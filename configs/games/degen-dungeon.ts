@@ -126,7 +126,7 @@ export const degenDungeonGame = defineGame({
   schemaVersion: 1,
   summary:
     "Wake up broke in a 3D island city of crypto degens and climb to the top.",
-  tags: ["adventure", "3d"],
+  tags: ["action", "strategy"],
   title: "Degen Dungeon",
   verification: {
     replay: {
