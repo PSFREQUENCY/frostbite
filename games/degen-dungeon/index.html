@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Degen Dungeon</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <div class="bar">
+        <header>
+          <h1>Degen Dungeon</h1>
+          <p id="status">Connecting to the platform…</p>
+        </header>
+        <p class="score">
+          <span>DUN <strong id="score">0</strong></span>
+          <span>Best <strong id="best">0</strong></span>
+          <span>Heat <strong id="heat">☆☆☆☆☆</strong></span>
+          <span><strong id="mood">GM</strong></span>
+        </p>
+      </div>
+      <div id="stage" class="stage">
+        <canvas
+          id="world"
+          width="960"
+          height="540"
+          aria-hidden="true"
+          hidden
+        ></canvas>
+        <canvas
+          id="screen"
+          width="512"
+          height="288"
+          role="img"
+          aria-label="The game screen: the island city of Nakasato, with your hero in its streets"
+        ></canvas>
+      </div>
+      <div class="foot">
+        <div id="sound"></div>
+        <p id="note" aria-live="polite"></p>
+        <div class="actions">
+          <button id="start" type="button" disabled>Wake up</button>
+          <button id="pause" type="button" disabled>Pause</button>
+          <button id="act" type="button" disabled>Do it</button>
+        </div>
+      </div>
+      <section aria-labelledby="earned-title">
+        <h2 id="earned-title">Earned today</h2>
+        <ul id="earned" aria-label="Milestones earned today"></ul>
+      </section>
+    </main>
+    <script src="main.js"></script>
+  </body>
+</html>
