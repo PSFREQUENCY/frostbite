@@ -1,13 +1,16 @@
 import { block, island, lots } from "../rules/constants.ts";
+import { echoAt, risen, statue } from "../rules/machine.ts";
 import type { DayState } from "../rules/types.ts";
 import { boroughs, spots } from "../rules/world.ts";
 
 // The island from above, drawn on the game screen: the whole picture where the browser has no WebGL, and the corner map where it has.
 export const colour = {
+  echo: "#c9b6ff",
   hero: "#ffd166",
   lot: "#31406b",
   sea: "#0a2a44",
   spot: "#5beac6",
+  statue: "#bfe9ff",
   street: "#141a2e",
   tux: "#ff5d5d",
 } as const;
@@ -47,7 +50,12 @@ export function drawMap(
         );
   });
   for (const spot of spots) square(colour.spot, spot.x, spot.z, 2);
+  // The statue is bigger on the map once it has risen, and the newbie of a trip back is where the rules say.
+  const up = day !== null && risen(day);
+  square(colour.statue, statue.x, statue.z, up ? 5 : 3);
   if (day === null) return;
+  const echo = echoAt(day);
+  if (echo !== null) square(colour.echo, echo.x, echo.z, 4);
   if (day.tux !== null) square(colour.tux, day.tux.x, day.tux.z, 4);
   square(colour.hero, day.x, day.z, 4);
 }

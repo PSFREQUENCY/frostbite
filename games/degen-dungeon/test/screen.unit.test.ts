@@ -96,7 +96,7 @@ describe("the cards", () => {
   });
 
   it("before one are the hero select: the hero at the front with five stats, or a question for one still locked", () => {
-    const rally = guideFor(7, 2, false);
+    const rally = guideFor(7, { day: 2, machine: false, slip: false });
     expect(rally.lines?.slice(0, 2)).toEqual([
       "< RALLY THE BULL >",
       "SPD 3  MUS 5  STL 1  CHA 4  SMT 2",
@@ -106,8 +106,14 @@ describe("the cards", () => {
       "ENTER TO WAKE UP - DAY 2",
       "TAP TO WAKE UP - DAY 2",
     ]);
-    expect(guideFor(9, 1, false).lines?.[0]).toBe("< ??? >");
-    expect(guideFor(9, 1, true).lines?.[0]).toBe("< SLIP THE UNICORN >");
-    expect(guideFor(42, 1, true).start).toBe("ARROWS TURN THE RING");
+    expect(
+      guideFor(9, { day: 1, machine: false, slip: false }).lines?.[0],
+    ).toBe("< ??? >");
+    expect(guideFor(9, { day: 1, machine: false, slip: true }).lines?.[0]).toBe(
+      "< SLIP THE UNICORN >",
+    );
+    expect(guideFor(42, { day: 1, machine: false, slip: true }).start).toBe(
+      "ARROWS TURN THE RING",
+    );
   });
 });

@@ -17,13 +17,19 @@ import { guideFor } from "./guide.ts";
 import { attachControls, type Mode } from "./page/controls.ts";
 import { element } from "./page/elements.ts";
 import { listEarned, noteFor, starsText } from "./page/hud.ts";
-import { afterDay, freshProgress, restore, type Progress } from "./progress.ts";
+import {
+  afterDay,
+  freshProgress,
+  nextRun,
+  restore,
+  type Progress,
+} from "./progress.ts";
 import { ticksPerSecond } from "./rules/constants.ts";
 import { heroes } from "./rules/heroes.ts";
 import { statusOf } from "./rules/status.ts";
 import { drawScreen } from "./screen/flat.ts";
 import { resultOf } from "./screen/result.ts";
-import { wakeUps } from "./script/cast.ts";
+import { wakeLine } from "./script/cast.ts";
 import { createRunSession, type Choice, type RunSession } from "./session.ts";
 import { createStage } from "./view/stage.ts";
 import { createWorldView } from "./view/world-view.ts";
@@ -98,12 +104,12 @@ function show(dt = 0): void {
     if (!pause.paused())
       note.textContent =
         caption ??
-        (seconds < wakeUntil ? (wakeUps[day.hero] ?? "") : noteFor(day));
+        (seconds < wakeUntil ? wakeLine(day.hero, day.loop) : noteFor(day));
   } else world?.turntable(hero, locked(), seconds, dt);
   if (context !== null)
     drawScreen(context, view.phase === "ready" ? null : day, world !== null);
   guideLayer.show(
-    cardFor(view.phase, guideFor(hero, progress.day, progress.slip), () =>
+    cardFor(view.phase, guideFor(hero, progress), () =>
       day === null ? null : resultOf(day, view),
     ),
   );
@@ -183,7 +189,7 @@ const begin = (): Promise<void> =>
     const ready = started?.status === "started" ? started : null;
     runId = ready?.runId ?? null;
     session = createRunSession({
-      day: progress.day,
+      ...nextRun(progress),
       hero,
       onEarned: (id) => {
         sound.sfx("milestone");

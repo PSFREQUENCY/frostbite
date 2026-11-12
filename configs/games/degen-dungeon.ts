@@ -26,7 +26,7 @@ const once = (
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and make it to the top. Pick a hero, take your first DUN from the Faucet, carry parcels, recruit a crew of three, ride the Green Line Express, and tell the honest offers from the scams. Steal and the heat rises: at three stars an agent in a black tuxedo walks straight at you, and what it touches is frozen. Nobody is ever hurt. DUN is in-game credit, earned by playing and never bought or sold. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and make it to the top. Pick a hero, take your first DUN from the Faucet, carry parcels, recruit a crew of three, ride the Green Line Express, and tell the honest offers from the scams. Steal and the heat rises: at three stars an agent in a black tuxedo walks straight at you, and what it touches is frozen. Nobody is ever hurt. DUN is in-game credit, earned by playing and never bought or sold. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline for better or worse. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -120,6 +120,24 @@ export const degenDungeonGame = defineGame({
       "Make 1,000 DUN in one day from gigs, honest offers and the fence.",
       "A thousand DUN made in one day.",
     ),
+    once(
+      "time-machine",
+      "The Ice Runner rises",
+      "Reach the top, and step into the Time Machine.",
+      "A statue in The Old Floe wakes for a hero worth 100,000 DUN.",
+    ),
+    once(
+      "met-yourself",
+      "Is that me?",
+      "Meet your newbie self on a trip back to day one.",
+      "Take the Time Machine, then look outside your old home.",
+    ),
+    once(
+      "brighter-timeline",
+      "A brighter timeline",
+      "Answer your newbie self three times and leave the past better than you found it.",
+      "The kind answer is not always the one that helps.",
+    ),
   ],
   network: betaTarget.chainId,
   rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
@@ -132,7 +150,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "0194f95107a03070698db5e27a976a2d80314d8b1ccad4210b51e2e46c97510f",
+        "0f957d9f9b655d5ee1d03673e756de15731e11df462337241b70d64956d254c0",
       version: 1,
     },
   },

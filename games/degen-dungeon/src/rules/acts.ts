@@ -9,6 +9,7 @@ import {
 } from "./constants.ts";
 import { cooled, heated, rankOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
+import { actMachine, pickMachine } from "./machine.ts";
 import type { Draft, Ride } from "./types.ts";
 import {
   dockLand,
@@ -22,6 +23,7 @@ import {
 
 // What the player's choices do: the one act button uses the nearest spot, a pick answers the offer that is waiting, and a lift takes a
 // helicopter up or down a level. Each answers null when it is done, or why it cannot be. A new kind of place is a new case in `useSpot`.
+// The statue and the newbie of a trip back are not spots: they are asked first, in `machine.ts`.
 const usedUp = "that is used up for today";
 
 function once(day: Draft, id: string, effect: () => void): string | null {
@@ -149,6 +151,8 @@ export function act(day: Draft): string | null {
     day.ride = "foot";
     return null;
   }
+  const machine = actMachine(day);
+  if (machine !== undefined) return machine;
   const spot = nearest(day.x, day.z);
   if (spot !== null) return useSpot(day, spot);
   if (day.ride === "foot" || day.ride === "boat") return "nothing to do here";
@@ -158,6 +162,8 @@ export function act(day: Draft): string | null {
 
 // Yes or no to the offer that is waiting. A crooked offer taken costs the pocket; walked away from, it is a scam spotted.
 export function pick(day: Draft, yes: boolean): string | null {
+  const machine = pickMachine(day, yes);
+  if (machine !== undefined) return machine;
   const spot = day.talk === null ? undefined : spotNamed(day.talk);
   if (spot === undefined) return "nobody asked";
   day.talk = null;

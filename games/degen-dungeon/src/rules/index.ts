@@ -9,11 +9,13 @@ import type { GameVerifier, RunInput } from "@frostbite/game-sdk/run-record";
 import { act, lift, pick } from "./acts.ts";
 import {
   maxInputs,
+  maxLoops,
   maxTicks,
   verifierId,
   verifierVersion,
 } from "./constants.ts";
 import { advance, startDay } from "./day.ts";
+import { scoreOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { earnedBy } from "./milestones.ts";
 import type { DayState, Draft } from "./types.ts";
@@ -21,7 +23,8 @@ import type { DayState, Draft } from "./types.ts";
 // The rules, as a pure state machine: the same seed, settings and inputs always play a day out the same way, which is what lets the
 // platform replay a run it issued a seed for. A run is one day of one hero.
 //
-// Settings: `hero` (0 to 9, see `heroes.ts`) and `day` (1 to 5, the story day, which fixes what the hero starts with).
+// Settings: `hero` (0 to 9, see `heroes.ts`) and `day` (1 to 5, the story day, which fixes what the hero starts with). A trip back through
+// the Time Machine adds `loop` (1 to 9) and is always to day 1 (see `machine.ts`).
 // Inputs, each with the `tick` it was made on: `move` `{ dir }` holds a heading (0 to 15, or -1 to stand); `act` uses the nearest spot;
 // `pick` `{ choice }` answers a waiting offer (0 yes, 1 no); `lift` `{ by }` takes a helicopter up or down a level (1 or -1); `end`
 // closes the day. Between inputs the day runs on by itself (`advance`). A day that is not closed counts as it stands at its last input.
@@ -65,17 +68,22 @@ export const degenRules: GameVerifier<DayState> = {
   earned: earnedBy,
   id: verifierId,
   init(seed, config) {
-    const fields = fieldsOf(config, ["day", "hero"]);
+    const trip = fieldsOf(config, ["day", "hero", "loop"]);
+    const fields =
+      typeof trip === "string" ? fieldsOf(config, ["day", "hero"]) : trip;
     if (typeof fields === "string")
       return refuse("a day takes exactly: day, hero");
     const hero = whole(fields.hero, 0, heroes.length - 1);
     const day = whole(fields.day, 1, 5);
-    return hero === null || day === null
-      ? refuse("hero must be 0 to 9 and day 1 to 5")
-      : { ok: true, state: startDay(seed, hero, day) };
+    const loop = typeof trip === "string" ? 0 : whole(trip.loop, 1, maxLoops);
+    if (hero === null || day === null)
+      return refuse("hero must be 0 to 9 and day 1 to 5");
+    return loop === null || (loop > 0 && day !== 1)
+      ? refuse("a trip back is loop 1 to 9, and always to day 1")
+      : { ok: true, state: startDay(seed, hero, day, loop) };
   },
   // What the day made, once it is over: the number the game shows and keeps as the player's best day.
-  score: (state) => (state.ended ? state.made + state.storm : null),
+  score: (state) => (state.ended ? scoreOf(state) : null),
   step(state, input: RunInput) {
     if (state.ended) return refuse("the day has ended");
     const names = fieldsFor.get(input.type);

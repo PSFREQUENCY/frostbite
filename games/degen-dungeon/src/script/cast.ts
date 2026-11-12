@@ -15,6 +15,11 @@ export const wakeUps: readonly string[] = [
 
 // What each offer says while it waits for a yes or a no, by the spot's name.
 export const offers: Readonly<Record<string, string>> = {
+  "echo-faucet":
+    "Your newbie self is last in the Faucet line. Cut in and drain it first?",
+  "echo-offer":
+    "Your newbie self is about to test a recovery app. Warn them off it?",
+  "echo-wake": "That is you on day one, broke and blinking. Hand over 500 DUN?",
   "offer-kiki":
     "Bestie, I lost my seed phrase! Will you test my recovery app with yours?",
   "offer-scruff":
@@ -30,5 +35,40 @@ export const endings = {
   closed: "YOU CALLED IT A DAY",
   frozen: "FROZEN BY THE TUXES",
   home: "HOME SAFE",
+  machine: "INTO THE TIME MACHINE",
   timeout: "THE DAY RAN OUT",
 } as const;
+
+// The first line of a day: the hero's wake-up, or on a trip back, the step out of the ice.
+const tripWake =
+  "You step out of the ice on day one, and somewhere in town a newbie you is waking up.";
+export const wakeLine = (hero: number, loop: number): string =>
+  loop > 0 ? tripWake : (wakeUps[hero] ?? "");
+
+// What gives a newbie away before a tip: the seed decides which kind of newbie a trip back meets.
+export const echoTells = {
+  careful: "Your newbie self counts the same three coins twice.",
+  reckless: "Your newbie self is already staring at a billboard.",
+} as const;
+
+// Where the newbie is, for the line that points the way.
+export const echoPlaces: Readonly<Record<string, string>> = {
+  "echo-faucet": "in the Faucet line at The Exchange",
+  "echo-offer": "at the recovery app stand in Meme Market",
+  "echo-wake": "waking up outside home",
+};
+
+export const machineLines = {
+  asleep: "The Ice Runner sleeps in the ice. Reach the top and it will rise.",
+  cooling: "The Time Machine is cooling down behind you.",
+  risen:
+    "The Ice Runner has risen in The Old Floe, and the Time Machine is open.",
+} as const;
+
+// How a trip back left the timeline, for the card after it.
+export const timelineLine = (fate: number): string =>
+  fate > 0
+    ? `TIMELINE +${String(fate)} BRIGHTER`
+    : fate < 0
+      ? `TIMELINE ${String(fate)} DARKER`
+      : "TIMELINE UNCHANGED";

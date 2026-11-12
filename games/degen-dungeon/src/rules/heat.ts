@@ -1,4 +1,10 @@
-import { heatPerStar, maxHeat, rankFloors, tuxStars } from "./constants.ts";
+import {
+  fateDun,
+  heatPerStar,
+  maxHeat,
+  rankFloors,
+  tuxStars,
+} from "./constants.ts";
 import type { DayState, Draft } from "./types.ts";
 
 // Heat, and what is read from money: the stars shown, the rank a net worth earns.
@@ -22,3 +28,8 @@ export function cooled(day: Draft, by: number): void {
   day.heat = Math.max(0, day.heat - by);
   if (day.heat === 0 && day.peak >= tuxStars * heatPerStar) day.shook = true;
 }
+
+// What a day counts for: what it made and caught, and on a trip back, what the bent timeline adds or takes (never below nothing).
+export const scoreOf = (
+  day: Pick<DayState, "fate" | "made" | "storm">,
+): number => Math.max(0, day.made + day.storm + day.fate * fateDun);

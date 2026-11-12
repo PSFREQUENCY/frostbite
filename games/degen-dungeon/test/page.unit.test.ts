@@ -70,7 +70,10 @@ describe("what the platform is asked to remember", () => {
     ).toEqual({
       best: 12,
       day: 3,
+      fate: 0,
       hero: 2,
+      loops: 0,
+      machine: false,
       seen: true,
       slip: true,
       sound: { effects: false, music: true, volume: 0.5 },

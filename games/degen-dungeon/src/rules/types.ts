@@ -1,7 +1,7 @@
 // One day in Nakasato, as the rules hold it. Everything is a whole number or a name, so a replay ends exactly where the player did.
 export type Ride = "boat" | "car" | "foot" | "heli" | "scooter";
-// How a day ended: closed by the player, frozen by a tux, asleep at home, or out of time.
-export type Cause = "closed" | "frozen" | "home" | "timeout";
+// How a day ended: closed by the player, frozen by a tux, asleep at home, inside the Time Machine, or out of time.
+export type Cause = "closed" | "frozen" | "home" | "machine" | "timeout";
 
 export interface Point {
   readonly x: number;
@@ -20,6 +20,8 @@ export interface DayState {
   // The spots used up today (each can be used once).
   readonly done: readonly string[];
   readonly ended: boolean;
+  // How far a trip back has bent the timeline: above 0 is brighter, below is darker. It stays 0 on a day of the story.
+  readonly fate: number;
   readonly fenced: number;
   readonly freezer: number;
   // Honest gigs finished today.
@@ -31,6 +33,8 @@ export interface DayState {
   readonly inputs: number;
   // How high a helicopter is: 0 is on the ground.
   readonly level: number;
+  // 0 on a day of the story; 1 or more on a trip back to day one through the Time Machine.
+  readonly loop: number;
   // DUN earned today by gigs, honest offers and fencing (the airdrop is counted apart, in `storm`).
   readonly made: number;
   // The spot a carried delivery is for.

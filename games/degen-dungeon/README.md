@@ -15,7 +15,7 @@ how it fits together and what is left.
 ## How a day is checked
 
 The rules in `src/rules/` are a pure, seeded, whole-number state machine. The page records only the player's choices; the platform replays
-them through the published verifier (`src/replay.ts`) and decides the score and all fifteen milestones itself.
+them through the published verifier (`src/replay.ts`) and decides the score and all eighteen milestones itself.
 
 ## Tests
 
@@ -24,3 +24,9 @@ them through the published verifier (`src/replay.ts`) and decides the score and 
 ## Ownership
 
 The game's author owns it; the platform games team reviews every game before it is merged.
+
+## The Time Machine
+
+Reach the top (a worth of 100,000 DUN) and the Ice Runner statue in The Old Floe rises. Step up to it and the day ends inside the Time
+Machine; the next day is a trip back to day one, where your newbie self is waking up, queueing at the Faucet and about to be scammed.
+Each meeting is a yes or a no, and each answer bends the timeline for better or worse. After the trip the story starts again from day 1.

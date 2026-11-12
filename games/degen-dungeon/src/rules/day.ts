@@ -1,11 +1,11 @@
-import { startState, stepInt } from "@frostbite/game-sdk/seeded";
-
+import { coin } from "./coin.ts";
 import {
   catchRadius,
   dayPockets,
   frozenFine,
   gustTicks,
   heatFadeTicks,
+  loopPocket,
   maxTicks,
   patch,
   stormDay,
@@ -16,28 +16,30 @@ import {
   tuxStars,
 } from "./constants.ts";
 import { cooled, starsOf } from "./heat.ts";
+import { statue } from "./machine.ts";
 import { moved } from "./move.ts";
 import type { DayState, Draft } from "./types.ts";
 import { centreOf, inSwapMeet, spotNamed } from "./world.ts";
 
-// Whether the offer the seed decides is a scam today. The seed is mixed first, so seeds that are near each other do not agree.
-function scamToday(seed: number): boolean {
-  let mixed = Math.imul(seed ^ (seed >>> 16), 0x85_eb_ca_6b);
-  mixed = Math.imul(mixed ^ (mixed >>> 13), 0xc2_b2_ae_35);
-  return stepInt(startState(mixed ^ (mixed >>> 16)), 2).value === 1;
-}
-
-// A day from its first tick: the hero wakes at home with what that story day gives them, and the seed decides today's scam.
-export function startDay(seed: number, hero: number, day: number): DayState {
-  const home = spotNamed(`home-${String(hero)}`) ?? centreOf(4);
+// A day from its first tick: the hero wakes at home with what that story day gives them, and the seed decides today's scam. A trip back
+// (`loop` above 0) starts beside the statue instead, with a traveller's pocket.
+export function startDay(
+  seed: number,
+  hero: number,
+  day: number,
+  loop = 0,
+): DayState {
+  const home =
+    loop > 0 ? statue : (spotNamed(`home-${String(hero)}`) ?? centreOf(4));
   return {
     cause: null,
     crew: [],
-    crooked: scamToday(seed),
+    crooked: coin(seed),
     day,
     dir: -1,
     done: [],
     ended: false,
+    fate: 0,
     fenced: 0,
     freezer: 0,
     gigs: 0,
@@ -46,10 +48,11 @@ export function startDay(seed: number, hero: number, day: number): DayState {
     hot: 0,
     inputs: 0,
     level: 0,
+    loop,
     made: 0,
     parcel: null,
     peak: 0,
-    pocket: dayPockets[day - 1] ?? 0,
+    pocket: loop > 0 ? loopPocket : (dayPockets[day - 1] ?? 0),
     rep: 0,
     ride: "foot",
     rides: 0,

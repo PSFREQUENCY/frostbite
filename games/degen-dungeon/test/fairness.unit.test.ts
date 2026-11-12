@@ -6,6 +6,7 @@ import { degenRules } from "../src/rules/index.ts";
 import { milestoneIds } from "../src/rules/milestones.ts";
 import { createBot } from "./support/bot.ts";
 import { replay } from "./support/replay.ts";
+import { machineDay, tripDay } from "./support/trips.ts";
 
 // Every milestone can be earned by a legal day, and none by a day in which nothing is done.
 function busyDay() {
@@ -102,7 +103,7 @@ describe("the milestones", () => {
     ]);
 
     const reached = new Set(
-      [busy, hot, bare, funnel].flatMap((bot) =>
+      [busy, hot, bare, funnel, machineDay(), tripDay()].flatMap((bot) =>
         degenRules.earned(bot.state()),
       ),
     );

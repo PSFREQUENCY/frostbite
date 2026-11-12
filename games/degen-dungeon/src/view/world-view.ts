@@ -7,6 +7,7 @@ import {
   Scene,
 } from "three";
 
+import { echoAt, risen } from "../rules/machine.ts";
 import { paceOf } from "../rules/move.ts";
 import type { DayState, Ride } from "../rules/types.ts";
 import {
@@ -16,10 +17,11 @@ import {
   stride,
   type Actor,
 } from "./actor.ts";
-import { createRig, type Intent } from "./camera.ts";
+import { createRig, type Intent, type Subject } from "./camera.ts";
 import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
 import type { Stage } from "./stage.ts";
+import { buildStatue } from "./statue.ts";
 
 // The scene and its three ways of being looked at: a day being played, the opening cinematic, and the hero turntable of the first screen.
 // It reads the rules' state and changes nothing in it; everything here is how a moment looks, never what happened.
@@ -70,11 +72,15 @@ export function createWorldView(stage: Stage): WorldView {
   );
   block.name = "cornerstone";
   block.position.set(170, 0.5, 180);
+  const statue = buildStatue();
+  // The hero's newbie self on a trip back: a second, smaller body of the hero who is travelling.
+  let echo: { readonly actor: Actor; readonly hero: number } | null = null;
   scene.add(
     city,
     ride,
     shadow,
     block,
+    statue.root,
     tux.root,
     ...cast.map(({ root }) => root),
   );
@@ -87,6 +93,7 @@ export function createWorldView(stage: Stage): WorldView {
     for (const { root } of [...cast, tux]) root.visible = false;
     ride.visible = false;
     shadow.visible = false;
+    if (echo !== null) echo.actor.root.visible = false;
   };
   const grown = (part: number): void => {
     if (towers !== undefined)
@@ -110,6 +117,30 @@ export function createWorldView(stage: Stage): WorldView {
         z: metres(state.z),
       };
       const riding = state.ride !== "foot";
+      statue.pose(risen(state), seconds, dt);
+      // While the newbie is being answered, the close-up is on the newbie, from beside the hero.
+      let face: Subject | null = null;
+      const past = echoAt(state);
+      if (past !== null) {
+        if (echo?.hero !== state.hero) {
+          if (echo !== null) scene.remove(echo.actor.root);
+          echo = { actor: buildActor(state.hero), hero: state.hero };
+          echo.actor.root.name = "echo";
+          echo.actor.root.scale.multiplyScalar(0.85);
+          scene.add(echo.actor.root);
+        }
+        const newbie = echo.actor;
+        newbie.root.visible = true;
+        newbie.root.position.set(metres(past.x) + 1.2, 0, metres(past.z));
+        newbie.root.rotation.y = Math.atan2(
+          at.x - newbie.root.position.x,
+          at.z - newbie.root.position.z,
+        );
+        stride(newbie, 0, seconds);
+        const { x, z } = newbie.root.position;
+        if (state.talk === past.id)
+          face = { heading: Math.atan2(at.z - z, at.x - x), x, y: 0, z };
+      }
       const place = (
         actor: Actor,
         back: number,
@@ -157,7 +188,7 @@ export function createWorldView(stage: Stage): WorldView {
               : riding
                 ? "ride"
                 : "follow";
-      rig.aim(intent, { ...at, heading }, dt);
+      rig.aim(intent, face ?? { ...at, heading }, dt);
       show();
     },
     opening(seconds) {

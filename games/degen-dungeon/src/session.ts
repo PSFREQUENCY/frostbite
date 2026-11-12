@@ -37,6 +37,8 @@ export interface RunSession {
 export interface RunSessionOptions {
   readonly day: number;
   readonly hero: number;
+  // 1 or more on a trip back through the Time Machine; 0 or left out on a day of the story.
+  readonly loop?: number;
   // Called once for each milestone the day earns, as soon as it is earned.
   readonly onEarned?: (milestone: string) => void;
   readonly seed: number;
@@ -45,7 +47,11 @@ export interface RunSessionOptions {
 const finished: Outcome = { ok: false, reason: "the day has ended" };
 
 export function createRunSession(options: RunSessionOptions): RunSession {
-  const config = { day: options.day, hero: options.hero };
+  const story = { day: options.day, hero: options.hero };
+  const config =
+    options.loop === undefined || options.loop === 0
+      ? story
+      : { ...story, loop: options.loop };
   const init = degenRules.init(options.seed, config);
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;

@@ -9,8 +9,11 @@ import { centreOf, spotNamed } from "../../src/rules/world.ts";
 
 // A player for the tests: it walks the streets (every spot stands on one), uses spots by name and answers offers, by legal inputs only.
 // What it did is in `inputs`, which is a day's record.
-export function createBot(seed = 7, hero = 7, day = 1) {
-  const init = degenRules.init(seed, { day, hero });
+export function createBot(seed = 7, hero = 7, day = 1, loop = 0) {
+  const init = degenRules.init(
+    seed,
+    loop > 0 ? { day, hero, loop } : { day, hero },
+  );
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;
   let now = 0;

@@ -12,7 +12,7 @@ borough. The first day opens on a cinematic that Space, Enter or a tap skips. Th
 carry three parcels, answer three offers (one always a scam, one always honest, one decided by the day's seed), recruit a crew of two,
 ride the Green Line loop, steal and fence loot, borrow a scooter, car, boat or helicopter, get chased and frozen by a tux at three stars,
 cool off at the Rebrand booth, stash DUN in the freezer, find three seed words, catch the Great Airdrop on story day 3 (with a magnet and a
-vacuum), and go home to end the day. Fifteen milestones, all replay-verified.
+vacuum), and go home to end the day. Eighteen milestones, all replay-verified.
 
 ## How it fits together
 
@@ -98,3 +98,30 @@ Put the `sha256` in `configs/games/degen-dungeon.ts`. If `src/sample-run.ts` sto
 
 See the pull request text or the last report for what ran. Nobody has played this with their hands. It has not been run on a real phone,
 in other browsers, or through the Docker contract tests (`pnpm test:e2e`). Frame rate, sound and how the stick feels are unknown.
+
+## The Time Machine (added last)
+
+What exists, in the rules (`src/rules/machine.ts`) and proven by bots (`test/machine.unit.test.ts`, `test/support/trips.ts`):
+
+- **The statue.** The Ice Runner stands at `statue` in The Old Floe. It rises when the hero's worth reaches rank 4 (`statueRank`, 100,000
+  DUN); acting beside it then ends the day with cause `machine`. On the page, finishing day 5 at home opens the machine too (`afterDay`).
+- **The trip back.** While the machine is open the first screen starts a trip (`nextRun`): settings `{ day: 1, hero, loop }`. The hero
+  steps out beside the statue with `loopPocket` DUN. Their newbie self (`echoAt`) spends a third of the day at each of three places:
+  outside home, in the Faucet line, at the recovery app scam.
+- **Choices.** Each meeting is a yes or a no (no always walks on), and each bends `fate`. A tip at home is +2 for a careful newbie and -2
+  for a reckless one (the seed decides, `recklessOn`, and the note shows a tell); walking on is +1. Cutting the Faucet line is -2 and pays
+  100 DUN; walking on is +1. A warning at the scam is +2; silence is -1. Brighter steps add rep, darker ones add paradox heat (the tuxes
+  come at three stars), and a trip's score is `made + storm + fate x 500`, never below 0.
+- **After a trip** the save keeps the summed `fate` and the count of `loops`, the machine closes, and the story starts again from day 1.
+
+Decisions made for you (all drafts): the statue is an original figure with no real person's name or likeness; rank 4 wakes it because the
+economy cannot reach rank 5 yet; `loop` 2 to 9 play like 1 apart from the newbie's coin.
+
+Still to build:
+
+1. Carry the timeline forward: pass the save's `fate` into days 1 to 5 as a setting (a start pocket and scam odds that shift with it), so
+   a trip changes the next playthrough inside the rules, not only on the save.
+2. The rise as a moment: a scripted shot in `cine.ts` when `risen` first turns true, and a walk between the newbie's three places (the
+   view moves the newbie in one step today).
+3. More meetings and later loops: a second newbie on loop 2 (the hero from the first trip), meetings on a moving schedule, lines per hero.
+4. The statue's real model, the machine's inside, sound for both, and the newbie on the corner map's legend.

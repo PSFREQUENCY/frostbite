@@ -5,12 +5,14 @@ import {
 } from "@frostbite/game-sdk/guide";
 import { byInput } from "@frostbite/game-sdk/touch";
 
+import { scoreOf } from "../rules/heat.ts";
 import { statusOf } from "../rules/status.ts";
 import type { DayState } from "../rules/types.ts";
-import { endings } from "../script/cast.ts";
+import { endings, timelineLine } from "../script/cast.ts";
 import { colour } from "./flat.ts";
 
-// The card after a day: how it ended, what it made, the status it ended on, the best day, and how to go again. The SDK draws it over the
+// The card after a day: how it ended, what it made, the status it ended on (or how a trip back left the timeline), the best day, and how
+// to go again. The SDK draws it over the
 // screen at the pixels of the display.
 export const resultOf = (
   day: DayState,
@@ -30,7 +32,7 @@ export const resultOf = (
           },
           {
             colour: "#ffffff",
-            text: `MADE ${String(day.made + day.storm)} DUN   ${statusOf(day)}`,
+            text: `MADE ${String(scoreOf(day))} DUN   ${day.loop > 0 ? timelineLine(day.fate) : statusOf(day)}`,
             weight: resultWeight.detail,
           },
           {

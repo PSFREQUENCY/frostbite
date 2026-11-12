@@ -1,3 +1,4 @@
+import { moments } from "./machine.ts";
 import type { DayState } from "./types.ts";
 
 // Every milestone this game can earn, each decided by the state of a day alone (so a replay can decide it too). The ids are the ones in
@@ -21,6 +22,16 @@ export const milestones: readonly {
   { earned: (day) => day.storm >= 100_000, id: "storm-funnel" },
   { earned: (day) => day.words >= 3, id: "three-words" },
   { earned: (day) => day.made >= 1_000, id: "payday" },
+  { earned: (day) => day.cause === "machine", id: "time-machine" },
+  {
+    earned: (day) => moments.some((id) => day.done.includes(id)),
+    id: "met-yourself",
+  },
+  {
+    earned: (day) =>
+      day.fate >= 3 && moments.every((id) => day.done.includes(id)),
+    id: "brighter-timeline",
+  },
 ];
 
 export const milestoneIds: readonly string[] = milestones.map(({ id }) => id);

@@ -55,3 +55,14 @@ export const dayPockets = [0, 600, 3_000, 12_000, 60_000] as const;
 export const faucetDun = 100;
 export const gigRep = 10;
 export const lootRep = 20;
+
+// The Time Machine: the rank that wakes the statue, how many trips back a save may count, what a traveller carries, how long the newbie
+// stays at each place, the tip a newbie can be handed, the heat a paradox brings for each step the timeline darkens, and what each step of
+// the timeline is worth when a trip is scored.
+export const statueRank = 4;
+export const maxLoops = 9;
+export const loopPocket = 1_000;
+export const echoTicks = 6_000;
+export const tipDun = 500;
+export const paradoxHeat = 60;
+export const fateDun = 500;
