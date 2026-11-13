@@ -1,5 +1,6 @@
 import { feeSourceEnvironmentDefinitions } from "./fee-definitions.ts";
 import { mailEnvironmentDefinitions } from "./mail-definitions.ts";
+import { telemetryEnvironmentDefinitions } from "./telemetry-definitions.ts";
 
 export const environmentNames = [
   "local",
@@ -288,6 +289,7 @@ export const environmentDefinitions = [
   ...coreDefinitions,
   ...mailEnvironmentDefinitions,
   ...feeSourceEnvironmentDefinitions,
+  ...telemetryEnvironmentDefinitions,
 ] as const;
 
 export const environmentKeys = environmentDefinitions.map(({ key }) => key);
