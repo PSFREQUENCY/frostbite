@@ -179,3 +179,38 @@ button:focus-visible {
     transition: none !important;
   }
 }
+
+/* Talks: what is said, and the answers as buttons a thumb can reach. */
+.talk {
+  border: 1px solid #5beac6;
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 8px 12px;
+}
+
+.talk p {
+  margin: 0 0 6px;
+}
+
+.talk ol {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.talk button {
+  min-height: 44px;
+  text-align: left;
+  width: 100%;
+}
+
+.goal {
+  color: #ffd166;
+  margin: 4px 0;
+}
+
+.score {
+  flex-wrap: wrap;
+}

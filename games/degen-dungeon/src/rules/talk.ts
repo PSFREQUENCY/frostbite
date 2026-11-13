@@ -1,4 +1,4 @@
-import { heatPerStar, maxxShare } from "./constants.ts";
+import { heatPerStar } from "./constants.ts";
 import { cooled, rankOf } from "./heat.ts";
 import { buy, sell } from "./market.ts";
 import type { Draft } from "./types.ts";

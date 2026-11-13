@@ -21,7 +21,7 @@ import {
   statue,
 } from "../src/rules/machine.ts";
 import type { DayState } from "../src/rules/types.ts";
-import { openTo, spots } from "../src/rules/places.ts";
+import { spots } from "../src/rules/places.ts";
 import { onLand } from "../src/rules/world.ts";
 import { createRunSession } from "../src/session.ts";
 import { createBot } from "./support/bot.ts";

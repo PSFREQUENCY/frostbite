@@ -12,6 +12,7 @@ import {
 } from "../src/page/controls.ts";
 import { element } from "../src/page/elements.ts";
 import { listEarned, noteFor, starsText } from "../src/page/hud.ts";
+import { goalFor, talkOf } from "../src/page/words.ts";
 import { afterDay, freshProgress, restore } from "../src/progress.ts";
 import { started } from "./support/replay.ts";
 
@@ -21,14 +22,28 @@ describe("the words beside the picture", () => {
   it("say what can be done here: an offer to answer, a spot to use, a parcel to carry, or how to play", () => {
     expect(starsText(250)).toBe("★★☆☆☆");
     expect(noteFor({ ...day, talk: "offer-kiki" })).toBe(
-      "Bestie, I lost my seed phrase! Will you test my recovery app with yours? Space says yes, X walks away.",
+      "Space or 1 to 4 answers, X walks away.",
     );
-    expect(noteFor({ ...day, talk: "recruit-6" })).toContain(
+    expect(talkOf({ ...day, talk: "offer-kiki" })).toEqual({
+      answers: ["Yes", "Walk away"],
+      say: "Bestie, I lost my seed phrase! Will you test my recovery app with yours?",
+    });
+    expect(
+      talkOf({ ...day, looking: true, talk: "offer-kiki" })?.say,
+    ).toContain("Red flag: she wants your words.");
+    expect(talkOf({ ...day, talk: "recruit-6" })?.say).toBe(
       "Mint could use a crew. Team up?",
     );
-    expect(noteFor({ ...day, talk: "nobody" })).toContain(
-      "Someone could use a crew.",
+    expect(talkOf({ ...day, talk: "nobody" })?.say).toBe(
+      "Someone could use a crew. Team up?",
     );
+    expect(talkOf({ ...day, talk: "chart" })?.say).toMatch(
+      /The coin is at \d+ DUN/,
+    );
+    expect(talkOf({ ...day, talk: "home" })?.answers).toHaveLength(3);
+    expect(talkOf(day)).toBeNull();
+    expect(goalFor(day)).toBe("Cross the FREE FROST riot in The Exchange.");
+    expect(goalFor({ ...day, drain: 4 })).toContain("draining");
     expect(noteFor(day)).toBe("Space: Rally's place");
     const street = { ...day, x: 18_000, z: 18_000 };
     expect(noteFor({ ...street, parcel: "drop-marina" })).toBe(
@@ -84,7 +99,16 @@ describe("what the platform is asked to remember", () => {
   });
 
   it("keeps the best day, opens the next story day after a night at home, and unlocks Slip in the airdrop", () => {
-    const home = afterDay(freshProgress, { ...day, cause: "home", made: 300 });
+    const lazy = afterDay(freshProgress, { ...day, cause: "home", made: 300 });
+    expect(lazy.progress.day).toBe(1);
+    const home = afterDay(freshProgress, {
+      ...day,
+      cause: "home",
+      done: ["riot", "speech"],
+      gigs: 1,
+      made: 300,
+      paper: 4,
+    });
     expect([home.newBest, home.progress.best, home.progress.day]).toEqual([
       true,
       300,
@@ -118,6 +142,8 @@ describe("what the platform is asked to remember", () => {
 
 describe("the player's hands", () => {
   const hands = () => ({
+    answer: vi.fn<(choice: number) => void>(),
+    look: vi.fn<() => void>(),
     act: vi.fn<() => void>(),
     lift: vi.fn<(by: number) => void>(),
     move: vi.fn<(dir: number) => void>(),

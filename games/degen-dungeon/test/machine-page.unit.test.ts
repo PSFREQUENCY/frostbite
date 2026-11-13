@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { guideFor } from "../src/guide.ts";
 import { noteFor } from "../src/page/hud.ts";
+import { goalFor, talkOf } from "../src/page/words.ts";
 import { afterDay, freshProgress, nextRun, restore } from "../src/progress.ts";
 import { fateDun } from "../src/rules/constants.ts";
 import { startDay } from "../src/rules/day.ts";
@@ -19,14 +20,14 @@ describe("the Time Machine on the page", () => {
   const trip = startDay(1, 7, 1, 1);
   const street = { x: 18_000, z: 17_000 };
 
-  it("opens when the statue takes the hero or the last day ends at home, and a trip back starts the story again", () => {
+  it("opens when the statue takes the hero or the last day ends on SHA Beach, and a trip back starts the story again", () => {
     const entered = afterDay(
       { ...freshProgress, day: 3 },
       { ...day, cause: "machine", day: 3, ended: true },
     ).progress;
     expect([entered.machine, entered.day]).toEqual([true, 3]);
-    expect(nextRun(entered)).toEqual({ day: 1, loop: 1 });
-    const last = { ...day, cause: "home", day: 5 } as const;
+    expect(nextRun(entered)).toEqual({ day: 1, fate: 0, loop: 1 });
+    const last = { ...day, cause: "beach", day: 5 } as const;
     expect(afterDay({ ...freshProgress, day: 5 }, last).progress.machine).toBe(
       true,
     );
@@ -44,9 +45,10 @@ describe("the Time Machine on the page", () => {
       loops: 3,
       machine: false,
     });
-    expect(nextRun(back.progress)).toEqual({ day: 1, loop: 0 });
+    expect(nextRun(back.progress)).toEqual({ day: 1, fate: 3, loop: 0 });
     expect(nextRun({ ...freshProgress, loops: 40, machine: true })).toEqual({
       day: 1,
+      fate: 0,
       loop: 9,
     });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({
@@ -83,16 +85,19 @@ describe("the Time Machine on the page", () => {
     if (echo === null) throw new Error("nobody to meet");
     const met = { ...trip, x: echo.x, z: echo.z };
     expect(noteFor(met)).toContain("talk to your newbie self");
-    expect(noteFor({ ...trip, ...street })).toBe(
-      "Your newbie self is waking up outside home.",
+    expect(goalFor({ ...trip, ...street })).toBe(
+      "Find your newbie self, waking up outside home.",
+    );
+    expect(goalFor({ ...trip, done: ["echo-wake"] })).toBe(
+      "Bend the timeline, then sleep it off.",
     );
     expect(noteFor({ ...trip, ...street, done: ["echo-wake"] })).toContain(
       "uses what is near",
     );
-    expect(noteFor({ ...met, talk: "echo-wake" })).toContain(
+    expect(talkOf({ ...met, talk: "echo-wake" })?.say).toContain(
       echoTells[recklessOn(trip) ? "reckless" : "careful"],
     );
-    expect(noteFor({ ...met, talk: "echo-offer" })).toContain(
+    expect(talkOf({ ...met, talk: "echo-offer" })?.say).toContain(
       "Warn them off it?",
     );
     const view = { best: 0, newBest: false, phase: "over" };

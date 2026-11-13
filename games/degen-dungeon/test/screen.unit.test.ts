@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import { guideFor } from "../src/guide.ts";
-import { spots } from "../src/rules/places.ts";
+import { openTo, spots } from "../src/rules/places.ts";
 import { colour, drawMap, drawScreen } from "../src/screen/flat.ts";
 import { resultOf } from "../src/screen/result.ts";
 import { started } from "./support/replay.ts";
@@ -28,14 +28,25 @@ function surface() {
 const day = { ...started(1, 7, 1), tux: { x: 9_000, z: 18_000 } };
 
 describe("the island from above", () => {
-  it("draws every lot and spot, and the hero and the tux once a day is on", () => {
+  it("draws every lot and the places open today, and the hero and the tux once a day is on", () => {
     const empty = surface();
     drawMap(empty.context, null, { size: 360, x: 0, y: 0 });
     expect(empty.fills.filter(([tint]) => tint === colour.lot)).toHaveLength(
       36,
     );
     expect(empty.fills.filter(([tint]) => tint === colour.spot)).toHaveLength(
-      spots.length,
+      spots.filter((spot) => spot.on === undefined).length,
+    );
+    const today = surface();
+    drawMap(today.context, day, { size: 360, x: 0, y: 0 });
+    const open = spots.filter((spot) => openTo(spot, day));
+    expect(
+      today.fills.filter(
+        ([tint]) => tint === colour.spot || tint === colour.letter,
+      ),
+    ).toHaveLength(open.length);
+    expect(today.fills.filter(([tint]) => tint === colour.letter)).toHaveLength(
+      3,
     );
     expect(empty.fills.some(([tint]) => tint === colour.hero)).toBe(false);
     const played = surface();
@@ -77,7 +88,7 @@ describe("the cards", () => {
     const over = { best: 900, newBest: false, phase: "over" };
     expect(resultOf(day, { ...over, phase: "running" })).toBeNull();
     const home = resultOf(
-      { ...day, cause: "home", gigs: 3, made: 640, storm: 60 },
+      { ...day, cause: "home", gigs: 5, made: 640, storm: 60 },
       over,
     );
     expect(home?.rows.map(({ text }) => text)).toEqual([
@@ -93,6 +104,12 @@ describe("the cards", () => {
       colour.tux,
     ]);
     expect(resultOf(day, over)?.rows[0]?.text).toBe("YOU CALLED IT A DAY");
+    const beach = resultOf({ ...day, cause: "beach", day: 5, dream: 2 }, over);
+    expect(beach?.rows.map(({ text }) => text).slice(0, 3)).toEqual([
+      "SUNRISE ON SHA BEACH",
+      "MADE 0 DUN   DOWN BAD",
+      "THE PENTHOUSE BECOMES A HOME FOR THE PEOPLE YOU STEPPED ON. UNKNOWN NUMBER, TWO LETTERS: GM.",
+    ]);
   });
 
   it("before one are the hero select: the hero at the front with five stats, or a question for one still locked", () => {

@@ -37,7 +37,10 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
       "You were liquidated overnight, and the movers are already here.",
     );
     expect(byId(window, "act")?.hasAttribute("disabled")).toBe(false);
-    // Rally wakes at his own door: the act there is going home, which ends the day.
+    // Rally wakes at his own door: the act there opens home, and the first answer is sleep, which ends the day.
+    byId(window, "act")?.dispatchEvent(new window.MouseEvent("click"));
+    await settle(50);
+    expect(byId(window, "talk")?.hasAttribute("hidden")).toBe(false);
     byId(window, "act")?.dispatchEvent(new window.MouseEvent("click"));
     await settle(100);
     const start = byId(window, "start");
@@ -55,7 +58,7 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
     });
     expect(stored.progress).toMatchObject({
       best: 0,
-      day: 2,
+      day: 1,
       hero: 7,
       seen: true,
       slip: false,

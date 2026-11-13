@@ -15,7 +15,7 @@ describe("the page's keys, pause and sound", () => {
       window.dispatchEvent(new window.KeyboardEvent("keydown", { code }));
     const text = (id: string) => byId(window, id)?.textContent;
     const running = () => byId(window, "start")?.hasAttribute("hidden");
-    // Rally wakes at his own door, so the first act is going home, which ends the day.
+    // Rally wakes at his own door, so acting opens home, and acting again (the first answer) sleeps, which ends the day.
     const playOut = async () => {
       for (let at = 0; at < 400 && running(); at += 1) {
         press("Space");
@@ -119,8 +119,8 @@ describe("the page's keys, pause and sound", () => {
     press("Enter");
     await settle(100);
     expect(running()).toBe(true);
-    // A night at home opens the next story day, which starts with DUN in the pocket.
-    expect(text("score")).toBe("600");
+    // A night at home before the first morning's goals are done keeps the player on day one, which starts with nothing.
+    expect(text("score")).toBe("0");
   }, 40_000);
 
   it("pauses when the tab is hidden during a run", async () => {

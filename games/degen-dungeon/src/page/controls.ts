@@ -1,12 +1,14 @@
 import { attachKeys, standardKeys } from "@frostbite/game-sdk/controls";
 import { attachZones, type Where } from "@frostbite/game-sdk/touch-zones";
 
-// What the player's hands can do. Keys: arrows or WASD walk (eight ways), Space or E acts and says yes, X or Escape says no, R and F take
-// a helicopter up and down, Enter starts, P pauses; before a day, left and right turn the hero ring. Fingers: before a day a tap on
+// What the player's hands can do. Keys: arrows or WASD walk (eight ways), Space or E acts and says yes, X or Escape says no, 1 to 4 pick
+// an answer, V turns frost vision on and off, R and F take a helicopter up and down, Enter starts, P pauses; before a day, left and right turn the hero ring. Fingers: before a day a tap on
 // either side turns the ring and a tap in the middle starts; during one the left of the screen is a stick (sixteen ways) and a tap on the
 // right acts, or answers yes on the right and no on the left while an offer waits.
 export interface Hands {
   readonly act: () => void;
+  readonly answer: (choice: number) => void;
+  readonly look: () => void;
   readonly lift: (by: number) => void;
   readonly move: (dir: number) => void;
   readonly no: () => void;
@@ -33,6 +35,11 @@ const keys = {
   KeyF: "fall",
   KeyR: "rise",
   KeyS: "south",
+  Digit1: "answer0",
+  Digit2: "answer1",
+  Digit3: "answer2",
+  Digit4: "answer3",
+  KeyV: "look",
   KeyW: "north",
   KeyX: "no",
   Space: "act",
@@ -97,6 +104,13 @@ export function attachControls(
     if (phase !== "down") return;
     if (action === "rise") hands.lift(1);
     else if (action === "fall") hands.lift(-1);
+    else if (
+      action === "answer0" ||
+      action === "answer1" ||
+      action === "answer2" ||
+      action === "answer3"
+    )
+      hands.answer(Number(action.slice(6)));
     else hands[action]();
   });
   const stopZones = attachZones<Zone>(screen, {
