@@ -1,10 +1,9 @@
+import { chased } from "./chase.ts";
 import { coin } from "./coin.ts";
 import {
-  catchRadius,
+  dayFreezers,
   dayPockets,
-  frozenFine,
   gustTicks,
-  heatFadeTicks,
   loopPocket,
   maxTicks,
   patch,
@@ -12,94 +11,95 @@ import {
   stormStart,
   stormTicks,
   swapMeetBonus,
-  tuxGap,
-  tuxStars,
+  visionTicks,
 } from "./constants.ts";
-import { cooled, starsOf } from "./heat.ts";
 import { statue } from "./machine.ts";
 import { moved } from "./move.ts";
+import { spotNamed } from "./places.ts";
+import { ticked } from "./tick.ts";
 import type { DayState, Draft } from "./types.ts";
-import { centreOf, inSwapMeet, spotNamed } from "./world.ts";
+import { centreOf, inSwapMeet } from "./world.ts";
 
-// A day from its first tick: the hero wakes at home with what that story day gives them, and the seed decides today's scam. A trip back
-// (`loop` above 0) starts beside the statue instead, with a traveller's pocket.
+// A day from its first tick: the hero wakes at home with what that story day gives them (the timeline from earlier trips back moves the
+// pocket a hundred DUN a step), and the seed decides today's scam. The third day is the morning of the drain. A trip back (`loop` above
+// 0) starts beside the statue instead, with a traveller's pocket.
 export function startDay(
   seed: number,
   hero: number,
   day: number,
   loop = 0,
+  fate = 0,
 ): DayState {
   const home =
     loop > 0 ? statue : (spotNamed(`home-${String(hero)}`) ?? centreOf(4));
+  const pocket =
+    loop > 0
+      ? loopPocket
+      : Math.max(0, (dayPockets[day - 1] ?? 0) + 100 * fate);
   return {
+    allIns: 0,
+    bag: 0,
+    beat: 0,
     cause: null,
+    cop: null,
     crew: [],
     crooked: coin(seed),
     day,
     dir: -1,
     done: [],
+    drain: 0,
+    dream: 0,
     ended: false,
-    fate: 0,
+    fake: day === 3 && loop === 0,
+    fate: loop > 0 ? 0 : fate,
     fenced: 0,
-    freezer: 0,
+    firstBuy: -1,
+    fomo: 0,
+    freezer: loop > 0 ? 0 : (dayFreezers[day - 1] ?? 0),
+    gate: 0,
     gigs: 0,
+    grass: false,
     heat: 0,
     hero,
     hot: 0,
     inputs: 0,
+    letters: 0,
     level: 0,
+    looking: false,
     loop,
     made: 0,
+    maxx: 0,
+    paid: 0,
+    paper: 0,
+    paperAt: -1,
+    paperHands: 0,
     parcel: null,
     peak: 0,
-    pocket: loop > 0 ? loopPocket : (dayPockets[day - 1] ?? 0),
+    peakFomo: 0,
+    peakPocket: pocket,
+    pocket,
     rep: 0,
     ride: "foot",
     rides: 0,
     rugged: 0,
+    saved: false,
     seed: seed >>> 0,
+    sells: 0,
     shook: false,
     spotted: 0,
     storm: 0,
     talk: null,
     tick: 0,
     tools: 0,
+    topped: 0,
     tux: null,
+    vests: null,
+    vision: hero === 2 ? 2 * visionTicks : visionTicks,
+    warned: 0,
     words: 0,
     x: home.x,
     z: home.z,
   };
-}
-
-const toward = (from: number, to: number, pace: number): number =>
-  from + Math.max(-pace, Math.min(pace, to - from));
-
-// At three stars a tux appears a little way off and walks straight at the hero, through walls, a little faster for every star. It never
-// runs, and it is always closer than it was. What it reaches on the ground is frozen: the loot goes back, a fine is paid, the day is over.
-function chased(day: Draft): void {
-  const stars = starsOf(day.heat);
-  if (stars < tuxStars) {
-    day.tux = null;
-    return;
-  }
-  const from = day.tux ?? {
-    x: day.x + (day.x < tuxGap ? tuxGap : -tuxGap),
-    z: day.z,
-  };
-  const pace = 6 + 2 * stars;
-  const tux = {
-    x: toward(from.x, day.x, pace),
-    z: toward(from.z, day.z, pace),
-  };
-  day.tux = tux;
-  const near = Math.max(Math.abs(tux.x - day.x), Math.abs(tux.z - day.z));
-  if (day.level > 0 || near > catchRadius) return;
-  day.cause = "frozen";
-  day.ended = true;
-  day.dir = -1;
-  day.hot = 0;
-  day.talk = null;
-  day.pocket -= Math.min(day.pocket, frozenFine);
 }
 
 // How much DUN falls on a patch of ground in one tick of the Great Airdrop, from 0 to 7: the same for every player of a seed, and new for
@@ -118,9 +118,14 @@ export function gust(seed: number, x: number, z: number, tick: number): number {
 // What bare hands catch, then with the magnet, the vacuum, and both.
 const pull = [1, 3, 4, 8] as const;
 
+export const storming = (day: Pick<DayState, "day" | "tick">): boolean =>
+  day.day === stormDay &&
+  day.tick >= stormStart &&
+  day.tick < stormStart + stormTicks;
+
+// Only what the hero runs through is caught: standing still catches nothing.
 function stormed(day: Draft): void {
-  if (day.day !== stormDay) return;
-  if (day.tick < stormStart || day.tick >= stormStart + stormTicks) return;
+  if (!storming(day) || day.dir < 0) return;
   const fall =
     gust(day.seed, day.x, day.z, day.tick) +
     (inSwapMeet(day.x, day.z) ? swapMeetBonus : 0);
@@ -137,8 +142,8 @@ export function advance(state: DayState, tick: number): DayState {
   while (day.tick < tick && !day.ended) {
     day.tick += 1;
     moved(day);
-    chased(day);
-    if (day.heat > 0 && day.tick % heatFadeTicks === 0) cooled(day, 1);
+    ticked(day);
+    if (!day.ended) chased(day);
     stormed(day);
     if (day.tick >= maxTicks && !day.ended) {
       day.cause = "timeout";

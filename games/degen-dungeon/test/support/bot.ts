@@ -5,14 +5,19 @@ import { advance } from "../../src/rules/day.ts";
 import { degenRules } from "../../src/rules/index.ts";
 import { paceOf } from "../../src/rules/move.ts";
 import type { DayState } from "../../src/rules/types.ts";
-import { centreOf, spotNamed } from "../../src/rules/world.ts";
+import { spotNamed } from "../../src/rules/places.ts";
+import { centreOf } from "../../src/rules/world.ts";
 
 // A player for the tests: it walks the streets (every spot stands on one), uses spots by name and answers offers, by legal inputs only.
 // What it did is in `inputs`, which is a day's record.
-export function createBot(seed = 7, hero = 7, day = 1, loop = 0) {
+export function createBot(seed = 7, hero = 7, day = 1, loop = 0, fate = 0) {
   const init = degenRules.init(
     seed,
-    loop > 0 ? { day, hero, loop } : { day, hero },
+    loop > 0
+      ? { day, hero, loop }
+      : fate === 0
+        ? { day, hero }
+        : { day, fate, hero },
   );
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;
@@ -50,17 +55,22 @@ export function createBot(seed = 7, hero = 7, day = 1, loop = 0) {
     Math.max(0, Math.min(island - 1, value));
   const centreNear = (x: number, z: number) =>
     centreOf(Math.floor(within(x) / block) + 3 * Math.floor(within(z) / block));
-  // To the middle of the borough the bot is in, along the streets to the middle of the borough the place is in, then to the place.
+  // Whether a line east to west at this z runs along a street or an avenue.
+  const across = (z: number): boolean => {
+    const local = within(z) % block;
+    return local < 800 || (local > 5_000 && local < 7_000) || local > 11_200;
+  };
+  // To the middle of the borough the bot is in, along the streets to the middle of the borough the place is in, then to the place (by
+  // the avenue first when the place is on one).
   const go = (x: number, z: number): void => {
     const from = here();
-    for (const stage of [
-      centreNear(from.x, from.z),
-      centreNear(x, z),
-      { x, z },
-    ]) {
+    for (const stage of [centreNear(from.x, from.z), centreNear(x, z)]) {
       leg("x", stage.x);
       leg("z", stage.z);
     }
+    if (across(z)) leg("z", z);
+    leg("x", x);
+    leg("z", z);
   };
 
   return {
@@ -68,10 +78,17 @@ export function createBot(seed = 7, hero = 7, day = 1, loop = 0) {
     end: (): void => send("end"),
     go,
     here,
+    // Sets off on a heading and keeps going.
+    head: (dir: number): void => send("move", { dir }),
     hold,
     inputs,
     lift: (by: number): void => send("lift", { by }),
-    pick: (yes: boolean): void => send("pick", { choice: yes ? 0 : 1 }),
+    look: (): void => send("look"),
+    // Yes (0) or no (1), or one of a talk's answers by number.
+    pick: (answer: boolean | number): void =>
+      send("pick", {
+        choice: typeof answer === "number" ? answer : answer ? 0 : 1,
+      }),
     // Sets the clock, without a choice.
     skipTo: (tick: number): void => void (now = tick),
     state: (): DayState => state,
@@ -81,6 +98,14 @@ export function createBot(seed = 7, hero = 7, day = 1, loop = 0) {
       if (spot === undefined) throw new Error(`no spot named ${id}`);
       go(spot.x, spot.z);
       send("act");
+    },
+    // Goes home and sleeps.
+    sleep(): void {
+      const home = spotNamed(`home-${String(state.hero)}`);
+      if (home === undefined) throw new Error("no home");
+      go(home.x, home.z);
+      send("act");
+      send("pick", { choice: 0 });
     },
     wait: (ticks: number): void => void (now += ticks),
   };

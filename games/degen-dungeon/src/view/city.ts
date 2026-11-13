@@ -13,7 +13,8 @@ import {
 } from "three";
 
 import { block, island, lots } from "../rules/constants.ts";
-import { boroughs, centreOf, spots, type Spot } from "../rules/world.ts";
+import { spots, type Spot } from "../rules/places.ts";
+import { boroughs, centreOf } from "../rules/world.ts";
 
 // Nakasato, built in code from the same numbers the rules walk on: the island, the sea, a block of towers on every lot and a marker on
 // every spot. It is a stand-in the right size and in the right place: the kit of real buildings, billboards and street dressing goes here.

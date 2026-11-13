@@ -1,7 +1,8 @@
 import { block, island, lots } from "../rules/constants.ts";
 import { echoAt, risen, statue } from "../rules/machine.ts";
 import type { DayState } from "../rules/types.ts";
-import { boroughs, spots } from "../rules/world.ts";
+import { spots } from "../rules/places.ts";
+import { boroughs } from "../rules/world.ts";
 
 // The island from above, drawn on the game screen: the whole picture where the browser has no WebGL, and the corner map where it has.
 export const colour = {

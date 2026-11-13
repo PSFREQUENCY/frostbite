@@ -51,7 +51,9 @@ export const swapMeetBonus = 8;
 
 // Net worth at which each rank begins (Newbie, Shrimp, Crab, Dolphin, Shark, Whale), and what a story day starts with in the pocket.
 export const rankFloors = [0, 1_000, 5_000, 25_000, 100_000, 500_000] as const;
-export const dayPockets = [0, 600, 3_000, 12_000, 60_000] as const;
+export const dayPockets = [0, 600, 0, 3_000, 10_000] as const;
+// What each story day starts with in the freezer: the climb so far, fixed so that every day replays on its own.
+export const dayFreezers = [0, 400, 4_000, 20_000, 80_000] as const;
 export const faucetDun = 100;
 export const gigRep = 10;
 export const lootRep = 20;
@@ -66,3 +68,35 @@ export const echoTicks = 6_000;
 export const tipDun = 500;
 export const paradoxHeat = 60;
 export const fateDun = 500;
+
+// The rest of the island. Frost vision lasts this long a day (Lumen's lamp twice as long). The seed paper is tested this long after it is
+// written, and a drained pocket loses this much every ten ticks (a permission slip leaks one). Crossing the riot is a star; loot taken in front of a crowd adds witnesses.
+export const visionTicks = 450;
+export const paperTest = 2_400;
+export const drainPace = 4;
+export const riotHeat = 100;
+export const witnessHeat = 80;
+// The beat cop: out at two stars, on a scooter, and a fine instead of a freeze.
+export const copStars = 2;
+export const copGap = 2_500;
+export const copPace = 16;
+export const copFine = 100;
+// The coin: a new candle every ten seconds, and the size of a small buy. MAXX pays a fiftieth every half minute in the mania.
+export const candleTicks = 300;
+export const buyDun = 100;
+export const maxxTicks = 900;
+export const maxxShare = 50;
+// The park takes FOMO down a point every this many ticks of sitting still; the mania puts it up a point every this many.
+export const grassTicks = 10;
+export const fomoTicks = 90;
+// The oldest tunnel and SHA Beach, north of the island under the sea, and how close behind the Vests come.
+export const tunnel = { x0: 23_600, x1: 24_400, z0: -7_100, z1: 0 } as const;
+export const beach = {
+  x0: 16_000,
+  x1: 32_000,
+  z0: -9_600,
+  z1: -7_000,
+} as const;
+export const waterline = -9_200;
+export const vestGap = 1_800;
+export const vestPace = 8;

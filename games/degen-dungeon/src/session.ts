@@ -11,12 +11,13 @@ import type { DayState } from "./rules/types.ts";
 export type Outcome =
   { readonly ok: true } | { readonly ok: false; readonly reason: string };
 
-// What a player can choose: the one act button, a helicopter's climb or drop, a heading to hold, and yes (0) or no (1) to an offer.
+// What a player can choose: the one act button, frost vision, a helicopter's climb or drop, a heading to hold, and an answer (0 yes and 1
+// no to an offer, or one of a talk's answers).
 export type Choice =
   | { readonly by: number; readonly type: "lift" }
   | { readonly choice: number; readonly type: "pick" }
   | { readonly dir: number; readonly type: "move" }
-  | { readonly type: "act" };
+  | { readonly type: "act" | "look" };
 
 // One day as the player plays it. The page calls `tick` on its timer and `send` when the player chooses; the rules decide what is legal,
 // and each choice they accept (with the tick it was made on) is written into a run record. Only choices are recorded, never the ticks

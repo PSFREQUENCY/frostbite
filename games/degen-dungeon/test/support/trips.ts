@@ -12,7 +12,8 @@ export function machineDay() {
   bot.use("tool-magnet");
   bot.use("tool-vacuum");
   bot.go(32_500, 18_000);
-  bot.skipTo(stormStart + stormTicks);
+  bot.skipTo(stormStart);
+  bot.hold(4, stormTicks);
   bot.go(statue.x, statue.z);
   bot.act();
   return bot;

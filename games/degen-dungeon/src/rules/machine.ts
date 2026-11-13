@@ -4,14 +4,14 @@ import {
   faucetDun,
   gigRep,
   paradoxHeat,
-  reach,
   statueRank,
   tipDun,
 } from "./constants.ts";
 import { heated, rankOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import type { DayState, Draft, Point } from "./types.ts";
-import { centreOf, spotNamed } from "./world.ts";
+import { inReach, spotNamed } from "./places.ts";
+import { centreOf } from "./world.ts";
 
 // The Time Machine. The Ice Runner, a statue in The Old Floe, sleeps until the hero reaches the top; then it rises, and stepping up to it
 // ends the day inside the machine. The day after is a trip back to day one (`loop` 1 or more), where the hero's newbie self is living that
@@ -23,12 +23,11 @@ export const moments = ["echo-wake", "echo-faucet", "echo-offer"] as const;
 export type Moment = (typeof moments)[number];
 export type Echo = Point & { readonly id: Moment };
 
-export const inReach = (from: Point, place: Point): boolean =>
-  Math.max(Math.abs(from.x - place.x), Math.abs(from.z - place.z)) <= reach;
+export { inReach };
 
 // The statue is up on every trip back (the traveller has just stepped out of it), and on any day the hero's worth reaches the top.
 export const risen = (
-  day: Pick<DayState, "freezer" | "loop" | "pocket">,
+  day: Pick<DayState, "fake" | "freezer" | "loop" | "maxx" | "pocket">,
 ): boolean => day.loop > 0 || rankOf(day) >= statueRank;
 
 // Whether this trip's newbie wastes what they are handed. The seed decides, and the page shows a tell before the answer.

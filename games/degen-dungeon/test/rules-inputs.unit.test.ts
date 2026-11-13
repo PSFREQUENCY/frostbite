@@ -64,9 +64,11 @@ describe("an input", () => {
     expect(refusal(day, "act", { tick: 0.5 })).toBe(
       "tick must be a whole number",
     );
-    expect(refusal(day, "pick", { choice: 2, tick: 0 })).toBe(
-      "choice must be 0 or 1",
+    expect(refusal(day, "pick", { choice: 4, tick: 0 })).toBe(
+      "choice must be 0 to 3",
     );
+    expect(refusal(day, "pick", { choice: 2, tick: 0 })).toBe("yes or no");
+    expect(refusal(day, "look", { tick: 0 })).toBeNull();
     expect(refusal(day, "pick", { choice: 0, tick: 0 })).toBe("nobody asked");
     expect(refusal(day, "lift", { by: 0, tick: 0 })).toBe("by must be 1 or -1");
     expect(refusal(day, "lift", { by: 2, tick: 0 })).toBe("by must be 1 or -1");

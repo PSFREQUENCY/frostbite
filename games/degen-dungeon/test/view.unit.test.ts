@@ -2,7 +2,7 @@ import { InstancedMesh, PerspectiveCamera, type Scene } from "three";
 import { describe, expect, it, vi } from "vitest";
 
 import { heroes } from "../src/rules/heroes.ts";
-import { spots } from "../src/rules/world.ts";
+import { spots } from "../src/rules/places.ts";
 import { buildActor, buildTux, heroCount, stride } from "../src/view/actor.ts";
 import { createRig, poseFor } from "../src/view/camera.ts";
 import { frameOf, opening } from "../src/view/cine.ts";

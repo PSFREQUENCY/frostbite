@@ -11,12 +11,15 @@ import type { DayState, Draft } from "./types.ts";
 export const starsOf = (heat: number): number =>
   Math.min(5, Math.floor(heat / heatPerStar));
 
-export const worthOf = (day: Pick<DayState, "freezer" | "pocket">): number =>
-  day.freezer + day.pocket;
+// The freezer does not show on the morning of the drain until the hideout terminal is checked.
+export const worthOf = (
+  day: Pick<DayState, "fake" | "freezer" | "maxx" | "pocket">,
+): number => (day.fake ? 0 : day.freezer) + day.maxx + day.pocket;
 
 // 0 is Newbie, 5 is Whale.
-export const rankOf = (day: Pick<DayState, "freezer" | "pocket">): number =>
-  rankFloors.filter((floor) => worthOf(day) >= floor).length - 1;
+export const rankOf = (
+  day: Pick<DayState, "fake" | "freezer" | "maxx" | "pocket">,
+): number => rankFloors.filter((floor) => worthOf(day) >= floor).length - 1;
 
 export function heated(day: Draft, by: number): void {
   day.heat = Math.min(maxHeat, day.heat + by);

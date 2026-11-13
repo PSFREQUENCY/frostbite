@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import { guideFor } from "../src/guide.ts";
-import { spots } from "../src/rules/world.ts";
+import { spots } from "../src/rules/places.ts";
 import { colour, drawMap, drawScreen } from "../src/screen/flat.ts";
 import { resultOf } from "../src/screen/result.ts";
 import { started } from "./support/replay.ts";

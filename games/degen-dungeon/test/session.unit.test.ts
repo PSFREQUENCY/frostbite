@@ -35,7 +35,7 @@ describe("a day as it is played", () => {
     expect(session.send({ type: "act" })).toEqual({ ok: true });
     expect(session.send({ type: "act" })).toEqual({
       ok: false,
-      reason: "that is used up for today",
+      reason: "answer first",
     });
     expect([
       session.clock(),
@@ -43,6 +43,7 @@ describe("a day as it is played", () => {
       told,
       session.earned(),
     ]).toEqual([270, 100, ["faucet"], ["faucet"]]);
+    expect(session.state().talk).toBe("paper");
     const record = session.record();
     expect(record.inputs.map(({ type }) => type)).toEqual([
       "move",
@@ -70,9 +71,11 @@ describe("a day as it is played", () => {
   it("needs no closing input when a choice ends the day, and writes one when the clock or a tux does", () => {
     const home = createRunSession({ day: 1, hero: 7, seed: 4 });
     home.send({ type: "act" });
+    expect([home.state().cause, home.state().talk]).toEqual([null, "home"]);
+    home.send({ choice: 0, type: "pick" });
     expect(home.state().cause).toBe("home");
     const stayed = home.record();
-    expect(stayed.inputs.map(({ type }) => type)).toEqual(["act"]);
+    expect(stayed.inputs.map(({ type }) => type)).toEqual(["act", "pick"]);
     expect(replay(stayed)).toEqual(home.state());
 
     const told: string[] = [];
@@ -87,6 +90,6 @@ describe("a day as it is played", () => {
     const record = late.record();
     expect(record.inputs).toEqual([{ data: { tick: maxTicks }, type: "end" }]);
     expect(replay(record)).toEqual(late.state());
-    expect(told).toContain("storm-catch");
+    expect(told).toEqual([]);
   });
 });

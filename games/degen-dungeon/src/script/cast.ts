@@ -25,6 +25,29 @@ export const offers: Readonly<Record<string, string>> = {
   "offer-scruff":
     "Psst. Help me find three lost words, and never tell me yours.",
   "offer-yield": "Interest every single day and no risk at all, friend.",
+  "offer-double":
+    "A famous face on the big screen: send me DUN and I send back double!",
+  "offer-recovery":
+    "Lost your words? I recover anything, for a small fee up front.",
+  "offer-job": "Dream job, great pay. Just install our interview app to start?",
+  "offer-fed":
+    "Federal notice: your account is under investigation. Move your DUN to a safe locker by QR code?",
+  "offer-slip": "Sign this little slip and I can hold your wallet for you?",
+  "offer-meter": "Pay the meter? Just scan the sticker.",
+  "offer-honeypot": "Everyone is buying it. Buy in before it moons?",
+};
+
+// What gives a scam away, shown once the player can see tells (frost vision, sharp smarts or street smarts from scams walked away from).
+export const tells: Readonly<Record<string, string>> = {
+  "offer-double": "Red flag: nobody sends back double.",
+  "offer-fed": "Red flag: real agents never tell you to move your money.",
+  "offer-honeypot": "Red flag: everyone can buy it, and nobody has sold it.",
+  "offer-job": "Red flag: a job that needs an install before a hello.",
+  "offer-kiki": "Red flag: she wants your words.",
+  "offer-meter": "Red flag: the sticker is pasted over the real code.",
+  "offer-recovery": "Red flag: the fee comes before the help.",
+  "offer-slip": "Red flag: the fine print lets them take from you later.",
+  "offer-yield": "Red flag: no risk and interest every day.",
 };
 
 export const recruitLine = (name: string): string =>
@@ -35,15 +58,29 @@ export const endings = {
   closed: "YOU CALLED IT A DAY",
   frozen: "FROZEN BY THE TUXES",
   home: "HOME SAFE",
+  beach: "SUNRISE ON SHA BEACH",
   machine: "INTO THE TIME MACHINE",
   timeout: "THE DAY RAN OUT",
+  vested: "THE VESTS GOT THERE FIRST",
 } as const;
 
 // The first line of a day: the hero's wake-up, or on a trip back, the step out of the ice.
 const tripWake =
   "You step out of the ice on day one, and somewhere in town a newbie you is waking up.";
-export const wakeLine = (hero: number, loop: number): string =>
-  loop > 0 ? tripWake : (wakeUps[hero] ?? "");
+// After the first morning each day opens on its era.
+export const eraWakes: readonly string[] = [
+  "",
+  "The mania: every billboard is a promise, and MAXX pays twenty a day.",
+  "You wake up drained: DUN 0, crew 0, rank Newbie. Check the hideout terminal before you panic.",
+  "Launch Day: robots roll out of the server farms and start taking routes.",
+  "Moon Night: the whole island is gathering under Moon Tower.",
+];
+export const wakeLine = (hero: number, loop: number, day = 1): string =>
+  loop > 0
+    ? tripWake
+    : day > 1
+      ? (eraWakes[day - 1] ?? "")
+      : (wakeUps[hero] ?? "");
 
 // What gives a newbie away before a tip: the seed decides which kind of newbie a trip back meets.
 export const echoTells = {

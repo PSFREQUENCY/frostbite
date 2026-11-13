@@ -8,11 +8,11 @@ import {
   dockWater,
   helipad,
   inSwapMeet,
-  nearest,
   onLand,
   onWater,
-  spots,
 } from "../src/rules/world.ts";
+import { reach } from "../src/rules/constants.ts";
+import { nearest, openTo, spots } from "../src/rules/places.ts";
 import { createBot } from "./support/bot.ts";
 import { refusal, started } from "./support/replay.ts";
 
@@ -23,8 +23,28 @@ describe("the island", () => {
     for (const spot of spots.filter(({ id }) => id !== "ride-boat"))
       expect(onLand(spot.x, spot.z), spot.id).toBe(true);
     expect(new Set(spots.map(({ id }) => id)).size).toBe(spots.length);
-    expect(nearest(18_000, 18_000)).toBeNull();
-    expect(nearest(17_100, 18_050)?.id).toBe("faucet");
+    const open = { day: 1, hero: 7, looking: false };
+    expect(nearest({ ...open, x: 18_000, z: 18_000 })).toBeNull();
+    expect(nearest({ ...open, x: 17_100, z: 18_050 })?.id).toBe("faucet");
+    expect(nearest({ ...open, x: 18_900, z: 15_500 })).toBeNull();
+    expect(nearest({ ...open, looking: true, x: 18_900, z: 15_500 })?.id).toBe(
+      "heroword-7",
+    );
+  });
+
+  it("never puts two places that can be open on the same day within reach of each other", () => {
+    for (const day of [1, 2, 3, 4, 5])
+      for (const hero of [0, 7, 9]) {
+        const seen = { day, hero, looking: true };
+        const open = spots.filter((spot) => openTo(spot, seen));
+        for (const one of open)
+          for (const other of open)
+            if (one !== other)
+              expect(
+                Math.max(Math.abs(one.x - other.x), Math.abs(one.z - other.z)),
+                `${one.id} and ${other.id} on day ${String(day)}`,
+              ).toBeGreaterThan(2 * reach);
+      }
   });
 
   it("keeps feet out of buildings and off the edge, and boats off the shore and inside the sea", () => {
@@ -75,7 +95,7 @@ describe("rides", () => {
     expect(refusal(bot.state(), "act", { tick: bot.state().tick })).toBeNull();
     bot.act();
     expect(bot.state().ride).toBe("foot");
-    const owner = createBot(1, 5, 3);
+    const owner = createBot(1, 5, 4);
     owner.use("ride-scooter");
     expect(owner.state().heat).toBe(0);
     owner.hold(4, 30);

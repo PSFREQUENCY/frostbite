@@ -9,7 +9,7 @@ import {
   statue,
 } from "../rules/machine.ts";
 import type { DayState } from "../rules/types.ts";
-import { nearest, spotNamed } from "../rules/world.ts";
+import { nearest, spotNamed } from "../rules/places.ts";
 import {
   echoPlaces,
   echoTells,

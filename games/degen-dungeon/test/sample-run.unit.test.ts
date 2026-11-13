@@ -18,7 +18,7 @@ describe("the sample day the verifier is shown with", () => {
     expectVerifiedScore(
       degenRules,
       sampleRun(),
-      (state) => state.made + state.storm,
+      (state) => state.made + state.storm + state.fate * 500,
     );
   });
 });
