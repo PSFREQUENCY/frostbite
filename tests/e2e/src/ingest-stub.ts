@@ -17,6 +17,8 @@ export interface ReceivedReport {
 
 export interface IngestStub {
   readonly close: () => Promise<void>;
+  // The port it listens on (the one asked for, or the one the system gave when 0 was asked).
+  readonly port: number;
   readonly received: ReceivedReport[];
 }
 
@@ -39,12 +41,14 @@ export async function startIngestStub(port: number): Promise<IngestStub> {
   await new Promise<void>((resolve) =>
     server.listen(port, "127.0.0.1", resolve),
   );
+  const address = server.address();
   return {
     close: () =>
       new Promise<void>((resolve) => {
         server.closeAllConnections();
         server.close(() => resolve());
       }),
+    port: typeof address === "object" && address !== null ? address.port : port,
     received,
   };
 }
