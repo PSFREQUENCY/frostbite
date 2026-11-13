@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalytics } from "@frostbite/client-react";
 import { returnTarget } from "@frostbite/shared/auth/sign-in-path";
 import type { WalletNetwork } from "@frostbite/wallet/contracts";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
@@ -29,6 +30,10 @@ export function SignInSurface({
   const [first] = shown;
   const [chosen, choose] = useState(first?.kind ?? "");
   const group = useId();
+  const analytics = useAnalytics();
+  // The methods a person has begun on this page. A method that finds them already signed in takes them on without a sign-in, which is not
+  // one to count.
+  const begun = useRef(new Set<string>());
   const keys = useRef<Readonly<Record<string, HTMLButtonElement | null>>>({});
   if (first === undefined)
     return <p role="status">Signing in is not available right now.</p>;
@@ -98,7 +103,19 @@ export function SignInSurface({
           <h2 className="sign-in-slot__title">{`${label} login`}</h2>
           <Component
             expectedNetwork={expectedNetwork}
-            onSignedIn={() => navigate(returnTarget(window.location.search))}
+            onSignedIn={() => {
+              if (begun.current.has(kind))
+                analytics.capture("sign_in_succeeded", { method: kind });
+              navigate(returnTarget(window.location.search));
+            }}
+            track={{
+              failed: (reason) =>
+                analytics.capture("sign_in_failed", { method: kind, reason }),
+              started: () => {
+                begun.current.add(kind);
+                analytics.capture("sign_in_started", { method: kind });
+              },
+            }}
           />
         </section>
       ))}

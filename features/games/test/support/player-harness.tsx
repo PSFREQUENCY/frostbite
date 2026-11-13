@@ -1,5 +1,7 @@
+import { AnalyticsProvider } from "@frostbite/client-react";
 import { gameChannel, protocolVersion } from "@frostbite/game-sdk/protocol";
 import type { AccountPort } from "@frostbite/game-sdk/synced-backend";
+import type { Analytics } from "@frostbite/telemetry/analytics";
 import { act, type ComponentProps } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { installDialogShim } from "@frostbite/test-kit/dom";
@@ -46,11 +48,14 @@ export const noAccount = () => signedOut;
 const original = HTMLIFrameElement.prototype.setAttribute;
 
 export const harness: {
+  // What the page counts with, when a test wants to see what is counted; otherwise nothing is.
+  analytics: Analytics | undefined;
   atStart: (() => void) | undefined;
   container: HTMLElement;
   root: Root;
   readonly started: string[];
 } = {
+  analytics: undefined,
   atStart: undefined,
   container: document.createElement("div"),
   root: createRoot(document.createElement("div")),
@@ -65,6 +70,7 @@ export function registerHarness(): void {
   });
   beforeEach(() => {
     window.localStorage.clear();
+    harness.analytics = undefined;
     harness.atStart = undefined;
     harness.container = document.createElement("div");
     document.body.append(harness.container);
@@ -80,15 +86,22 @@ export function registerHarness(): void {
 const player = (
   accountFor: (gameId: string) => AccountPort,
   extra: Partial<ComponentProps<typeof GamePlayer>>,
-) => (
-  <GamePlayer
-    accountFor={accountFor}
-    game={game}
-    src="/play/embedded-game/index.html"
-    title="Embedded game"
-    {...extra}
-  />
-);
+) => {
+  const page = (
+    <GamePlayer
+      accountFor={accountFor}
+      game={game}
+      src="/play/embedded-game/index.html"
+      title="Embedded game"
+      {...extra}
+    />
+  );
+  return harness.analytics === undefined ? (
+    page
+  ) : (
+    <AnalyticsProvider analytics={harness.analytics}>{page}</AnalyticsProvider>
+  );
+};
 
 // Renders the player again with other properties, as the page does when the wallet connects.
 export const rerender = (

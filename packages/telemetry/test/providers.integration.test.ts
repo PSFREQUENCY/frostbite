@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { analyticsProviders } from "../src/analytics/providers/index.ts";
+import { analyticsProviderNames } from "../src/analytics/names.ts";
+import { browserAnalyticsProviders as analyticsProviders } from "../src/analytics/providers/browser.ts";
 import { describeError } from "../src/errors/describe.ts";
 import { errorProviderNames } from "../src/errors/names.ts";
 import { browserErrorProviders } from "../src/errors/providers/browser.ts";
@@ -29,6 +30,14 @@ describe.each(Object.entries<AnalyticsProviderFactory>(analyticsProviders))(
     });
   },
 );
+
+describe("the analytics registry", () => {
+  it("offers exactly the names the setting accepts", () => {
+    expect(Object.keys(analyticsProviders).sort()).toEqual(
+      [...analyticsProviderNames].sort(),
+    );
+  });
+});
 
 describe("the error-reporting registries", () => {
   it("offer exactly the names the setting accepts, in a page and on the server alike", () => {

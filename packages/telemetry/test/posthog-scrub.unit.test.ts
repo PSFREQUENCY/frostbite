@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { removed } from "../src/scrubber.ts";
-import { scrubPostHogRecord } from "../src/errors/providers/posthog-scrub.ts";
+import { scrubPostHogRecord } from "../src/providers-shared/posthog-scrub.ts";
 
 const uuid = "3f2a9c1e-5b7d-4e8a-9c0d-1a2b3c4d5e6f";
 const keep = { dropSourceContext: false };
@@ -97,5 +97,18 @@ describe("the PostHog event scrub", () => {
     expect(JSON.stringify(scrubPostHogRecord(withContext, keep))).toContain(
       "context_line",
     );
+  });
+});
+
+describe("the page's own path", () => {
+  it("is made anonymous the way the address is", () => {
+    expect(
+      JSON.stringify(
+        scrubPostHogRecord(
+          { $pathname: `/s/${uuid}`, $host: "frostbit.example" },
+          keep,
+        ),
+      ),
+    ).toBe('{"$pathname":"/s/:id","$host":"frostbit.example"}');
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createBrowserAnalytics } from "../src/analytics/browser.ts";
 import { createAnalytics } from "../src/analytics/index.ts";
 import type { AnalyticsProvider } from "../src/analytics/port.ts";
 import type { Problem } from "../src/guard.ts";
@@ -122,12 +123,15 @@ describe("analytics", () => {
 
   it("refuses a provider name that is not in the registry", () => {
     expect(() =>
-      createAnalytics({ ...settings, provider: "elsewhere" }),
+      createAnalytics(
+        { ...settings, provider: "elsewhere" },
+        { registry: { fake: () => fake().provider } },
+      ),
     ).toThrow(/Unknown analytics provider "elsewhere"/u);
   });
 
   it("is the platform's own noop when none is chosen, and does nothing", async () => {
-    const analytics = createAnalytics({
+    const analytics = createBrowserAnalytics({
       ingestOrigin: null,
       provider: "noop",
       token: null,

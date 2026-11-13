@@ -23,13 +23,19 @@ function offersNativeSheet(): boolean {
   );
 }
 
+// What `onShare` is told when the person uses something that is not a platform of the configuration.
+export const nativeDestination = "native";
+export const copyDestination = "copy";
+
 function Tiles({
   config,
   link,
+  onShare,
   text,
 }: {
   readonly config: ShareConfig;
   readonly link: LinkState;
+  readonly onShare: ((destination: string) => void) | undefined;
   readonly text: string;
 }) {
   const ready = link.kind === "ready";
@@ -43,7 +49,8 @@ function Tiles({
         <li>
           <button
             className="share-tile share-tile--native"
-            onClick={() =>
+            onClick={() => {
+              onShare?.(nativeDestination);
               // A person closing the sheet is not a failure; there is nothing to say either way.
               void navigator
                 .share({
@@ -51,8 +58,8 @@ function Tiles({
                   title: shareControlCopy.nativeTitle,
                   url: link.url,
                 })
-                .catch(() => undefined)
-            }
+                .catch(() => undefined);
+            }}
             type="button"
           >
             <span className="share-tile__mark">⤴</span>
@@ -86,6 +93,7 @@ function Tiles({
                   text,
                   url: link.url,
                 })}
+                onClick={() => onShare?.(platform.id)}
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -103,7 +111,13 @@ function Tiles({
   );
 }
 
-function CopyRow({ url }: { readonly url: string }) {
+function CopyRow({
+  onShare,
+  url,
+}: {
+  readonly onShare: ((destination: string) => void) | undefined;
+  readonly url: string;
+}) {
   const [copied, setCopied] = useState<"done" | "failed" | "idle">("idle");
   return (
     <>
@@ -116,12 +130,13 @@ function CopyRow({ url }: { readonly url: string }) {
         />
         <button
           data-copied={copied === "done" ? "true" : undefined}
-          onClick={() =>
+          onClick={() => {
+            onShare?.(copyDestination);
             void navigator.clipboard.writeText(url).then(
               () => setCopied("done"),
               () => setCopied("failed"),
-            )
-          }
+            );
+          }}
           type="button"
         >
           {copied === "done" ? "✓" : shareControlCopy.copy}
@@ -144,6 +159,7 @@ function SheetBody({
   heading,
   kicker,
   makeLink,
+  onShare,
   text,
 }: {
   readonly art?: ReactNode;
@@ -151,6 +167,7 @@ function SheetBody({
   readonly heading: string;
   readonly kicker: string;
   readonly makeLink: () => Promise<string | null>;
+  readonly onShare: ((destination: string) => void) | undefined;
   readonly text: string;
 }) {
   const [link, setLink] = useState<LinkState>({ kind: "preparing" });
@@ -180,8 +197,10 @@ function SheetBody({
           <strong>{heading}</strong>
         </span>
       </div>
-      <Tiles config={config} link={link} text={text} />
-      {link.kind === "ready" ? <CopyRow url={link.url} /> : null}
+      <Tiles config={config} link={link} onShare={onShare} text={text} />
+      {link.kind === "ready" ? (
+        <CopyRow onShare={onShare} url={link.url} />
+      ) : null}
       {link.kind === "preparing" ? (
         <p className="share-note" role="status">
           {shareControlCopy.preparing}
@@ -199,6 +218,7 @@ function SheetBody({
 // The sheet itself. Its body is only made while it is open, so the link is asked for when the person asks to share and not before.
 export function ShareSheet({
   onClose,
+  onShare,
   open,
   ...body
 }: {
@@ -208,6 +228,8 @@ export function ShareSheet({
   readonly kicker: string;
   readonly makeLink: () => Promise<string | null>;
   readonly onClose: () => void;
+  // Told where the person chose to send it: a platform's id, or `native` (the phone's own sheet) or `copy` (the link).
+  readonly onShare?: ((destination: string) => void) | undefined;
   readonly open: boolean;
   readonly text: string;
 }) {
@@ -218,7 +240,7 @@ export function ShareSheet({
       sheet
       title={shareControlCopy.sheetTitle}
     >
-      {open ? <SheetBody {...body} /> : null}
+      {open ? <SheetBody {...body} onShare={onShare} /> : null}
     </ArcadeDialog>
   );
 }

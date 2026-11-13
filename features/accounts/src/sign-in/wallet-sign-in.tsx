@@ -13,7 +13,11 @@ import type { SignInViewProps } from "./views.ts";
 
 // Signing in with a Bitcoin wallet: connect one, then sign a challenge. "Signed in" is shown only after the server has said so, and
 // the page moves on once, whether the person signed in just now or already was.
-export function WalletSignIn({ expectedNetwork, onSignedIn }: SignInViewProps) {
+export function WalletSignIn({
+  expectedNetwork,
+  onSignedIn,
+  track,
+}: SignInViewProps) {
   const wallet = useWalletConnection();
   const chooser = useWalletChooser();
   const { actions, busy, failure, view } = useWalletSession(wallet);
@@ -27,6 +31,12 @@ export function WalletSignIn({ expectedNetwork, onSignedIn }: SignInViewProps) {
     moved.current = true;
     onSignedIn();
   }, [onSignedIn, signedIn]);
+  // A failure is counted once, when it appears (the tracker is a new object on every render of the page, so it is not what is watched).
+  const reported = useRef<string | null>(null);
+  useEffect(() => {
+    if (failure !== null && reported.current !== failure) track.failed(failure);
+    reported.current = failure;
+  }, [failure, track]);
   const working = busy !== null;
   return (
     <div className="sign-in-method">
@@ -47,7 +57,10 @@ export function WalletSignIn({ expectedNetwork, onSignedIn }: SignInViewProps) {
           )}
           <button
             disabled={working}
-            onClick={() => void actions.signIn()}
+            onClick={() => {
+              track.started();
+              void actions.signIn();
+            }}
             type="button"
           >
             {busy === "sign-in"

@@ -121,4 +121,30 @@ describe("the proxy", () => {
       expect(() => proxy(report())).toThrow(/Unknown provider/u);
     });
   });
+
+  describe("a page's analytics events", () => {
+    const event = () =>
+      new NextRequest("https://platform.example.com/telemetry/events/e/?ip=0", {
+        headers: { cookie: "frostbite_session=SECRET" },
+        method: "POST",
+      });
+
+    it("are sent on to the analytics provider's address, whatever the error reporting is set to", () => {
+      vi.stubEnv("NEXT_PUBLIC_ANALYTICS_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ANALYTICS_TOKEN", "phc_events");
+      vi.stubEnv("ANALYTICS_INGEST_ORIGIN", "https://events.example.com");
+      const response = proxy(event());
+      expect(response.headers.get("x-middleware-rewrite")).toBe(
+        "https://events.example.com/e/?ip=0",
+      );
+      expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
+    });
+
+    it("are answered with nothing when analytics has no provider, even if errors do", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_TOKEN", "phc_test");
+      vi.stubEnv("ERROR_REPORTING_INGEST_ORIGIN", "https://eu.i.example.com");
+      expect(proxy(event()).status).toBe(204);
+    });
+  });
 });

@@ -48,6 +48,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 # here: the same source builds to different bytes in a different environment.)
 RUN pnpm --filter @repo/repository-policy check:templates
 RUN pnpm scenes:render
+# The page is built with the settings of its two reports, because the browser has no environment to read them from: which provider each uses
+# and its public project key (a key that only lets a page send in; it reads nothing, so it is not a secret and may sit in the image's
+# history). Without them both reports are off. The test builds' robot setting is deliberately not here: no image people use may set it.
+ARG NEXT_PUBLIC_ANALYTICS_PROVIDER
+ARG NEXT_PUBLIC_ANALYTICS_TOKEN
+ARG NEXT_PUBLIC_ERROR_REPORTING_PROVIDER
+ARG NEXT_PUBLIC_ERROR_REPORTING_TOKEN
 # The build makes the games (prebuild) and then the standalone server. It reads no secrets: configuration is validated when the server starts.
 RUN pnpm --filter web build
 # Tag every file the browser downloads with an id, so an error report can be turned back into our own source. This works offline and needs no

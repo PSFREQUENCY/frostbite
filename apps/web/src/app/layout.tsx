@@ -14,6 +14,7 @@ import { getPageAccessDependencies } from "../server/auth/runtime";
 import { readSessionState } from "../server/auth/session-state";
 import { siteMetadata } from "../server/metadata/next-metadata";
 import { readSiteIdentity } from "../server/metadata/site";
+import { AnalyticsBoundary } from "../telemetry/analytics-boundary";
 import { ClientNavigation } from "./client-navigation";
 import { sceneVideoBase } from "./scene-videos";
 import { WalletShell } from "./wallet-shell";
@@ -63,28 +64,30 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body>
-        <ClientNavigation />
-        <ScenesProvider videoBase={sceneVideoBase}>
-          <ShellStatusProvider
-            status={
-              <IndexingBadge
-                polling={chainStatusConfig.polling}
-                syncWindowBlocks={chainStatusConfig.syncWindowBlocks}
-              />
-            }
-          >
-            <WalletShell
-              balanceRefreshMs={walletAuthConfig.balanceRefreshMs}
-              candidates={walletAuthConfig.candidates}
-              network={walletAuthConfig.network}
-              reconnectWaitMs={walletAuthConfig.reconnectWaitMs}
-              session={session}
+        <AnalyticsBoundary>
+          <ClientNavigation />
+          <ScenesProvider videoBase={sceneVideoBase}>
+            <ShellStatusProvider
+              status={
+                <IndexingBadge
+                  polling={chainStatusConfig.polling}
+                  syncWindowBlocks={chainStatusConfig.syncWindowBlocks}
+                />
+              }
             >
-              {children}
-            </WalletShell>
-          </ShellStatusProvider>
-          <AnimationToggle />
-        </ScenesProvider>
+              <WalletShell
+                balanceRefreshMs={walletAuthConfig.balanceRefreshMs}
+                candidates={walletAuthConfig.candidates}
+                network={walletAuthConfig.network}
+                reconnectWaitMs={walletAuthConfig.reconnectWaitMs}
+                session={session}
+              >
+                {children}
+              </WalletShell>
+            </ShellStatusProvider>
+            <AnimationToggle />
+          </ScenesProvider>
+        </AnalyticsBoundary>
       </body>
     </html>
   );

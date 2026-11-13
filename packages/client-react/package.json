@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage"
   },
   "dependencies": {
+    "@frostbite/telemetry": "workspace:*",
     "react": "19.2.8"
   },
   "devDependencies": {

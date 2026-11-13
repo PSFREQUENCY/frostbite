@@ -1,10 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import {
-  startErrorReportingStub,
-  type ErrorReportingStub,
+  errorReportingStubPort,
+  startIngestStub,
+  type IngestStub,
   type ReceivedReport,
-} from "../src/error-reporting-stub.ts";
+} from "../src/ingest-stub.ts";
 
 // A page that throws reports it to the platform's own address, which forwards the report to the error provider (a stand-in here). The build
 // for these tests is made with the posthog provider (see the e2e job's build step), and the web server forwards to the stand-in.
@@ -12,13 +13,14 @@ import {
 const notThisProject = () => test.info().project.name !== "desktop";
 test.describe.configure({ mode: "serial" });
 
-let started: ErrorReportingStub | undefined;
-function stub(): ErrorReportingStub {
+let started: IngestStub | undefined;
+function stub(): IngestStub {
   if (started === undefined) throw new Error("The stand-in is not running.");
   return started;
 }
 test.beforeAll(async () => {
-  if (!notThisProject()) started = await startErrorReportingStub();
+  if (!notThisProject())
+    started = await startIngestStub(errorReportingStubPort);
 });
 test.afterAll(async () => {
   await started?.close();

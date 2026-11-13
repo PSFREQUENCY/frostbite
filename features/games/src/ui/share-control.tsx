@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalytics } from "@frostbite/client-react";
 import type { ShareConfig } from "@frostbite/share";
 import { ShareButton } from "@frostbite/share/react";
 import type { CreateShareInput } from "@frostbite/shared/games";
@@ -34,6 +35,7 @@ export function ShareControl({
   readonly variant?: "button" | "chip" | "icon";
 }) {
   const shares = useMemo(() => api ?? createSharesApi(), [api]);
+  const analytics = useAnalytics();
   // The control asks for its link when it opens, and again if this function changes, so `request` must be the same object for the same
   // thing (a constant, or made with `useMemo`).
   const makeLink = useCallback(async () => {
@@ -48,6 +50,7 @@ export function ShareControl({
       heading={heading}
       kicker={kicker}
       makeLink={makeLink}
+      onShare={(platform) => analytics.capture("share_clicked", { platform })}
       text={text}
       {...(variant === undefined ? {} : { variant })}
     />

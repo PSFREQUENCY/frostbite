@@ -126,6 +126,9 @@ importers:
       '@frostbite/chain':
         specifier: workspace:*
         version: link:../../packages/chain
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -359,6 +362,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -374,6 +380,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@frostbite/wallet':
         specifier: workspace:*
         version: link:../../packages/wallet
@@ -833,6 +842,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -872,6 +884,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@frostbite/wallet':
         specifier: workspace:*
         version: link:../../packages/wallet
@@ -988,6 +1003,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -1015,6 +1033,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1891,6 +1912,9 @@ importers:
 
   packages/client-react:
     dependencies:
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       react:
         specifier: 19.2.8
         version: 19.2.8

@@ -11,6 +11,7 @@ import {
   vi,
 } from "vitest";
 
+import { AnalyticsProvider } from "@frostbite/client-react";
 import { SignInSurface } from "../src/sign-in/sign-in-surface.tsx";
 import type { SignInView } from "../src/sign-in/views.ts";
 
@@ -20,10 +21,18 @@ const navigate = vi.fn();
 
 // A view that signs in when its button is pressed, as the real ones do once the server has said so.
 const view = (kind: string, label: string): SignInView => ({
-  Component: ({ expectedNetwork, onSignedIn }) => (
-    <button data-network={expectedNetwork} onClick={onSignedIn} type="button">
-      {`Sign in via ${kind}`}
-    </button>
+  Component: ({ expectedNetwork, onSignedIn, track }) => (
+    <>
+      <button data-network={expectedNetwork} onClick={onSignedIn} type="button">
+        {`Sign in via ${kind}`}
+      </button>
+      <button onClick={track.started} type="button">
+        {`Begin ${kind}`}
+      </button>
+      <button onClick={() => track.failed("code-wrong")} type="button">
+        {`Fail ${kind}`}
+      </button>
+    </>
   ),
   glyph: "*",
   kind,
@@ -36,15 +45,20 @@ const views = [
   view("email", "Email"),
 ];
 
+const capture = vi.fn();
+const analytics = { capture, shutdown: () => Promise.resolve() };
+
 const show = (offered: readonly string[]) =>
   act(async () => {
     root.render(
-      <SignInSurface
-        expectedNetwork="signet"
-        navigate={navigate}
-        offered={offered}
-        views={views}
-      />,
+      <AnalyticsProvider analytics={analytics}>
+        <SignInSurface
+          expectedNetwork="signet"
+          navigate={navigate}
+          offered={offered}
+          views={views}
+        />
+      </AnalyticsProvider>,
     );
   });
 
@@ -56,6 +70,7 @@ beforeEach(() => {
   document.body.append(container);
   root = createRoot(container);
   navigate.mockClear();
+  capture.mockClear();
   window.history.replaceState(null, "", "/sign-in");
 });
 afterEach(() => {
@@ -197,5 +212,29 @@ describe("the sign-in page's methods", () => {
       await press("Sign in via wallet");
       expect(navigate).toHaveBeenCalledExactlyOnceWith("/");
     }
+  });
+});
+
+describe("what the sign-in page counts", () => {
+  it("counts a sign-in as begun by a method, as failed with its reason code, and as succeeded only when begun", async () => {
+    await show(["wallet", "passkey"]);
+    await press("Begin wallet");
+    await press("Fail wallet");
+    await press("Sign in via wallet");
+    expect(capture.mock.calls).toEqual([
+      ["sign_in_started", { method: "wallet" }],
+      ["sign_in_failed", { method: "wallet", reason: "code-wrong" }],
+      ["sign_in_succeeded", { method: "wallet" }],
+    ]);
+  });
+
+  it("does not count a success for a method the person never began, such as one that found them already signed in", async () => {
+    await show(["wallet", "passkey"]);
+    await press("Begin passkey");
+    await press("Sign in via wallet");
+    expect(capture.mock.calls.map(([name]) => name)).toEqual([
+      "sign_in_started",
+    ]);
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
 });

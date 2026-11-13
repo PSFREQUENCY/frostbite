@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@frostbite/client-http": "workspace:*",
+    "@frostbite/client-react": "workspace:*",
     "@frostbite/database": "workspace:*",
     "@frostbite/feature-games": "workspace:*",
     "@frostbite/game-runs": "workspace:*",
@@ -31,6 +32,7 @@
     "@frostbite/scenes": "workspace:*",
     "@frostbite/share": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@repo/ui": "workspace:*",
     "drizzle-orm": "1.0.0-rc.4",
     "react": "19.2.8"

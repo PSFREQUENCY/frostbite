@@ -34,14 +34,14 @@ function parseService(
   const allowAutomation =
     keys.allowAutomation !== undefined &&
     blankAsUnset(source[keys.allowAutomation]) === "true";
-  // Robots are kept out of reports so that a crawler's errors are not mistaken for a person's. Letting them in is for the browsers that run our
+  // Robots are kept out of reports and counts so that a crawler is not mistaken for a person. Letting them in is for the browsers that run our
   // tests, and wherever real people sign in it would only let a script flood the provider.
   if (
     allowAutomation &&
     (source.APP_ENV === "preview" || source.APP_ENV === "production")
   )
     throw new Error(
-      `${keys.allowAutomation ?? ""}=true lets robots send reports; it is not allowed when APP_ENV is ${source.APP_ENV}.`,
+      `${keys.allowAutomation ?? ""}=true lets robots report; it is not allowed when APP_ENV is ${source.APP_ENV}.`,
     );
   const checked = schema.safeParse({
     ...(allowAutomation ? { allowAutomation } : {}),
@@ -69,6 +69,7 @@ export function parseTelemetryEnvironment(
     analytics: parseService(
       source,
       {
+        allowAutomation: "NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION",
         ingestOrigin: "ANALYTICS_INGEST_ORIGIN",
         provider: "NEXT_PUBLIC_ANALYTICS_PROVIDER",
         token: "NEXT_PUBLIC_ANALYTICS_TOKEN",

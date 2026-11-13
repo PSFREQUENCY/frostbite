@@ -4,7 +4,7 @@ import { PostHog as PostHogClient } from "posthog-node";
 import type { ServiceSettings } from "../../settings.ts";
 import type { ErrorProvider } from "../port.ts";
 import { errorOf, propertiesOf } from "./posthog-report.ts";
-import { scrubPostHogRecord } from "./posthog-scrub.ts";
+import { scrubPostHogRecord } from "../../providers-shared/posthog-scrub.ts";
 
 // Every server report is from one anonymous source: nobody is identified, and no person is made of it.
 export const serverDistinctId = "platform-server";

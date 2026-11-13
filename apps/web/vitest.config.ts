@@ -17,7 +17,7 @@ export default packageVitestConfig({
       "src/server/http/next-operation.ts",
       "src/server/http/report-internal-error.ts",
       "src/server/telemetry/*.ts",
-      "src/telemetry/*.ts",
+      "src/telemetry/*.ts*",
       "src/app/error.tsx",
       "src/server/auth/page-access.ts",
       "src/server/auth/runtime.ts",

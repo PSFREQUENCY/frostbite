@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalytics } from "@frostbite/client-react";
 import {
   classifyWalletConnectionError,
   walletNetworkUnavailableReason,
@@ -25,6 +26,7 @@ export function WalletChoices({
     readonly failure: WalletConnectionFailure;
   } | null>(null);
   const [pending, setPending] = useState<WalletCandidate | null>(null);
+  const analytics = useAnalytics();
   const unavailable = (candidate: WalletCandidate) =>
     walletNetworkUnavailableReason(candidate.id, wallet.network);
   return (
@@ -51,13 +53,25 @@ export function WalletChoices({
                 onClick={() => {
                   setError(null);
                   setPending(candidate);
+                  analytics.capture("wallet_connect_started", {
+                    wallet: candidate.id,
+                  });
                   void wallet
                     .connect(candidate.id)
-                    .catch((failure) =>
-                      setError({
-                        candidate,
-                        failure: classifyWalletConnectionError(failure),
-                      }),
+                    .then(
+                      () =>
+                        analytics.capture("wallet_connect_succeeded", {
+                          wallet: candidate.id,
+                        }),
+                      (failure) => {
+                        const classified =
+                          classifyWalletConnectionError(failure);
+                        analytics.capture("wallet_connect_failed", {
+                          reason: classified.kind,
+                          wallet: candidate.id,
+                        });
+                        setError({ candidate, failure: classified });
+                      },
                     )
                     .finally(() => setPending(null));
                 }}

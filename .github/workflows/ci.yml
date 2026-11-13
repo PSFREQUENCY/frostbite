@@ -238,11 +238,14 @@ jobs:
       - name: Set up Node and dependencies
         uses: ./.github/actions/setup-node
 
-      # The page's error-reporting settings are put into the browser code when it is built, so the build for these tests names the posthog
-      # provider (and lets the test browsers, which announce themselves as robots, report); the server forwards the reports to a stand-in
-      # (see tests/e2e/tests/error-reporting.spec.ts). Nothing is sent anywhere else.
+      # The page's error-reporting and analytics settings are put into the browser code when it is built, so the build for these tests names the
+      # posthog provider for both (and lets the test browsers, which announce themselves as robots, report); the server forwards the reports and
+      # events to stand-ins (see tests/e2e/tests/error-reporting.spec.ts and analytics.spec.ts). Nothing is sent anywhere else.
       - name: Build production artifacts
         run: >-
+          NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
+          NEXT_PUBLIC_ANALYTICS_TOKEN=phc_e2e_stand_in_events
+          NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION=true
           NEXT_PUBLIC_ERROR_REPORTING_PROVIDER=posthog
           NEXT_PUBLIC_ERROR_REPORTING_TOKEN=phc_e2e_stand_in
           NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION=true

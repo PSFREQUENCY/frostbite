@@ -18,6 +18,7 @@ import {
   ArcadeStage,
   type DockSection,
 } from "@repo/ui/arcade";
+import { useAnalytics } from "@frostbite/client-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import type { ClaimsApi } from "../client/claims-api.ts";
@@ -38,7 +39,7 @@ import { touchScreenQuery, useMediaQuery } from "./use-media-query.ts";
 import { useTheatre } from "./use-theatre.ts";
 import { usePhoneLandscape } from "./use-phone-landscape.ts";
 import { useGameSession } from "./use-game-session.ts";
-import { WalletCard } from "./wallet-card.tsx";
+import { walletDockSection } from "./wallet-section.tsx";
 
 // What the frame may do. Scripts only: no same-origin access, so the game has no storage, cookies or session
 // of the platform, no forms, no popups, no top navigation. The response headers for the game's files repeat
@@ -123,6 +124,11 @@ export function GamePlayer({
   };
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const analytics = useAnalytics();
+  // A game's page was opened: counted once for each game the page shows.
+  useEffect(() => {
+    analytics.capture("game_opened", { game: game.id });
+  }, [analytics, game.id]);
   const {
     claimsFor: claimsOf,
     bindTelling,
@@ -177,22 +183,7 @@ export function GamePlayer({
     ...(claims === undefined
       ? []
       : [claimsDockSection(claimUi.claims, claimUi.reopen, titles)]),
-    ...(wallet === undefined
-      ? []
-      : [
-          {
-            badge: wallet.current === null ? null : "Connected",
-            content: (
-              <WalletCard
-                connect={wallet.connect}
-                current={wallet.current}
-                expectedNetwork={wallet.expectedNetwork}
-              />
-            ),
-            id: "wallet",
-            label: "Wallet",
-          },
-        ]),
+    ...(wallet === undefined ? [] : [walletDockSection(wallet)]),
     ...sections,
   ];
   return (

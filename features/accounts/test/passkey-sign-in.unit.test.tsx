@@ -29,6 +29,7 @@ import { signInViews } from "../src/sign-in/registry.ts";
 let container: HTMLElement;
 let root: Root;
 const onSignedIn = vi.fn();
+const track = { failed: vi.fn(), started: vi.fn() };
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -40,7 +41,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   act(() => {
     root.render(
-      <PasskeySignIn expectedNetwork="signet" onSignedIn={onSignedIn} />,
+      <PasskeySignIn
+        expectedNetwork="signet"
+        onSignedIn={onSignedIn}
+        track={track}
+      />,
     );
   });
 });
@@ -106,8 +111,18 @@ describe("the passkey sign-in view", () => {
       expect(container.querySelector('[role="status"]')).toBeNull();
       expect(onSignedIn).not.toHaveBeenCalled();
       expect(button()?.disabled).toBe(false);
+      // The attempt is counted when it begins, and its failure by the code of the outcome, never by the words.
+      expect(track.started).toHaveBeenCalledTimes(1);
+      expect(track.failed).toHaveBeenCalledExactlyOnceWith(outcome);
     },
   );
+
+  it("counts an attempt that works as started, and not as a failure", async () => {
+    answering({ kind: "signed-in" });
+    await press();
+    expect(track.started).toHaveBeenCalledTimes(1);
+    expect(track.failed).not.toHaveBeenCalled();
+  });
 
   it("is disabled and says it is waiting while the passkey is being asked for", async () => {
     let finish: (value: PasskeySignInResult) => void = () => {};

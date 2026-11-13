@@ -1,4 +1,5 @@
 import { ApiError } from "@frostbite/client-http";
+import { useAnalytics } from "@frostbite/client-react";
 import type { WalletInfo } from "@frostbite/game-sdk/protocol";
 import type { FeeSpeed } from "@frostbite/shared/chain";
 import type {
@@ -17,6 +18,11 @@ import {
   isSettledClaim,
   unreachableCopy,
 } from "../domain/claim-copy.ts";
+import {
+  countClaimChanged,
+  countClaimRefused,
+  countClaimStarted,
+} from "./game-analytics.ts";
 
 // What the wallet is asked to sign, and what it gives back (the same transaction, signed). The platform page's wallet
 // provides it; where the wallet cannot sign claims, there is none, and the page says so.
@@ -43,6 +49,7 @@ export function useClaims(options: {
   readonly wallet: WalletInfo | null;
 }) {
   const { api, enabled, gameId, onChange, sign, wallet } = options;
+  const analytics = useAnalytics();
   const [feeSpeed, setFeeSpeed] = useState<FeeSpeed | null>(
     options.feeSpeed ?? null,
   );
@@ -57,17 +64,22 @@ export function useClaims(options: {
     changed.current = onChange;
   }, [onChange]);
 
-  const upsert = useCallback((claim: GameClaim, announce: boolean) => {
-    const before = known.current.get(claim.id);
-    known.current.set(claim.id, claim.state);
-    setClaims((held) =>
-      held.some(({ id }) => id === claim.id)
-        ? held.map((entry) => (entry.id === claim.id ? claim : entry))
-        : [...held, claim],
-    );
-    if (announce && before !== claim.state)
-      changed.current?.(claim.milestoneId, claim.state);
-  }, []);
+  const upsert = useCallback(
+    (claim: GameClaim, announce: boolean) => {
+      const before = known.current.get(claim.id);
+      known.current.set(claim.id, claim.state);
+      setClaims((held) =>
+        held.some(({ id }) => id === claim.id)
+          ? held.map((entry) => (entry.id === claim.id ? claim : entry))
+          : [...held, claim],
+      );
+      if (announce && before !== claim.state) {
+        changed.current?.(claim.milestoneId, claim.state);
+        countClaimChanged(analytics, gameId, before, claim.state);
+      }
+    },
+    [analytics, gameId],
+  );
 
   // The claims already on the account, shown without telling the game anything about them.
   useEffect(() => {
@@ -108,10 +120,11 @@ export function useClaims(options: {
   const begin = useCallback(
     (claim: GameClaim) => {
       upsert(claim, true);
+      countClaimStarted(analytics, gameId);
       setActiveId(claim.id);
       setMessage(null);
     },
-    [upsert],
+    [analytics, gameId, upsert],
   );
 
   const start = useCallback(
@@ -126,7 +139,10 @@ export function useClaims(options: {
           wallet: wallet.address,
         });
         if (answer.status === "started") begin(answer.claim);
-        else setMessage(claimUnavailableCopy[answer.reason]);
+        else {
+          countClaimRefused(analytics, gameId, answer.reason);
+          setMessage(claimUnavailableCopy[answer.reason]);
+        }
       } catch (error) {
         setMessage(
           error instanceof ApiError && error.code === "unauthorized"
@@ -135,7 +151,7 @@ export function useClaims(options: {
         );
       }
     },
-    [api, begin, feeSpeed, gameId, wallet],
+    [analytics, api, begin, feeSpeed, gameId, wallet],
   );
 
   const active = claims.find(({ id }) => id === activeId) ?? null;
@@ -183,9 +199,11 @@ export function useClaims(options: {
     message,
     // Tells the player why a claim a game asked for could not start, in the page's own words (the game is given only a coarse reason).
     refuse: useCallback(
-      (reason: GameClaimUnavailableReason) =>
-        setMessage(claimUnavailableCopy[reason]),
-      [],
+      (reason: GameClaimUnavailableReason) => {
+        countClaimRefused(analytics, gameId, reason);
+        setMessage(claimUnavailableCopy[reason]);
+      },
+      [analytics, gameId],
     ),
     reopen: useCallback((claimId: string) => setActiveId(claimId), []),
     sign: signActive,
