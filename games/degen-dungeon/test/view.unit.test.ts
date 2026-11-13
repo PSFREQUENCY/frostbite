@@ -22,9 +22,9 @@ describe("the city", () => {
     const city = buildCity();
     const towers = city.root.getObjectByName("towers");
     const marks = city.root.getObjectByName("spots");
-    expect(towers instanceof InstancedMesh && towers.count).toBeGreaterThan(
-      100,
-    );
+    expect(towers?.children.length).toBeGreaterThan(18);
+    expect(towers?.getObjectByName("shopfronts")).toBeDefined();
+    city.night(1);
     expect(marks instanceof InstancedMesh && marks.count).toBe(spots.length);
     expect(city.root.getObjectByName("moon-tower")?.position.toArray()).toEqual(
       [210, 75, 150],
@@ -83,8 +83,24 @@ describe("the city", () => {
 describe("the camera", () => {
   const subject = { heading: 0, x: 10, y: 0, z: 20 };
 
-  it("follows from the south, and looks back at a face or down at hands from in front", () => {
-    expect(poseFor("follow", subject).from).toEqual([10, 6.5, 29]);
+  it("rides low behind the hero's shoulder, and looks back at a face or down at hands from in front", () => {
+    const [x, y, z] = poseFor("follow", subject).from;
+    expect([x > 10, y < 4, z > 24]).toEqual([true, true, true]);
+    const tight = poseFor("follow", subject, -Math.PI / 2, {
+      indoors: true,
+      low: false,
+      open: 0,
+      speed: 0,
+    });
+    expect(tight.from[2]).toBeLessThan(z);
+    expect(
+      poseFor("follow", subject, 0, {
+        indoors: false,
+        low: true,
+        open: 1,
+        speed: 1,
+      }).from[0],
+    ).toBeLessThan(10);
     expect(poseFor("talk", subject).from[0]).toBeGreaterThan(10);
     expect(poseFor("hands", subject).fov).toBeLessThan(
       poseFor("talk", subject).fov,
@@ -108,6 +124,14 @@ describe("the camera", () => {
     expect(rig.pose()).toEqual(poseFor("follow", on));
     rig.aim("ride", on, 0.016);
     expect(rig.pose()).not.toEqual(poseFor("ride", on));
+    // Walking east swings it round behind the hero; walking at it leaves it be.
+    rig.aim("follow", { ...on, heading: 0 }, 2, true);
+    expect(rig.yaw()).toBeGreaterThan(-0.5);
+    const back = createRig();
+    back.aim("follow", { ...on, heading: Math.PI / 2 }, 2, true);
+    expect(back.yaw()).toBeCloseTo(-Math.PI / 2);
+    expect(createRig(() => true).openness(0, 0)).toBe(0);
+    expect(createRig().openness(0, 0)).toBe(1);
     const camera = new PerspectiveCamera();
     rig.cut({ fov: 33, from: [1, 2, 3], look: [0, 0, 0] });
     rig.apply(camera);
@@ -159,7 +183,7 @@ describe("the scene", () => {
       part("tux")?.position.x,
       part("car")?.visible,
     ]).toEqual([true, 150, false]);
-    expect(stage.camera.fov).toBe(50);
+    expect(stage.camera.fov).toBe(52);
     view.day(
       { ...day, crew: [], level: 2, ride: "heli", tux: null },
       1,
@@ -174,7 +198,7 @@ describe("the scene", () => {
     view.day({ ...day, talk: "offer-kiki" }, 1, 0.016, false);
     expect(stage.camera.fov).toBe(30);
     view.day({ ...day, dir: -1 }, 1, 0.016, true);
-    expect(stage.camera.fov).toBe(26);
+    expect(stage.camera.fov).toBe(24);
     view.day({ ...day, ride: "car" }, 1, 0.016, false);
     expect([part("car")?.visible, part("crowd")?.visible]).toEqual([
       true,

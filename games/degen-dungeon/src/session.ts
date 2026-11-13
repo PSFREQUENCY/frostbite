@@ -11,12 +11,13 @@ import type { DayState } from "./rules/types.ts";
 export type Outcome =
   { readonly ok: true } | { readonly ok: false; readonly reason: string };
 
-// What a player can choose: the one act button, frost vision, a helicopter's climb or drop, a heading to hold, and an answer (0 yes and 1
-// no to an offer, or one of a talk's answers).
+// What a player can choose: the one act button, frost vision, a helicopter's climb or drop, a heading to hold, a way to move on foot (0
+// walk, 1 run, 2 crouch, 3 crawl), and an answer (0 yes and 1 no to an offer, or one of a talk's answers).
 export type Choice =
   | { readonly by: number; readonly type: "lift" }
   | { readonly choice: number; readonly type: "pick" }
   | { readonly dir: number; readonly type: "move" }
+  | { readonly mode: number; readonly type: "gait" }
   | { readonly type: "act" | "look" };
 
 // One day as the player plays it. The page calls `tick` on its timer and `send` when the player chooses; the rules decide what is legal,
@@ -38,6 +39,8 @@ export interface RunSession {
 export interface RunSessionOptions {
   readonly day: number;
   readonly hero: number;
+  // Last night's lantern wish (1 to 4) on a story day; 0 or left out for none.
+  readonly boon?: number;
   // The timeline a story day carries from trips back (-9 to 9), and 1 or more on a trip back itself; 0 or left out otherwise.
   readonly fate?: number;
   readonly loop?: number;
@@ -52,8 +55,16 @@ export function createRunSession(options: RunSessionOptions): RunSession {
   const story = { day: options.day, hero: options.hero };
   const loop = options.loop ?? 0;
   const fate = options.fate ?? 0;
+  const boon = options.boon ?? 0;
+  // Only the settings that change the day are written, so a plain day's record stays as small as it was.
   const config =
-    loop > 0 ? { ...story, loop } : fate !== 0 ? { ...story, fate } : story;
+    loop > 0
+      ? { ...story, loop }
+      : {
+          ...story,
+          ...(fate === 0 ? {} : { fate }),
+          ...(boon === 0 ? {} : { boon }),
+        };
   const init = degenRules.init(options.seed, config);
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;

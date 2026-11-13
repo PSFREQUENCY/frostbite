@@ -1,4 +1,5 @@
 import { heatPerStar } from "./constants.ts";
+import { counter, counters, games, lunar, play } from "./counters.ts";
 import { cooled, rankOf } from "./heat.ts";
 import { buy, sell } from "./market.ts";
 import type { Draft } from "./types.ts";
@@ -38,6 +39,31 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
     { does: "paper-4" },
   ],
   realtor: stay("realtor", "home-studio", "home-rowhouse", "home-yard"),
+  lantern: [
+    { does: "wish-1" },
+    { does: "wish-2" },
+    { does: "wish-3" },
+    { does: "wish-4" },
+    leave,
+  ],
+  ...Object.fromEntries(
+    Object.keys(counters).map((kind) => [
+      `shop-${kind}`,
+      kind === "arcade"
+        ? [
+            ...Object.keys(games).map((game) => ({
+              does: `play-${game}`,
+              to: "shop-arcade",
+            })),
+            leave,
+          ]
+        : [{ does: `buy-${kind}`, to: `shop-${kind}` }, leave],
+    ]),
+  ),
+  colony: [{ does: "colony" }, leave],
+  crater: [{ does: "rock" }, leave],
+  "moon-pad": [{ does: "land" }, leave],
+  shuttle: [{ does: "fly" }, leave],
   speech: [{ to: "speech-2" }],
   "speech-2": [{ to: "speech-3" }],
   "speech-3": [{ does: "heard" }],
@@ -128,6 +154,16 @@ function deed(day: Draft, name: string): string | null {
   }
   if (name in prices)
     return locked(day) ? "your wallet is locked" : shop(day, name);
+  if (name.startsWith("buy-")) return counter(day, name.slice(4));
+  if (name.startsWith("play-")) return play(day, name.slice(5));
+  if (name === "fly" || name === "land" || name === "rock" || name === "colony")
+    return lunar(day, name);
+  if (name.startsWith("wish-")) {
+    if (day.done.includes("lantern")) return "your lantern is already up";
+    day.wish = Number(name.slice(5));
+    day.done = [...day.done, "lantern"];
+    return null;
+  }
   switch (name) {
     case "all-in":
     case "buy":

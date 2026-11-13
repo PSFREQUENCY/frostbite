@@ -1,5 +1,7 @@
-import { reach } from "./constants.ts";
+import { moonPad, reach, shuttleBooth } from "./constants.ts";
 import { heroes } from "./heroes.ts";
+import { parkedRides } from "./parked.ts";
+import { rooms } from "./rooms.ts";
 import { sites } from "./sites.ts";
 import { bit, days, type Spot } from "./spot.ts";
 import type { DayState, Point } from "./types.ts";
@@ -92,14 +94,67 @@ const letters: Spot[] = avenue.map(([x, z, day], index) => ({
   z,
 }));
 
-export const spots: readonly Spot[] = [
+// The shops' counters, and the lantern ground in the Old Floe park (open every day, used after dark).
+const counters: Spot[] = rooms.map((room) => ({
+  ...room.counter,
+  id: room.id,
+  kind: "talk",
+  label: room.label,
+  node: `shop-${room.kind}`,
+}));
+const lanterns: Spot = {
+  id: "lanterns",
+  kind: "talk",
+  label: "The lantern ground",
+  node: "lantern",
+  x: 30_000,
+  z: 6_000,
+};
+// The shuttle booth under Moon Tower, and on the moon the pad home, the colony's airlock and a crater rim to take a rock from.
+const moonward: readonly Spot[] = [
+  {
+    id: "shuttle",
+    kind: "talk",
+    label: "Shuttle to the colony",
+    node: "shuttle",
+    ...shuttleBooth,
+  },
+  {
+    id: "moon-pad",
+    kind: "talk",
+    label: "Shuttle home",
+    node: "moon-pad",
+    ...moonPad,
+  },
+  {
+    id: "colony",
+    kind: "talk",
+    label: "The colony airlock",
+    node: "colony",
+    x: 103_000,
+    z: 4_000,
+  },
+  {
+    id: "crater",
+    kind: "talk",
+    label: "Crater rim",
+    node: "crater",
+    x: 109_500,
+    z: 3_000,
+  },
+];
+const fixed: readonly Spot[] = [
   ...homes,
   ...heroWords,
   ...recruits,
   ...stops,
   ...letters,
   ...sites,
+  ...counters,
+  lanterns,
+  ...moonward,
 ];
+export const spots: readonly Spot[] = [...fixed, ...parkedRides(fixed)];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);
 

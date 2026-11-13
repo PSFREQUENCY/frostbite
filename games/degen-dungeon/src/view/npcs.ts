@@ -1,5 +1,6 @@
 import { Group, type Scene } from "three";
 
+import { roomAt } from "../rules/rooms.ts";
 import { openTo, spots } from "../rules/places.ts";
 import type { DayState } from "../rules/types.ts";
 import { buildActor, type Actor } from "./actor.ts";
@@ -47,8 +48,11 @@ export function createPeople(scene: Scene, cast: readonly Actor[]) {
     },
     show(state: DayState, at: Subject, seconds: number, dt: number): void {
       people.forEach((spot, index) => {
-        const x = metres(spot.x) + 1.4;
-        const z = metres(spot.z) - 1.4;
+        // A shop's clerk stands behind the counter, toward the back wall; anyone else beside their spot.
+        const shop = roomAt(spot.x, spot.z);
+        const back = shop === null ? 0 : shop.north ? 1.9 : -1.9;
+        const x = metres(spot.x) + (shop === null ? 1.4 : 0);
+        const z = metres(spot.z) + (shop === null ? -1.4 : back);
         const near =
           Math.hypot(x - at.x, z - at.z) < sight && openTo(spot, state);
         const hero = spot.kind === "recruit" ? spot.hero : null;

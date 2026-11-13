@@ -34,6 +34,11 @@ export type Spot = Base &
       }
     | { readonly kind: "gig"; readonly pay: number; readonly to: string }
     | { readonly kind: "loot"; readonly value: number }
+    // A car, scooter or bike left on the street: a car's window has to be broken, which brings heat; scooters and bikes are for anyone.
+    | {
+        readonly kind: "parked";
+        readonly ride: "bike" | "car" | "scooter";
+      }
     | { readonly kind: "ride"; readonly rank: number; readonly ride: Ride }
     | { readonly kind: "stop"; readonly next: string }
     | { readonly kind: "talk"; readonly node: string }

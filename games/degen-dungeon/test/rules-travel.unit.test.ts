@@ -9,6 +9,7 @@ import {
   helipad,
   inSwapMeet,
   onLand,
+  onMoon,
   onWater,
 } from "../src/rules/world.ts";
 import { reach } from "../src/rules/constants.ts";
@@ -21,7 +22,9 @@ describe("the island", () => {
     for (const [x, z] of units)
       expect(Math.abs(Math.hypot(x, z) - 1_024)).toBeLessThan(2);
     for (const spot of spots.filter(({ id }) => id !== "ride-boat"))
-      expect(onLand(spot.x, spot.z), spot.id).toBe(true);
+      expect(onLand(spot.x, spot.z) || onMoon(spot.x, spot.z), spot.id).toBe(
+        true,
+      );
     expect(new Set(spots.map(({ id }) => id)).size).toBe(spots.length);
     const open = { day: 1, hero: 7, looking: false };
     expect(nearest({ ...open, x: 18_000, z: 18_000 })).toBeNull();

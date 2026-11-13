@@ -14,8 +14,10 @@ import { restartDelayMs } from "@frostbite/game-sdk/touch-start";
 
 import { effects, track } from "./audio.ts";
 import { guideFor } from "./guide.ts";
+import { createBag } from "./page/bag.ts";
 import { attachControls, type Mode } from "./page/controls.ts";
 import { element, everyFrame } from "./page/elements.ts";
+import { handsFor } from "./page/hands.ts";
 import { listEarned, noteFor } from "./page/hud.ts";
 import { createPanel } from "./page/panel.ts";
 import {
@@ -44,9 +46,9 @@ const screen = element("screen", "canvas");
 const worldCanvas = element("world", "canvas");
 const guideLayer = createGuideLayer(screen);
 const earnedList = element("earned", "ul");
-const panel = createPanel({
-  answer: (choice) => void choose({ choice, type: "pick" }),
-});
+const panel = createPanel({ answer: (choice) => hands.answer(choice) });
+const bag = createBag();
+const wishText = element("wish-text", "input");
 const startButton = element("start", "button");
 const actButton = element("act", "button");
 const pauseButton = element("pause", "button");
@@ -86,6 +88,7 @@ const locked = (): boolean => (heroes[hero]?.hidden ?? true) && !progress.slip;
 function show(dt = 0): void {
   const day = session?.state() ?? null;
   panel.render(view.phase === "running" ? day : null, progress.best);
+  bag.render(view.phase === "running" ? day : null);
   if (view.phase === "running" && day !== null) {
     const caption = intro === null ? null : (world?.opening(intro) ?? null);
     if (caption === null) {
@@ -96,7 +99,7 @@ function show(dt = 0): void {
       note.textContent =
         caption ??
         (seconds < wakeUntil
-          ? wakeLine(day.hero, day.loop, day.day)
+          ? wakeLine(day.hero, day.loop, day.day, day.answered)
           : noteFor(day));
   } else world?.turntable(hero, locked(), seconds, dt);
   if (context !== null)
@@ -110,8 +113,8 @@ function show(dt = 0): void {
 
 function setRunning(running: boolean): void {
   startButton.hidden = running;
-  actButton.disabled = !running;
-  pauseButton.disabled = !running;
+  for (const button of [actButton, pauseButton, ...moveButtons])
+    button.disabled = !running;
 }
 
 pause.subscribe((paused) => {
@@ -218,7 +221,6 @@ const mode = (): Mode => {
   if (!loop.running()) return "waiting";
   return session?.state().talk == null ? "playing" : "asked";
 };
-const togglePause = (): void => void (loop.running() && pause.toggle());
 
 async function connect(): Promise<void> {
   try {
@@ -248,40 +250,44 @@ async function connect(): Promise<void> {
   show();
 }
 
-// While something waits for an answer, the act button and Space give the first answer.
-const yesOrAct = (): void =>
-  void (mode() === "asked" ? choose({ choice: 0, type: "pick" }) : start());
-attachControls(
-  screen,
-  {
-    act: () => void (loop.running() && yesOrAct()),
-    lift: (by) => void choose({ by, type: "lift" }),
-    move: (dir) => void choose({ dir, type: "move" }),
-    answer: (choice) => void choose({ choice, type: "pick" }),
-    look: () => void choose({ type: "look" }),
-    no: () => {
-      const day = session?.state();
-      const last = day === undefined ? 1 : panel.answers(day) - 1;
-      choose({ choice: last, type: "pick" });
-    },
-    pause: togglePause,
-    start,
-    // A tap that comes straight after a day ends is not a wish for another.
-    tapStart: () => {
-      if (loop.running() || performance.now() - endedAt >= restartDelayMs)
-        start();
-    },
-    turn,
+// The hands, the keys and fingers that move them, and the buttons under the screen.
+const hands = handsFor({
+  answers: (day) => panel.answers(day),
+  bag: () => bag.toggle(),
+  choose,
+  day: () => session?.state() ?? null,
+  jump: () => world?.jump(),
+  pause: () => void (loop.running() && pause.toggle()),
+  running: () => loop.running(),
+  start,
+  // A tap that comes straight after a day ends is not a wish for another.
+  tapStart: () => {
+    if (loop.running() || performance.now() - endedAt >= restartDelayMs)
+      start();
   },
-  mode,
-);
-actButton.addEventListener("click", () => void (loop.running() && yesOrAct()));
-pauseButton.addEventListener("click", togglePause);
-const tap = (id: string, choice: Choice): void =>
-  element(id, "button").addEventListener("click", () => choose(choice));
-tap("look", { type: "look" });
-tap("up", { by: 1, type: "lift" });
-tap("down", { by: -1, type: "lift" });
+  turn,
+  wish: (text) => world?.write(text),
+  wishText: () => wishText.value,
+  yaw: () => world?.yaw() ?? -Math.PI / 2,
+});
+attachControls(screen, hands, mode);
+const press = (id: string, does: () => void): HTMLButtonElement => {
+  const button = element(id, "button");
+  button.addEventListener("click", does);
+  return button;
+};
+press("act", hands.act);
+press("pause", hands.pause);
+press("look", hands.look);
+press("up", () => hands.lift(1));
+press("down", () => hands.lift(-1));
+const moveButtons = [
+  press("jump", hands.jump),
+  press("run", () => hands.gait(1)),
+  press("duck", () => hands.gait(2)),
+  press("crawl", () => hands.gait(3)),
+  press("pack", hands.bag),
+];
 startButton.addEventListener("click", () => void begin());
 setRunning(false);
 // Between days nothing ticks, so the ring turns on the browser's own frames.

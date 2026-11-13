@@ -6,19 +6,26 @@ import { degenRules } from "../../src/rules/index.ts";
 import { paceOf } from "../../src/rules/move.ts";
 import type { DayState } from "../../src/rules/types.ts";
 import { spotNamed } from "../../src/rules/places.ts";
+import { roomAt } from "../../src/rules/rooms.ts";
 import { centreOf } from "../../src/rules/world.ts";
 
 // A player for the tests: it walks the streets (every spot stands on one), uses spots by name and answers offers, by legal inputs only.
 // What it did is in `inputs`, which is a day's record.
-export function createBot(seed = 7, hero = 7, day = 1, loop = 0, fate = 0) {
-  const init = degenRules.init(
-    seed,
-    loop > 0
-      ? { day, hero, loop }
-      : fate === 0
-        ? { day, hero }
-        : { day, fate, hero },
-  );
+export function createBot(
+  seed = 7,
+  hero = 7,
+  day = 1,
+  loop = 0,
+  fate = 0,
+  boon = 0,
+) {
+  const init = degenRules.init(seed, {
+    day,
+    hero,
+    ...(loop === 0 ? {} : { loop }),
+    ...(fate === 0 ? {} : { fate }),
+    ...(boon === 0 ? {} : { boon }),
+  });
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;
   let now = 0;
@@ -63,6 +70,12 @@ export function createBot(seed = 7, hero = 7, day = 1, loop = 0, fate = 0) {
   // To the middle of the borough the bot is in, along the streets to the middle of the borough the place is in, then to the place (by
   // the avenue first when the place is on one).
   const go = (x: number, z: number): void => {
+    // Out of a shop by its doorway first.
+    const room = roomAt(here().x, here().z);
+    if (room !== null) {
+      leg("x", room.counter.x);
+      leg("z", room.north ? room.door.z0 - 200 : room.door.z1 + 200);
+    }
     const from = here();
     for (const stage of [centreNear(from.x, from.z), centreNear(x, z)]) {
       leg("x", stage.x);
@@ -76,6 +89,8 @@ export function createBot(seed = 7, hero = 7, day = 1, loop = 0, fate = 0) {
   return {
     act: (): void => send("act"),
     end: (): void => send("end"),
+    // Walks (0), runs (1), crouches (2) or crawls (3) from now on.
+    gait: (mode: number): void => send("gait", { mode }),
     go,
     here,
     // Sets off on a heading and keeps going.

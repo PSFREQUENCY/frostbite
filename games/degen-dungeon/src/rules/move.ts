@@ -1,4 +1,4 @@
-import { fogLine } from "./constants.ts";
+import { fogLine, gaitTenths } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import type { DayState, Draft, Ride } from "./types.ts";
 import {
@@ -8,6 +8,8 @@ import {
   inTunnel,
   onBeach,
   onLand,
+  onMoon,
+  onStreet,
   onWater,
 } from "./world.ts";
 
@@ -33,26 +35,36 @@ export const units = [
 
 // Centimetres a tick: on foot it is the hero's own speed, on a ride the ride's.
 const ridePace: Readonly<Record<Ride, number>> = {
+  bike: 18,
   boat: 28,
   car: 32,
   foot: 10,
   heli: 36,
   scooter: 22,
 };
-// A tuned car is quicker.
+// On foot the gait changes the pace (running, crouching, crawling); a tuned car is quicker.
 export const paceOf = (
-  state: Pick<DayState, "done" | "hero" | "ride">,
+  state: Pick<DayState, "done" | "gait" | "hero" | "ride">,
 ): number =>
-  ridePace[state.ride] +
-  (state.ride === "foot" ? (heroes[state.hero]?.speed ?? 1) : 0) +
-  (state.ride === "car" && state.done.includes("tune") ? 8 : 0);
-
-// Where a body may be: a boat on the water, a helicopter in the sky, and feet and wheels on the island (and, on foot, in the oldest tunnel
-// and on SHA Beach once the Genesis Room is open).
+  state.ride === "foot"
+    ? Math.max(
+        1,
+        Math.floor(
+          ((ridePace.foot + (heroes[state.hero]?.speed ?? 1)) *
+            (gaitTenths[state.gait] ?? 10)) /
+            10,
+        ),
+      )
+    : ridePace[state.ride] +
+      (state.ride === "car" && state.done.includes("tune") ? 8 : 0);
+// Where a body may be: the moon's ground once the shuttle sets down, a boat on the water, a helicopter in the sky, wheels on the streets,
+// and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {
+  if (onMoon(day.x, day.z)) return onMoon;
   if (day.ride === "boat") return onWater;
   if (day.ride === "heli") return inSky;
-  if (day.ride !== "foot" || day.gate === 0) return onLand;
+  if (day.ride !== "foot") return onStreet;
+  if (day.gate === 0) return onLand;
   return (x, z) => onLand(x, z) || inTunnel(x, z) || onBeach(x, z);
 }
 

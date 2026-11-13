@@ -4,10 +4,12 @@ import {
   bodyRadius,
   island,
   lots,
+  moon,
   sea,
   shore,
   tunnel,
 } from "./constants.ts";
+import { inRoom } from "./rooms.ts";
 import type { Point } from "./types.ts";
 
 // The island: nine boroughs in a grid, a street through the middle of each both ways, avenues between them, buildings in the corners,
@@ -46,13 +48,15 @@ const inLot = (value: number): boolean => {
     ([near, far]) => local > near - bodyRadius && local < far + bodyRadius,
   );
 };
-// Where feet and wheels may be: on the island and not in a building.
-export const onLand = (x: number, z: number): boolean =>
+// Where wheels may be: on the island and not in a building. Feet may also be inside one of the shops you can walk into.
+export const onStreet = (x: number, z: number): boolean =>
   x >= bodyRadius &&
   z >= bodyRadius &&
   x <= island - bodyRadius &&
   z <= island - bodyRadius &&
   !(inLot(x) && inLot(z));
+export const onLand = (x: number, z: number): boolean =>
+  onStreet(x, z) || inRoom(x, z);
 // Where a helicopter may be, and a boat (which also keeps off the shore).
 export const inSky = (x: number, z: number): boolean =>
   x >= -sea && z >= -sea && x <= island + sea && z <= island + sea;
@@ -81,3 +85,9 @@ export const inTunnel = (x: number, z: number): boolean =>
   x >= tunnel.x0 && x <= tunnel.x1 && z >= tunnel.z0 && z <= tunnel.z1;
 export const onBeach = (x: number, z: number): boolean =>
   x >= beach.x0 && x <= beach.x1 && z >= beach.z0 && z <= beach.z1;
+// On the moon's ground, round the colony.
+export const onMoon = (x: number, z: number): boolean =>
+  x >= moon.x0 + bodyRadius &&
+  x <= moon.x1 - bodyRadius &&
+  z >= moon.z0 + bodyRadius &&
+  z <= moon.z1 - bodyRadius;

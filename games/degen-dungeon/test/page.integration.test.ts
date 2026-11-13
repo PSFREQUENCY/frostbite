@@ -15,10 +15,10 @@ describe("the page's keys, pause and sound", () => {
       window.dispatchEvent(new window.KeyboardEvent("keydown", { code }));
     const text = (id: string) => byId(window, id)?.textContent;
     const running = () => byId(window, "start")?.hasAttribute("hidden");
-    // Rally wakes at his own door, so acting opens home, and acting again (the first answer) sleeps, which ends the day.
+    // Rally wakes at his own door, so acting (E) opens home, and acting again (the first answer) sleeps, which ends the day.
     const playOut = async () => {
       for (let at = 0; at < 400 && running(); at += 1) {
-        press("Space");
+        press("KeyE");
         await settle(35);
       }
     };
@@ -65,17 +65,17 @@ describe("the page's keys, pause and sound", () => {
     expect(text("note")).toContain("Paused");
     expect(audio.state).toBe("suspended");
     const before = audio.oscillators.length;
-    press("Space");
+    press("KeyE");
     expect(audio.oscillators.length).toBe(before);
     press("KeyP");
     expect(text("pause")).toBe("Pause");
     expect(text("note")).not.toContain("Paused");
     expect(audio.state).toBe("running");
-    press("Space");
+    press("KeyE");
     expect(audio.oscillators.length).toBeGreaterThan(before);
   });
 
-  it("pauses from its button, ignores P when no run is going, and Space taps rather than pauses", async () => {
+  it("pauses from its button, ignores P when no run is going, and E acts rather than pauses", async () => {
     const { audio, press, text, window } = await driver();
     press("KeyP");
     expect(text("pause")).toBe("Pause");
@@ -87,7 +87,7 @@ describe("the page's keys, pause and sound", () => {
     button?.dispatchEvent(new window.MouseEvent("click"));
     expect(text("pause")).toBe("Pause");
     const before = audio.oscillators.length;
-    press("Space");
+    press("KeyE");
     expect(audio.oscillators.length).toBeGreaterThan(before);
     expect(text("pause")).not.toBe("Resume");
   });
@@ -160,6 +160,7 @@ describe("the page's keys, pause and sound", () => {
       seen: false,
       slip: false,
       sound: { effects: false, music: false, volume: 0.2 },
+      wish: 0,
     });
   });
 });

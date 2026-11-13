@@ -6,7 +6,7 @@ import { degenRules } from "../src/rules/index.ts";
 import { refusal, started } from "./support/replay.ts";
 
 describe("starting a day", () => {
-  it("takes exactly a hero and a story day, each in range", () => {
+  it("takes a hero and a story day, each in range, and nothing it does not know", () => {
     const short: Readonly<Record<string, number>>[] = [
       {},
       { day: 1 },
@@ -15,7 +15,7 @@ describe("starting a day", () => {
     for (const config of short)
       expect(degenRules.init(1, config)).toEqual({
         ok: false,
-        reason: "a day takes exactly: day, hero",
+        reason: "a day takes a day and a hero, and may add loop, fate or boon",
       });
     const wrong: Readonly<Record<string, number | string>>[] = [
       { day: 0, hero: 1 },
@@ -64,8 +64,8 @@ describe("an input", () => {
     expect(refusal(day, "act", { tick: 0.5 })).toBe(
       "tick must be a whole number",
     );
-    expect(refusal(day, "pick", { choice: 4, tick: 0 })).toBe(
-      "choice must be 0 to 3",
+    expect(refusal(day, "pick", { choice: 5, tick: 0 })).toBe(
+      "choice must be 0 to 4",
     );
     expect(refusal(day, "pick", { choice: 2, tick: 0 })).toBe("yes or no");
     expect(refusal(day, "look", { tick: 0 })).toBeNull();

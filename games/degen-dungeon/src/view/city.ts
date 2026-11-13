@@ -6,6 +6,7 @@ import {
   InstancedMesh,
   Mesh,
   MeshStandardMaterial,
+  MeshToonMaterial,
   PlaneGeometry,
   SphereGeometry,
 } from "three";
@@ -15,7 +16,10 @@ import { watcherAt } from "../rules/mystery.ts";
 import { openTo, spots, type Spot } from "../rules/places.ts";
 import { beatOf } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
-import { box, buildBlocks } from "./blocks.ts";
+import { buildBlocks } from "./blocks.ts";
+import { streets } from "./prints.ts";
+import { toonSteps } from "./textures.ts";
+import { box } from "./hash.ts";
 
 // Nakasato, built in code from the same numbers the rules walk on: the island and the sea, the buildings of every borough, Moon Tower
 // and the screens of Ticker Square with the hooded mirror statue, and a glowing marker on every place open today: the day's story beat
@@ -34,6 +38,7 @@ const spotTints: Readonly<Record<Spot["kind"], string>> = {
   locker: "#ffd166",
   loot: "#ff5d5d",
   offer: "#ff9ecf",
+  parked: "#5aa9ff",
   plug: "#c9b6ff",
   rebrand: "#ffd166",
   recruit: "#ffd166",
@@ -47,6 +52,8 @@ const spotTints: Readonly<Record<Spot["kind"], string>> = {
 export interface City {
   // Shows the markers for what is open on this day, where the story's beat is, and the watcher by frost vision.
   mark(day: DayState | null, seconds: number): void;
+  // How dark it is (0 day, 1 night): windows and signs light up.
+  night(part: number): void;
   readonly root: Group;
 }
 
@@ -116,9 +123,15 @@ export function buildCity(): City {
   const root = new Group();
   root.name = "city";
   const size = metres(island);
+  const paving = streets();
+  if (paving !== null) paving.repeat.set(3, 3);
   const ground = new Mesh(
     new PlaneGeometry(size, size),
-    new MeshStandardMaterial({ color: "#20263a", roughness: 1 }),
+    new MeshToonMaterial({
+      color: "#ffffff",
+      gradientMap: toonSteps,
+      map: paving,
+    }),
   );
   ground.name = "ground";
   ground.rotation.x = -Math.PI / 2;
@@ -135,8 +148,24 @@ export function buildCity(): City {
   sea.name = "sea";
   sea.rotation.x = -Math.PI / 2;
   sea.position.set(size / 2, -0.6, size / 2);
+  // The Old Floe is a park: grass where the other boroughs build.
+  const grass = new MeshToonMaterial({
+    color: "#4f9d5d",
+    gradientMap: toonSteps,
+  });
+  for (const [x, z] of [
+    [269, 29],
+    [331, 29],
+    [269, 91],
+  ] as const) {
+    const lawn = new Mesh(new PlaneGeometry(42, 42), grass);
+    lawn.name = "lawn";
+    lawn.rotation.x = -Math.PI / 2;
+    lawn.position.set(x, 0.02, z);
+    root.add(lawn);
+  }
   root.add(ground, sea);
-  buildBlocks(root);
+  const blocks = buildBlocks(root);
   landmarks(root);
   const markers = new InstancedMesh(
     new CylinderGeometry(0.35, 0.35, 1, 8),
@@ -171,7 +200,9 @@ export function buildCity(): City {
   return {
     mark(day, seconds) {
       spots.forEach((spot, index) => {
-        const open = day === null ? spot.on === undefined : openTo(spot, day);
+        const open =
+          spot.kind !== "parked" &&
+          (day === null ? spot.on === undefined : openTo(spot, day));
         const paper = spot.kind === "letter";
         const wide = paper ? 1 : 2.2 + 0.25 * Math.sin(seconds * 2 + index);
         const side = open ? wide : 0;
@@ -201,6 +232,7 @@ export function buildCity(): City {
         steps.position.set(metres(at.x), 0.05, metres(at.z));
       }
     },
+    night: (part) => blocks.night(part),
     root,
   };
 }

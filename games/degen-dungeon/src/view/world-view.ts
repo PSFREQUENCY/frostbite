@@ -1,27 +1,28 @@
-import { BoxGeometry, Mesh, MeshStandardMaterial, Scene } from "three";
+import {
+  BoxGeometry,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Scene,
+  SphereGeometry,
+} from "three";
 
 import { storming } from "../rules/day.ts";
 import { risen } from "../rules/machine.ts";
-import { paceOf } from "../rules/move.ts";
 import { onLand } from "../rules/world.ts";
-import type { DayState, Point } from "../rules/types.ts";
-import {
-  buildActor,
-  buildCop,
-  buildTux,
-  buildVest,
-  heightOf,
-  heroCount,
-  type Actor,
-} from "./actor.ts";
+import type { DayState } from "../rules/types.ts";
+import { buildActor, heightOf, heroCount, type Actor } from "./actor.ts";
 import { buildAirdrop } from "./airdrop.ts";
 import { buildBoards } from "./boards.ts";
-import { createRig, type Intent, type Subject } from "./camera.ts";
+import { createRig } from "./camera.ts";
+import { buildChasers } from "./chasers.ts";
 import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
-import { buildCrowd, type Gathering } from "./crowd.ts";
+import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
+import { hopAt, placeCast } from "./lead.ts";
 import { buildLine } from "./line.ts";
+import { buildMoon } from "./moon.ts";
 import { loadModels, modelOf, rigged, type Model } from "./models/load.ts";
 import type { ModelName } from "./models/packed.ts";
 import { shaderTime, visionDepth } from "./models/shaders.ts";
@@ -29,25 +30,27 @@ import { createNewbie } from "./newbie.ts";
 import { createPeople } from "./npcs.ts";
 import { buildNorth } from "./north.ts";
 import { buildRides } from "./rides.ts";
+import { createRing, ring } from "./ring.ts";
+import { intentFor, roomFor } from "./shot.ts";
 import { createStage, type Stage } from "./stage.ts";
 import { buildStatue } from "./statue.ts";
+import { buildTown, timeOf } from "./town.ts";
 
 // The whole island in 3D: the city and its era, the cast, the crowds, the rides, the chasers, the airdrop and the far north, with the camera
 // rig choosing a shot for each moment. It reads a day and draws it; nothing here feeds back into the rules.
 export interface WorldView {
   day(state: DayState, seconds: number, dt: number, closeUp: boolean): void;
+  // A hop on the spot (or on the move), for the screen only.
+  jump(): void;
   opening(seconds: number): string | null;
   turntable(hero: number, locked: boolean, seconds: number, dt: number): void;
+  // Writes the player's message on the hero's lantern.
+  write(message: string): void;
+  // The way the camera looks (radians from east toward south), which the stick's "up" means.
+  yaw(): number;
 }
 
 const levelHeight = 12;
-const ring = { radius: 3.4, x: 300, z: 64 };
-const gatheringOf = (state: DayState): Gathering | null => {
-  if (state.gate > 0) return null;
-  if (state.day === 1 && !state.done.includes("speech")) return "riot";
-  if (state.day === 4) return "robots";
-  return state.day === 5 && state.beat >= 1 ? "party" : null;
-};
 
 export function createWorldView(
   stage: Stage,
@@ -63,10 +66,22 @@ export function createWorldView(
   const airdrop = buildAirdrop();
   const rides = buildRides();
   const statue = buildStatue();
+  const town = buildTown();
+  const moon = buildMoon();
+  const helmet = new Mesh(
+    new SphereGeometry(0.3, 20, 14),
+    new MeshBasicMaterial({
+      color: "#bfe9ff",
+      depthWrite: false,
+      opacity: 0.35,
+      transparent: true,
+    }),
+  );
+  helmet.name = "helmet";
   const cast: Actor[] = Array.from({ length: heroCount + 1 }, (_, hero) =>
     buildActor(hero),
   );
-  const chasers = { cop: buildCop(), tux: buildTux(), vests: buildVest() };
+  const chasers = buildChasers();
   const shadow = new Mesh(
     new BoxGeometry(0.6, 1.7, 0.4),
     new MeshStandardMaterial({ color: "#000000" }),
@@ -82,13 +97,17 @@ export function createWorldView(
     airdrop.root,
     rides.root,
     statue.root,
+    town.root,
+    moon.root,
+    helmet,
     shadow,
     ...cast.map(({ root }) => root),
-    ...Object.values(chasers).map(({ root }) => root),
+    ...chasers.actors.map(({ root }) => root),
   );
   const loaded = new Map<ModelName, Model>();
   const past = createNewbie(scene, loaded);
-  const town = createPeople(scene, cast);
+  const people = createPeople(scene, cast);
+  const spinRing = createRing(cast, shadow);
   void models?.then((all) => {
     for (const [name, model] of all) loaded.set(name, model);
     cast.forEach((actor, hero) => {
@@ -104,17 +123,23 @@ export function createWorldView(
   );
   const towers = city.root.getObjectByName("towers");
   let heading = Math.PI / 2;
-  let spin = 0;
   let era = 0;
+  let clock = 0;
+  let jumped = -9;
+  let open = 0.5;
+  let sampled = -1;
   const hideAll = (): void => {
-    for (const { root } of [...cast, ...Object.values(chasers)])
-      root.visible = false;
+    for (const { root } of cast) root.visible = false;
+    chasers.hide();
     rides.show("foot", 0, 0, 0, 0, 0);
     shadow.visible = false;
     crowd.show(null, 0);
     airdrop.fall(false, 0, 0, 0, 0);
     past.hide();
-    town.hide();
+    people.hide();
+    helmet.visible = false;
+    city.root.visible = true;
+    town.root.visible = true;
   };
   const grown = (part: number): void => {
     if (towers !== undefined)
@@ -131,22 +156,6 @@ export function createWorldView(
     rig.apply(stage.camera);
     stage.draw(scene);
   };
-  const chase = (
-    actor: Actor,
-    at: Point | null,
-    to: Subject,
-    seconds: number,
-    dt: number,
-  ): void => {
-    if (at === null) return;
-    actor.root.visible = true;
-    actor.root.position.set(metres(at.x), 0, metres(at.z));
-    actor.root.rotation.y = Math.atan2(
-      to.x - metres(at.x),
-      to.z - metres(at.z),
-    );
-    actor.move(12, seconds, dt);
-  };
   return {
     day(state, seconds, dt, closeUp) {
       hideAll();
@@ -160,6 +169,8 @@ export function createWorldView(
         z: metres(state.z),
       };
       const riding = state.ride !== "foot";
+      const { along, dark } = timeOf(state.tick);
+      clock = seconds;
       light.set(
         scene,
         state.day,
@@ -167,7 +178,12 @@ export function createWorldView(
         seconds,
         at.x,
         at.z,
+        along,
+        dark,
+        moon.on(at.x, at.z),
       );
+      city.night(dark);
+      town.show(state, at.x, at.z, heading, seconds, dt);
       city.mark(state, seconds);
       north.show(state.gate > 0, seconds);
       crowd.show(gatheringOf(state), seconds);
@@ -182,31 +198,31 @@ export function createWorldView(
       visionDepth.value +=
         ((state.looking ? 1 : 0) - visionDepth.value) * Math.min(1, dt * 4);
       const face = past.show(state, at, seconds, dt);
-      const pace =
-        state.dir >= 0 && !riding && state.talk === null ? paceOf(state) : 0;
-      const place = (actor: Actor, back: number, side: number): void => {
-        actor.root.visible = true;
-        actor.root.position.set(
-          at.x - Math.cos(heading) * back - Math.sin(heading) * side,
-          at.y + (riding ? 0.7 : 0),
-          at.z - Math.sin(heading) * back + Math.cos(heading) * side,
-        );
-        actor.root.rotation.y = Math.PI / 2 - heading;
-        actor.move(
-          pace,
-          seconds,
-          dt,
-          state.talk !== null,
-          state.ended && state.cause === "beach",
-        );
-      };
-      const lead = cast[state.hero];
-      if (lead !== undefined) place(lead, 0, 0);
-      state.crew.forEach((hero, slot) => {
-        const mate = cast[hero];
-        if (mate !== undefined) place(mate, 0.5, slot === 0 ? -1.7 : 1.7);
-      });
-      town.show(state, at, seconds, dt);
+      // On the moon: a helmet, a black sky, and jumps that hang in the air.
+      const up = moon.on(at.x, at.z);
+      const lead = placeCast(
+        cast,
+        state,
+        at,
+        seconds,
+        dt,
+        up ? hopAt((seconds - jumped) / 1.8) * 2.4 : hopAt(seconds - jumped),
+      );
+      helmet.visible = up && lead !== undefined;
+      if (lead !== undefined) {
+        const tall = heightOf(state.hero);
+        helmet.position.copy(lead.root.position);
+        helmet.position.y += tall * 0.86;
+        helmet.scale.setScalar(tall / 1.7);
+      }
+      city.root.visible = !up;
+      town.root.visible = !up;
+      moon.show(at.x, at.z, seconds);
+      people.show(state, at, seconds, dt);
+      // A ride taken from the kerb keeps its colour, and a car its broken window.
+      const taken = [...state.done]
+        .reverse()
+        .find((id) => id.startsWith(`${state.ride}-`));
       if (riding)
         rides.show(
           state.ride,
@@ -215,22 +231,28 @@ export function createWorldView(
           at.z,
           Math.PI / 2 - heading,
           seconds,
+          taken === undefined ? undefined : town.paintOf(taken),
+          state.ride === "car" && taken !== undefined,
         );
-      chase(chasers.cop, state.cop, at, seconds, dt);
-      chase(chasers.tux, state.tux, at, seconds, dt);
-      chase(chasers.vests, state.vests, at, seconds, dt);
-      const intent: Intent =
-        state.talk !== null
-          ? "talk"
-          : closeUp
-            ? "hands"
-            : state.ride === "heli"
-              ? "sky"
-              : riding || state.gate > 0
-                ? "ride"
-                : "follow";
-      rig.aim(intent, face ?? at, dt);
+      chasers.show(state, at, seconds, dt);
+      // How open the ground is round the hero, looked at a few times a second.
+      if (Math.abs(seconds - sampled) > 0.3) {
+        sampled = seconds;
+        open += (rig.openness(at.x, at.z) - open) * 0.5;
+      }
+      const room = roomFor(state, open);
+      const rising = town.lantern(seconds);
+      if (rising === null) {
+        const moving = state.dir >= 0 && state.talk === null;
+        rig.aim(intentFor(state, closeUp), face ?? at, dt, moving, room);
+      } else {
+        const [x, y, z] = rising;
+        rig.aim("follow", { heading, x, y: y - 1.6, z }, dt, false, room);
+      }
       show(seconds);
+    },
+    jump() {
+      jumped = clock;
     },
     opening(seconds) {
       const frame = frameOf(opening, seconds);
@@ -239,6 +261,8 @@ export function createWorldView(
       setEra(1);
       light.set(scene, 1, false, seconds, 180, 180);
       city.mark(null, seconds);
+      city.night(0);
+      town.idle(seconds);
       crowd.show("riot", seconds);
       grown(frame.index === 0 ? 0 : frame.index === 1 ? frame.part : 1);
       rig.cut(frame.pose);
@@ -251,33 +275,13 @@ export function createWorldView(
       setEra(1);
       light.set(scene, 1, false, seconds, ring.x, ring.z);
       city.mark(null, seconds);
-      // The ring turns the short way round to bring the chosen hero to the front.
-      const turn =
-        ((hero - spin + heroCount * 1.5) % heroCount) - heroCount / 2;
-      spin += turn * (1 - Math.exp(-8 * Math.max(0, dt)));
-      cast.slice(0, heroCount).forEach((actor, slot) => {
-        const angle = ((slot - spin) * Math.PI * 2) / heroCount;
-        const here = [
-          ring.x + Math.sin(angle) * ring.radius,
-          0,
-          ring.z + Math.cos(angle) * ring.radius,
-        ] as const;
-        const hidden = locked && slot === hero;
-        actor.root.visible = !hidden;
-        actor.root.position.set(...here);
-        actor.root.rotation.y = angle;
-        actor.move(0, seconds, dt, false, slot === hero);
-        if (!hidden) return;
-        shadow.visible = true;
-        shadow.position.set(here[0], 0.85, here[2]);
-      });
-      rig.cut({
-        fov: 38,
-        from: [ring.x, 2.4, ring.z + 10],
-        look: [ring.x, 1.2, ring.z + ring.radius],
-      });
+      city.night(0);
+      town.idle(seconds);
+      rig.cut(spinRing(hero, locked, seconds, dt));
       show(seconds);
     },
+    write: (message) => town.write(message),
+    yaw: () => rig.yaw(),
   };
 }
 

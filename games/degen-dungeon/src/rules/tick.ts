@@ -34,8 +34,15 @@ function zones(day: Draft): void {
 }
 
 function moods(day: Draft): void {
+  const low = day.ride === "foot" && day.gait >= 2;
   const fade =
-    day.talk === "lying" ? 3 : day.talk === "hideout" ? 10 : heatFadeTicks;
+    day.talk === "lying"
+      ? 3
+      : day.talk === "hideout"
+        ? 10
+        : low
+          ? heatFadeTicks / 2
+          : heatFadeTicks;
   if (day.heat > 0 && day.tick % fade === 0) cooled(day, 1);
   const rising = day.day === 2 || day.day === 5 ? fomoTicks : fomoTicks * 3;
   if (day.tick % rising === 0) day.fomo = Math.min(100, day.fomo + 1);

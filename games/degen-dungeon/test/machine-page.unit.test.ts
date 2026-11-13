@@ -26,7 +26,12 @@ describe("the Time Machine on the page", () => {
       { ...day, cause: "machine", day: 3, ended: true },
     ).progress;
     expect([entered.machine, entered.day]).toEqual([true, 3]);
-    expect(nextRun(entered)).toEqual({ day: 1, fate: 0, loop: 1 });
+    expect(nextRun(entered)).toEqual({
+      boon: 0,
+      day: 1,
+      fate: 0,
+      loop: 1,
+    });
     const last = { ...day, cause: "beach", day: 5 } as const;
     expect(afterDay({ ...freshProgress, day: 5 }, last).progress.machine).toBe(
       true,
@@ -45,12 +50,15 @@ describe("the Time Machine on the page", () => {
       loops: 3,
       machine: false,
     });
-    expect(nextRun(back.progress)).toEqual({ day: 1, fate: 3, loop: 0 });
-    expect(nextRun({ ...freshProgress, loops: 40, machine: true })).toEqual({
+    expect(nextRun(back.progress)).toEqual({
+      boon: 0,
       day: 1,
-      fate: 0,
-      loop: 9,
+      fate: 3,
+      loop: 0,
     });
+    expect(
+      nextRun({ ...freshProgress, loops: 40, machine: true, wish: 2 }),
+    ).toEqual({ boon: 0, day: 1, fate: 0, loop: 9 });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({
       fate: -3,
       loops: 2,

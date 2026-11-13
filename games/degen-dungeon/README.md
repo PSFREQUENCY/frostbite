@@ -27,19 +27,38 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   leaves footprints at one corner a day. The game never says who S is.
 - **Status** over your head: GM, SAFU, GRINDER, WAGMI, TOUCHING GRASS, BASED, DIAMOND HANDS, DOWN BAD, PAPER HANDS, DEGEN, BAGHOLDER,
   EXIT LIQUIDITY, RUGGED, REKT or FUDDED.
+- **Living streets:** low buildings with little shops on the ground floor ring every block, with the towers set back behind them;
+  lamps, hydrants, benches, bins, newspaper boxes, traffic lights, posters, flyers and a billboard over every crossroads; people
+  strolling and stopping to talk; traffic that thickens at rush hour and thins at night; a sun that crosses the sky, then the moon and
+  the stars. Walk into seventeen shops (sliding doors, a counter, a clerk): coffee and noodles calm FOMO, food and glow sticks give frost
+  vision back, a cut or a wash loses heat, the gym and the bait shop are good for standing, the pawn shop buys loot, and the arcade has
+  four cabinets, one go each a day. Landmarks fill the rest: a library, a bank, a museum, an NFT gallery, a VR dome, a giant arcade,
+  three clubs with searchlights, a record label's tower, a creator studio, a skate park with murals, lookout posts and company names on
+  the tallest towers. Every name is an original gag.
+- **Rides on the street:** about a hundred cars, fifty scooters and fifty bikes are parked along the kerbs. Breaking into a car brings a
+  star of heat; a scooter or a bike is free. Park beside another to step off.
+- **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
+  cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
+- **The moon:** a seat on the shuttle under Moon Tower costs 500,000 DUN (pocket first, then the freezer), on foot and with no heat.
+  Up there, in a helmet, walk the moon's ground, meet the colony, take a rock from a crater rim, and fly home from the pad.
 - **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner statue in The Old Floe
   rises. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
   timeline for better or worse, and the timeline carries into the next playthrough.
 
-Keys: arrows or WASD walk, Space or E acts and gives the first answer, 1 to 4 pick an answer, X walks away, V is frost vision, R and F fly
-a helicopter, Enter starts, P pauses. On a phone the left thumb steers, a tap on the right acts, and every answer is a button.
+Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
+answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F fly a helicopter, Enter starts, P
+pauses. On a phone the left thumb steers, a tap on the right acts, and the buttons under the screen jump, run, duck, crawl and open the
+backpack. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
+over a square or on a ride, and cuts in close when you use something. The next place to go glows on the corner map and stands in the
+city as a column of light.
 
 ## How a day is checked
 
-`src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }`, with `loop` on a trip back or
-`fate` for the timeline a story day carries. Inputs are `move`, `act`, `pick`, `lift`, `look` and `end`, each with its tick; the day
-runs itself between them. The platform replays the record to the same end and decides the 37 milestones from it. `src/replay.ts`
-publishes the rules; `src/sample-run.ts` is a legal day the verifier is shown with.
+`src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }`, with `loop` on a trip back,
+and on a story day `fate` for the timeline it carries and `boon` for last night's lantern wish. Inputs are `move`, `gait`, `act`,
+`pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
+replays the record to the same end and decides the 39 milestones from it. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+a legal day the verifier is shown with. The settings come from the page, so `fate` and `boon` are the page's word, as before.
 
 ## Tests
 

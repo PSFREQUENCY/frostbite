@@ -12,7 +12,8 @@ import type { DayState } from "./rules/types.ts";
 
 // What the platform is asked to remember: the best day, the story day the player is on, the hero last chosen, whether the opening has
 // been seen, whether Slip is unlocked, the Time Machine (whether it is open, how many trips back there have been, and how they have bent
-// the timeline), and the sound settings. Anything handed back is untrusted and is checked field by field.
+// the timeline), the lantern wish sent up on the last story day, and the sound settings. Anything handed back is untrusted and is checked
+// field by field.
 export interface Progress {
   readonly best: number;
   readonly day: number;
@@ -24,6 +25,8 @@ export interface Progress {
   readonly seen: boolean;
   readonly slip: boolean;
   readonly sound: SoundSettings;
+  // The lantern wish (1 to 4) the last story day sent up, which the next one carries; 0 for none.
+  readonly wish: number;
 }
 
 export const freshProgress: Progress = {
@@ -36,6 +39,7 @@ export const freshProgress: Progress = {
   seen: false,
   slip: false,
   sound: defaultSound,
+  wish: 0,
 };
 
 const whole = (
@@ -64,6 +68,7 @@ export function restore(saved: unknown): Progress {
     seen: fields.seen === true,
     slip: fields.slip === true,
     sound: parseSound(fields.sound),
+    wish: whole(fields.wish, 0, 4, 0),
   };
 }
 
@@ -97,18 +102,30 @@ export function afterDay(
       loops: Math.min(99, progress.loops + (trip ? 1 : 0)),
       machine: !trip && (progress.machine || won || day.cause === "machine"),
       slip: progress.slip || (day.day === stormDay && day.storm > 0),
+      wish: trip ? 0 : day.wish,
     },
   };
 }
 
 // The day the first screen begins: a trip back to day one while the Time Machine is open, or the story day the player is on.
-// A story day carries the timeline the trips back have left, as far as the rules take it.
+// A story day carries the timeline the trips back have left, as far as the rules take it, and last night's lantern wish.
 export const nextRun = (
   progress: Progress,
-): { readonly day: number; readonly fate: number; readonly loop: number } =>
+): {
+  readonly boon: number;
+  readonly day: number;
+  readonly fate: number;
+  readonly loop: number;
+} =>
   progress.machine
-    ? { day: 1, fate: 0, loop: Math.min(maxLoops, progress.loops + 1) }
+    ? {
+        boon: 0,
+        day: 1,
+        fate: 0,
+        loop: Math.min(maxLoops, progress.loops + 1),
+      }
     : {
+        boon: progress.wish,
         day: progress.day,
         fate: Math.max(-9, Math.min(9, progress.fate)),
         loop: 0,

@@ -5,7 +5,7 @@ import {
   MeshStandardMaterial,
 } from "three";
 
-import { box, hash } from "./blocks.ts";
+import { box, hash } from "./hash.ts";
 
 // The Great Airdrop on screen: DUN tumbling out of the sky all round the hero. With the magnet or the vacuum the nearest coins bend
 // toward the hero as they fall. The rules count what is caught by patch; this is only how it looks.

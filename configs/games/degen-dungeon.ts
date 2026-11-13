@@ -21,12 +21,13 @@ const once = (
   }) as const;
 
 // Degen Dungeon: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over five story days by honest gigs, a
-// crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and the Time Machine. A run is one day of one hero. The title, the words and every milestone are a draft for the owner; a milestone's id
-// is one the game's rules decide (`games/degen-dungeon/src/rules/milestones.ts`).
+// crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and the Time Machine. A run is one day of one hero. Walk-in
+// shops, parked rides, the lantern night and the moon colony fill the city between the story's beats. The title, the words and every
+// milestone are a draft for the owner; a milestone's id is one the game's rules decide (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, play the arcade's cabinets, borrow a parked car, scooter or bike, and find the library, the bank, the clubs and the skate park. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. After dark, send a lantern up to the crypto gods; they may answer in the morning. A Whale can buy a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -252,6 +253,18 @@ export const degenDungeonGame = defineGame({
       "Buy something from the fit shop.",
       "Gloves, shades and a hooded parka, each with a use.",
     ),
+    once(
+      "lantern",
+      "Message to the gods",
+      "Send a lantern up from the lantern ground after dark.",
+      "Write your message, pick a wish, and watch it rise with thousands more.",
+    ),
+    once(
+      "joyride",
+      "Joyride",
+      "Take a car parked on the street.",
+      "The window breaks, and a star of heat comes with the keys.",
+    ),
   ],
   network: betaTarget.chainId,
   rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
@@ -264,7 +277,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "2bca8580ae0bd442996cb259e18e6e6241385cc88561cf370628c8d3a80a4a6b",
+        "105d47ee0937e4176495ce3478277bb6e165ee65069311ba6189cb0c487823ce",
       version: 1,
     },
   },

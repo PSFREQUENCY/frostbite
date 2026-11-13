@@ -1,5 +1,5 @@
 // One day in Nakasato, as the rules hold it. Everything is a whole number or a name, so a replay ends exactly where the player did.
-export type Ride = "boat" | "car" | "foot" | "heli" | "scooter";
+export type Ride = "bike" | "boat" | "car" | "foot" | "heli" | "scooter";
 // How a day ended: closed by the player, frozen by a tux, asleep at home, inside the Time Machine, out of time, on SHA Beach at sunrise,
 // or with Max's Vests first to the beach.
 export type Cause =
@@ -13,6 +13,8 @@ export interface Point {
 export interface DayState {
   // All-in bets made today.
   readonly allIns: number;
+  // The lantern wish from the night before that the crypto gods answered this morning (1 to 4, see `boons`), or 0.
+  readonly answered: number;
   // The coin held, in hundredths of a coin, and the DUN paid for it.
   readonly bag: number;
   // The next beat of today's story (days 2 to 5; day one's goals are read from the day itself).
@@ -46,6 +48,8 @@ export interface DayState {
   readonly freezer: number;
   // 1 once the Genesis Room is open and the oldest tunnel with it.
   readonly gate: number;
+  // How the hero moves on foot: 0 walking, 1 running, 2 crouching, 3 crawling.
+  readonly gait: number;
   // Honest gigs finished today.
   readonly gigs: number;
   // FOMO came down to nothing in the park after climbing.
@@ -109,6 +113,8 @@ export interface DayState {
   readonly vision: number;
   // Strangers warned about a scam.
   readonly warned: number;
+  // The wish sent up on a lantern tonight (0 none, 1 to 4).
+  readonly wish: number;
   readonly words: number;
   readonly x: number;
   readonly z: number;

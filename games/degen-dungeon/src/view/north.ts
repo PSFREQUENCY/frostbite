@@ -9,7 +9,7 @@ import {
 } from "three";
 
 import { beach, tunnel, waterline } from "../rules/constants.ts";
-import { box } from "./blocks.ts";
+import { box } from "./hash.ts";
 
 // North of the island under the sea: the oldest tunnel, lit, and SHA Beach at its end at the first sunrise of the game, with footprints
 // that run to the waterline and stop. Both are hidden until the Genesis Room is open.

@@ -100,3 +100,18 @@ export const beach = {
 export const waterline = -9_200;
 export const vestGap = 1_800;
 export const vestPace = 8;
+
+// Night falls for the last third of the day: the lanterns go up then. A gait changes a walking pace by tenths (walk, run, crouch, crawl),
+// and crouching or crawling hides the hero a little and lets heat fade twice as fast.
+export const nightTick = 12_000;
+export const gaitTenths = [10, 16, 6, 4] as const;
+export const gaitStealth = [0, 0, 2, 4] as const;
+// What a wish answered brings at the start of the next story day: moonlight (frost vision), the crew's luck (rep), safe keys (the
+// freezer), riches (the pocket).
+export const boons = [0, 300, 60, 500, 400] as const;
+// The colony on the moon: a seat on the shuttle from Moon Tower, the moon's walkable ground (centimetres, far east of the island), where
+// the shuttle sets down, and where it lands back home.
+export const moonFare = 500_000;
+export const moon = { x0: 100_000, x1: 112_000, z0: 0, z1: 12_000 } as const;
+export const moonPad = { x: 106_000, z: 9_000 } as const;
+export const shuttleBooth = { x: 20_400, z: 17_300 } as const;

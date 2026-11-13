@@ -15,9 +15,9 @@ export const starsText = (heat: number): string =>
 
 export function noteFor(day: DayState): string {
   if (day.talk !== null)
-    return byInput("Space or 1 to 4 answers, X walks away.", "Tap an answer.");
+    return byInput("E or 1 to 5 answers, X walks away.", "Tap an answer.");
   const here = (what: string): string =>
-    byInput(`Space: ${what}`, `Tap right: ${what}`);
+    byInput(`E: ${what}`, `Tap right: ${what}`);
   if (inReach(day, statue)) {
     if (day.loop > 0) return machineLines.cooling;
     return risen(day)
@@ -42,7 +42,7 @@ export function noteFor(day: DayState): string {
     return `Carry the parcel to: ${spotNamed(day.parcel)?.label ?? "its door"}`;
   if (day.loop === 0 && risen(day)) return machineLines.risen;
   return byInput(
-    "Arrows walk, Space uses what is near, V is frost vision. Sleep at home ends the day.",
+    "Arrows walk, Shift runs, Space jumps, E uses what is near, B opens the backpack. Sleep at home ends the day.",
     "The left thumb steers and a tap on the right uses what is near.",
   );
 }

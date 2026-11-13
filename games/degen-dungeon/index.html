@@ -40,6 +40,14 @@
       </div>
       <div id="talk" class="talk" hidden>
         <p id="say" aria-live="polite"></p>
+        <input
+          id="wish-text"
+          type="text"
+          maxlength="40"
+          placeholder="Write your message to the crypto gods"
+          aria-label="Your lantern's message"
+          hidden
+        />
         <ol id="answers" aria-label="Answers"></ol>
       </div>
       <div class="foot">
@@ -53,6 +61,11 @@
           <button id="look" type="button" disabled>Frost vision</button>
           <button id="up" type="button" hidden>Climb</button>
           <button id="down" type="button" hidden>Drop</button>
+          <button id="jump" type="button" disabled>Jump</button>
+          <button id="run" type="button" disabled>Run</button>
+          <button id="duck" type="button" disabled>Duck</button>
+          <button id="crawl" type="button" disabled>Crawl</button>
+          <button id="pack" type="button" disabled>Backpack</button>
         </div>
       </div>
       <section aria-labelledby="earned-title">
@@ -60,6 +73,10 @@
         <ul id="earned" aria-label="Milestones earned today"></ul>
       </section>
     </main>
+    <aside id="bag" class="bag" aria-hidden="true" aria-labelledby="bag-title">
+      <h2 id="bag-title">Backpack</h2>
+      <div id="bag-items"></div>
+    </aside>
     <script src="main.js"></script>
   </body>
 </html>

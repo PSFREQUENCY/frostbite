@@ -9,7 +9,8 @@ import {
   SphereGeometry,
 } from "three";
 
-import { box, hash } from "./blocks.ts";
+import type { DayState } from "../rules/types.ts";
+import { box, hash } from "./hash.ts";
 import { painted } from "./boards.ts";
 
 // The town in numbers: the FREE FROST riot packing The Exchange on the first morning (signs up, bouncing), the Moon Night party under
@@ -144,3 +145,11 @@ export function buildCrowd(): Crowd {
     },
   };
 }
+
+// Which crowd a day has: the riot before the speech on the first morning, the robots on day four, the party once Moon Night begins.
+export const gatheringOf = (state: DayState): Gathering | null => {
+  if (state.gate > 0) return null;
+  if (state.day === 1 && !state.done.includes("speech")) return "riot";
+  if (state.day === 4) return "robots";
+  return state.day === 5 && state.beat >= 1 ? "party" : null;
+};

@@ -75,12 +75,28 @@ export const eraWakes: readonly string[] = [
   "Launch Day: robots roll out of the server farms and start taking routes.",
   "Moon Night: the whole island is gathering under Moon Tower.",
 ];
-export const wakeLine = (hero: number, loop: number, day = 1): string =>
+// What the crypto gods sent back for last night's lantern, by the wish they answered (the rules' `boons`).
+export const answers: readonly string[] = [
+  "",
+  "The crypto gods read your lantern: your frost vision lasts longer today.",
+  "The crypto gods read your lantern: the street gives you a little more respect today.",
+  "The crypto gods read your lantern: there is extra DUN frozen in your freezer.",
+  "The crypto gods read your lantern: your pocket is heavier this morning.",
+];
+
+export const wakeLine = (
+  hero: number,
+  loop: number,
+  day = 1,
+  answered = 0,
+): string =>
   loop > 0
     ? tripWake
-    : day > 1
-      ? (eraWakes[day - 1] ?? "")
-      : (wakeUps[hero] ?? "");
+    : answered > 0
+      ? (answers[answered] ?? "")
+      : day > 1
+        ? (eraWakes[day - 1] ?? "")
+        : (wakeUps[hero] ?? "");
 
 // What gives a newbie away before a tip: the seed decides which kind of newbie a trip back meets.
 export const echoTells = {

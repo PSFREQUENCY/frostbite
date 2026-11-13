@@ -23,6 +23,7 @@ export function createPanel(hands: {
   const box = element("talk", "div");
   const say = element("say", "p");
   const answers = element("answers", "ol");
+  const wish = element("wish-text", "input");
   const look = element("look", "button");
   const up = element("up", "button");
   const down = element("down", "button");
@@ -46,6 +47,7 @@ export function createPanel(hands: {
       down.hidden = up.hidden;
       const talk = day === null ? null : talkOf(day);
       box.hidden = talk === null;
+      wish.hidden = day?.talk !== "lantern";
       const key = talk === null ? "" : `${talk.say}|${talk.answers.join("|")}`;
       if (key === shown) return;
       shown = key;

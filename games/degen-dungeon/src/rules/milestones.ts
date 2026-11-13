@@ -63,6 +63,11 @@ export const milestones: readonly {
     earned: (day) => has(day, "fit-gloves", "fit-shades", "fit-parka"),
     id: "fresh-fit",
   },
+  { earned: (day) => has(day, "lantern"), id: "lantern" },
+  {
+    earned: (day) => day.done.some((id) => id.startsWith("car-")),
+    id: "joyride",
+  },
 ];
 
 export const milestoneIds: readonly string[] = milestones.map(({ id }) => id);

@@ -1,6 +1,7 @@
 import { chased } from "./chase.ts";
 import { coin } from "./coin.ts";
 import {
+  boons,
   dayFreezers,
   dayPockets,
   gustTicks,
@@ -22,22 +23,28 @@ import { centreOf, inSwapMeet } from "./world.ts";
 
 // A day from its first tick: the hero wakes at home with what that story day gives them (the timeline from earlier trips back moves the
 // pocket a hundred DUN a step), and the seed decides today's scam. The third day is the morning of the drain. A trip back (`loop` above
-// 0) starts beside the statue instead, with a traveller's pocket.
+// 0) starts beside the statue instead, with a traveller's pocket. `boon` is last night's lantern wish (1 to 4), which the seed may answer.
 export function startDay(
   seed: number,
   hero: number,
   day: number,
   loop = 0,
   fate = 0,
+  boon = 0,
 ): DayState {
   const home =
     loop > 0 ? statue : (spotNamed(`home-${String(hero)}`) ?? centreOf(4));
+  // A lantern wish from last night is answered, or not, by the seed. What it brings is in `boons`.
+  const answered = loop === 0 && boon > 0 && coin(seed, 0xb0_07) ? boon : 0;
+  const gift = boons[answered] ?? 0;
   const pocket =
-    loop > 0
+    (loop > 0
       ? loopPocket
-      : Math.max(0, (dayPockets[day - 1] ?? 0) + 100 * fate);
+      : Math.max(0, (dayPockets[day - 1] ?? 0) + 100 * fate)) +
+    (answered === 4 ? gift : 0);
   return {
     allIns: 0,
+    answered,
     bag: 0,
     beat: 0,
     cause: null,
@@ -55,7 +62,10 @@ export function startDay(
     fenced: 0,
     firstBuy: -1,
     fomo: 0,
-    freezer: loop > 0 ? 0 : (dayFreezers[day - 1] ?? 0),
+    freezer:
+      (loop > 0 ? 0 : (dayFreezers[day - 1] ?? 0)) +
+      (answered === 3 ? gift : 0),
+    gait: 0,
     gate: 0,
     gigs: 0,
     grass: false,
@@ -78,7 +88,7 @@ export function startDay(
     peakFomo: 0,
     peakPocket: pocket,
     pocket,
-    rep: 0,
+    rep: answered === 2 ? gift : 0,
     ride: "foot",
     rides: 0,
     rugged: 0,
@@ -94,8 +104,11 @@ export function startDay(
     topped: 0,
     tux: null,
     vests: null,
-    vision: hero === 2 ? 2 * visionTicks : visionTicks,
+    vision:
+      (hero === 2 ? 2 * visionTicks : visionTicks) +
+      (answered === 1 ? gift : 0),
     warned: 0,
+    wish: 0,
     words: 0,
     x: home.x,
     z: home.z,

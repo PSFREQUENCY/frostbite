@@ -3,169 +3,154 @@ import {
   Color,
   ConeGeometry,
   CylinderGeometry,
+  Group,
   InstancedMesh,
-  Matrix4,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  Quaternion,
+  Mesh,
+  MeshToonMaterial,
   SphereGeometry,
-  Vector3,
   type BufferGeometry,
-  type Group,
+  type Matrix4,
 } from "three";
 
-import { block, lots } from "../rules/constants.ts";
+import { block } from "../rules/constants.ts";
+import { box } from "./hash.ts";
+import { buildLot, styles } from "./lots.ts";
+import { createShell } from "./shell.ts";
+import { facade, shopfronts, toonSteps } from "./textures.ts";
 
-// The buildings and trees of the nine boroughs, built from the rules' lots: New York towers in Neon Row and The Exchange, Los Angeles
-// stucco and palms on the marina and the boardwalk, Philadelphia brick in Cold Harbor, Rug Row and Gig Street, sheds and head frames in
-// The Shaft, and the Old Floe mostly park. Each kind of thing is one instanced mesh, so the whole city is a handful of draws.
-interface Style {
-  readonly colours: readonly string[];
-  readonly glow: string | null;
-  readonly high: number;
-  readonly low: number;
-  readonly rows: number;
-  readonly trees: "palm" | "pine" | null;
-}
-const style = (
-  colours: readonly string[],
-  low: number,
-  high: number,
-  rows: number,
-  glow: string | null = null,
-  trees: Style["trees"] = null,
-): Style => ({ colours, glow, high, low, rows, trees });
-const styles: readonly Style[] = [
-  style(["#7a3b2e", "#8c4a36", "#5e3a2f"], 8, 16, 2, null),
-  style(["#f3e3c3", "#f7c6a3", "#cfe8e0"], 6, 12, 2, null, "palm"),
-  style(["#dfe9f2", "#c9d7e3"], 4, 8, 1, null, "pine"),
-  style(["#1d1b33", "#2a2350", "#14122a"], 30, 70, 2, "#ff3df2"),
-  style(["#21405f", "#2c5b86", "#1b2f47"], 40, 110, 2, "#5beac6"),
-  style(["#ff8a5b", "#ffd166", "#5beac6", "#ff9ecf"], 4, 9, 3, null, "palm"),
-  style(["#8c3b2e", "#a14a35", "#6e2f26"], 9, 12, 4, "#ffd166"),
-  style(["#4a4f58", "#5d6470", "#3a3f47"], 10, 22, 2, "#ffb000"),
-  style(["#9a4a32", "#b0603e", "#7d3d2b"], 12, 24, 3, "#ff9a3c", "pine"),
-];
-
-// A number in [0, 1) that is the same every time for the same three whole numbers.
-export const hash = (a: number, b: number, c: number): number => {
-  let mixed = Math.imul(a + 1, 0x9e_37_79_b1) ^ Math.imul(b + 7, 0x85_eb_ca_6b);
-  mixed = Math.imul(mixed ^ (c + 13), 0xc2_b2_ae_35);
-  return ((mixed ^ (mixed >>> 15)) >>> 0) / 0x1_0000_0000;
-};
-
-interface Piece {
-  readonly colour: string;
-  readonly matrix: Matrix4;
-}
-const place = new Vector3();
-const upright = new Quaternion();
-const extent = new Vector3();
-// A box's matrix from its centre and size in metres.
-export const box = (
-  x: number,
-  y: number,
-  z: number,
-  w: number,
-  h: number,
-  d: number,
-): Matrix4 =>
-  new Matrix4().compose(place.set(x, y, z), upright, extent.set(w, h, d));
+// The buildings and trees of the nine boroughs, built from the rules' lots. Every lot is ringed by low buildings on the pavement, two to
+// six floors, many with a little shop on the ground floor (an awning, a sign, a lit window at night); the towers stand back in the middle
+// of the lot, so the street feels like a street and the skyline is still there. New York towers in Neon Row and The Exchange, Los Angeles
+// stucco and palms on the marina and the boardwalk, Philadelphia brick in Cold Harbor, Rug Row and Gig Street, sheds in The Shaft, and the
+// Old Floe mostly park. The walls are cartoon-shaded and tiled with window bays: glass, curtains, some cracked, some boarded up.
+const toon = (colour: string): MeshToonMaterial =>
+  new MeshToonMaterial({ color: colour, gradientMap: toonSteps });
 
 function instanced(
   name: string,
   geometry: BufferGeometry,
-  material: MeshBasicMaterial | MeshStandardMaterial,
-  pieces: readonly Piece[],
+  pieces: readonly (readonly [Matrix4, string])[],
 ): InstancedMesh {
   const mesh = new InstancedMesh(
     geometry,
-    material,
+    toon("#ffffff"),
     Math.max(1, pieces.length),
   );
   mesh.name = name;
   mesh.count = pieces.length;
-  pieces.forEach((piece, index) => {
-    mesh.setMatrixAt(index, piece.matrix);
-    mesh.setColorAt(index, new Color(piece.colour));
+  pieces.forEach(([matrix, colour], index) => {
+    mesh.setMatrixAt(index, matrix);
+    mesh.setColorAt(index, new Color(colour));
   });
-  mesh.castShadow = name === "towers";
-  mesh.receiveShadow = true;
   return mesh;
 }
 
-export function buildBlocks(city: Group): void {
-  const towers: Piece[] = [];
-  const glows: Piece[] = [];
-  const trunks: Piece[] = [];
-  const crowns: Piece[] = [];
-  const pines: Piece[] = [];
+export interface Blocks {
+  // How dark it is (0 day, 1 night): windows and shop signs light up.
+  night(part: number): void;
+}
+
+export function buildBlocks(city: Group): Blocks {
+  const towers = new Group();
+  towers.name = "towers";
+  const lit: MeshToonMaterial[] = [];
+  const signs: MeshToonMaterial[] = [];
+  const roofs: [Matrix4, string][] = [];
+  const tanks: [Matrix4, string][] = [];
+  const trunks: [Matrix4, string][] = [];
+  const crowns: [Matrix4, string][] = [];
+  const pines: [Matrix4, string][] = [];
+  const fronts = createShell();
   styles.forEach((look, borough) => {
+    const low = createShell();
+    const high = createShell();
+    for (let corner = 0; corner < 4; corner += 1)
+      if (borough !== 2 || corner === 3)
+        buildLot(borough, corner, { fronts, high, low, roofs, tanks });
+    const [front, back] = look.walls;
+    for (const [shell, wall, name] of [
+      [low, front, "low"],
+      [high, back, "high"],
+    ] as const) {
+      const material = new MeshToonMaterial({
+        color: "#ffffff",
+        emissive: "#ffffff",
+        emissiveIntensity: 0,
+        gradientMap: toonSteps,
+        vertexColors: true,
+      });
+      const day = facade(
+        borough * 2 + (name === "low" ? 0 : 1),
+        wall,
+        look.trim,
+        false,
+      );
+      const night = facade(
+        borough * 2 + (name === "low" ? 0 : 1),
+        wall,
+        look.trim,
+        true,
+      );
+      if (day === null || night === null) material.color.set(wall);
+      else {
+        material.map = day;
+        material.emissiveMap = night;
+        lit.push(material);
+      }
+      const mesh = new Mesh(shell.geometry(), material);
+      mesh.name = `${name}-${String(borough)}`;
+      towers.add(mesh);
+    }
+    if (look.trees === null) return;
     const left = (block * (borough % 3)) / 100;
     const top = (block * Math.floor(borough / 3)) / 100;
-    lots.forEach(([west, east], column) =>
-      lots.forEach(([north, south], row) => {
-        const lot = column * 2 + row;
-        if (borough === 2 && lot !== 3) return;
-        const span = (east - west) / 100 / look.rows;
-        const deep = (south - north) / 100 / look.rows;
-        for (let i = 0; i < look.rows; i += 1)
-          for (let j = 0; j < look.rows; j += 1) {
-            const roll = hash(borough, lot, i * 7 + j);
-            const height = look.low + (look.high - look.low) * roll;
-            const x = left + west / 100 + span * (i + 0.5);
-            const z = top + north / 100 + deep * (j + 0.5);
-            const colour =
-              look.colours[Math.floor(roll * 97) % look.colours.length] ??
-              "#888888";
-            towers.push({
-              colour,
-              matrix: box(x, height / 2, z, span * 0.86, height, deep * 0.86),
-            });
-            if (look.glow !== null && roll > 0.35)
-              for (let floor = 4; floor < height - 2; floor += 6)
-                glows.push({
-                  colour: look.glow,
-                  matrix: box(x, floor, z, span * 0.88, 0.5, deep * 0.88),
-                });
-          }
-      }),
-    );
-    if (look.trees === null) return;
     for (let k = 0; k < 14; k += 1) {
       const along = (k % 7) * 16 + 8;
-      const side = k < 7 ? 51.5 : 68.5;
+      if (along > 46 && along < 74) continue;
+      const side = k < 7 ? 51.2 : 68.8;
       const x = left + (k % 2 === 0 ? along : side);
       const z = top + (k % 2 === 0 ? side : along);
       if (look.trees === "palm") {
-        trunks.push({ colour: "#8a6a4a", matrix: box(x, 4, z, 0.5, 8, 0.5) });
-        crowns.push({
-          colour: "#3fae6b",
-          matrix: box(x, 8.5, z, 3.2, 1.2, 3.2),
-        });
+        trunks.push([box(x, 4, z, 0.5, 8, 0.5), "#8a6a4a"]);
+        crowns.push([box(x, 8.5, z, 3.2, 1.2, 3.2), "#3fae6b"]);
       } else
-        pines.push({
-          colour: k % 3 === 0 ? "#e8f6ff" : "#2f6f57",
-          matrix: box(x, 3, z, 2.6, 6, 2.6),
-        });
+        pines.push([
+          box(x, 3, z, 2.6, 6, 2.6),
+          k % 3 === 0 ? "#e8f6ff" : "#2f6f57",
+        ]);
     }
   });
-  const flat = () =>
-    new MeshStandardMaterial({
-      color: "#ffffff",
-      flatShading: true,
-      roughness: 0.8,
-    });
-  city.add(
-    instanced("towers", new BoxGeometry(1, 1, 1), flat(), towers),
-    instanced(
-      "windows",
-      new BoxGeometry(1, 1, 1),
-      new MeshBasicMaterial({ color: "#ffffff" }),
-      glows,
-    ),
-    instanced("trunks", new CylinderGeometry(0.5, 0.5, 1, 6), flat(), trunks),
-    instanced("palms", new SphereGeometry(0.5, 8, 6), flat(), crowns),
-    instanced("pines", new ConeGeometry(0.5, 1, 7), flat(), pines),
+  const shopMaterial = new MeshToonMaterial({
+    color: "#ffffff",
+    emissive: "#ffffff",
+    emissiveIntensity: 0.1,
+    gradientMap: toonSteps,
+  });
+  const day = shopfronts(false);
+  const night = shopfronts(true);
+  if (day !== null && night !== null) {
+    shopMaterial.map = day;
+    shopMaterial.emissiveMap = night;
+    signs.push(shopMaterial);
+  } else shopMaterial.color.set("#3a3346");
+  const strip = new Mesh(fronts.geometry(), shopMaterial);
+  strip.name = "shopfronts";
+  towers.add(
+    strip,
+    instanced("roof-units", new BoxGeometry(1, 1, 1), roofs),
+    instanced("water-tanks", new CylinderGeometry(0.5, 0.5, 1, 8), tanks),
   );
+  city.add(
+    towers,
+    instanced("trunks", new CylinderGeometry(0.5, 0.5, 1, 6), trunks),
+    instanced("palms", new SphereGeometry(0.5, 8, 6), crowns),
+    instanced("pines", new ConeGeometry(0.5, 1, 7), pines),
+  );
+  return {
+    night(part) {
+      for (const material of lit) material.emissiveIntensity = part * 1.1;
+      for (const material of signs)
+        material.emissiveIntensity = 0.1 + part * 0.9;
+    },
+  };
 }

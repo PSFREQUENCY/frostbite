@@ -6,7 +6,7 @@ import {
   MeshStandardMaterial,
 } from "three";
 
-import { box } from "./blocks.ts";
+import { box } from "./hash.ts";
 
 // The Green Line Express: an elevated track round the eight outer boroughs, through every stop, and a train that runs it all day. The
 // train is only for looks; the rules move a rider from stop to stop.

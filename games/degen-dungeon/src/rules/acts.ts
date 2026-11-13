@@ -2,6 +2,8 @@ import {
   borrowHeat,
   drainPace,
   faucetDun,
+  gaitStealth,
+  nightTick,
   gigRep,
   lineCool,
   lootHeat,
@@ -17,7 +19,7 @@ import { nearest, spotNamed, spots, type Spot } from "./places.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
 import type { Draft, Ride } from "./types.ts";
-import { dockLand, dockWater, onLand } from "./world.ts";
+import { dockLand, dockWater, onStreet } from "./world.ts";
 
 // The act button, the answer to a question and a helicopter's climb. Each answers null when it is done, or why it cannot be. The statue,
 // the newbie of a trip back, the watcher and the story's beat are asked first; then the nearest open place. A new kind of place is a new
@@ -98,6 +100,7 @@ function rideLine(day: Draft, next: string): string | null {
 function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
   const stealth =
     (heroes[day.hero]?.stealth ?? 0) +
+    (gaitStealth[day.gait] ?? 0) +
     (day.done.includes("fit-parka") || day.done.includes("locker") ? 2 : 0);
   const crowd =
     spot.id === "loot-stall" ||
@@ -110,6 +113,8 @@ function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
 // Opening a talk: Frost gives the speech on the first morning, the floor and the shops need an unlocked wallet, and MAXX is shut after the
 // winter.
 function open(day: Draft, node: string): string | null {
+  if (node === "lantern" && day.tick < nightTick)
+    return "the lanterns go up after dark";
   if (node === "frost")
     day.talk =
       day.day === 1 && !day.done.includes("speech") ? "speech" : "frost";
@@ -154,6 +159,16 @@ function useSpot(day: Draft, spot: Spot): string | null {
       return once(day, spot.id, () => void (day.pocket += 500));
     case "loot":
       return once(day, spot.id, () => loot(day, spot));
+    case "parked":
+      // Beside another parked ride, the one being ridden is parked too.
+      if (day.ride !== "foot") {
+        day.ride = "foot";
+        return null;
+      }
+      return once(day, spot.id, () => {
+        day.ride = spot.ride;
+        if (spot.ride === "car") heated(day, borrowHeat);
+      });
     case "offer":
     case "recruit":
       return ask(day, spot);
@@ -232,7 +247,7 @@ export function lift(day: Draft, by: number): string | null {
   if (day.ride !== "heli") return "only a helicopter climbs";
   const level = day.level + by;
   if (level < 0 || level > 3) return "no higher or lower than that";
-  if (level === 0 && !onLand(day.x, day.z)) return "nowhere to land here";
+  if (level === 0 && !onStreet(day.x, day.z)) return "nowhere to land here";
   day.level = level;
   return null;
 }
@@ -242,5 +257,12 @@ export function look(day: Draft): string | null {
   if (!day.looking && day.vision === 0)
     return "frost vision is spent for today";
   day.looking = !day.looking;
+  return null;
+}
+
+// How the hero moves on foot from now: 0 walking, 1 running, 2 crouching, 3 crawling.
+export function gait(day: Draft, mode: number): string | null {
+  if (day.gait === mode) return "already moving that way";
+  day.gait = mode;
   return null;
 }

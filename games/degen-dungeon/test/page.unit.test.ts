@@ -22,7 +22,7 @@ describe("the words beside the picture", () => {
   it("say what can be done here: an offer to answer, a spot to use, a parcel to carry, or how to play", () => {
     expect(starsText(250)).toBe("★★☆☆☆");
     expect(noteFor({ ...day, talk: "offer-kiki" })).toBe(
-      "Space or 1 to 4 answers, X walks away.",
+      "E or 1 to 5 answers, X walks away.",
     );
     expect(talkOf({ ...day, talk: "offer-kiki" })).toEqual({
       answers: ["Yes", "Walk away"],
@@ -44,7 +44,7 @@ describe("the words beside the picture", () => {
     expect(talkOf(day)).toBeNull();
     expect(goalFor(day)).toBe("Cross the FREE FROST riot in The Exchange.");
     expect(goalFor({ ...day, drain: 4 })).toContain("draining");
-    expect(noteFor(day)).toBe("Space: Rally's place");
+    expect(noteFor(day)).toBe("E: Rally's place");
     const street = { ...day, x: 18_000, z: 18_000 };
     expect(noteFor({ ...street, parcel: "drop-marina" })).toBe(
       "Carry the parcel to: Yacht club door",
@@ -81,6 +81,7 @@ describe("what the platform is asked to remember", () => {
         seen: true,
         slip: true,
         sound: { effects: false, music: true, volume: 0.5 },
+        wish: 3,
       }),
     ).toEqual({
       best: 12,
@@ -92,9 +93,18 @@ describe("what the platform is asked to remember", () => {
       seen: true,
       slip: true,
       sound: { effects: false, music: true, volume: 0.5 },
+      wish: 3,
     });
     expect(
-      restore({ best: -1, day: 9, hero: 2.5, seen: "yes", slip: 1, sound: 7 }),
+      restore({
+        best: -1,
+        day: 9,
+        hero: 2.5,
+        seen: "yes",
+        slip: 1,
+        sound: 7,
+        wish: 5,
+      }),
     ).toEqual({ ...freshProgress, sound: defaultSound });
   });
 
@@ -143,6 +153,9 @@ describe("what the platform is asked to remember", () => {
 describe("the player's hands", () => {
   const hands = () => ({
     answer: vi.fn<(choice: number) => void>(),
+    bag: vi.fn<() => void>(),
+    gait: vi.fn<(mode: number, held?: boolean) => void>(),
+    jump: vi.fn<() => void>(),
     look: vi.fn<() => void>(),
     act: vi.fn<() => void>(),
     lift: vi.fn<(by: number) => void>(),
@@ -218,17 +231,34 @@ describe("the player's hands", () => {
     press("KeyD", "keyup");
     press("KeyS", "keyup");
     expect(hand.move.mock.calls).toEqual([[0], [2], [4], [-1]]);
-    for (const code of ["Space", "KeyX", "KeyR", "KeyF", "Enter", "KeyP"])
+    for (const code of ["KeyE", "KeyX", "KeyR", "KeyF", "Enter", "KeyP"])
       press(code);
-    press("Space", "keyup");
+    press("KeyE", "keyup");
     expect(
       [hand.act, hand.no, hand.start, hand.pause].map(
         (called) => called.mock.calls.length,
       ),
     ).toEqual([1, 1, 1, 1]);
     expect(hand.lift.mock.calls).toEqual([[1], [-1]]);
+    // Space jumps, Shift held runs, C crouches, Z crawls, B and I open the backpack, 5 picks a fifth answer.
+    for (const code of [
+      "Space",
+      "ShiftLeft",
+      "KeyC",
+      "KeyZ",
+      "KeyB",
+      "KeyI",
+      "Digit5",
+    ])
+      press(code);
+    press("ShiftLeft", "keyup");
+    expect([hand.jump.mock.calls.length, hand.bag.mock.calls.length]).toEqual([
+      1, 2,
+    ]);
+    expect(hand.gait.mock.calls).toEqual([[1, true], [2], [3], [1, false]]);
+    expect(hand.answer).toHaveBeenCalledWith(4);
     stop();
-    press("Space");
+    press("KeyE");
     expect(hand.act).toHaveBeenCalledTimes(1);
   });
 });

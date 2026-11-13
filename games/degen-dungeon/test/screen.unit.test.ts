@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { guideFor } from "../src/guide.ts";
 import { openTo, spots } from "../src/rules/places.ts";
-import { colour, drawMap, drawScreen } from "../src/screen/flat.ts";
+import { colour, drawMap, drawScreen, onMap } from "../src/screen/flat.ts";
 import { resultOf } from "../src/screen/result.ts";
 import { started } from "./support/replay.ts";
 
@@ -35,11 +35,11 @@ describe("the island from above", () => {
       36,
     );
     expect(empty.fills.filter(([tint]) => tint === colour.spot)).toHaveLength(
-      spots.filter((spot) => spot.on === undefined).length,
+      spots.filter((spot) => spot.on === undefined && onMap(spot)).length,
     );
     const today = surface();
     drawMap(today.context, day, { size: 360, x: 0, y: 0 });
-    const open = spots.filter((spot) => openTo(spot, day));
+    const open = spots.filter((spot) => openTo(spot, day) && onMap(spot));
     expect(
       today.fills.filter(
         ([tint]) => tint === colour.spot || tint === colour.letter,
