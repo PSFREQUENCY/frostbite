@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { AnalyticsProviderFactory } from "../src/analytics/port.ts";
+import type { ErrorProviderFactory } from "../src/errors/port.ts";
 import { analyticsProviders } from "../src/analytics/providers/index.ts";
 import { errorProviders } from "../src/errors/providers/index.ts";
 import { describeError } from "../src/errors/describe.ts";
@@ -12,7 +14,7 @@ const settings = (provider: string) => ({
   token: provider === "noop" ? null : "test-key",
 });
 
-describe.each(Object.entries(analyticsProviders))(
+describe.each(Object.entries<AnalyticsProviderFactory>(analyticsProviders))(
   "the analytics provider %s",
   (name, factory) => {
     it("takes an event without throwing and closes", async () => {
@@ -27,7 +29,7 @@ describe.each(Object.entries(analyticsProviders))(
   },
 );
 
-describe.each(Object.entries(errorProviders))(
+describe.each(Object.entries<ErrorProviderFactory>(errorProviders))(
   "the error-reporting provider %s",
   (name, factory) => {
     it("takes a report without throwing and closes", async () => {
