@@ -21,14 +21,9 @@ const navigate = vi.fn();
 
 // A view that signs in when its button is pressed, as the real ones do once the server has said so.
 const view = (kind: string, label: string): SignInView => ({
-  Component: ({ expectedNetwork, onSignedIn, referralCode, track }) => (
+  Component: ({ expectedNetwork, onSignedIn, track }) => (
     <>
-      <button
-        data-network={expectedNetwork}
-        data-referral={referralCode ?? ""}
-        onClick={onSignedIn}
-        type="button"
-      >
+      <button data-network={expectedNetwork} onClick={onSignedIn} type="button">
         {`Sign in via ${kind}`}
       </button>
       <button onClick={track.started} type="button">
@@ -53,20 +48,14 @@ const views = [
 const capture = vi.fn();
 const analytics = { capture, shutdown: () => Promise.resolve() };
 
-const show = (
-  offered: readonly string[],
-  referralCode: string | null = null,
-  acceptsInvitation = true,
-) =>
+const show = (offered: readonly string[]) =>
   act(async () => {
     root.render(
       <AnalyticsProvider analytics={analytics}>
         <SignInSurface
-          acceptsInvitation={acceptsInvitation}
           expectedNetwork="signet"
           navigate={navigate}
           offered={offered}
-          referralCode={referralCode}
           views={views}
         />
       </AnalyticsProvider>,
@@ -104,62 +93,6 @@ const press = (name: string) =>
   });
 
 describe("the sign-in page's methods", () => {
-  describe("the invitation code", () => {
-    const codes = () =>
-      [...container.querySelectorAll("[data-referral]")].map((element) =>
-        element.getAttribute("data-referral"),
-      );
-    const field = () =>
-      container.querySelector<HTMLInputElement>(
-        "details input[type=text], details input:not([type])",
-      );
-    const typeInto = (value: string) =>
-      act(async () => {
-        const input = field();
-        if (input === null) throw new Error("no field");
-        Object.getOwnPropertyDescriptor(
-          HTMLInputElement.prototype,
-          "value",
-        )?.set?.call(input, value);
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-
-    it("starts with the code the address carried, open, and hands it to every method", async () => {
-      await show(["wallet", "email"], "23456789");
-      expect(field()?.value).toBe("23456789");
-      expect(container.querySelector("details")?.open).toBe(true);
-      expect(codes()).toEqual(["23456789", "23456789"]);
-    });
-
-    it("is closed and empty when nobody sent the visitor, and hands on no code", async () => {
-      await show(["wallet", "email"]);
-      expect(container.querySelector("details")?.open).toBe(false);
-      expect(codes()).toEqual(["", ""]);
-    });
-
-    it("takes a code typed in any case and with spaces, and hands the code on in its one form", async () => {
-      await show(["wallet", "email"]);
-      await typeInto(" bcdfghjk ");
-      expect(codes()).toEqual(["BCDFGHJK", "BCDFGHJK"]);
-      expect(container.querySelector("[role=alert]")).toBeNull();
-    });
-
-    it("says what is wrong with a text that is not a code, and hands on none", async () => {
-      await show(["wallet", "email"], "23456789");
-      await typeInto("nope");
-      expect(codes()).toEqual(["", ""]);
-      expect(container.textContent).toContain("8 letters and numbers");
-      await typeInto("");
-      expect(container.textContent).not.toContain("8 letters and numbers");
-    });
-
-    it("is not asked for where the page does not take invitations, whatever the address carried", async () => {
-      await show(["wallet"], "23456789", false);
-      expect(container.querySelector("details")).toBeNull();
-      expect(codes()).toEqual([""]);
-    });
-  });
-
   it("shows a key for each offered method, in the server's order, with the network the wallet is asked for", async () => {
     await show(["email", "wallet"]);
     expect(
