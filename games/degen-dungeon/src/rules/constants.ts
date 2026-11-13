@@ -74,7 +74,7 @@ export const fateDun = 500;
 export const visionTicks = 450;
 export const paperTest = 2_400;
 export const drainPace = 4;
-export const riotHeat = 100;
+export const riotHeat = 130;
 export const witnessHeat = 80;
 // The beat cop: out at two stars, on a scooter, and a fine instead of a freeze.
 export const copStars = 2;

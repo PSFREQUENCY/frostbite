@@ -264,7 +264,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "97c45ffdcbd59b22072a6033d38f9c49d3939549216f4ba538bc56819fb20952",
+        "2bca8580ae0bd442996cb259e18e6e6241385cc88561cf370628c8d3a80a4a6b",
       version: 1,
     },
   },
