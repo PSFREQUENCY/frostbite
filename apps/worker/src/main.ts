@@ -1,6 +1,11 @@
 import { createServer } from "node:http";
 
 import { createNodeRequestListener } from "@frostbite/http/node-adapter";
+import {
+  createServerErrorReporter,
+  installProcessErrorMonitor,
+} from "@frostbite/telemetry/errors/server";
+import { parseTelemetryEnvironment } from "@repo/config/telemetry";
 
 import { expiredRowPolicy } from "@repo/configs/expired-rows";
 import { providerRegistry } from "@repo/configs/providers";
@@ -20,6 +25,21 @@ function log(
   console.error(JSON.stringify({ level, message, ...fields }));
 }
 
+// Errors are reported to the provider the settings name (nothing, when none is set), as well as logged. A setting that cannot work stops the
+// worker here, with its name. A server report carries no message: it can hold the player's own data.
+const errors = createServerErrorReporter(
+  parseTelemetryEnvironment(process.env).errorReporting,
+  {
+    onProblem: (problem) =>
+      log("error", "error reporting problem", { problem }),
+  },
+);
+installProcessErrorMonitor(errors, process);
+function failed(message: string, error: Error): void {
+  log("error", message, { error: error.message });
+  errors.captureException(error);
+}
+
 const runtime = createWorkerRuntime({
   environment: process.env,
   providers: providerRegistry,
@@ -32,8 +52,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const)
 const port = parseWorkerPort(process.env);
 const server = createServer(
   createNodeRequestListener(runtime.handle, {
-    onError: (error) =>
-      log("error", "request failed", { error: error.message }),
+    onError: (error) => failed("request failed", error),
   }),
 );
 await new Promise<void>((resolve) => server.listen(port, resolve));
@@ -41,16 +60,14 @@ log("info", "worker listening", { port });
 
 await Promise.all([
   runtime.runRelay(shutdown.signal, (error) =>
-    log("error", "relay pass failed", { error: error.message }),
+    failed("relay pass failed", error),
   ),
   runtime.runRowSweeps(shutdown.signal, {
-    onError: (error) =>
-      log("error", "row sweep failed", { error: error.message }),
+    onError: (error) => failed("row sweep failed", error),
     onResult: (counts) => log("info", "expired rows removed", { ...counts }),
   }),
   runtime.runCleanup(shutdown.signal, {
-    onError: (error) =>
-      log("error", "cleanup pass failed", { error: error.message }),
+    onError: (error) => failed("cleanup pass failed", error),
     onResult: ({ claimed, failures, removed }) =>
       log(failures.length > 0 ? "error" : "info", "abandoned uploads", {
         claimed,
@@ -65,4 +82,5 @@ const closed = new Promise<void>((resolve) => server.close(() => resolve()));
 server.closeIdleConnections();
 await closed;
 await runtime.close();
+await errors.shutdown();
 log("info", "worker stopped");

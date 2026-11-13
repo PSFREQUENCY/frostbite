@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: new URL("../..", import.meta.url).pathname,
   poweredByHeader: false,
+  // The page's error reports are sent to paths that end in a slash; the proxy forwards them as they are (see `src/proxy.ts`).
+  // Maps of the browser code are made so that error reports can be read; the image build tags them, uploads them if it can, and removes them
+  // before the image is made, so nothing serves them.
+  productionBrowserSourceMaps: true,
+  skipTrailingSlashRedirect: true,
   transpilePackages: [
     "@repo/configs",
     "@frostbite/feature-platform-shell",

@@ -85,4 +85,40 @@ describe("the proxy", () => {
       "purpose",
     ]);
   });
+
+  describe("a page's error reports", () => {
+    const report = (headers: Record<string, string> = {}) =>
+      new NextRequest("https://platform.example.com/telemetry/errors/e/?ip=0", {
+        headers,
+        method: "POST",
+      });
+
+    it("are sent on to the provider with no page headers and none of the person's, when a provider is set", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_TOKEN", "phc_test");
+      vi.stubEnv("ERROR_REPORTING_INGEST_ORIGIN", "https://eu.i.example.com");
+      const response = proxy(report({ cookie: "frostbite_session=SECRET" }));
+      expect(response.headers.get("x-middleware-rewrite")).toBe(
+        "https://eu.i.example.com/e/?ip=0",
+      );
+      expect(
+        response.headers.get("Content-Security-Policy-Report-Only"),
+      ).toBeNull();
+      expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
+    });
+
+    it("are answered with nothing when no provider is set", () => {
+      const response = proxy(report());
+      expect(response.status).toBe(204);
+      expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+    });
+
+    it("cannot be brought down by a mistake in the error-reporting settings for any page", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "mystery");
+      expect(() =>
+        proxy(new NextRequest("https://platform.example.com/games")),
+      ).not.toThrow();
+      expect(() => proxy(report())).toThrow(/Unknown provider/u);
+    });
+  });
 });

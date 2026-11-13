@@ -21,6 +21,7 @@
     "@frostbite/object-storage": "workspace:*",
     "@frostbite/plugin-kit": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@repo/configs": "workspace:*"
   },
   "devDependencies": {

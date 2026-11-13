@@ -13,6 +13,15 @@ const settings = {
 const uuid = "3f2a9c1e-5b7d-4e8a-9c0d-1a2b3c4d5e6f";
 
 describe("describeError", () => {
+  it("keeps only the top frames asked for", () => {
+    const error = new Error("m");
+    error.stack = Array.from(
+      { length: 20 },
+      (_, i) => `    at f${String(i)} (x:1:1)`,
+    ).join("\n");
+    expect(describeError(error, {}, { maxFrames: 3 }).frames).toHaveLength(3);
+  });
+
   it("keeps the kind, the message and the lines of the stack", () => {
     const error = new TypeError("bad input");
     const report = describeError(error);
@@ -45,9 +54,12 @@ describe("describeError", () => {
     const report = describeError({
       secret: "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
     });
-    expect(report).toMatchObject({ frames: [], name: "NonError" });
+    expect(report).toMatchObject({ frames: [], name: "object" });
     expect(report.message).not.toContain("bc1q");
-    expect(describeError("a string").message).not.toContain("a string");
+    expect(describeError("a string")).toMatchObject({
+      message: "",
+      name: "string",
+    });
   });
 
   it("keeps the ids the platform made and the route as a template", () => {
@@ -125,16 +137,35 @@ describe("the error reporter", () => {
     expect(rejecting.problems).toContain("shutdown-timed-out");
   });
 
-  it("refuses a provider name that is not in the registry, and runs as noop by default", async () => {
+  it("refuses a provider name that is not in the registry", () => {
     expect(() =>
-      createErrorReporter({ ...settings, provider: "elsewhere" }),
+      createErrorReporter(
+        { ...settings, provider: "elsewhere" },
+        { registry: {} },
+      ),
     ).toThrow(/Unknown error-reporting provider "elsewhere"/u);
-    const reporter = createErrorReporter({
-      ingestOrigin: null,
-      provider: "noop",
-      token: null,
+  });
+
+  it("leaves the message out of a report when told to, and keeps a database code", () => {
+    const captureException = vi.fn<ErrorProvider["captureException"]>();
+    const reporter = createErrorReporter(settings, {
+      describe: { message: "omit" },
+      registry: {
+        fake: () => ({ captureException, shutdown: () => Promise.resolve() }),
+      },
     });
-    reporter.captureException(new Error("x"));
-    await expect(reporter.shutdown()).resolves.toBeUndefined();
+    const failure = Object.assign(new Error("Failed query: params: a@b.co"), {
+      name: "DrizzleQueryError",
+    });
+    reporter.captureException(
+      Object.assign(failure, { cause: { code: "23505" } }),
+    );
+    const sent = captureException.mock.calls[0]?.[0];
+    expect(sent).toMatchObject({
+      code: "23505",
+      message: "",
+      name: "DrizzleQueryError",
+    });
+    expect(JSON.stringify(sent)).not.toContain("Failed query");
   });
 });

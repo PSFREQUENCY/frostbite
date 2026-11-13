@@ -52,4 +52,12 @@ export const telemetryEnvironmentDefinitions = [
     required: false,
     secret: false,
   },
+  {
+    key: "NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION",
+    description:
+      "true lets a browser that announces itself as a robot send error reports, which the browsers that run our tests do; blank or false keeps them out. For test builds only: refused when APP_ENV is preview or production. Baked into the browser build.",
+    exposure: "public",
+    required: false,
+    secret: false,
+  },
 ] as const satisfies readonly EnvironmentDefinition[];

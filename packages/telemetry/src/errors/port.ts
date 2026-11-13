@@ -13,6 +13,8 @@ export interface ErrorContext {
 
 // An error as a provider receives it: already described, checked and scrubbed.
 export interface ErrorReport {
+  // A database error's code (`23505`), when it has one.
+  readonly code?: string;
   readonly context: ErrorContext;
   readonly frames: readonly string[];
   readonly message: string;
