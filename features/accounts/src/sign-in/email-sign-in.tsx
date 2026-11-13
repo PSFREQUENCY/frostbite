@@ -9,7 +9,11 @@ import type { SignInViewProps } from "./views.ts";
 
 // Signing in with a code sent by email: ask for it, then enter it. "A code was sent" is shown only after the server has said so, and the
 // page never says whether the address already has an account.
-export function EmailSignIn({ onSignedIn, track }: SignInViewProps) {
+export function EmailSignIn({
+  onSignedIn,
+  referralCode,
+  track,
+}: SignInViewProps) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"address" | "code" | "signed-in">("address");
@@ -37,7 +41,7 @@ export function EmailSignIn({ onSignedIn, track }: SignInViewProps) {
   async function enter(event: FormEvent) {
     event.preventDefault();
     setWorking(true);
-    const outcome = await verifyEmailCode(request, email, code);
+    const outcome = await verifyEmailCode(request, email, code, referralCode);
     setWorking(false);
     if (outcome.kind === "signed-in") {
       setStep("signed-in");

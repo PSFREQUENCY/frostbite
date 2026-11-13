@@ -16,6 +16,7 @@ import type { SignInViewProps } from "./views.ts";
 export function WalletSignIn({
   expectedNetwork,
   onSignedIn,
+  referralCode,
   track,
 }: SignInViewProps) {
   const wallet = useWalletConnection();
@@ -59,7 +60,7 @@ export function WalletSignIn({
             disabled={working}
             onClick={() => {
               track.started();
-              void actions.signIn();
+              void actions.signIn(referralCode);
             }}
             type="button"
           >

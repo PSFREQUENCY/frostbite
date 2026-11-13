@@ -137,6 +137,8 @@ export function createContactCodeService(dependencies: {
       readonly code: string;
       readonly destination: string;
       readonly kind: MethodKind;
+      // Who referred the person, if they arrived by a link; used only when the code makes a new account.
+      readonly referralCode?: string | null;
     }): Promise<VerifyCodeResult> {
       const now = clock();
       const checked = await check(input, now, null);
@@ -148,6 +150,7 @@ export function createContactCodeService(dependencies: {
         destination: checked.destination,
         kind: checked.channel.kind,
         now,
+        referralCode: input.referralCode ?? null,
         session: createSessionMaterial(now, sessionToken, sessions),
       });
       return result.kind === "signed-in"

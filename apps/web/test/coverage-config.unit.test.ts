@@ -25,6 +25,7 @@ describe("web coverage inventory", () => {
             "src/server/auth/runtime.ts",
             "src/app/api/csp-report/route.ts",
             "src/app/api/ready/route.ts",
+            "src/app/r/[code]/route.ts",
             "src/proxy.ts",
             "src/server/database.ts",
             "src/server/rate-limit.ts",

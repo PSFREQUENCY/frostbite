@@ -68,9 +68,33 @@ describe("signing in with a wallet", () => {
     expect(s.verify).toHaveBeenCalledWith({
       challengeId,
       expectedAction: "sign-in",
+      referralCode: null,
       signature: "sig",
     });
     expect(verify.access).toEqual({ kind: "public" });
+  });
+
+  it("hands on the code of whoever invited the person, and accepts only a code of the right shape", async () => {
+    const s = services();
+    s.verify.mockResolvedValueOnce({
+      ok: true,
+      sessionToken: "fresh-token",
+    } as never);
+    const [, verify] = createWalletSignInOperations(() => s.services);
+    await verify.execute(
+      { challengeId, referralCode: "23456789", signature: "sig" },
+      anonymous,
+    );
+    expect(s.verify).toHaveBeenCalledWith(
+      expect.objectContaining({ referralCode: "23456789" }),
+    );
+    expect(
+      verify.inputSchema.safeParse({
+        challengeId,
+        referralCode: "not a code",
+        signature: "sig",
+      }).success,
+    ).toBe(false);
   });
 
   it("tells every failure the same way except a conflict, which is its own, and says nothing about whose a wallet is", async () => {

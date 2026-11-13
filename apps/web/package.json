@@ -32,6 +32,7 @@
     "@frostbite/feature-creator-admission": "workspace:*",
     "@frostbite/feature-game-admin": "workspace:*",
     "@frostbite/feature-games": "workspace:*",
+    "@frostbite/referrals": "workspace:*",
     "@frostbite/feature-platform-shell": "workspace:*",
     "@frostbite/feature-profiles": "workspace:*",
     "@frostbite/feature-public-collections": "workspace:*",

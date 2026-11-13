@@ -24,6 +24,8 @@
     "@frostbite/provider-media-processing-sharp": "workspace:*",
     "@frostbite/provider-object-storage-r2": "workspace:*",
     "@frostbite/provider-workflows-inngest": "workspace:*",
+    "@frostbite/referrals": "workspace:*",
+    "@frostbite/rewards": "workspace:*",
     "@frostbite/share": "workspace:*",
     "@frostbite/shared": "workspace:*",
     "@frostbite/wallet": "workspace:*",

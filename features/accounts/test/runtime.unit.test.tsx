@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { linkReferralOnNewAccount } from "../src/referral-link.ts";
 import type { AccountMethods } from "../src/runtime.ts";
 
 const factories = vi.hoisted(() => ({
@@ -169,7 +170,10 @@ describe("passkey runtime composition", () => {
       policy,
       sender: "mail-sender",
     });
-    expect(factories.contactRepository).toHaveBeenCalledWith("database");
+    // New accounts are linked to whoever referred them, in the transaction that makes them.
+    expect(factories.contactRepository).toHaveBeenCalledWith("database", {
+      onAccountCreated: linkReferralOnNewAccount,
+    });
     expect(factories.contactService).toHaveBeenCalledWith(
       expect.objectContaining({
         channels: ["email-channel"],

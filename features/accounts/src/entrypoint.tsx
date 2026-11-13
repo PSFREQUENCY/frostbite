@@ -32,6 +32,10 @@ import type {
 import { AccountSurface } from "./ui/account-surface.tsx";
 import { AdminHome } from "./ui/admin-home.tsx";
 import { SetupPage } from "./ui/setup-page.tsx";
+import {
+  normalizeReferralCode,
+  referralParameter,
+} from "@frostbite/shared/referrals";
 import { SignInPage } from "./ui/sign-in-page.tsx";
 import { createRedeemSetupLinkOperation } from "./setup/operation.ts";
 import type { SetupLinkService } from "@frostbite/authorization";
@@ -168,11 +172,16 @@ export function createAccountsEntrypoint({
       {
         access: { kind: "public" },
         path: "/sign-in",
-        render: ({ navigation }) => (
+        render: ({ navigation, searchParams }) => (
           <SignInPage
             expectedNetwork={signIn.network}
             navigation={navigation}
             offered={signIn.offered()}
+            referralCode={normalizeReferralCode(
+              typeof searchParams?.[referralParameter] === "string"
+                ? searchParams[referralParameter]
+                : null,
+            )}
           />
         ),
       },

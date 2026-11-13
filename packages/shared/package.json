@@ -20,6 +20,7 @@
     "./identifiers": "./src/identifiers/uuid-v7.ts",
     "./platform": "./src/platform/status.ts",
     "./profiles": "./src/profiles/index.ts",
+    "./referrals": "./src/referrals/code.ts",
     "./uploads": "./src/uploads/index.ts",
     "./providers": "./src/features/manifest.ts",
     "./collections": "./src/collections/index.ts",

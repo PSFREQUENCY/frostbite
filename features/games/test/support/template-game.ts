@@ -135,4 +135,8 @@ export const runsConfig = { playRoot: "/nonexistent/play" } as const;
 export const claimsConfig = {
   chain: () => null,
   delay: { maxLagBlocks: 2, maxUnsettledMs: 60 * 60_000 },
+  // Nothing here earns a referral cut (there is no chain to claim on), so only the ceilings are needed.
+  referrals: {
+    policy: { maximumMaturitySeconds: 86_400, maximumMinimumPayout: 1_000n },
+  },
 } as const;

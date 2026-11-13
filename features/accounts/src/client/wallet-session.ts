@@ -132,6 +132,8 @@ export function createWalletSession(dependencies: {
         "verifyLink" | "verifySignIn" | "verifyStepUp"];
     },
     verifySchema: Parser<object>,
+    // What the verifying request carries beside the challenge and the signature (a sign-in's referral code).
+    verifyExtras: Readonly<Record<string, string>> = {},
   ): Promise<boolean> {
     if (busy !== null) return false;
     if (!connection.connected) {
@@ -164,7 +166,11 @@ export function createWalletSession(dependencies: {
         return false;
       }
       await request(routes.verify, verifySchema, {
-        body: { challengeId: challenge.challengeId, signature },
+        body: {
+          challengeId: challenge.challengeId,
+          signature,
+          ...verifyExtras,
+        },
       });
       await refresh();
       set({ busy: null });
@@ -199,7 +205,8 @@ export function createWalletSession(dependencies: {
       connection = next;
       if (changed) publish();
     },
-    signIn: () =>
+    // `referralCode` is the code of whoever referred the person, used by the server only if this sign-in makes a new account.
+    signIn: (referralCode: string | null = null) =>
       signed(
         "sign-in",
         {
@@ -207,6 +214,7 @@ export function createWalletSession(dependencies: {
           verify: walletAuthRoutes.verifySignIn,
         },
         walletSignedInResponseSchema,
+        referralCode === null ? {} : { referralCode },
       ),
     snapshot: (): WalletSessionSnapshot =>
       (snapshot ??= {

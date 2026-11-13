@@ -44,6 +44,7 @@ beforeEach(() => {
       <PasskeySignIn
         expectedNetwork="signet"
         onSignedIn={onSignedIn}
+        referralCode={null}
         track={track}
       />,
     );

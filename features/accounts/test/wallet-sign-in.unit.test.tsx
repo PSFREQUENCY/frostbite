@@ -22,12 +22,16 @@ import { WalletSignIn } from "../src/sign-in/wallet-sign-in.tsx";
 
 const onSignedIn = vi.fn();
 const track = { failed: vi.fn(), started: vi.fn() };
-const view = (network: "signet" | "mainnet" = "signet") => (
+const view = (
+  network: "signet" | "mainnet" = "signet",
+  referralCode: string | null = null,
+) => (
   // A new function and a new tracker on every render, as the sign-in surface gives them: moving on, and counting a failure, must still
   // happen once.
   <WalletSignIn
     expectedNetwork={network}
     onSignedIn={() => onSignedIn()}
+    referralCode={referralCode}
     track={{
       failed: (reason) => track.failed(reason),
       started: () => track.started(),
@@ -91,6 +95,29 @@ describe("signing in with a wallet on the sign-in page", () => {
       "/api/v1/auth/wallet/challenge",
       "/api/v1/auth/wallet/verify",
       "/api/v1/auth/methods",
+    ]);
+  });
+
+  it("sends the code of whoever invited the person with the signature, and sends none when nobody did", async () => {
+    Object.assign(connection, { address, connected: true, provider: "xverse" });
+    let signedIn = false;
+    Object.assign(answers, {
+      "/api/v1/auth/methods": () =>
+        signedIn ? methods([address]) : denied("unauthorized", 401),
+      "/api/v1/auth/wallet/challenge": challenge,
+      "/api/v1/auth/wallet/verify": () => {
+        signedIn = true;
+        return json({ signedIn: true });
+      },
+    });
+    await show(view("signet", "23456789"));
+    await settle();
+    await press("Sign in with wallet");
+    const verified = requests.filter(
+      ({ path }) => path === "/api/v1/auth/wallet/verify",
+    );
+    expect(verified.map(({ body }) => body)).toEqual([
+      expect.objectContaining({ referralCode: "23456789" }),
     ]);
   });
 

@@ -28,8 +28,20 @@ import { EmailSignIn } from "../src/sign-in/email-sign-in.tsx";
 
 let container: HTMLElement;
 let root: Root;
+let referral: string | null = null;
 const onSignedIn = vi.fn();
 const track = { failed: vi.fn(), started: vi.fn() };
+const mount = () =>
+  act(() => {
+    root.render(
+      <EmailSignIn
+        expectedNetwork="signet"
+        onSignedIn={onSignedIn}
+        referralCode={referral}
+        track={track}
+      />,
+    );
+  });
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -39,15 +51,8 @@ beforeEach(() => {
   document.body.append(container);
   root = createRoot(container);
   vi.clearAllMocks();
-  act(() => {
-    root.render(
-      <EmailSignIn
-        expectedNetwork="signet"
-        onSignedIn={onSignedIn}
-        track={track}
-      />,
-    );
-  });
+  referral = null;
+  mount();
 });
 afterEach(() => {
   act(() => root.unmount());
@@ -166,12 +171,40 @@ describe("entering the code", () => {
       expect.any(Function),
       "Ada@Example.com",
       "123456",
+      null,
     );
     expect(onSignedIn).toHaveBeenCalledOnce();
     expect(container.querySelector('[role="status"]')?.textContent).toContain(
       "Signed in",
     );
     expect(container.querySelector("form")).toBeNull();
+  });
+
+  it("carries the code of whoever invited the person with the code it sends, and none when nobody did", async () => {
+    await toCodeStep();
+    verifyAnswers({ kind: "signed-in" });
+    type("123456");
+    await submit();
+    expect(flow.verifyEmailCode).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      "Ada@Example.com",
+      "123456",
+      null,
+    );
+    act(() => root.unmount());
+    root = createRoot(container);
+    referral = "23456789";
+    mount();
+    await toCodeStep();
+    verifyAnswers({ kind: "signed-in" });
+    type("654321");
+    await submit();
+    expect(flow.verifyEmailCode).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      "Ada@Example.com",
+      "654321",
+      "23456789",
+    );
   });
 
   it.each(["code-wrong", "rate-limited", "network"] as const)(

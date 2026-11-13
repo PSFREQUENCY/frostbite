@@ -30,6 +30,7 @@ import type {
 export function createGameClaimsService(dependencies: GameClaimsDependencies) {
   const {
     clock,
+    completed,
     earned,
     funding,
     game,
@@ -54,6 +55,15 @@ export function createGameClaimsService(dependencies: GameClaimsDependencies) {
     const change: ClaimChange | null = afterBroadcast(outcome);
     if (change === null) return claim;
     return repository.update(userId, claim.id, moveTo("signed", change));
+  }
+
+  // Tells whoever follows a completed claim. Whatever goes wrong is reported and never fails the claim, which is complete either way.
+  async function announce(claim: StoredClaim): Promise<void> {
+    try {
+      await completed?.(claim);
+    } catch (error) {
+      report?.({ error, step: "completed" });
+    }
   }
 
   return {
@@ -198,10 +208,10 @@ export function createGameClaimsService(dependencies: GameClaimsDependencies) {
       if (claim === null) return { code: "not-found", ok: false };
       const chain = ports(claim.chain);
       if (chain === null) return { code: "chain-unavailable", ok: false };
-      const done = async (held: StoredClaim): Promise<RefreshClaimResult> => ({
-        claim: await viewer.one(held),
-        ok: true,
-      });
+      const done = async (held: StoredClaim): Promise<RefreshClaimResult> => {
+        if (held.state === "complete") await announce(held);
+        return { claim: await viewer.one(held), ok: true };
+      };
       try {
         if (claim.state === "signed")
           return done((await broadcast(userId, claim, chain)) ?? claim);
