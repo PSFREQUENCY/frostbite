@@ -1,38 +1,26 @@
 import {
-  BoxGeometry,
+  CapsuleGeometry,
   Color,
   CylinderGeometry,
-  DirectionalLight,
   Group,
-  HemisphereLight,
   InstancedMesh,
-  Matrix4,
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
+  SphereGeometry,
 } from "three";
 
-import { block, island, lots } from "../rules/constants.ts";
-import { spots, type Spot } from "../rules/places.ts";
-import { boroughs, centreOf } from "../rules/world.ts";
+import { island } from "../rules/constants.ts";
+import { watcherAt } from "../rules/mystery.ts";
+import { openTo, spots, type Spot } from "../rules/places.ts";
+import { beatOf } from "../rules/story.ts";
+import type { DayState } from "../rules/types.ts";
+import { box, buildBlocks } from "./blocks.ts";
 
-// Nakasato, built in code from the same numbers the rules walk on: the island, the sea, a block of towers on every lot and a marker on
-// every spot. It is a stand-in the right size and in the right place: the kit of real buildings, billboards and street dressing goes here.
+// Nakasato, built in code from the same numbers the rules walk on: the island and the sea, the buildings of every borough, Moon Tower
+// and the screens of Ticker Square with the hooded mirror statue, and a glowing marker on every place open today: the day's story beat
+// tallest and gold, S's letters white on the ground, the watcher's footprints only by frost vision.
 export const metres = (centimetres: number): number => centimetres / 100;
-
-// A borough's own colour and how tall it builds, in the order of `boroughs`.
-const tints = [
-  "#3d6c8f",
-  "#2f8f9d",
-  "#8fc7e8",
-  "#b23ac7",
-  "#e0b341",
-  "#e8663d",
-  "#7a4fd1",
-  "#5d6b7a",
-  "#3fae6b",
-];
-const storeys = [14, 18, 9, 22, 46, 16, 12, 10, 20];
 
 const spotTints: Readonly<Record<Spot["kind"], string>> = {
   drop: "#7be36b",
@@ -40,106 +28,179 @@ const spotTints: Readonly<Record<Spot["kind"], string>> = {
   fence: "#c9c2ff",
   freezer: "#9fd8ff",
   gig: "#7be36b",
+  heroword: "#c9b6ff",
   home: "#ffffff",
+  letter: "#ffffff",
+  locker: "#ffd166",
   loot: "#ff5d5d",
   offer: "#ff9ecf",
+  plug: "#c9b6ff",
   rebrand: "#ffd166",
   recruit: "#ffd166",
   ride: "#5aa9ff",
   stop: "#22c55e",
+  talk: "#ffb000",
   tool: "#f4a261",
   word: "#f7f3d7",
 };
 
-function towers(): InstancedMesh {
-  const mesh = new InstancedMesh(
-    new BoxGeometry(1, 1, 1),
-    new MeshStandardMaterial({ metalness: 0.1, roughness: 0.75 }),
-    boroughs.length * lots.length * lots.length,
-  );
-  mesh.name = "towers";
-  const place = new Matrix4();
-  let at = 0;
-  boroughs.forEach((_, borough) => {
-    const centre = centreOf(borough);
-    for (const [west, east] of lots)
-      for (const [north, south] of lots) {
-        const height = (storeys[borough] ?? 10) + ((west + north) % 7);
-        place
-          .makeScale(metres(east - west), height, metres(south - north))
-          .setPosition(
-            metres(centre.x - block / 2 + (west + east) / 2),
-            height / 2,
-            metres(centre.z - block / 2 + (north + south) / 2),
-          );
-        mesh.setMatrixAt(at, place);
-        mesh.setColorAt(at, new Color(tints[borough]));
-        at += 1;
-      }
-  });
-  return mesh;
+export interface City {
+  // Shows the markers for what is open on this day, where the story's beat is, and the watcher by frost vision.
+  mark(day: DayState | null, seconds: number): void;
+  readonly root: Group;
 }
 
-function markers(): InstancedMesh {
-  const mesh = new InstancedMesh(
-    new CylinderGeometry(0.35, 0.35, 2.4, 8),
-    new MeshStandardMaterial({ emissive: "#ffffff", emissiveIntensity: 0.35 }),
-    spots.length,
-  );
-  mesh.name = "spots";
-  const place = new Matrix4();
-  spots.forEach((spot, at) => {
-    mesh.setMatrixAt(
-      at,
-      place.makeTranslation(metres(spot.x), 1.2, metres(spot.z)),
-    );
-    mesh.setColorAt(at, new Color(spotTints[spot.kind]));
+function landmarks(root: Group): void {
+  const glass = new MeshStandardMaterial({
+    color: "#1b2f47",
+    emissive: "#5beac6",
+    emissiveIntensity: 0.3,
+    metalness: 0.4,
+    roughness: 0.2,
   });
-  return mesh;
-}
-
-export function buildCity(): Group {
-  const city = new Group();
-  city.name = "city";
-  const size = metres(island);
-  const ground = new Mesh(
-    new BoxGeometry(size, 1, size),
-    new MeshStandardMaterial({ color: "#1b2233", roughness: 1 }),
-  );
-  ground.name = "ground";
-  ground.position.set(size / 2, -0.5, size / 2);
-  const water = new Mesh(
-    new PlaneGeometry(size * 3, size * 3),
-    new MeshStandardMaterial({ color: "#0a3a55", roughness: 0.4 }),
-  );
-  water.name = "sea";
-  water.rotation.x = -Math.PI / 2;
-  water.position.set(size / 2, -0.8, size / 2);
-  // Moon Tower, the top everyone climbs toward, stands over The Exchange.
-  const tower = new Mesh(
-    new BoxGeometry(14, 110, 14),
+  const tower = new Mesh(new CylinderGeometry(6, 9, 150, 8), glass);
+  tower.name = "moon-tower";
+  tower.position.set(210, 75, 150);
+  const moon = new Mesh(
+    new SphereGeometry(7, 16, 12),
     new MeshStandardMaterial({
-      color: "#f7f3d7",
-      emissive: "#e0b341",
-      emissiveIntensity: 0.5,
+      color: "#fff3b0",
+      emissive: "#ffd166",
+      emissiveIntensity: 1,
     }),
   );
-  tower.name = "moon-tower";
-  tower.position.set(
-    metres(centreOf(4).x) + 30,
-    55,
-    metres(centreOf(4).z) - 30,
+  moon.position.set(210, 156, 150);
+  const screens = new MeshStandardMaterial({
+    color: "#0b0d18",
+    emissive: "#22c55e",
+    emissiveIntensity: 0.9,
+  });
+  for (const [x, z, turn] of [
+    [169, 168, 0],
+    [191, 168, 0],
+    [169, 192, Math.PI],
+    [191, 192, Math.PI],
+  ] as const) {
+    const screen = new Mesh(new PlaneGeometry(14, 8), screens);
+    screen.name = "ticker";
+    screen.position.set(x, 22, z);
+    screen.rotation.y = turn;
+    root.add(screen);
+  }
+  const bronze = new MeshStandardMaterial({
+    color: "#8a6a3a",
+    metalness: 0.8,
+    roughness: 0.35,
+  });
+  const figure = new Mesh(new CapsuleGeometry(0.9, 2.2, 4, 10), bronze);
+  figure.position.set(186, 2.6, 186);
+  const face = new Mesh(
+    new SphereGeometry(0.7, 16, 12),
+    new MeshStandardMaterial({
+      color: "#ffffff",
+      metalness: 1,
+      roughness: 0.05,
+    }),
   );
-  const moon = new DirectionalLight("#cfe3ff", 1.6);
-  moon.position.set(size * 0.2, 260, size * 0.9);
-  city.add(
-    ground,
-    water,
-    towers(),
-    markers(),
-    tower,
-    new HemisphereLight("#9fb8ff", "#1b2233", 1.1),
-    moon,
+  face.name = "mirror-face";
+  face.position.set(186, 4.6, 186.3);
+  const plinth = new Mesh(
+    new CylinderGeometry(1.6, 1.8, 1, 10),
+    new MeshStandardMaterial({ color: "#3a3f47" }),
   );
-  return city;
+  plinth.position.set(186, 0.5, 186);
+  root.add(tower, moon, figure, face, plinth);
+}
+
+export function buildCity(): City {
+  const root = new Group();
+  root.name = "city";
+  const size = metres(island);
+  const ground = new Mesh(
+    new PlaneGeometry(size, size),
+    new MeshStandardMaterial({ color: "#20263a", roughness: 1 }),
+  );
+  ground.name = "ground";
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.set(size / 2, 0, size / 2);
+  ground.receiveShadow = true;
+  const sea = new Mesh(
+    new PlaneGeometry(size * 4, size * 4),
+    new MeshStandardMaterial({
+      color: "#0a2a44",
+      metalness: 0.2,
+      roughness: 0.3,
+    }),
+  );
+  sea.name = "sea";
+  sea.rotation.x = -Math.PI / 2;
+  sea.position.set(size / 2, -0.6, size / 2);
+  root.add(ground, sea);
+  buildBlocks(root);
+  landmarks(root);
+  const markers = new InstancedMesh(
+    new CylinderGeometry(0.35, 0.35, 1, 8),
+    new MeshStandardMaterial({ emissive: "#ffffff", emissiveIntensity: 0.6 }),
+    spots.length,
+  );
+  markers.name = "spots";
+  spots.forEach((spot, index) =>
+    markers.setColorAt(index, new Color(spotTints[spot.kind])),
+  );
+  const beacon = new Mesh(
+    new CylinderGeometry(0.8, 0.8, 30, 12, 1, true),
+    new MeshStandardMaterial({
+      color: "#ffb000",
+      emissive: "#ffb000",
+      emissiveIntensity: 1,
+      opacity: 0.4,
+      transparent: true,
+    }),
+  );
+  beacon.name = "beat";
+  const steps = new Mesh(
+    new CylinderGeometry(1.2, 1.2, 0.1, 12),
+    new MeshStandardMaterial({
+      color: "#c9b6ff",
+      emissive: "#c9b6ff",
+      emissiveIntensity: 0.8,
+    }),
+  );
+  steps.name = "watcher";
+  root.add(markers, beacon, steps);
+  return {
+    mark(day, seconds) {
+      spots.forEach((spot, index) => {
+        const open = day === null ? spot.on === undefined : openTo(spot, day);
+        const paper = spot.kind === "letter";
+        const wide = paper ? 1 : 2.2 + 0.25 * Math.sin(seconds * 2 + index);
+        const side = open ? wide : 0;
+        markers.setMatrixAt(
+          index,
+          box(
+            metres(spot.x),
+            0.04,
+            metres(spot.z),
+            side,
+            open ? 0.06 : 0,
+            paper ? side * 0.7 : side,
+          ),
+        );
+      });
+      markers.instanceMatrix.needsUpdate = true;
+      const beat = day === null ? null : beatOf(day);
+      beacon.visible = beat !== null;
+      if (beat !== null) {
+        beacon.position.set(metres(beat.at.x), 15, metres(beat.at.z));
+        beacon.scale.setScalar(1 + 0.15 * Math.sin(seconds * 3));
+      }
+      steps.visible =
+        day !== null && day.looking && !day.done.includes("watcher");
+      if (day !== null && steps.visible) {
+        const at = watcherAt(day.seed, day.day);
+        steps.position.set(metres(at.x), 0.05, metres(at.z));
+      }
+    },
+    root,
+  };
 }

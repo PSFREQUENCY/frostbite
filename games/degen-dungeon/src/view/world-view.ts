@@ -1,183 +1,224 @@
-import {
-  BoxGeometry,
-  Color,
-  Fog,
-  Mesh,
-  MeshStandardMaterial,
-  Scene,
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial, Scene } from "three";
 
-import { echoAt, risen } from "../rules/machine.ts";
+import { storming } from "../rules/day.ts";
+import { risen } from "../rules/machine.ts";
 import { paceOf } from "../rules/move.ts";
-import type { DayState, Ride } from "../rules/types.ts";
+import { onLand } from "../rules/world.ts";
+import type { DayState, Point } from "../rules/types.ts";
 import {
   buildActor,
+  buildCop,
   buildTux,
+  buildVest,
+  heightOf,
   heroCount,
-  stride,
   type Actor,
 } from "./actor.ts";
+import { buildAirdrop } from "./airdrop.ts";
+import { buildBoards } from "./boards.ts";
 import { createRig, type Intent, type Subject } from "./camera.ts";
 import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
-import type { Stage } from "./stage.ts";
+import { buildCrowd, type Gathering } from "./crowd.ts";
+import { buildLight } from "./era.ts";
+import { buildLine } from "./line.ts";
+import { loadModels, modelOf, rigged, type Model } from "./models/load.ts";
+import type { ModelName } from "./models/packed.ts";
+import { shaderTime, visionDepth } from "./models/shaders.ts";
+import { createNewbie } from "./newbie.ts";
+import { createPeople } from "./npcs.ts";
+import { buildNorth } from "./north.ts";
+import { buildRides } from "./rides.ts";
+import { createStage, type Stage } from "./stage.ts";
 import { buildStatue } from "./statue.ts";
 
-// The scene and its three ways of being looked at: a day being played, the opening cinematic, and the hero turntable of the first screen.
-// It reads the rules' state and changes nothing in it; everything here is how a moment looks, never what happened.
+// The whole island in 3D: the city and its era, the cast, the crowds, the rides, the chasers, the airdrop and the far north, with the camera
+// rig choosing a shot for each moment. It reads a day and draws it; nothing here feeds back into the rules.
 export interface WorldView {
-  // A day as it stands. `closeUp` is true for the moment after a spot is used, when the camera cuts to the hands.
   day(state: DayState, seconds: number, dt: number, closeUp: boolean): void;
-  // The opening after `seconds`: its line of words, or null once it is over.
   opening(seconds: number): string | null;
-  // The first screen: the cast on a ring, the chosen one at the front (a shadow, if they are still locked).
   turntable(hero: number, locked: boolean, seconds: number, dt: number): void;
 }
 
-// How big the box under a rider is (the kit's scooter, car, boat and helicopter replace it), and how high a helicopter level is.
-const rideSizes: Readonly<
-  Record<Exclude<Ride, "foot">, readonly [number, number, number]>
-> = {
-  boat: [2.2, 0.8, 5],
-  car: [1.9, 1, 3.8],
-  heli: [2.2, 1.6, 4.5],
-  scooter: [0.5, 0.7, 1.6],
-};
 const levelHeight = 12;
-const ring = { radius: 3.2, x: 180, z: 188 };
+const ring = { radius: 3.4, x: 300, z: 64 };
+const gatheringOf = (state: DayState): Gathering | null => {
+  if (state.gate > 0) return null;
+  if (state.day === 1 && !state.done.includes("speech")) return "riot";
+  if (state.day === 4) return "robots";
+  return state.day === 5 && state.beat >= 1 ? "party" : null;
+};
 
-export function createWorldView(stage: Stage): WorldView {
+export function createWorldView(
+  stage: Stage,
+  models?: Promise<ReadonlyMap<ModelName, Model>>,
+): WorldView {
   const scene = new Scene();
-  scene.background = new Color("#0b1026");
-  scene.fog = new Fog("#0b1026", 60, 520);
+  const light = buildLight();
   const city = buildCity();
-  const cast: Actor[] = Array.from({ length: heroCount }, (_, hero) =>
+  const boards = buildBoards();
+  const line = buildLine();
+  const north = buildNorth();
+  const crowd = buildCrowd();
+  const airdrop = buildAirdrop();
+  const rides = buildRides();
+  const statue = buildStatue();
+  const cast: Actor[] = Array.from({ length: heroCount + 1 }, (_, hero) =>
     buildActor(hero),
   );
-  const tux = buildTux();
-  const ride = new Mesh(
-    new BoxGeometry(1, 1, 1),
-    new MeshStandardMaterial({ color: "#e0b341", roughness: 0.5 }),
-  );
-  ride.name = "ride";
+  const chasers = { cop: buildCop(), tux: buildTux(), vests: buildVest() };
   const shadow = new Mesh(
     new BoxGeometry(0.6, 1.7, 0.4),
     new MeshStandardMaterial({ color: "#000000" }),
   );
   shadow.name = "locked";
-  // The first block: a lit cube of ice where the Faucet stands.
-  const block = new Mesh(
-    new BoxGeometry(1, 1, 1),
-    new MeshStandardMaterial({ color: "#bfe9ff", emissive: "#5beac6" }),
-  );
-  block.name = "cornerstone";
-  block.position.set(170, 0.5, 180);
-  const statue = buildStatue();
-  // The hero's newbie self on a trip back: a second, smaller body of the hero who is travelling.
-  let echo: { readonly actor: Actor; readonly hero: number } | null = null;
   scene.add(
-    city,
-    ride,
-    shadow,
-    block,
+    light.root,
+    city.root,
+    boards.root,
+    line.root,
+    north.root,
+    crowd.root,
+    airdrop.root,
+    rides.root,
     statue.root,
-    tux.root,
+    shadow,
     ...cast.map(({ root }) => root),
+    ...Object.values(chasers).map(({ root }) => root),
   );
-  const rig = createRig();
-  const towers = city.getObjectByName("towers");
+  const loaded = new Map<ModelName, Model>();
+  const past = createNewbie(scene, loaded);
+  const town = createPeople(scene, cast);
+  void models?.then((all) => {
+    for (const [name, model] of all) loaded.set(name, model);
+    cast.forEach((actor, hero) => {
+      const name = modelOf[hero];
+      const model =
+        name === undefined || name === null ? undefined : all.get(name);
+      if (model !== undefined) actor.wear(rigged(model, heightOf(hero)));
+    });
+  });
+  // Inside a building: on the island and not on its streets or avenues (the rules' own map, in centimetres).
+  const rig = createRig(
+    (x, z) => x > 0 && z > 0 && x < 360 && z < 360 && !onLand(x * 100, z * 100),
+  );
+  const towers = city.root.getObjectByName("towers");
   let heading = Math.PI / 2;
   let spin = 0;
-
+  let era = 0;
   const hideAll = (): void => {
-    for (const { root } of [...cast, tux]) root.visible = false;
-    ride.visible = false;
+    for (const { root } of [...cast, ...Object.values(chasers)])
+      root.visible = false;
+    rides.show("foot", 0, 0, 0, 0, 0);
     shadow.visible = false;
-    if (echo !== null) echo.actor.root.visible = false;
+    crowd.show(null, 0);
+    airdrop.fall(false, 0, 0, 0, 0);
+    past.hide();
+    town.hide();
   };
   const grown = (part: number): void => {
     if (towers !== undefined)
       towers.scale.y = Math.max(0.02, Math.min(1, part));
   };
-  const show = (): void => {
+  const setEra = (day: number): void => {
+    if (day === era) return;
+    era = day;
+    boards.era(day);
+  };
+  const show = (seconds: number): void => {
+    shaderTime.value = seconds;
+    line.run(seconds);
     rig.apply(stage.camera);
     stage.draw(scene);
   };
-
+  const chase = (
+    actor: Actor,
+    at: Point | null,
+    to: Subject,
+    seconds: number,
+    dt: number,
+  ): void => {
+    if (at === null) return;
+    actor.root.visible = true;
+    actor.root.position.set(metres(at.x), 0, metres(at.z));
+    actor.root.rotation.y = Math.atan2(
+      to.x - metres(at.x),
+      to.z - metres(at.z),
+    );
+    actor.move(12, seconds, dt);
+  };
   return {
     day(state, seconds, dt, closeUp) {
       hideAll();
       grown(1);
+      setEra(state.day);
       if (state.dir >= 0) heading = (state.dir * Math.PI) / 8;
-      const lead = cast[state.hero];
-      if (lead === undefined) return;
       const at = {
+        heading,
         x: metres(state.x),
         y: state.level * levelHeight,
         z: metres(state.z),
       };
       const riding = state.ride !== "foot";
+      light.set(
+        scene,
+        state.day,
+        state.gate > 0 && state.z < -7_000,
+        seconds,
+        at.x,
+        at.z,
+      );
+      city.mark(state, seconds);
+      north.show(state.gate > 0, seconds);
+      crowd.show(gatheringOf(state), seconds);
+      airdrop.fall(
+        storming(state),
+        seconds,
+        at.x,
+        at.z,
+        [0, 0.4, 0.6, 0.9][state.tools] ?? 0,
+      );
       statue.pose(risen(state), seconds, dt);
-      // While the newbie is being answered, the close-up is on the newbie, from beside the hero.
-      let face: Subject | null = null;
-      const past = echoAt(state);
-      if (past !== null) {
-        if (echo?.hero !== state.hero) {
-          if (echo !== null) scene.remove(echo.actor.root);
-          echo = { actor: buildActor(state.hero), hero: state.hero };
-          echo.actor.root.name = "echo";
-          echo.actor.root.scale.multiplyScalar(0.85);
-          scene.add(echo.actor.root);
-        }
-        const newbie = echo.actor;
-        newbie.root.visible = true;
-        newbie.root.position.set(metres(past.x) + 1.2, 0, metres(past.z));
-        newbie.root.rotation.y = Math.atan2(
-          at.x - newbie.root.position.x,
-          at.z - newbie.root.position.z,
-        );
-        stride(newbie, 0, seconds);
-        const { x, z } = newbie.root.position;
-        if (state.talk === past.id)
-          face = { heading: Math.atan2(at.z - z, at.x - x), x, y: 0, z };
-      }
-      const place = (
-        actor: Actor,
-        back: number,
-        side: number,
-        pace: number,
-      ): void => {
+      visionDepth.value +=
+        ((state.looking ? 1 : 0) - visionDepth.value) * Math.min(1, dt * 4);
+      const face = past.show(state, at, seconds, dt);
+      const pace =
+        state.dir >= 0 && !riding && state.talk === null ? paceOf(state) : 0;
+      const place = (actor: Actor, back: number, side: number): void => {
         actor.root.visible = true;
         actor.root.position.set(
           at.x - Math.cos(heading) * back - Math.sin(heading) * side,
-          at.y + (riding ? 0.6 : 0),
+          at.y + (riding ? 0.7 : 0),
           at.z - Math.sin(heading) * back + Math.cos(heading) * side,
         );
         actor.root.rotation.y = Math.PI / 2 - heading;
-        stride(actor, pace, seconds);
+        actor.move(
+          pace,
+          seconds,
+          dt,
+          state.talk !== null,
+          state.ended && state.cause === "beach",
+        );
       };
-      const pace =
-        state.dir >= 0 && !riding && state.talk === null ? paceOf(state) : 0;
-      place(lead, 0, 0, pace);
+      const lead = cast[state.hero];
+      if (lead !== undefined) place(lead, 0, 0);
       state.crew.forEach((hero, slot) => {
         const mate = cast[hero];
-        if (mate !== undefined) place(mate, 1.6, slot === 0 ? -1.1 : 1.1, pace);
+        if (mate !== undefined) place(mate, 0.5, slot === 0 ? -1.7 : 1.7);
       });
-      if (state.ride !== "foot") {
-        ride.visible = true;
-        ride.scale.set(...rideSizes[state.ride]);
-        ride.position.set(at.x, at.y + rideSizes[state.ride][1] / 2, at.z);
-        ride.rotation.y = Math.PI / 2 - heading;
-      }
-      if (state.tux !== null) {
-        tux.root.visible = true;
-        tux.root.position.set(metres(state.tux.x), 0, metres(state.tux.z));
-        tux.root.rotation.y = Math.atan2(
-          at.x - metres(state.tux.x),
-          at.z - metres(state.tux.z),
+      town.show(state, at, seconds, dt);
+      if (riding)
+        rides.show(
+          state.ride,
+          at.x,
+          at.y,
+          at.z,
+          Math.PI / 2 - heading,
+          seconds,
         );
-        stride(tux, 12, seconds);
-      }
+      chase(chasers.cop, state.cop, at, seconds, dt);
+      chase(chasers.tux, state.tux, at, seconds, dt);
+      chase(chasers.vests, state.vests, at, seconds, dt);
       const intent: Intent =
         state.talk !== null
           ? "talk"
@@ -185,29 +226,36 @@ export function createWorldView(stage: Stage): WorldView {
             ? "hands"
             : state.ride === "heli"
               ? "sky"
-              : riding
+              : riding || state.gate > 0
                 ? "ride"
                 : "follow";
-      rig.aim(intent, face ?? { ...at, heading }, dt);
-      show();
+      rig.aim(intent, face ?? at, dt);
+      show(seconds);
     },
     opening(seconds) {
       const frame = frameOf(opening, seconds);
       if (frame === null) return null;
       hideAll();
+      setEra(1);
+      light.set(scene, 1, false, seconds, 180, 180);
+      city.mark(null, seconds);
+      crowd.show("riot", seconds);
       grown(frame.index === 0 ? 0 : frame.index === 1 ? frame.part : 1);
       rig.cut(frame.pose);
-      show();
+      show(seconds);
       return frame.caption;
     },
     turntable(hero, locked, seconds, dt) {
       hideAll();
       grown(1);
+      setEra(1);
+      light.set(scene, 1, false, seconds, ring.x, ring.z);
+      city.mark(null, seconds);
       // The ring turns the short way round to bring the chosen hero to the front.
       const turn =
         ((hero - spin + heroCount * 1.5) % heroCount) - heroCount / 2;
       spin += turn * (1 - Math.exp(-8 * Math.max(0, dt)));
-      cast.forEach((actor, slot) => {
+      cast.slice(0, heroCount).forEach((actor, slot) => {
         const angle = ((slot - spin) * Math.PI * 2) / heroCount;
         const here = [
           ring.x + Math.sin(angle) * ring.radius,
@@ -218,17 +266,30 @@ export function createWorldView(stage: Stage): WorldView {
         actor.root.visible = !hidden;
         actor.root.position.set(...here);
         actor.root.rotation.y = angle;
-        stride(actor, slot === hero ? 2 : 0, seconds);
+        actor.move(0, seconds, dt, false, slot === hero);
         if (!hidden) return;
         shadow.visible = true;
         shadow.position.set(here[0], 0.85, here[2]);
       });
       rig.cut({
-        fov: 35,
-        from: [ring.x, 2.2, ring.z + 9],
-        look: [ring.x, 1.1, ring.z + ring.radius],
+        fov: 38,
+        from: [ring.x, 2.4, ring.z + 10],
+        look: [ring.x, 1.2, ring.z + ring.radius],
       });
-      show();
+      show(seconds);
     },
   };
+}
+
+// The world on a page's canvas, or null where the browser has no WebGL 2 (the canvas is then hidden and the flat map is the game). Frost
+// Run's models load in the background and are put on as they arrive.
+export function worldOn(canvas: HTMLCanvasElement): WorldView | null {
+  const stage = createStage(canvas);
+  canvas.hidden = stage === null;
+  return stage === null
+    ? null
+    : createWorldView(
+        stage,
+        loadModels().catch(() => new Map()),
+      );
 }

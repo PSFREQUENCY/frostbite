@@ -71,12 +71,35 @@ export interface Rig {
   pose(): Pose;
 }
 
-export function createRig(): Rig {
+// A camera that would stand inside a building is pulled in toward the subject until it is over open ground, and lifted as it comes in,
+// so the subject stays in view. `inside` says whether a ground point (metres) is inside a building.
+export function pulledIn(
+  pose: Pose,
+  inside: (x: number, z: number) => boolean,
+): Pose {
+  const [x, y, z] = pose.from;
+  const [lx, , lz] = pose.look;
+  for (let part = 1; part > 0.05; part -= 0.05) {
+    const at: Vec = [
+      lx + (x - lx) * part,
+      y + (1 - part) * 6,
+      lz + (z - lz) * part,
+    ];
+    if (!inside(at[0], at[2])) return part === 1 ? pose : { ...pose, from: at };
+  }
+  return pose;
+}
+
+export function createRig(
+  inside: (x: number, z: number) => boolean = () => false,
+): Rig {
   let now: Pose = { fov: 50, from: [0, 10, 10], look: [0, 0, 0] };
   let last: Intent | null = null;
   return {
     aim(intent, subject, dt) {
-      const want = poseFor(intent, subject);
+      const want = closeUps.includes(intent)
+        ? poseFor(intent, subject)
+        : pulledIn(poseFor(intent, subject), inside);
       const cuts =
         last === null ||
         (intent !== last &&

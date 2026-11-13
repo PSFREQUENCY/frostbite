@@ -31,8 +31,7 @@ import { drawScreen } from "./screen/flat.ts";
 import { resultOf } from "./screen/result.ts";
 import { wakeLine } from "./script/cast.ts";
 import { createRunSession, type Choice, type RunSession } from "./session.ts";
-import { createStage } from "./view/stage.ts";
-import { createWorldView } from "./view/world-view.ts";
+import { worldOn } from "./view/world-view.ts";
 
 // The page of the game: it draws, it plays, and it asks the platform to remember. It saves nothing itself and asks nothing of the
 // network. The rules, the session, the picture and the words are in their own modules; this only joins them to the page and the platform.
@@ -52,9 +51,7 @@ const startButton = element("start", "button");
 const actButton = element("act", "button");
 const pauseButton = element("pause", "button");
 const context = screen.getContext("2d");
-const stage = createStage(worldCanvas);
-const world = stage === null ? null : createWorldView(stage);
-worldCanvas.hidden = world === null;
+const world = worldOn(worldCanvas);
 
 let play: PlatformPlay | null = null;
 let progress: Progress = freshProgress;

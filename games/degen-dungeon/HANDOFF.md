@@ -1,127 +1,62 @@
 # Degen Dungeon: handoff
 
-This is the scaffold of Degen Dungeon with its hard parts built: the rules engine, the replay verifier, the day session, the 3D stage, the
-camera with its close-ups, the skippable cinematic, the hero select and the page wiring. What is left is mostly content and art. The design
-is the owner's plan doc, "Degen Dungeon: game plan" (three tabs: Plan, Stories, Lore); ask the owner for it and read it first. Follow
-`skills/build-a-game/SKILL.md` and its `references/` for everything the platform asks of a game.
-
-## What a player can do now
-
-Pick a hero on the first screen (left and right turn the ring; the card shows the five stats). Enter or a tap wakes them up in their
-borough. The first day opens on a cinematic that Space, Enter or a tap skips. Then: walk the nine boroughs, take first DUN from the Faucet,
-carry three parcels, answer three offers (one always a scam, one always honest, one decided by the day's seed), recruit a crew of two,
-ride the Green Line loop, steal and fence loot, borrow a scooter, car, boat or helicopter, get chased and frozen by a tux at three stars,
-cool off at the Rebrand booth, stash DUN in the freezer, find three seed words, catch the Great Airdrop on story day 3 (with a magnet and a
-vacuum), and go home to end the day. Eighteen milestones, all replay-verified.
+The game is playable end to end: ten heroes, five story days each, the city's systems, the mystery, Moon Night to SHA Beach, and the
+Time Machine. What follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
+polish. The plan it follows is the "Degen Dungeon: game plan" doc (Plan, Stories and Lore tabs).
 
 ## How it fits together
 
-| Where                                | What it is                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/rules/`                         | The game, as a pure whole-number state machine. `index.ts` is the verifier (`degenRules`); `day.ts` starts and advances a day (movement, the tux, heat, the airdrop); `acts.ts` is what the act button, a yes or no, and a helicopter's lift do; `world.ts` is the island and every spot; `heroes.ts` the cast and stats; `milestones.ts`, `status.ts`, `heat.ts`, `move.ts`, `constants.ts`. |
-| `src/session.ts`                     | One day as played: ticks, the player's choices, and the run record.                                                                                                                                                                                                                                                                                                                           |
-| `src/view/`                          | three.js. `stage.ts` (renderer, or null without WebGL 2), `city.ts` (island from the rules' numbers), `actor.ts` (stand-in bodies), `camera.ts` (intents: follow, ride, sky, talk, hands), `cine.ts` (shot lists; the opening), `world-view.ts` (day, opening, turntable).                                                                                                                    |
-| `src/screen/`                        | The 2D screen: the flat map (whole game without WebGL, corner map with it) and the result card.                                                                                                                                                                                                                                                                                               |
-| `src/page/`, `src/main.ts`           | Keys and touch zones, the note and readouts, and the glue to the SDK.                                                                                                                                                                                                                                                                                                                         |
-| `src/script/cast.ts`, `src/guide.ts` | Every line of words, once. The first-screen card is the hero select.                                                                                                                                                                                                                                                                                                                          |
-| `test/support/bot.ts`                | A bot that walks the streets and uses spots by name. `fairness.unit.test.ts` proves every milestone can be earned.                                                                                                                                                                                                                                                                            |
+| Where           | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/rules/`    | The pure rules. `index.ts` (settings, inputs, score), `day.ts` (start and advance), `tick.ts` (riot, heat fade, FOMO, drain, paper test, MAXX interest, vision, diamond hands, beach), `chase.ts` (cop, tux, Vests), `acts.ts` (the act button, answers, lift, look), `talk.ts` (home, hideout, paper, speech, Frost, floor, MAXX, shops), `market.ts` (the coin), `story.ts` + `chapters.ts` (day-one goals, each hero's beats, the dream, party, Genesis Room), `mystery.ts` (the watcher), `machine.ts` (statue and trip back), `places.ts` + `sites.ts` + `spot.ts` (every place, by day), `world.ts` (geometry and zones), `status.ts`, `milestones.ts` (37). |
+| `src/script/`   | Every word, once: `cast.ts` (wake-ups, offers, tells, endings), `lines.ts` (talks, Frost on S, day-one goals), `stories.ts` and `dreams.ts` (beats and endings), `letters.ts` (S's 21 letters).                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `src/page/`     | `words.ts` (Pip's line and the talk words), `panel.ts` (readouts, answer buttons, vision and lift buttons), `hud.ts` (the note line), `controls.ts` (keys and touch).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `src/view/`     | three.js: `world-view.ts` assembles the city (`city.ts`, `blocks.ts`, `boards.ts`, `line.ts`, `north.ts`, `era.ts`), people (`actor.ts`, `body.ts`, `faces-*.ts`, `looks.ts`, `npcs.ts`, `newbie.ts`), `crowd.ts`, `airdrop.ts`, `rides.ts`, `statue.ts`, and the camera (`camera.ts`, `cine.ts`). `models/` holds Frost Run's four packed hero models and its shader looks.                                                                                                                                                                                                                                                                                       |
+| `test/support/` | `bot.ts` (legal inputs only), `story.ts` (`tellStory` plays any hero's day), `days.ts` and `trips.ts` (the milestone days).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-Rules of the house, already true and to be kept:
+The first screen is the hero select, so one Enter or one tap starts a run as the platform's contract asks; the opening cinematic plays
+at the start of the very first day and can be skipped.
 
-- A run is one day of one hero: settings `{ day, hero }`; inputs `move`, `act`, `pick`, `lift`, `end`, each with its tick. Between inputs
-  the day runs by `advance`. Only choices are recorded, at most 1,200 a day (the platform caps a record at 64 KB and 5,000 inputs).
-- Places are centimetres on the floor, x east and z south; headings are sixteen whole-number vectors; the airdrop counts by patch of ground.
-- Nothing in `src/view`, `src/screen` or `src/page` feeds the rules.
-- A new place is a row in `world.ts`; a new kind of place is a case in `acts.ts` `useSpot`; a new shot is an intent in `camera.ts` or a
-  list in `cine.ts`; a new status is a row in `status.ts`; a new milestone is a row in `milestones.ts` and in the manifest.
-- Any change under `src/rules/`, `src/replay.ts` or `src/sample-run.ts` changes the verifier: re-pin its digest (below).
+## Decisions made here
 
-## Decisions made here (drafts for the owner)
+- **Days replay alone.** Each story day starts from a fixed pocket and freezer (`dayPockets`, `dayFreezers`); the save remembers the day
+  reached. The next day opens only when the day's story is told and slept on.
+- **The drain morning** is day three's start: the freezer and rank look gone until the hideout terminal shows otherwise; the pocket really
+  is empty. On the first morning the seed paper's test is live: a pocket (without diamond-hand gloves) or a phone photo drains at 12 DUN a
+  second until the terminal, and a mattress is found only if the heat brought someone to the door.
+- **REKT is a status, not a day end.** Story DUN goes to the pocket, never to `made`; a trade's realised profit does count as made.
+- **Airdrop DUN is caught only on the move**, so an idle day earns nothing.
+- **The timeline carries** into story days as `fate` (-9 to 9, a hundred DUN a step on the starting pocket). A forged `fate` buys at most
+  900 DUN, which makes no milestone easier to earn.
+- **Real people and projects** appear only as original stand-ins (Frost, the Ice Runner, the mirror statue, Kiki, Max Leverage's MAXX),
+  never by name, likeness or quote. Nobody is hurt: the tuxes freeze, the cop fines, the Vests only get there first.
+- **Frost Run's models** (Volt, Nib, Lumen, Hrimm) are copied in as packed text (about 490 KB, roughly 170 KB gzipped) and load in the
+  background; until they arrive, and for the six new heroes, bodies are built in code.
 
-1. **The hero select is the first screen, and the opening plays after it.** The platform's browser contract needs one Enter or one tap to
-   start a run, so the cinematic cannot stand in front of the first screen. It plays at the start of the first day, the day does not tick
-   while it plays, and it is skipped by any act. The plan doc says opening first; this is the nearest thing the platform allows.
-2. **The select card is the SDK's first-screen card** (sharp text: name, kind, five stats). Stat bars as page elements are still to do.
-3. **Offers are a yes or a no**, not a conversation tree. `DayState.talk` holds the waiting spot. Dialogue graphs are the next step.
-4. **Recruiting is one yes** at a hero's spot. The plan's "finish a job in their borough" is content to add.
-5. **The tux walks through walls**, a little faster per star, and cannot reach a helicopter in the air. Being caught ends the day.
-6. **Story days start from fixed pockets** (`dayPockets`), so each day replays alone. Free days from a saved career are not built.
-7. **Stand-in art.** Bodies are primitives in the right colours; the city is one tower per lot. Frost Run's packed hero models
-   (`games/frost-run/src/screen/models` on the fork's `game/frost-run` branch) are not copied in yet.
-8. Every name, number, line and milestone is a draft: heroes, stats, DUN amounts, heat numbers, FUD, Kiki, Scruff, MAXX.
-9. No real people, projects or brands appear, and nobody is hurt: this is the owner's rule for the game and the arcade's.
+## What is left to polish
 
-## What is left, in the order I would do it
-
-1. **Art pass on the cast.** Bring in Frost Run's four packed models and its turntable; build Omen, Chip, Mint, Rally, Dip and Slip the
-   same way (Blender scripts, packed). Replace `looks` in `view/actor.ts`. Watch the bundle size and tell the owners what it comes to.
-2. **City kit.** Buildings per borough (New York stoops, Los Angeles palms, Philly rowhouses), streets, the Green Line track and train,
-   Moon Tower, the mirror statue, the ice runner, SHA Beach signs. Billboards as `CanvasTexture` (words from the plan's Lore tab).
-3. **Close-up polish.** The wake-up shot per hero (eyes open, pull back), the hands shot per kind of spot, the tell (a push-in on what is
-   off), train-ride cuts. All are shot lists in `cine.ts` played by `world-view.ts`.
-4. **Conversations.** A dialogue graph per offer and recruit, the frost-vision red flags, Street Smarts.
-5. **The rest of the economy.** The MAXX account and its pause, the seed paper and the drain morning, shops (fits, homes, ride
-   upgrades), FOMO and touching grass, the market chart and coin launches, Rep doors.
-6. **Heat.** Witnesses, beat cops, freeze trucks, the FUD helicopter and patrol boats, lying low in the hideout.
-7. **Days two to five for each hero** (the Stories tab), the eras (mania, winter, Launch Day, Moon Night), Bit, the Genesis Room, SHA Beach.
-8. **The airdrop on screen.** Instanced flakes (tens of thousands), the magnet and vacuum effects, the Swap Meet, Slip's reveal. The rules
-   are done (`day.ts` `stormed`, `gust`).
-9. **Rides on screen and under the thumb.** Models, a touch control for the helicopter's lift (keys R and F work now), boat wake, fishing
-   with Dip as a boat gig.
-10. **Statuses** that need the market or earlier days (see `status.ts`), and the share card.
-11. **Sound.** `src/audio.ts` is still the template's track and effects.
+1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; real building kits per borough; the
+   Liquidity Bell, the Chart rollercoaster, the JPEG museum steps and the hill.
+2. More scams on the plan's list as offers (the double-your-DUN screen is in; wrong number and the look-alike locker are not).
+3. Close-ups per beat (hands for gigs, a push-in on a scam's tell) and a shot for the statue's rise.
+4. Sound per era and effects for the drain, the freeze and the airdrop (one loop and four effects today).
+5. Balance: pay, prices and the coin's swings are first guesses; play each hero's five days and tune.
+6. The Time Machine: more meetings on later loops, and the newbie walking between places.
 
 ## Checks, from the repo root unless noted
 
 ```
 npx prettier --write games/degen-dungeon configs/games/degen-dungeon.ts
-cd games/degen-dungeon && npx tsc --noEmit -p . && npx eslint . --max-warnings 0 && pnpm env:check
+cd games/degen-dungeon && npx tsc --noEmit -p . && npx eslint . --max-warnings 0
 npx vitest run --config vitest.config.ts --coverage
 cd ../../apps/web && npx vitest run --config vitest.config.ts test/games-config.unit.test.ts test/games-verifiers.unit.test.ts test/verifiers.unit.test.ts test/games-conformance.unit.test.ts test/games-layout.unit.test.ts test/verification-levels.unit.test.ts
 cd ../.. && pnpm repository:check
 ```
 
-Re-pin the verifier after any rules change, from `games/degen-dungeon`:
-
-```
-cat > digest.tmp.mts <<'END'
-import { bundleVerifier } from "@frostbite/game-sdk/build";
-const built = await bundleVerifier(process.argv[2] ?? ".");
-console.log(JSON.stringify({ id: built?.id, sha256: built?.sha256, version: built?.version }));
-END
-node --experimental-strip-types ./digest.tmp.mts "$PWD"; rm digest.tmp.mts
-```
-
-Put the `sha256` in `configs/games/degen-dungeon.ts`. If `src/sample-run.ts` stops replaying to its claims, play it again with the bot.
+When the rules change, re-pin the verifier from the game folder (`bundleVerifier` from `@frostbite/game-sdk/build`, then the new
+`sha256` into `configs/games/degen-dungeon.ts`) and, if the sample day no longer replays to its claims, regenerate it from a bot run.
 
 ## Not verified
 
-See the pull request text or the last report for what ran. Nobody has played this with their hands. It has not been run on a real phone,
-in other browsers, or through the Docker contract tests (`pnpm test:e2e`). Frame rate, sound and how the stick feels are unknown.
-
-## The Time Machine (added last)
-
-What exists, in the rules (`src/rules/machine.ts`) and proven by bots (`test/machine.unit.test.ts`, `test/support/trips.ts`):
-
-- **The statue.** The Ice Runner stands at `statue` in The Old Floe. It rises when the hero's worth reaches rank 4 (`statueRank`, 100,000
-  DUN); acting beside it then ends the day with cause `machine`. On the page, finishing day 5 at home opens the machine too (`afterDay`).
-- **The trip back.** While the machine is open the first screen starts a trip (`nextRun`): settings `{ day: 1, hero, loop }`. The hero
-  steps out beside the statue with `loopPocket` DUN. Their newbie self (`echoAt`) spends a third of the day at each of three places:
-  outside home, in the Faucet line, at the recovery app scam.
-- **Choices.** Each meeting is a yes or a no (no always walks on), and each bends `fate`. A tip at home is +2 for a careful newbie and -2
-  for a reckless one (the seed decides, `recklessOn`, and the note shows a tell); walking on is +1. Cutting the Faucet line is -2 and pays
-  100 DUN; walking on is +1. A warning at the scam is +2; silence is -1. Brighter steps add rep, darker ones add paradox heat (the tuxes
-  come at three stars), and a trip's score is `made + storm + fate x 500`, never below 0.
-- **After a trip** the save keeps the summed `fate` and the count of `loops`, the machine closes, and the story starts again from day 1.
-
-Decisions made for you (all drafts): the statue is an original figure with no real person's name or likeness; rank 4 wakes it because the
-economy cannot reach rank 5 yet; `loop` 2 to 9 play like 1 apart from the newbie's coin.
-
-Still to build:
-
-1. Carry the timeline forward: pass the save's `fate` into days 1 to 5 as a setting (a start pocket and scam odds that shift with it), so
-   a trip changes the next playthrough inside the rules, not only on the save.
-2. The rise as a moment: a scripted shot in `cine.ts` when `risen` first turns true, and a walk between the newbie's three places (the
-   view moves the newbie in one step today).
-3. More meetings and later loops: a second newbie on loop 2 (the hero from the first trip), meetings on a moving schedule, lines per hero.
-4. The statue's real model, the machine's inside, sound for both, and the newbie on the corner map's legend.
+Nobody has played it with hands. No phone, no second browser, no sound check, no frame-rate measurement; the browser contract in
+`tests/e2e` was not run here; screenshots were taken in headless Chromium with a software renderer.

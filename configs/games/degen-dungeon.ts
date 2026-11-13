@@ -20,13 +20,13 @@ const once = (
     verification: "replay-verified",
   }) as const;
 
-// Degen Dungeon: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs by honest gigs, a crew, and staying
-// ahead of the tuxes. A run is one day of one hero. The title, the words and every milestone are a draft for the owner; a milestone's id
+// Degen Dungeon: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over five story days by honest gigs, a
+// crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and the Time Machine. A run is one day of one hero. The title, the words and every milestone are a draft for the owner; a milestone's id
 // is one the game's rules decide (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and make it to the top. Pick a hero, take your first DUN from the Faucet, carry parcels, recruit a crew of three, ride the Green Line Express, and tell the honest offers from the scams. Steal and the heat rises: at three stars an agent in a black tuxedo walks straight at you, and what it touches is frozen. Nobody is ever hurt. DUN is in-game credit, earned by playing and never bought or sold. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline for better or worse. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -138,6 +138,120 @@ export const degenDungeonGame = defineGame({
       "Answer your newbie self three times and leave the past better than you found it.",
       "The kind answer is not always the one that helps.",
     ),
+    once(
+      "the-speech",
+      "Three things",
+      "Hear Frost's speech in Ticker Square on the first morning.",
+      "Cross the riot. Frost is thawed and talking.",
+    ),
+    once(
+      "seed-paper",
+      "Write it down",
+      "Write down your seed words and choose where the paper lives.",
+      "The Faucet comes with a phone and a pen.",
+    ),
+    once(
+      "your-word",
+      "Your own word",
+      "Find your hero's own word by frost vision on the first morning.",
+      "Look near your door with frost vision on.",
+    ),
+    once(
+      "hustle",
+      "The hustle",
+      "Finish your hero's story for day two.",
+      "Pip's line says where the story goes next.",
+    ),
+    once(
+      "crew-up",
+      "Crewed up",
+      "Finish your hero's story for day three.",
+      "Every hero needs someone. Pip knows who.",
+    ),
+    once(
+      "big-play",
+      "The big play",
+      "Finish your hero's story for day four.",
+      "Launch Day changes everything. Follow the gold beacon.",
+    ),
+    once(
+      "dream",
+      "The dream",
+      "Choose how your hero's dream ends on Moon Night.",
+      "Moon Night opens on your dream. Both answers are real.",
+    ),
+    once(
+      "genesis-room",
+      "The Genesis Room",
+      "Open the last door in the Dungeon with your crew's three words.",
+      "Under the party, the door needs a full crew.",
+    ),
+    once(
+      "sha-beach",
+      "SHA Beach",
+      "Run the oldest tunnel to SHA Beach at sunrise.",
+      "The footprints run to the waterline. Do not let the Vests get there first.",
+    ),
+    once(
+      "dear-newbie",
+      "A letter from S",
+      "Pick up one of S's letters.",
+      "They are lying among the flyers on the avenues.",
+    ),
+    once(
+      "the-watcher",
+      "Someone is watching",
+      "Find the watcher's footprints by frost vision.",
+      "Once a day, at the corner of one borough.",
+    ),
+    once(
+      "pulled-the-plug",
+      "Pull the plug",
+      "Find the bot farm under Rug Row and pull the plug.",
+      "Something in a Rug Row basement hums. Only frost vision shows it.",
+    ),
+    once(
+      "dead-locker",
+      "Dead locker",
+      "Open a dead locker with three street words.",
+      "Three scraps of paper in The Exchange spell it out.",
+    ),
+    once(
+      "diamond-hands",
+      "Diamond hands",
+      "Buy the coin before the Great Airdrop and hold it all the way through.",
+      "Winter is when the island finds out what it really owns.",
+    ),
+    once(
+      "touching-grass",
+      "Touch grass",
+      "Let FOMO climb, then sit in the Old Floe park until it is gone.",
+      "The park is the one place the billboards cannot reach.",
+    ),
+    once(
+      "based",
+      "Based",
+      "Warn someone else about a scam.",
+      "Spot one, then tell Frost, or warn the crowd when your story asks.",
+    ),
+    once(
+      "saved-the-rest",
+      "Saved the rest",
+      "Stop a draining pocket at the hideout terminal with DUN still in it.",
+      "A seed paper in a pocket or on a phone gets found. Race home.",
+    ),
+    once(
+      "moved-up",
+      "Moved up",
+      "Buy a new home from the realtor.",
+      "Rank opens the studio, the rowhouse and the house with a yard.",
+    ),
+    once(
+      "fresh-fit",
+      "Fresh fit",
+      "Buy something from the fit shop.",
+      "Gloves, shades and a hooded parka, each with a use.",
+    ),
   ],
   network: betaTarget.chainId,
   rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
@@ -150,7 +264,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "0f957d9f9b655d5ee1d03673e756de15731e11df462337241b70d64956d254c0",
+        "97c45ffdcbd59b22072a6033d38f9c49d3939549216f4ba538bc56819fb20952",
       version: 1,
     },
   },

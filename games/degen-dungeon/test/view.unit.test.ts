@@ -1,9 +1,15 @@
-import { InstancedMesh, PerspectiveCamera, type Scene } from "three";
+import {
+  InstancedMesh,
+  Matrix4,
+  Mesh,
+  PerspectiveCamera,
+  type Scene,
+} from "three";
 import { describe, expect, it, vi } from "vitest";
 
-import { heroes } from "../src/rules/heroes.ts";
 import { spots } from "../src/rules/places.ts";
-import { buildActor, buildTux, heroCount, stride } from "../src/view/actor.ts";
+import { boardLines, buildBoards, hillWords } from "../src/view/boards.ts";
+import { buildLine, onRing } from "../src/view/line.ts";
 import { createRig, poseFor } from "../src/view/camera.ts";
 import { frameOf, opening } from "../src/view/cine.ts";
 import { buildCity, metres } from "../src/view/city.ts";
@@ -12,31 +18,65 @@ import { createWorldView } from "../src/view/world-view.ts";
 import { started } from "./support/replay.ts";
 
 describe("the city", () => {
-  it("has a tower on every lot, a marker on every spot, and Moon Tower over The Exchange", () => {
+  it("has its buildings, a marker for every place, Moon Tower over The Exchange, and shows only what is open today", () => {
     const city = buildCity();
-    const towers = city.getObjectByName("towers");
-    const marks = city.getObjectByName("spots");
-    expect(towers instanceof InstancedMesh && towers.count).toBe(36);
+    const towers = city.root.getObjectByName("towers");
+    const marks = city.root.getObjectByName("spots");
+    expect(towers instanceof InstancedMesh && towers.count).toBeGreaterThan(
+      100,
+    );
     expect(marks instanceof InstancedMesh && marks.count).toBe(spots.length);
-    expect(city.getObjectByName("moon-tower")?.position.toArray()).toEqual([
-      210, 55, 150,
-    ]);
+    expect(city.root.getObjectByName("moon-tower")?.position.toArray()).toEqual(
+      [210, 75, 150],
+    );
     expect(metres(18_000)).toBe(180);
+    const day = started(1, 7, 2);
+    city.mark(day, 1);
+    const matrix = new Matrix4();
+    const shown = (id: string): boolean => {
+      if (!(marks instanceof InstancedMesh)) return false;
+      marks.getMatrixAt(
+        spots.findIndex((spot) => spot.id === id),
+        matrix,
+      );
+      return matrix.elements[0] !== 0;
+    };
+    expect([
+      shown("faucet"),
+      shown("letter-1"),
+      shown("letter-4"),
+      shown("frost"),
+    ]).toEqual([true, false, true, true]);
+    expect(city.root.getObjectByName("beat")?.visible).toBe(true);
+    expect(city.root.getObjectByName("watcher")?.visible).toBe(false);
+    city.mark({ ...day, looking: true }, 1);
+    expect(city.root.getObjectByName("watcher")?.visible).toBe(true);
+    city.mark(null, 1);
+    expect([
+      shown("faucet"),
+      shown("letter-4"),
+      city.root.getObjectByName("beat")?.visible,
+    ]).toEqual([true, false, false]);
   });
-});
 
-describe("the cast", () => {
-  it("has a body for every hero and for a tux, with legs that walk and stand", () => {
-    expect(heroCount).toBe(heroes.length);
-    const giant = buildActor(3);
-    expect(giant.root.scale.x).toBe(1.6);
-    stride(giant, 13, 0.3);
-    expect(giant.legs[0]?.rotation.x).not.toBe(0);
-    expect(giant.legs[0]?.rotation.x).toBe(-(giant.legs[1]?.rotation.x ?? 0));
-    stride(giant, 0, 0.3);
-    expect(Math.abs(giant.legs[0]?.rotation.x ?? 1)).toBe(0);
-    expect(buildTux().root.name).toBe("tux");
-    expect(buildActor(99).root.children.length).toBeGreaterThan(3);
+  it("paints the boards and the hill sign for each era, and runs the Green Line round its ring", () => {
+    const boards = buildBoards();
+    const hill = boards.root.getObjectByName("hill-sign");
+    boards.era(2);
+    const mania = hill instanceof Mesh ? hill.material : null;
+    boards.era(3);
+    expect(hill instanceof Mesh ? hill.material : null).not.toBe(mania);
+    expect(hillWords[2]).toBe("NGMI");
+    expect(boardLines.every((lines) => lines.length >= 6)).toBe(true);
+    expect(onRing(0)).toEqual([68, 93, 0]);
+    expect(onRing(240)[0]).toBe(308);
+    expect(onRing(-1)[0]).toBe(68);
+    const line = buildLine();
+    line.run(0);
+    const train = line.root.getObjectByName("train");
+    const before = train?.position.x;
+    line.run(2);
+    expect(train?.position.x).not.toBe(before);
   });
 });
 
@@ -117,7 +157,7 @@ describe("the scene", () => {
     expect([
       part("tux")?.visible,
       part("tux")?.position.x,
-      part("ride")?.visible,
+      part("car")?.visible,
     ]).toEqual([true, 150, false]);
     expect(stage.camera.fov).toBe(50);
     view.day(
@@ -127,19 +167,64 @@ describe("the scene", () => {
       false,
     );
     expect([
-      part("ride")?.visible,
-      part("ride")?.position.y,
+      part("heli")?.visible,
+      part("heli")?.position.y,
       part("tux")?.visible,
-    ]).toEqual([true, 24.8, false]);
+    ]).toEqual([true, 24, false]);
     view.day({ ...day, talk: "offer-kiki" }, 1, 0.016, false);
     expect(stage.camera.fov).toBe(30);
     view.day({ ...day, dir: -1 }, 1, 0.016, true);
     expect(stage.camera.fov).toBe(26);
     view.day({ ...day, ride: "car" }, 1, 0.016, false);
-    expect(part("ride")?.scale.z).toBe(3.8);
-    const drawn = draw.mock.calls.length;
-    view.day({ ...day, hero: 42 }, 1, 0.016, false);
-    expect(draw.mock.calls).toHaveLength(drawn);
+    expect([part("car")?.visible, part("crowd")?.visible]).toEqual([
+      true,
+      true,
+    ]);
+    view.day(
+      {
+        ...day,
+        cop: { x: 15_000, z: 15_500 },
+        day: 4,
+        tux: null,
+        vests: { x: 18_000, z: 16_000 },
+      },
+      1,
+      0.016,
+      false,
+    );
+    expect([
+      part("cop")?.visible,
+      part("vest")?.visible,
+      part("robots")?.visible,
+    ]).toEqual([true, true, true]);
+    view.day(
+      { ...started(1, 0, 3), dir: 0, tick: 7_300, tools: 3 },
+      1,
+      0.016,
+      false,
+    );
+    expect([
+      part("airdrop")?.visible,
+      part("snow")?.visible,
+      part("crowd")?.visible,
+    ]).toEqual([true, true, false]);
+    view.day({ ...started(1, 0, 5), beat: 1 }, 1, 0.016, false);
+    expect([
+      part("crowd-signs")?.visible,
+      part("crowd-bodies")?.visible,
+      part("north")?.visible,
+    ]).toEqual([false, true, false]);
+    view.day(
+      { ...started(1, 0, 5), dir: 12, gate: 1, z: -8_000 },
+      1,
+      0.016,
+      false,
+    );
+    expect([part("north")?.visible, part("crowd")?.visible]).toEqual([
+      true,
+      false,
+    ]);
+    expect(stage.camera.fov).toBeGreaterThan(50);
   });
 
   it("plays the opening with the city growing, and says when it is over", () => {
@@ -160,8 +245,8 @@ describe("the scene", () => {
     const view = createWorldView(stage);
     for (let frame = 0; frame < 300; frame += 1)
       view.turntable(3, false, frame * 0.016, 0.016);
-    expect(part("hero-3")?.position.z).toBeCloseTo(191.2, 1);
-    expect(part("hero-3")?.position.x).toBeCloseTo(180, 1);
+    expect(part("hero-3")?.position.z).toBeCloseTo(67.4, 1);
+    expect(part("hero-3")?.position.x).toBeCloseTo(300, 1);
     expect(part("locked")?.visible).toBe(false);
     view.turntable(9, true, 0, 0.016);
     expect([part("hero-9")?.visible, part("locked")?.visible]).toEqual([
