@@ -1,4 +1,5 @@
 import { shopTalks } from "./shops.ts";
+import { venueTalks } from "./venues.ts";
 
 // What the talks say and the answers they offer, in the order of the rules' `nodes`, and the words for the day's goals. Each line is
 // written once. A draft for the owner.
@@ -78,6 +79,7 @@ export const talks: Readonly<
     say: "Third: look after each other. That is the whole game.",
   },
   ...shopTalks,
+  ...venueTalks,
 };
 
 // What Frost says about S, a different hint each day.

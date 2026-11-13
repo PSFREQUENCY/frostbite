@@ -111,6 +111,8 @@ export interface Rig {
   // How open the ground is round a point (metres): the share of rays that run 14 metres without meeting a building.
   openness(x: number, z: number): number;
   pose(): Pose;
+  // Puts the camera exactly at a pose (a clip's), keeping the way it looks for after.
+  set(pose: Pose): void;
   // The way the camera looks, which the stick's "up" means (radians from east toward south).
   yaw(): number;
 }
@@ -192,6 +194,9 @@ export function createRig(
       return clear / 8;
     },
     pose: () => now,
+    set(pose) {
+      now = pose;
+    },
     yaw: () => yaw,
   };
 }

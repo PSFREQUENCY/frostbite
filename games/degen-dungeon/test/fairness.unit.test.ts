@@ -13,7 +13,7 @@ import {
   hotDay,
   stormDay,
 } from "./support/days.ts";
-import { nightDay } from "./support/night.ts";
+import { moonDay, nightDay } from "./support/night.ts";
 import { replay } from "./support/replay.ts";
 import { tellStory } from "./support/story.ts";
 import { machineDay, tripDay } from "./support/trips.ts";
@@ -34,6 +34,7 @@ describe("the milestones", () => {
       diamondDay(),
       grassDay(),
       nightDay(),
+      moonDay(),
       machineDay(),
       tripDay(),
       tellStory(createBot(11, 5, 2)),
@@ -83,6 +84,7 @@ describe("the milestones", () => {
     ]);
     expect(earned(grassDay())).toEqual(["touching-grass"]);
     expect(earned(nightDay())).toEqual(["home-safe", "lantern", "joyride"]);
+    expect(earned(moonDay())).toContain("to-the-moon");
   });
 
   it("are not earned by a day in which nothing is done, and a bot's day replays to the same end", () => {

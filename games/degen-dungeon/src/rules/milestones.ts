@@ -68,6 +68,7 @@ export const milestones: readonly {
     earned: (day) => day.done.some((id) => id.startsWith("car-")),
     id: "joyride",
   },
+  { earned: (day) => has(day, "moon"), id: "to-the-moon" },
 ];
 
 export const milestoneIds: readonly string[] = milestones.map(({ id }) => id);

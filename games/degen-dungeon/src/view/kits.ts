@@ -1,5 +1,6 @@
 import {
   BoxGeometry,
+  CapsuleGeometry,
   CylinderGeometry,
   Euler,
   Float32BufferAttribute,
@@ -21,7 +22,7 @@ import { toonSteps } from "./textures.ts";
 // The rides, built in code and facing along +z: a car with glass, lights and four wheels, a kick scooter, a bike, a little yacht, and a
 // helicopter. A part painted "paint" takes the ride's own colour (each parked car is its own colour); the rest keep theirs.
 export type Part = readonly [
-  shape: "ball" | "box" | "ring" | "wheel",
+  shape: "ball" | "box" | "pill" | "ring" | "wheel",
   colour: string,
   size: readonly [number, number, number],
   at: readonly [number, number, number],
@@ -56,19 +57,18 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
     ["ring", "#11131c", [0.36, 0.36, 0.36], [0, 0.36, -0.55]],
   ],
   boat: [
-    ["box", "#f5f0ff", [2.4, 1, 6], [0, 0.5, 0]],
-    ["box", "#2a4b8d", [1.8, 1.1, 2.2], [0, 1.5, -0.6]],
-    ["box", "#ffd166", [2.5, 0.2, 6.1], [0, 1, 0]],
+    ["pill", "#f5f0ff", [2.4, 1.2, 6], [0, 0.5, 0]],
+    ["ball", "#2a4b8d", [0.9, 0.7, 1.2], [0, 1.4, -0.6]],
+    ["pill", "#ffd166", [2.5, 0.2, 6.1], [0, 1, 0]],
   ],
   car: [
-    ["box", "paint", [1.9, 0.64, 4.1], [0, 0.66, 0]],
-    ["box", "#11131c", [1.96, 0.18, 4.16], [0, 0.34, 0]],
-    ["box", "#22314a", [1.66, 0.56, 2.1], [0, 1.24, -0.25]],
-    ["box", "paint", [1.72, 0.08, 2], [0, 1.54, -0.25]],
-    ["box", "#fff6c8", [0.42, 0.18, 0.05], [0.6, 0.74, 2.06]],
-    ["box", "#fff6c8", [0.42, 0.18, 0.05], [-0.6, 0.74, 2.06]],
-    ["box", "#ff3b3b", [0.42, 0.14, 0.05], [0.6, 0.78, -2.06]],
-    ["box", "#ff3b3b", [0.42, 0.14, 0.05], [-0.6, 0.78, -2.06]],
+    ["pill", "paint", [1.95, 0.8, 4.2], [0, 0.72, 0]],
+    ["pill", "#11131c", [2, 0.3, 4.1], [0, 0.42, 0]],
+    ["ball", "#22314a", [0.85, 0.5, 1.15], [0, 1.08, -0.2]],
+    ["ball", "#fff6c8", [0.18, 0.12, 0.08], [0.6, 0.8, 2.02]],
+    ["ball", "#fff6c8", [0.18, 0.12, 0.08], [-0.6, 0.8, 2.02]],
+    ["ball", "#ff3b3b", [0.2, 0.1, 0.08], [0.62, 0.84, -2.02]],
+    ["ball", "#ff3b3b", [0.2, 0.1, 0.08], [-0.62, 0.84, -2.02]],
     ...wheels(0.95, 0.4, 1.3, 0.4, 0.3),
   ],
   heli: [
@@ -78,7 +78,7 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
     ["box", "#11131c", [2.4, 0.15, 0.6], [0, 0.15, 0]],
   ],
   scooter: [
-    ["box", "paint", [0.45, 0.12, 1.4], [0, 0.25, 0]],
+    ["pill", "paint", [0.45, 0.14, 1.4], [0, 0.25, 0]],
     ["box", "#11131c", [0.08, 1, 0.08], [0, 0.75, 0.6]],
     ["box", "#11131c", [0.6, 0.08, 0.08], [0, 1.25, 0.6]],
     ["wheel", "#11131c", [0.2, 0.12, 0.2], [0, 0.2, 0.62]],
@@ -86,14 +86,19 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
   ],
 };
 
+// Each shape at the size of a unit box: a ball, a box, a pill lying along +z, a ring standing across it, a wheel turning across it.
 const shapeOf = (shape: Part[0]): BufferGeometry =>
   shape === "ball"
-    ? new SphereGeometry(1, 12, 10)
+    ? new SphereGeometry(1, 14, 10)
     : shape === "box"
       ? new BoxGeometry(1, 1, 1)
-      : shape === "ring"
-        ? new TorusGeometry(1, 0.08, 6, 18)
-        : new CylinderGeometry(1, 1, 1, 12);
+      : shape === "pill"
+        ? new CapsuleGeometry(0.5, 1, 6, 14)
+            .rotateX(Math.PI / 2)
+            .scale(1, 1, 0.5)
+        : shape === "ring"
+          ? new TorusGeometry(1, 0.08, 6, 18)
+          : new CylinderGeometry(1, 1, 1, 12);
 const turnOf = (shape: Part[0]): Euler =>
   new Euler(
     0,

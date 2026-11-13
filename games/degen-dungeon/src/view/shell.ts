@@ -3,7 +3,8 @@ import { BufferGeometry, Float32BufferAttribute } from "three";
 // Many boxes and quads in one geometry, with their texture coordinates in metres, so a wall of window bays tiles at the right size on a
 // building of any width and height, and a whole borough is one draw. Roofs and floors take one point of the texture (its wall colour).
 export interface Shell {
-  // A building: its walls tiled by `bay` metres across and `floor` metres up, shifted by `shift` bays, its roof plain.
+  // A building: its walls tiled by `bay` metres across and `floor` metres up, shifted by `shift` bays, its roof plain, its corners
+  // rounded by `round` metres (half its width makes it a round tower).
   block(
     x0: number,
     x1: number,
@@ -12,6 +13,7 @@ export interface Shell {
     height: number,
     shade: number,
     shift: number,
+    round?: number,
   ): void;
   geometry(): BufferGeometry;
   // One upright face, from (x0, z0) to (x1, z1) and from y0 to y1, showing the texture's part from (u0, v0) to (u1, v1). It faces the side
@@ -24,6 +26,9 @@ export interface Shell {
     shade?: number,
   ): void;
 }
+
+// How many straight pieces make a rounded corner.
+const corner = 4;
 
 export function createShell(bay = 12, floor = 12.8): Shell {
   const position: number[] = [];
@@ -74,26 +79,54 @@ export function createShell(bay = 12, floor = 12.8): Shell {
     );
   };
   return {
-    block(x0, x1, z0, z1, height, shade, shift) {
+    block(x0, x1, z0, z1, height, shade, shift, round = 0) {
       const up = height / floor;
-      const side = (from: number, to: number) =>
-        [shift, 0, shift + (to - from) / bay, up] as const;
-      quad([x0, z1, x1, z1], 0, height, side(x0, x1), shade);
-      quad([x1, z0, x0, z0], 0, height, side(x0, x1), shade);
-      quad([x0, z0, x0, z1], 0, height, side(z0, z1), shade);
-      quad([x1, z1, x1, z0], 0, height, side(z0, z1), shade);
+      const r = Math.max(0, Math.min(round, (x1 - x0) / 2, (z1 - z0) / 2));
+      // The footprint, with its corners rounded: north side east to west, then down the west side, along the south and up the east.
+      const path: (readonly [number, number])[] = [];
+      const arc = (cx: number, cz: number, from: number): void => {
+        for (let step = 0; step <= corner; step += 1) {
+          const angle = from - (step / corner) * (Math.PI / 2);
+          path.push([cx + r * Math.cos(angle), cz + r * Math.sin(angle)]);
+        }
+      };
+      arc(x1 - r, z0 + r, 0);
+      arc(x0 + r, z0 + r, -Math.PI / 2);
+      arc(x0 + r, z1 - r, Math.PI);
+      arc(x1 - r, z1 - r, Math.PI / 2);
+      path.push(path[0] ?? [x1, z0]);
+      let along = shift;
+      for (let index = 0; index + 1 < path.length; index += 1) {
+        const [ax, az] = path[index] ?? [0, 0];
+        const [bx, bz] = path[index + 1] ?? [0, 0];
+        const length = Math.hypot(bx - ax, bz - az);
+        if (length < 0.01) continue;
+        quad(
+          [ax, az, bx, bz],
+          0,
+          height,
+          [along, 0, along + length / bay, up],
+          shade,
+        );
+        along += length / bay;
+      }
+      const [cx, cz] = [(x0 + x1) / 2, (z0 + z1) / 2];
       const plain: readonly [number, number] = [0.005, 0.995];
-      face(
-        [
-          [x0, height, z0],
-          [x0, height, z1],
-          [x1, height, z1],
-          [x1, height, z0],
-        ],
-        [0, 1, 0],
-        [plain, plain, plain, plain],
-        shade * 0.8,
-      );
+      for (let index = 0; index + 1 < path.length; index += 1) {
+        const [ax, az] = path[index] ?? [0, 0];
+        const [bx, bz] = path[index + 1] ?? [0, 0];
+        face(
+          [
+            [cx, height, cz],
+            [ax, height, az],
+            [bx, height, bz],
+            [cx, height, cz],
+          ],
+          [0, 1, 0],
+          [plain, plain, plain, plain],
+          shade * 0.8,
+        );
+      }
     },
     geometry() {
       const made = new BufferGeometry();

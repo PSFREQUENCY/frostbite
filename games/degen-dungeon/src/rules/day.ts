@@ -109,6 +109,8 @@ export function startDay(
       (answered === 1 ? gift : 0),
     warned: 0,
     wish: 0,
+    shot: 0,
+    shotAt: 0,
     words: 0,
     x: home.x,
     z: home.z,

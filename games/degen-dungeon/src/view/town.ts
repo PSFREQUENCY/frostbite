@@ -97,7 +97,7 @@ export function buildTown(): Town {
       parked.show(day, x, z, heading, seconds);
       walkers.show(seconds, 1 - dark * 0.6);
       traffic.show(seconds, along, dark, x, z);
-      venues.show(seconds, dark);
+      venues.show(seconds, dark, x, z);
       lanterns.show(dark, seconds, sent);
       beacon.show(questAt(day), x, z, seconds);
     },

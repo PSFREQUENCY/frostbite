@@ -1,4 +1,5 @@
-import { nightTick } from "../../src/rules/constants.ts";
+import { nightTick, shotWindow } from "../../src/rules/constants.ts";
+import { hits } from "../../src/rules/moonshot.ts";
 import { spotNamed, spots } from "../../src/rules/places.ts";
 import type { Spot } from "../../src/rules/spot.ts";
 import { createBot } from "./bot.ts";
@@ -39,4 +40,22 @@ export function nightDay(wish = 1, seed = 5, boon = 0): Bot {
   bot.pick(wish - 1);
   bot.sleep();
   return bot;
+}
+
+// A lucky Moon Night: a seed whose next launch hits, ten thousand DUN staked at the launchpad, the hundredfold landing, a seat on the
+// shuttle, and the moon underfoot.
+export function moonDay(): Bot {
+  for (let seed = 1; seed < 400; seed += 1) {
+    const bot = createBot(seed, 7, 5);
+    bot.use("launchpad");
+    bot.pick(2);
+    const { shotAt } = bot.here();
+    if (!hits(seed, shotAt / shotWindow)) continue;
+    bot.wait(shotAt - bot.here().tick + 1);
+    bot.use("shuttle");
+    bot.pick(0);
+    bot.end();
+    return bot;
+  }
+  throw new Error("no lucky seed");
 }

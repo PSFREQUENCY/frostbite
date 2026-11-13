@@ -1,11 +1,4 @@
-import {
-  BoxGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  Scene,
-  SphereGeometry,
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial, Scene } from "three";
 
 import { storming } from "../rules/day.ts";
 import { risen } from "../rules/machine.ts";
@@ -14,8 +7,10 @@ import type { DayState } from "../rules/types.ts";
 import { buildActor, heightOf, heroCount, type Actor } from "./actor.ts";
 import { buildAirdrop } from "./airdrop.ts";
 import { buildBoards } from "./boards.ts";
+import type { ClipKind } from "../script/clips.ts";
 import { createRig } from "./camera.ts";
 import { buildChasers } from "./chasers.ts";
+import { clipPose } from "./clips.ts";
 import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
@@ -39,7 +34,14 @@ import { buildTown, timeOf } from "./town.ts";
 // The whole island in 3D: the city and its era, the cast, the crowds, the rides, the chasers, the airdrop and the far north, with the camera
 // rig choosing a shot for each moment. It reads a day and draws it; nothing here feeds back into the rules.
 export interface WorldView {
-  day(state: DayState, seconds: number, dt: number, closeUp: boolean): void;
+  // A moment of a day; while a clip plays, the camera follows the clip instead.
+  day(
+    state: DayState,
+    seconds: number,
+    dt: number,
+    closeUp: boolean,
+    clip?: { readonly kind: ClipKind; readonly part: number } | null,
+  ): void;
   // A hop on the spot (or on the move), for the screen only.
   jump(): void;
   opening(seconds: number): string | null;
@@ -68,16 +70,6 @@ export function createWorldView(
   const statue = buildStatue();
   const town = buildTown();
   const moon = buildMoon();
-  const helmet = new Mesh(
-    new SphereGeometry(0.3, 20, 14),
-    new MeshBasicMaterial({
-      color: "#bfe9ff",
-      depthWrite: false,
-      opacity: 0.35,
-      transparent: true,
-    }),
-  );
-  helmet.name = "helmet";
   const cast: Actor[] = Array.from({ length: heroCount + 1 }, (_, hero) =>
     buildActor(hero),
   );
@@ -99,7 +91,6 @@ export function createWorldView(
     statue.root,
     town.root,
     moon.root,
-    helmet,
     shadow,
     ...cast.map(({ root }) => root),
     ...chasers.actors.map(({ root }) => root),
@@ -137,7 +128,7 @@ export function createWorldView(
     airdrop.fall(false, 0, 0, 0, 0);
     past.hide();
     people.hide();
-    helmet.visible = false;
+    moon.wear(null, 0);
     city.root.visible = true;
     town.root.visible = true;
   };
@@ -157,7 +148,7 @@ export function createWorldView(
     stage.draw(scene);
   };
   return {
-    day(state, seconds, dt, closeUp) {
+    day(state, seconds, dt, closeUp, clip = null) {
       hideAll();
       grown(1);
       setEra(state.day);
@@ -208,16 +199,10 @@ export function createWorldView(
         dt,
         up ? hopAt((seconds - jumped) / 1.8) * 2.4 : hopAt(seconds - jumped),
       );
-      helmet.visible = up && lead !== undefined;
-      if (lead !== undefined) {
-        const tall = heightOf(state.hero);
-        helmet.position.copy(lead.root.position);
-        helmet.position.y += tall * 0.86;
-        helmet.scale.setScalar(tall / 1.7);
-      }
+      moon.wear(up ? (lead ?? null) : null, heightOf(state.hero));
       city.root.visible = !up;
       town.root.visible = !up;
-      moon.show(at.x, at.z, seconds);
+      moon.show(at.x, at.z, seconds, state.tick);
       people.show(state, at, seconds, dt);
       // A ride taken from the kerb keeps its colour, and a car its broken window.
       const taken = [...state.done]
@@ -242,7 +227,8 @@ export function createWorldView(
       }
       const room = roomFor(state, open);
       const rising = town.lantern(seconds);
-      if (rising === null) {
+      if (clip !== null) rig.set(clipPose(clip.kind, at, clip.part));
+      else if (rising === null) {
         const moving = state.dir >= 0 && state.talk === null;
         rig.aim(intentFor(state, closeUp), face ?? at, dt, moving, room);
       } else {

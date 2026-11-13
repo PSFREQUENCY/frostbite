@@ -17,7 +17,8 @@ import { guideFor } from "./guide.ts";
 import { createBag } from "./page/bag.ts";
 import { attachControls, type Mode } from "./page/controls.ts";
 import { element, everyFrame } from "./page/elements.ts";
-import { handsFor } from "./page/hands.ts";
+import { handsFor, wireButtons } from "./page/hands.ts";
+import { createClips } from "./page/clips.ts";
 import { listEarned, noteFor } from "./page/hud.ts";
 import { createPanel } from "./page/panel.ts";
 import {
@@ -48,9 +49,9 @@ const guideLayer = createGuideLayer(screen);
 const earnedList = element("earned", "ul");
 const panel = createPanel({ answer: (choice) => hands.answer(choice) });
 const bag = createBag();
+const clips = createClips();
 const wishText = element("wish-text", "input");
 const startButton = element("start", "button");
-const actButton = element("act", "button");
 const pauseButton = element("pause", "button");
 const context = screen.getContext("2d");
 const world = worldOn(worldCanvas);
@@ -93,7 +94,7 @@ function show(dt = 0): void {
     const caption = intro === null ? null : (world?.opening(intro) ?? null);
     if (caption === null) {
       intro = null;
-      world?.day(day, seconds, dt, seconds < closeUntil);
+      world?.day(day, seconds, dt, seconds < closeUntil, clips.current());
     }
     if (!pause.paused())
       note.textContent =
@@ -113,8 +114,7 @@ function show(dt = 0): void {
 
 function setRunning(running: boolean): void {
   startButton.hidden = running;
-  for (const button of [actButton, pauseButton, ...moveButtons])
-    button.disabled = !running;
+  for (const button of moveButtons) button.disabled = !running;
 }
 
 pause.subscribe((paused) => {
@@ -145,10 +145,13 @@ const loop = createRunLoop({
     const dt = ticks / ticksPerSecond;
     seconds += dt;
     // The day does not start until the opening is over, so nothing is missed by watching it.
+    const before = running.state();
     if (intro !== null) intro += dt;
+    else if (clips.playing()) clips.step(dt);
     else
       for (let at = 0; at < ticks && !running.state().ended; at += 1)
         running.tick();
+    clips.watch(before, running.state());
     listEarned(earnedList, running.earned(), titles);
     show(dt);
     if (!running.state().ended) return true;
@@ -168,7 +171,11 @@ function choose(choice: Choice): void {
     if (choice.type === "act") intro = null;
     return;
   }
+  // A clip playing: anything but a step skips it.
+  if (clips.playing() && choice.type !== "move") return clips.skip();
+  const before = running.state();
   const outcome = running.send(choice);
+  clips.watch(before, running.state());
   if (choice.type !== "move") sound.sfx(outcome.ok ? "catch" : "miss");
   if (outcome.ok && choice.type === "act") closeUntil = seconds + 0.9;
   wakeUntil = 0;
@@ -194,6 +201,7 @@ const begin = (): Promise<void> =>
       seed: ready?.seed ?? localSeed(),
     });
     intro = progress.seen || world === null ? null : 0;
+    clips.reset();
     wakeUntil = seconds + 6;
     progress = { ...progress, hero, seen: true };
     saveProgress();
@@ -271,23 +279,7 @@ const hands = handsFor({
   yaw: () => world?.yaw() ?? -Math.PI / 2,
 });
 attachControls(screen, hands, mode);
-const press = (id: string, does: () => void): HTMLButtonElement => {
-  const button = element(id, "button");
-  button.addEventListener("click", does);
-  return button;
-};
-press("act", hands.act);
-press("pause", hands.pause);
-press("look", hands.look);
-press("up", () => hands.lift(1));
-press("down", () => hands.lift(-1));
-const moveButtons = [
-  press("jump", hands.jump),
-  press("run", () => hands.gait(1)),
-  press("duck", () => hands.gait(2)),
-  press("crawl", () => hands.gait(3)),
-  press("pack", hands.bag),
-];
+const moveButtons = wireButtons(hands);
 startButton.addEventListener("click", () => void begin());
 setRunning(false);
 // Between days nothing ticks, so the ring turns on the browser's own frames.

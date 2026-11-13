@@ -52,7 +52,7 @@ export function buildRides(): Rides {
       group.add(rotor);
     }
     if (ride === "car") {
-      crack.position.set(0.85, 1.22, 0.2);
+      crack.position.set(0.84, 1.12, -0.2);
       group.add(crack);
     }
     if (

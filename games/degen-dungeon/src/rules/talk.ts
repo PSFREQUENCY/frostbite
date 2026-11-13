@@ -1,5 +1,7 @@
 import { heatPerStar } from "./constants.ts";
 import { counter, counters, games, lunar, play } from "./counters.ts";
+import { stake } from "./moonshot.ts";
+import { activities, teller, venture } from "./venues.ts";
 import { cooled, rankOf } from "./heat.ts";
 import { buy, sell } from "./market.ts";
 import type { Draft } from "./types.ts";
@@ -60,7 +62,24 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
         : [{ does: `buy-${kind}`, to: `shop-${kind}` }, leave],
     ]),
   ),
+  bank: [
+    { does: "bank-in", to: "bank" },
+    { does: "bank-out", to: "bank" },
+    leave,
+  ],
   colony: [{ does: "colony" }, leave],
+  launchpad: [
+    { does: "shot-0" },
+    { does: "shot-1" },
+    { does: "shot-2" },
+    leave,
+  ],
+  ...Object.fromEntries(
+    Object.keys(activities).map((name) => [
+      `do-${name}`,
+      [{ does: `do-${name}` }, leave],
+    ]),
+  ),
   crater: [{ does: "rock" }, leave],
   "moon-pad": [{ does: "land" }, leave],
   shuttle: [{ does: "fly" }, leave],
@@ -156,6 +175,10 @@ function deed(day: Draft, name: string): string | null {
     return locked(day) ? "your wallet is locked" : shop(day, name);
   if (name.startsWith("buy-")) return counter(day, name.slice(4));
   if (name.startsWith("play-")) return play(day, name.slice(5));
+  if (name.startsWith("do-")) return venture(day, name.slice(3));
+  if (name === "bank-in" || name === "bank-out")
+    return teller(day, name === "bank-in");
+  if (name.startsWith("shot-")) return stake(day, Number(name.slice(5)));
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
   if (name.startsWith("wish-")) {

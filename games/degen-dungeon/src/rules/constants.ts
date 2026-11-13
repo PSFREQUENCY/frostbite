@@ -115,3 +115,10 @@ export const moonFare = 500_000;
 export const moon = { x0: 100_000, x1: 112_000, z0: 0, z1: 12_000 } as const;
 export const moonPad = { x: 106_000, z: 9_000 } as const;
 export const shuttleBooth = { x: 20_400, z: 17_300 } as const;
+// The moonshot launchpad under Moon Tower: what a shot can stake, what a hit pays (a hundred times), the odds of a hit (one in thirty),
+// and how often a launch goes up (every thirty seconds); a stake rides on the next launch.
+export const shotStakes = [1_000, 5_000, 10_000] as const;
+export const shotPays = 100;
+export const shotOdds = 30;
+export const shotWindow = 900;
+export const launchpad = { x: 21_700, z: 17_300 } as const;

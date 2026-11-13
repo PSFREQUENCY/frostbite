@@ -9,9 +9,16 @@ import {
   MeshBasicMaterial,
   MeshToonMaterial,
   SphereGeometry,
+  type Object3D,
 } from "three";
 
-import { moon, moonPad, shuttleBooth } from "../rules/constants.ts";
+import {
+  launchpad,
+  moon,
+  moonPad,
+  shotWindow,
+  shuttleBooth,
+} from "../rules/constants.ts";
 import { painted } from "./boards.ts";
 import { box, hash } from "./hash.ts";
 import { toonSteps } from "./textures.ts";
@@ -23,7 +30,10 @@ export interface Moon {
   // Whether a point (metres) is on the moon, for the sky and the helmet.
   on(x: number, z: number): boolean;
   readonly root: Group;
-  show(x: number, z: number, seconds: number): void;
+  // Where the hero is (metres), the clock, and the day's tick (a rocket goes up from the launchpad at every launch).
+  show(x: number, z: number, seconds: number, tick?: number): void;
+  // Puts the helmet on a body of a height (metres), or takes it off.
+  wear(body: { readonly root: Object3D } | null, tall: number): void;
 }
 
 const [x0, x1, z0, z1] = [
@@ -165,6 +175,28 @@ export function buildMoon(): Moon {
   );
   earth.name = "earth";
   root.add(panels, shuttle, rover, flag, pole, earth);
+  // The moonshot launchpad beside it: a round kiosk, and a little rocket that goes up at every launch.
+  const kiosk = new Mesh(
+    new CylinderGeometry(1.4, 1.6, 2.6, 24),
+    toon("#2a2350"),
+  );
+  kiosk.position.set(launchpad.x / 100 + 1.6, 1.3, launchpad.z / 100 - 1.4);
+  const rocket = new Group();
+  rocket.name = "launch-rocket";
+  const body = new Mesh(
+    new CylinderGeometry(0.35, 0.45, 2.2, 16),
+    toon("#f4f8ff"),
+  );
+  const tip = new Mesh(new ConeGeometry(0.35, 0.8, 16), toon("#ff3df2"));
+  tip.position.y = 1.5;
+  const flame = new Mesh(
+    new ConeGeometry(0.3, 1.2, 12),
+    new MeshBasicMaterial({ color: "#ffb35a" }),
+  );
+  flame.rotation.x = Math.PI;
+  flame.position.y = -1.6;
+  rocket.add(body, tip, flame);
+  root.add(kiosk, rocket);
   // Back on the island: the booth and its sign under Moon Tower.
   const booth = new Mesh(new BoxGeometry(2.4, 2.6, 1.6), toon("#2a2350"));
   booth.position.set(
@@ -182,10 +214,35 @@ export function buildMoon(): Moon {
     shuttleBooth.z / 100 - 1.4,
   );
   root.add(booth, sign);
+  const helmet = new Mesh(
+    new SphereGeometry(0.3, 20, 14),
+    new MeshBasicMaterial({
+      color: "#bfe9ff",
+      depthWrite: false,
+      opacity: 0.35,
+      transparent: true,
+    }),
+  );
+  helmet.name = "helmet";
+  root.add(helmet);
   return {
+    wear(body, tall) {
+      helmet.visible = body !== null;
+      if (body === null) return;
+      helmet.position.copy(body.root.position);
+      helmet.position.y += tall * 0.86;
+      helmet.scale.setScalar(tall / 1.7);
+    },
     on: (x, z) => x >= x0 - 40 && x <= x1 + 40 && z >= z0 - 40 && z <= z1 + 40,
     root,
-    show(x, z, seconds) {
+    show(x, z, seconds, tick = 0) {
+      const since = (tick % shotWindow) / 30;
+      rocket.position.set(
+        launchpad.x / 100 + 1.6,
+        3 + (since < 6 ? since * since * 4 : -40),
+        launchpad.z / 100 - 1.4,
+      );
+      rocket.visible = since < 6;
       rover.position.set(
         x0 + 60 + Math.sin(seconds * 0.15) * 30,
         0,

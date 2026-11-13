@@ -27,20 +27,29 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   leaves footprints at one corner a day. The game never says who S is.
 - **Status** over your head: GM, SAFU, GRINDER, WAGMI, TOUCHING GRASS, BASED, DIAMOND HANDS, DOWN BAD, PAPER HANDS, DEGEN, BAGHOLDER,
   EXIT LIQUIDITY, RUGGED, REKT or FUDDED.
-- **Living streets:** low buildings with little shops on the ground floor ring every block, with the towers set back behind them;
-  lamps, hydrants, benches, bins, newspaper boxes, traffic lights, posters, flyers and a billboard over every crossroads; people
-  strolling and stopping to talk; traffic that thickens at rush hour and thins at night; a sun that crosses the sky, then the moon and
-  the stars. Walk into seventeen shops (sliding doors, a counter, a clerk): coffee and noodles calm FOMO, food and glow sticks give frost
-  vision back, a cut or a wash loses heat, the gym and the bait shop are good for standing, the pawn shop buys loot, and the arcade has
-  four cabinets, one go each a day. Landmarks fill the rest: a library, a bank, a museum, an NFT gallery, a VR dome, a giant arcade,
-  three clubs with searchlights, a record label's tower, a creator studio, a skate park with murals, lookout posts and company names on
-  the tallest towers. Every name is an original gag.
+- **Living streets:** low buildings with rounded corners and little shops on the ground floor ring every block, with round and
+  soft-cornered towers set back behind them; lamps, hydrants, benches, bins, newspaper boxes, traffic lights, posters, flyers and a
+  billboard over every crossroads; people strolling and stopping to talk; traffic that thickens at rush hour and thins at night; a sun
+  that crosses the sky, then the moon and the stars. Walk into seventeen shops (sliding doors, a counter, a clerk): coffee and noodles
+  calm FOMO, food and glow sticks give frost vision back, a cut or a wash loses heat, the gym and the bait shop are good for standing,
+  the pawn shop buys loot, and the arcade has four cabinets, one go each a day.
+- **Landmarks, all open:** walk into round halls with a doorway and an arched canopy, each with one thing to do once a day: dance in
+  three clubs (The Mempool, Club Halving, Block Party), catch the late show at Starlight Cinema, plug into a pod at The Dome VR, play
+  the Mega Arcade's cabinets, read the whitepaper at Whitepaper Library, see the exhibits at the Museum of Genesis, collect a print at
+  Pixel Vault Gallery, cut a track at Bassline Records, go live at Clipstream Studios, and freeze or thaw DUN at First Block Bank's
+  teller. The Meme Market Skate Park and Gig Street Green are open to the sky. Lookout posts, NFT vending machines and company names on
+  the tallest towers finish it. Every name is an original gag.
 - **Rides on the street:** about a hundred cars, fifty scooters and fifty bikes are parked along the kerbs. Breaking into a car brings a
   star of heat; a scooter or a bike is free. Park beside another to step off.
 - **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
   cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
-- **The moon:** a seat on the shuttle under Moon Tower costs 500,000 DUN (pocket first, then the freezer), on foot and with no heat.
-  Up there, in a helmet, walk the moon's ground, meet the colony, take a rock from a crater rim, and fly home from the pad.
+- **The moonshot and the moon:** stake 1,000, 5,000 or 10,000 DUN at the Moonshot Launchpad under Moon Tower; it rides the next launch
+  (every thirty seconds), where about one in thirty goes a hundred times up and the rest go to nothing. A lucky shot pays for a seat on
+  the shuttle (500,000 DUN, pocket first, then the freezer, on foot and with no heat). Up there, in a helmet, walk the moon's ground,
+  meet the colony, take a rock from a crater rim, and fly home from the pad.
+- **Cinematic clips:** walking into a shop or landmark for the first time today, finishing an activity or a story beat, a letter, a
+  ride, a lantern, a moonshot landing or rugging, and the shuttle each play a short letterboxed clip with a title. The day waits while
+  it plays, and any key or tap skips it.
 - **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner statue in The Old Floe
   rises. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
   timeline for better or worse, and the timeline carries into the next playthrough.
@@ -57,7 +66,7 @@ city as a column of light.
 `src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }`, with `loop` on a trip back,
 and on a story day `fate` for the timeline it carries and `boon` for last night's lantern wish. Inputs are `move`, `gait`, `act`,
 `pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
-replays the record to the same end and decides the 39 milestones from it. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+replays the record to the same end and decides the 40 milestones from it. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
 a legal day the verifier is shown with. The settings come from the page, so `fate` and `boon` are the page's word, as before.
 
 ## Tests

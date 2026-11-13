@@ -1,10 +1,11 @@
-import { moonPad, reach, shuttleBooth } from "./constants.ts";
+import { launchpad, moonPad, reach, shuttleBooth } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { parkedRides } from "./parked.ts";
 import { rooms } from "./rooms.ts";
 import { sites } from "./sites.ts";
 import { bit, days, type Spot } from "./spot.ts";
 import type { DayState, Point } from "./types.ts";
+import { nodeOf, venues } from "./venues.ts";
 import { at, loop } from "./world.ts";
 
 export { bit, days, type Spot };
@@ -143,6 +144,17 @@ const moonward: readonly Spot[] = [
     z: 3_000,
   },
 ];
+// Something to do in every landmark you can walk into, toward the back of its floor; and the moonshot launchpad beside the shuttle booth.
+const outings: readonly Spot[] = venues.map(
+  ({ id, kind, label, middle, out }) => ({
+    id,
+    kind: "talk",
+    label,
+    node: nodeOf[kind],
+    x: middle.x,
+    z: middle.z - out * 600,
+  }),
+);
 const fixed: readonly Spot[] = [
   ...homes,
   ...heroWords,
@@ -153,6 +165,14 @@ const fixed: readonly Spot[] = [
   ...counters,
   lanterns,
   ...moonward,
+  ...outings,
+  {
+    id: "launchpad",
+    kind: "talk",
+    label: "Moonshot launchpad",
+    node: "launchpad",
+    ...launchpad,
+  },
 ];
 export const spots: readonly Spot[] = [...fixed, ...parkedRides(fixed)];
 const named = new Map(spots.map((spot) => [spot.id, spot]));

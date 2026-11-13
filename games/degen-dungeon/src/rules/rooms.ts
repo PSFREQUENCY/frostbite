@@ -4,7 +4,7 @@ import type { Point } from "./types.ts";
 // The mom-and-pop shops you can walk into: a room cut into a lot beside the street, with a doorway through its front wall and a counter at
 // the back. Each borough has one or two. Feet may be in a room or its doorway as well as on the street (`world.ts`); the walls are the
 // lot itself. The kind of shop decides what its counter sells (`talk.ts`).
-interface Box {
+export interface Box {
   readonly x0: number;
   readonly x1: number;
   readonly z0: number;

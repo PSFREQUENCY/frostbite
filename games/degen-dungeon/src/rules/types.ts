@@ -115,6 +115,9 @@ export interface DayState {
   readonly warned: number;
   // The wish sent up on a lantern tonight (0 none, 1 to 4).
   readonly wish: number;
+  // A moonshot in the air: the DUN staked (0 for none) and the tick of the launch it rides on.
+  readonly shot: number;
+  readonly shotAt: number;
   readonly words: number;
   readonly x: number;
   readonly z: number;

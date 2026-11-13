@@ -27,7 +27,7 @@ const once = (
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, play the arcade's cabinets, borrow a parked car, scooter or bike, and find the library, the bank, the clubs and the skate park. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. After dark, send a lantern up to the crypto gods; they may answer in the morning. A Whale can buy a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, borrow a parked car, scooter or bike, and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -265,6 +265,12 @@ export const degenDungeonGame = defineGame({
       "Take a car parked on the street.",
       "The window breaks, and a star of heat comes with the keys.",
     ),
+    once(
+      "to-the-moon",
+      "To the moon",
+      "Buy a seat on the shuttle to the moon colony.",
+      "Five hundred thousand DUN. Most who get there rode a lucky moonshot.",
+    ),
   ],
   network: betaTarget.chainId,
   rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
@@ -277,7 +283,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "105d47ee0937e4176495ce3478277bb6e165ee65069311ba6189cb0c487823ce",
+        "00cd172f754e808663839ad2412ff952db5300342f93df37ab39024edca263a7",
       version: 1,
     },
   },

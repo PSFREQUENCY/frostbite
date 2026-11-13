@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { createBag, packOf } from "../src/page/bag.ts";
-import { handsFor } from "../src/page/hands.ts";
+import { handsFor, wireButtons } from "../src/page/hands.ts";
 import { createSteer, worldHeading } from "../src/page/steer.ts";
 import type { DayState } from "../src/rules/types.ts";
 import type { Choice } from "../src/session.ts";
@@ -181,5 +181,41 @@ describe("the hands", () => {
     day = null;
     hands.gait(1);
     expect(chosen).toHaveLength(10);
+    // The buttons under the screen do the same, and the day's buttons come back to be switched on and off.
+    day = started(1, 7, 2);
+    const buttons = wireButtons(hands);
+    expect(buttons.map(({ id }) => id)).toEqual([
+      "act",
+      "pause",
+      "jump",
+      "run",
+      "duck",
+      "crawl",
+      "pack",
+    ]);
+    for (const id of [
+      "look",
+      "up",
+      "down",
+      "act",
+      "jump",
+      "run",
+      "duck",
+      "crawl",
+    ]) {
+      const button = document.getElementById(id);
+      button?.removeAttribute("disabled");
+      button?.click();
+    }
+    expect(chosen.slice(10)).toEqual([
+      { type: "look" },
+      { by: 1, type: "lift" },
+      { by: -1, type: "lift" },
+      { type: "act" },
+      { mode: 1, type: "gait" },
+      { mode: 2, type: "gait" },
+      { mode: 3, type: "gait" },
+    ]);
+    expect(jumps).toBe(2);
   });
 });

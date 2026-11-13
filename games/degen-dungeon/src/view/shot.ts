@@ -1,4 +1,5 @@
 import { roomAt } from "../rules/rooms.ts";
+import { venueAt } from "../rules/venues.ts";
 import type { DayState } from "../rules/types.ts";
 import type { Intent, Room } from "./camera.ts";
 
@@ -19,7 +20,9 @@ export const intentFor = (state: DayState, closeUp: boolean): Intent =>
 export const roomFor = (state: DayState, open: number): Room => {
   const riding = state.ride !== "foot";
   return {
-    indoors: roomAt(state.x, state.z) !== null,
+    indoors:
+      roomAt(state.x, state.z) !== null ||
+      (venueAt(state.x, state.z)?.door ?? null) !== null,
     low: !riding && state.gait >= 2,
     open,
     speed: riding ? 1 : state.gait === 1 && state.dir >= 0 ? 0.6 : 0,

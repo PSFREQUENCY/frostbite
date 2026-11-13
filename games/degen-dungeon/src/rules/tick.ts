@@ -1,3 +1,4 @@
+import { launch } from "./moonshot.ts";
 import {
   drainPace,
   fomoTicks,
@@ -75,6 +76,7 @@ export function ticked(day: Draft): void {
   zones(day);
   moods(day);
   money(day);
+  launch(day);
   if (day.looking) {
     day.vision = Math.max(0, day.vision - 1);
     day.looking = day.vision > 0;

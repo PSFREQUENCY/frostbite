@@ -4,7 +4,7 @@ import { block, lots } from "../rules/constants.ts";
 import { rooms } from "../rules/rooms.ts";
 import { box, hash } from "./hash.ts";
 import type { Shell } from "./shell.ts";
-import { venueLots } from "./venue-lots.ts";
+import { venues } from "../rules/venues.ts";
 
 // How each borough builds (`blocks.ts` draws it): the floors of the low buildings round each lot, the height of the tower set back in its
 // middle (none in the park and the market), the trees on its pavements, the neon trim of its windows, and its two wall colours.
@@ -53,6 +53,8 @@ export interface Builders {
 
 const depth = 9;
 const floorHeight = 3.2;
+// How round the low buildings' corners are (metres).
+const soft = 1.4;
 // A row of buildings along one side of a lot, from `from` to `to` (metres along the side), each 6 to 12 metres wide.
 function row(
   from: number,
@@ -78,18 +80,22 @@ export function coreOf(
 ): {
   readonly box: readonly [number, number, number, number];
   readonly height: number;
+  readonly round: boolean;
 } | null {
   const look = styles[borough];
   if (look?.core == null || (borough === 4 && corner === 1)) return null;
-  if (venueLots[`${String(borough)}-${String(corner)}`] !== undefined)
-    return null;
+  if (landmark(borough, corner)) return null;
   const roll = hash(borough, corner, 99);
   const [x0, z0] = cornerOf(borough, corner);
   return {
     box: [x0 + 13, x0 + 29, z0 + 13, z0 + 29],
     height: look.core[0] + (look.core[1] - look.core[0]) * roll,
+    round: roll > 0.5,
   };
 }
+// Whether a lot holds a landmark instead of a ring of buildings.
+const landmark = (borough: number, corner: number): boolean =>
+  venues.some(({ id }) => id === `venue-${String(borough)}-${String(corner)}`);
 // The north-west corner of a lot (metres).
 export const cornerOf = (
   borough: number,
@@ -107,7 +113,7 @@ export function buildLot(
 ): void {
   const look = styles[borough];
   if (look === undefined) return;
-  if (venueLots[`${String(borough)}-${String(corner)}`] !== undefined) return;
+  if (landmark(borough, corner)) return;
   const lane = Math.floor(corner / 2);
   const column = corner % 2;
   const [north, south] = lots[lane] ?? [0, 0];
@@ -134,6 +140,7 @@ export function buildLot(
       height,
       0.82 + roll * 0.18,
       Math.floor(roll * 4),
+      soft,
     );
     const [cx, cz] = [(bx0 + bx1) / 2, (bz0 + bz1) / 2];
     if (roll > 0.55)
@@ -148,11 +155,12 @@ export function buildLot(
     const v0 = kind < 4 ? 0.5 : 0;
     const uv = [u0, v0, u0 + 0.25, v0 + 0.5] as const;
     const out = 0.06;
+    // Clear of the rounded corners.
     const sides = [
-      [bx1, bz0 - out, bx0, bz0 - out],
-      [bx1 + out, bz1, bx1 + out, bz0],
-      [bx0, bz1 + out, bx1, bz1 + out],
-      [bx0 - out, bz0, bx0 - out, bz1],
+      [bx1 - soft, bz0 - out, bx0 + soft, bz0 - out],
+      [bx1 + out, bz1 - soft, bx1 + out, bz0 + soft],
+      [bx0 + soft, bz1 + out, bx1 - soft, bz1 + out],
+      [bx0 - out, bz0 + soft, bx0 - out, bz1 - soft],
     ] as const;
     const side = sides[face];
     if (side !== undefined) into.fronts.quad(side, 0, 4, uv);
@@ -194,6 +202,7 @@ export function buildLot(
   if (core === null) return;
   const [cx0, cx1, cz0, cz1] = core.box;
   const roll = hash(borough, corner, 99);
+  // The towers are futuristic: some round, the rest with soft corners.
   into.high.block(
     cx0,
     cx1,
@@ -202,5 +211,6 @@ export function buildLot(
     core.height,
     0.85 + roll * 0.15,
     Math.floor(roll * 4),
+    core.round ? (cx1 - cx0) / 2 : 4,
   );
 }
