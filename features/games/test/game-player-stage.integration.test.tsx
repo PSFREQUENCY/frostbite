@@ -67,6 +67,27 @@ describe("the notice when a milestone is reported", () => {
     expect(toast()?.textContent).toBe("");
   });
 
+  it("is shown in the dock strip below the game, so it never covers the play area", async () => {
+    await mount();
+    expect(toast()?.closest(".arcade-dock__notice")).not.toBeNull();
+    expect(toast()?.closest(".arcade-stage")).toBeNull();
+  });
+
+  it("is a small chip over the game in full screen, where there is no strip to use", async () => {
+    phone(true);
+    await mount();
+    await act(async () =>
+      [...h.container.querySelectorAll(".arcade-stage__bar button")]
+        .find((b) => b.textContent === "Play full screen")
+        ?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+    );
+    expect(toast()?.closest(".arcade-stage__overlay")).not.toBeNull();
+    expect(toast()?.closest(".arcade-dock")).toBeNull();
+    expect(
+      h.container.querySelectorAll('[data-testid="milestone-toast"]'),
+    ).toHaveLength(1);
+  });
+
   it("announces only the milestone just reported, not the ones announced before", async () => {
     const { target } = await mount();
     send(target, "ready", { sdkVersion: 1 }, "a");

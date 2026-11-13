@@ -190,6 +190,18 @@ html[data-theatre="true"] {
   color: var(--arcade-text);
   pointer-events: auto;
 }
+/* In full screen the game has the whole window and there is no strip to use, so the notice is a small one-line chip. */
+.arcade-stage[data-theatre="true"] .arcade-stage__overlay {
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+.arcade-stage[data-theatre="true"] .arcade-toast {
+  max-width: 70%;
+  overflow: hidden;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.5625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .arcade-toast {
   font-family: var(--arcade-font-pixel);
   font-size: 0.6875rem;

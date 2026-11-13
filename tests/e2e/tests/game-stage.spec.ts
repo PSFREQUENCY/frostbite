@@ -188,7 +188,7 @@ test("the bar does not stick on a small screen, where the header is tall", async
   );
 });
 
-test("a milestone the game reports is announced over the game, and the notice goes away", async ({
+test("a milestone the game reports is announced below the game, and the notice goes away", async ({
   page,
 }) => {
   await page.goto(fixtureGame.href);
@@ -200,6 +200,10 @@ test("a milestone the game reports is announced over the game, and the notice go
   await expect(notice).toHaveText(
     `${fixtureGame.firstMilestone.title} reached`,
   );
+  // It is below the game, not over it: a tall game on a phone keeps every row in view while the notice shows.
+  const shown = await box(page, '[data-testid="milestone-toast"]');
+  const game = await box(page, frameSelector);
+  expect(shown.y).toBeGreaterThanOrEqual(game.y + game.height - 1);
   await expect(notice).toHaveText("", { timeout: 9_000 });
   await expect(
     page.getByRole("button", { name: /^Milestones/u }),

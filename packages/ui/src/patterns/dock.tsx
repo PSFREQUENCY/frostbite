@@ -16,9 +16,13 @@ export interface DockSection {
 // Escape, or by clicking into the game (a frame takes focus from the page). Closed, it costs one line.
 export function ArcadeDock({
   label,
+  notice,
   sections,
 }: {
   readonly label: string;
+  // A passing notice (a milestone reached) shown over the strip for a moment. It takes no room of its own, so nothing moves, and it is
+  // below the game, so it never covers it.
+  readonly notice?: ReactNode;
   readonly sections: readonly DockSection[];
 }) {
   const base = useId();
@@ -86,6 +90,9 @@ export function ArcadeDock({
           </button>
         )}
       </div>
+      {notice === undefined ? null : (
+        <div className="arcade-dock__notice">{notice}</div>
+      )}
     </div>
   );
 }
