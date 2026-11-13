@@ -23,8 +23,16 @@ export const telemetryEnvironmentDefinitions = [
   {
     key: "ANALYTICS_INGEST_ORIGIN",
     description:
-      "The address the analytics provider receives events at (the platform's own /ingest path forwards to it). Blank when the provider needs none.",
+      "The address the analytics provider receives events at (the platform's own /telemetry/events path forwards to it). Blank when the provider needs none.",
     exposure: "server",
+    required: false,
+    secret: false,
+  },
+  {
+    key: "NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION",
+    description:
+      "true lets a browser that announces itself as a robot send analytics events, which the browsers that run our tests do; blank or false keeps them out. For test builds only: refused when APP_ENV is preview or production. Baked into the browser build.",
+    exposure: "public",
     required: false,
     secret: false,
   },

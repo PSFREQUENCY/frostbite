@@ -1,10 +1,13 @@
 import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import { gunzipSync } from "node:zlib";
 
-// Stands in for the error provider in the browser tests: the platform forwards a page's error reports here (the test web server is started
-// with `ERROR_REPORTING_INGEST_ORIGIN` set to `errorReportingStubOrigin`) and the test reads what arrived. Nothing leaves the machine.
+// Stands in for a provider in the browser tests: the platform forwards a page's reports or events here (the test web server is started with
+// `ERROR_REPORTING_INGEST_ORIGIN` and `ANALYTICS_INGEST_ORIGIN` set to these origins) and a test can read what arrived. Each service has its
+// own address, as it has its own provider. Nothing leaves the machine.
 export const errorReportingStubPort = 4399;
 export const errorReportingStubOrigin = `http://127.0.0.1:${String(errorReportingStubPort)}`;
+export const analyticsStubPort = 4398;
+export const analyticsStubOrigin = `http://127.0.0.1:${String(analyticsStubPort)}`;
 
 export interface ReceivedReport {
   readonly body: string;
@@ -12,12 +15,12 @@ export interface ReceivedReport {
   readonly url: string;
 }
 
-export interface ErrorReportingStub {
+export interface IngestStub {
   readonly close: () => Promise<void>;
   readonly received: ReceivedReport[];
 }
 
-export async function startErrorReportingStub(): Promise<ErrorReportingStub> {
+export async function startIngestStub(port: number): Promise<IngestStub> {
   const received: ReceivedReport[] = [];
   const server: Server = createServer((request, response) => {
     const chunks: Buffer[] = [];
@@ -34,7 +37,7 @@ export async function startErrorReportingStub(): Promise<ErrorReportingStub> {
     });
   });
   await new Promise<void>((resolve) =>
-    server.listen(errorReportingStubPort, "127.0.0.1", resolve),
+    server.listen(port, "127.0.0.1", resolve),
   );
   return {
     close: () =>

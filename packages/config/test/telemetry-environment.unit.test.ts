@@ -86,11 +86,22 @@ describe("the telemetry environment", () => {
       ).toThrow(/not allowed when APP_ENV is/u);
   });
 
-  it("does not let analytics be told to admit robots", () => {
-    expect(
-      parseTelemetryEnvironment({
-        NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
-      }).analytics,
-    ).not.toHaveProperty("allowAutomation");
+  it("lets each service be told to admit robots on its own, and refuses it in a deployment people sign in to", () => {
+    const analytics = parseTelemetryEnvironment({
+      NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION: "true",
+    });
+    expect(analytics.analytics).toMatchObject({ allowAutomation: true });
+    expect(analytics.errorReporting).not.toHaveProperty("allowAutomation");
+    const errors = parseTelemetryEnvironment({
+      NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
+    });
+    expect(errors.analytics).not.toHaveProperty("allowAutomation");
+    for (const APP_ENV of ["preview", "production"])
+      expect(() =>
+        parseTelemetryEnvironment({
+          APP_ENV,
+          NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION: "true",
+        }),
+      ).toThrow(/NEXT_PUBLIC_ANALYTICS_ALLOW_AUTOMATION=true.*not allowed/u);
   });
 });

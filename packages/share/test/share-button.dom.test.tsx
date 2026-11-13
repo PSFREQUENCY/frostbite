@@ -186,3 +186,64 @@ describe("the share control", () => {
     expect(button?.textContent).toBe("");
   });
 });
+
+describe("telling where a person chose to share", () => {
+  const opened = async (onShare: (destination: string) => void) => {
+    const container = await mount(
+      <ShareButton
+        config={config}
+        makeLink={async () => url}
+        onShare={onShare}
+        {...props}
+      />,
+    );
+    click(trigger(container));
+    await settle(() =>
+      expect(container.querySelectorAll("a.share-tile")).toHaveLength(2),
+    );
+    return container;
+  };
+
+  it("names the platform when its tile is used, and nothing else", async () => {
+    const onShare = vi.fn();
+    const container = await opened(onShare);
+    expect(onShare).not.toHaveBeenCalled();
+    // The tile is a link to another site; the click is stopped here so the test does not leave the page.
+    const second =
+      container.querySelectorAll<HTMLAnchorElement>("a.share-tile")[1];
+    second?.addEventListener("click", (event) => event.preventDefault());
+    click(second ?? null);
+    expect(onShare).toHaveBeenCalledExactlyOnceWith("chat");
+  });
+
+  it("says `copy` when the link is copied, and `native` when the device's sheet is used", async () => {
+    vi.stubGlobal("navigator", {
+      clipboard: { writeText: vi.fn(async () => undefined) },
+      share: vi.fn(async () => undefined),
+    });
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(pointer: coarse)",
+    }));
+    const onShare = vi.fn();
+    const container = await opened(onShare);
+    click(container.querySelector(".share-link button"));
+    click(container.querySelector(".share-tile--native"));
+    expect(onShare.mock.calls).toEqual([["copy"], ["native"]]);
+  });
+
+  it("works with nobody listening", async () => {
+    vi.stubGlobal("navigator", {
+      clipboard: { writeText: vi.fn(async () => undefined) },
+    });
+    const container = await mount(
+      <ShareButton config={config} makeLink={async () => url} {...props} />,
+    );
+    click(trigger(container));
+    await settle(() =>
+      expect(container.querySelector(".share-link button")).not.toBeNull(),
+    );
+    expect(() =>
+      click(container.querySelector(".share-link button")),
+    ).not.toThrow();
+  });
+});

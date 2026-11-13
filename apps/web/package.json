@@ -23,6 +23,7 @@
     "@frostbite/auth": "workspace:*",
     "@frostbite/authorization": "workspace:*",
     "@frostbite/chain": "workspace:*",
+    "@frostbite/client-react": "workspace:*",
     "@frostbite/database": "workspace:*",
     "@frostbite/feature-accounts": "workspace:*",
     "@frostbite/feature-chain-status": "workspace:*",

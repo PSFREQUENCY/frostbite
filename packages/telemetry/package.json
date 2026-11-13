@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./analytics": "./src/analytics/index.ts",
+    "./analytics/browser": "./src/analytics/browser.ts",
     "./errors": "./src/errors/index.ts",
     "./errors/browser": "./src/errors/browser.ts",
     "./errors/server": "./src/errors/server.ts",

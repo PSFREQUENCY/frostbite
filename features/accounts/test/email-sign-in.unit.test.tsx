@@ -29,6 +29,7 @@ import { EmailSignIn } from "../src/sign-in/email-sign-in.tsx";
 let container: HTMLElement;
 let root: Root;
 const onSignedIn = vi.fn();
+const track = { failed: vi.fn(), started: vi.fn() };
 
 beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -40,7 +41,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   act(() => {
     root.render(
-      <EmailSignIn expectedNetwork="signet" onSignedIn={onSignedIn} />,
+      <EmailSignIn
+        expectedNetwork="signet"
+        onSignedIn={onSignedIn}
+        track={track}
+      />,
     );
   });
 });
@@ -144,6 +149,8 @@ describe("asking for the code", () => {
       await submit();
       expect(input()?.type).toBe("email");
       expect(alertText()).toBe(outcomeMessage(outcome, serverWords ?? null));
+      expect(track.started).toHaveBeenCalledTimes(1);
+      expect(track.failed).toHaveBeenCalledExactlyOnceWith(outcome);
     },
   );
 });
@@ -177,6 +184,7 @@ describe("entering the code", () => {
       expect(alertText()).toBe(outcomeMessage(outcome));
       expect(onSignedIn).not.toHaveBeenCalled();
       expect(input()?.autocomplete).toBe("one-time-code");
+      expect(track.failed).toHaveBeenCalledExactlyOnceWith(outcome);
     },
   );
 
@@ -185,6 +193,8 @@ describe("entering the code", () => {
     type("111111");
     await click("Send a new code");
     expect(flow.requestEmailCode).toHaveBeenCalledTimes(2);
+    // Asking again is the same sign-in: it is counted as begun once.
+    expect(track.started).toHaveBeenCalledTimes(1);
     expect(input()?.value).toBe("");
   });
 

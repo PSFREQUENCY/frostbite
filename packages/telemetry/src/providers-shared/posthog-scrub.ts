@@ -1,4 +1,9 @@
-import { scrubDeep, scrubUrl, type Scrubbable } from "../../scrubber.ts";
+import {
+  scrubDeep,
+  scrubPath,
+  scrubUrl,
+  type Scrubbable,
+} from "../scrubber.ts";
 
 // What a PostHog event carries that must be left as the platform made it, or made anonymous in a way text scrubbing cannot: our own ids
 // (a correlation id is a uuid) are kept; the addresses the library records are cut to origin and anonymous path.
@@ -18,10 +23,13 @@ const addressProperties = new Set([
 // A value with the addresses in it made anonymous: the properties the library records by name, and any file name, when they are web addresses.
 function withAnonymousAddresses(value: Scrubbable, name = ""): Scrubbable {
   if (typeof value === "string")
-    return (addressProperties.has(name) || name === "filename") &&
-      /^https?:\/\//u.test(value)
-      ? scrubUrl(value)
-      : value;
+    // The page's own path, which the library records beside the address, is made anonymous the same way.
+    return name === "$pathname"
+      ? scrubPath(value)
+      : (addressProperties.has(name) || name === "filename") &&
+          /^https?:\/\//u.test(value)
+        ? scrubUrl(value)
+        : value;
   if (typeof value !== "object" || value === null) return value;
   if (Array.isArray(value))
     return value.map((item: Scrubbable) => withAnonymousAddresses(item));

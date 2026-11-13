@@ -7,9 +7,14 @@ ports, two provider registries and two settings, so either can change vendor wit
 
 ## Public API
 
-- `@frostbite/telemetry/analytics`: `createAnalytics(settings, options?)` returns `{ capture(name, properties), shutdown() }`.
-  `analyticsEvents` is the closed list of events and the only properties each may carry; `analyticsProviders` is the registry
-  (`{ noop }` today); `analyticsSettingsSchema` checks a service's settings against it.
+- `@frostbite/telemetry/analytics`: the vendor-free part: `createAnalytics(settings, { registry, onProblem? })` returns
+  `{ capture(name, properties), shutdown() }`. `analyticsEvents` is the closed list of events and the only properties each may carry;
+  `analyticsProviderNames` is the names a setting may take; `analyticsSettingsSchema` checks a service's settings against them.
+- `@frostbite/telemetry/analytics/browser`: for a page: `createBrowserAnalytics(settings)`. Every event is counted in the page, never on a
+  server: only the page knows which visit an event belongs to. PostHog's library is brought in once the page is idle, as a client named
+  `analytics` beside the default one that error reporting uses, so the two settings may name different providers. Pages are counted when the
+  address changes; an event that is neither a page view nor in the catalogue is dropped inside the library's own send hook as well.
+  Pages call `useAnalytics()` from `@frostbite/client-react` (a context the app fills), never this package's provider.
 - `@frostbite/telemetry/errors`: the vendor-free part: `createErrorReporter(settings, { registry, describe?, onProblem? })`, `describeError`
   (turns anything thrown into a report: the kind, a scrubbed message or none, a database code, the top stack lines, the platform's ids and the
   route as a template), the report types, and `errorProviderNames` (the names a setting may take).
@@ -27,10 +32,10 @@ route)`, which reports what a page throws and does not catch. The PostHog librar
 
 Write the adapter in `src/analytics/providers/` and/or `src/errors/providers/` (a vendor may serve only one; error reporting has a file for
 the browser and one for the server), implementing the provider interface in the service's `port.ts`, and add its line to the registry
-(analytics: `analytics/providers/index.ts`; errors: `errors/providers/browser.ts` and `server.ts`, and its name in `errors/names.ts`). Its name is
-then a valid value for the setting. The
+(analytics: `analytics/providers/browser.ts` and its name in `analytics/names.ts`; errors: `errors/providers/browser.ts` and `server.ts`, and
+its name in `errors/names.ts`). Its name is then a valid value for the setting. The
 integration test runs every registered provider against the contract. Vendor imports are allowed in those folders and in
-`src/providers-shared/` and nowhere else.
+`src/providers-shared/` (what both PostHog adapters share: the pinned library settings, the lazy loading, the scrub) and nowhere else.
 
 ## Invariants
 

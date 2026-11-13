@@ -32,6 +32,7 @@
   "dependencies": {
     "@frostbite/chain": "workspace:*",
     "@frostbite/client-http": "workspace:*",
+    "@frostbite/client-react": "workspace:*",
     "@frostbite/database": "workspace:*",
     "@frostbite/feature-chain-status": "workspace:*",
     "@frostbite/game-claims": "workspace:*",
@@ -45,6 +46,7 @@
     "@frostbite/scenes": "workspace:*",
     "@frostbite/share": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@frostbite/wallet": "workspace:*",
     "@repo/ui": "workspace:*",
     "react": "19.2.8"

@@ -8,20 +8,24 @@ import { scrubProperties } from "../scrubber.ts";
 import { serviceSettingsSchema, type ServiceSettings } from "../settings.ts";
 import { checkEvent } from "./catalogue.ts";
 import type { Analytics, AnalyticsProviderFactory } from "./port.ts";
-import { analyticsProviders } from "./providers/index.ts";
+import { analyticsProviderNames } from "./names.ts";
 
 export { analyticsEvents } from "./catalogue.ts";
 export type { AnalyticsEventName, AnalyticsProperties } from "./catalogue.ts";
 export type { Analytics, AnalyticsProvider } from "./port.ts";
-export { analyticsProviders } from "./providers/index.ts";
+export { analyticsProviderNames } from "./names.ts";
+export type { AnalyticsProviderName } from "./names.ts";
 
-export const analyticsSettingsSchema =
-  serviceSettingsSchema(analyticsProviders);
+// The settings of the analytics service, checked against the names it knows. This file holds no vendor: the registry that maps a name to an
+// adapter is `browser.ts`, so nothing that only checks settings loads a vendor's library.
+export const analyticsSettingsSchema = serviceSettingsSchema(
+  Object.fromEntries(analyticsProviderNames.map((name) => [name, true])),
+);
 
 export interface AnalyticsOptions {
   readonly onProblem?: OnProblem;
-  // The providers to choose from; the platform's own unless a test brings others.
-  readonly registry?: Readonly<Record<string, AnalyticsProviderFactory>>;
+  // The providers to choose from, by name.
+  readonly registry: Readonly<Record<string, AnalyticsProviderFactory>>;
   readonly shutdownTimeoutMs?: number;
 }
 
@@ -29,10 +33,9 @@ export interface AnalyticsOptions {
 // before the provider sees it, and nothing a provider does reaches the caller.
 export function createAnalytics(
   settings: ServiceSettings,
-  options: AnalyticsOptions = {},
+  options: AnalyticsOptions,
 ): Analytics {
-  const registry: Readonly<Record<string, AnalyticsProviderFactory>> =
-    options.registry ?? analyticsProviders;
+  const registry = options.registry;
   const onProblem = options.onProblem ?? (() => undefined);
   const factory = Object.hasOwn(registry, settings.provider)
     ? registry[settings.provider]
