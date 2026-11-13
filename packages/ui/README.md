@@ -20,6 +20,8 @@ as itself), `footer` links in the footer, and, inside a work area with more than
 sidebar (tabs on a narrow screen) and a breadcrumb. A work area's bar entry opens the first link the
 person may see. The grouping is `buildNavigationModel` in `src/patterns/navigation-model.ts`; its areas
 must match the manifest's (`@frostbite/shared/features`), which a type error at each page enforces.
+`ArcadeDock` takes an optional `notice`: a passing message drawn over the strip at exactly its height, so it moves nothing and, being below the game, never
+covers it. The games page uses it for the milestone notice (in full screen, with no strip to use, the notice is a small chip over the game instead).
 The header wraps its buttons onto a second row on a narrow phone, so `HeaderHeight` (inside the header) measures it and sets
 `--arcade-header-height` on the shell to the true height; everything sized "the window less the header" follows it. The token's own
 value stands before the page's code runs. Guided

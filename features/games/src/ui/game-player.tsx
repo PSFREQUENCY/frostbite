@@ -32,6 +32,7 @@ import { ScoreShare } from "./score-share.tsx";
 import type { SharesApi } from "../client/shares-api.ts";
 import type { ShareConfig } from "@frostbite/share";
 import { useFullscreen } from "./use-fullscreen.ts";
+import { MilestoneToast } from "./milestone-toast.tsx";
 import { useImmersive } from "./use-immersive.ts";
 import { touchScreenQuery, useMediaQuery } from "./use-media-query.ts";
 import { useTheatre } from "./use-theatre.ts";
@@ -237,14 +238,7 @@ export function GamePlayer({
         }
         overlay={
           <>
-            <div
-              aria-live="polite"
-              className="arcade-toast"
-              data-testid="milestone-toast"
-              role="status"
-            >
-              {toast}
-            </div>
+            {theatre.on ? <MilestoneToast text={toast} /> : null}
             {prompt ? (
               <div className="arcade-prompt" data-testid="fullscreen-prompt">
                 <p>
@@ -293,7 +287,11 @@ export function GamePlayer({
         }
         working={claimUi.working}
       />
-      <ArcadeDock label="About this game" sections={dock} />
+      <ArcadeDock
+        label="About this game"
+        notice={theatre.on ? undefined : <MilestoneToast text={toast} />}
+        sections={dock}
+      />
     </>
   );
 }
