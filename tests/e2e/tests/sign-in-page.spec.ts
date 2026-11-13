@@ -77,7 +77,8 @@ test("a referral link leads to the sign-in page with the invitation code filled 
   await expect(page).toHaveURL(/\/sign-in$/u);
   await page.getByText("Have an invitation code?").click();
   await page.getByLabel("Invitation code (optional)").fill("nope");
-  await expect(page.getByRole("alert")).toContainText("8 letters and numbers");
+  const mistake = page.getByText("8 letters and numbers");
+  await expect(mistake).toBeVisible();
   await page.getByLabel("Invitation code (optional)").fill("23456789");
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(mistake).toHaveCount(0);
 });
