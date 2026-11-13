@@ -4,6 +4,9 @@ import { z } from "zod";
 export const noopProvider = "noop";
 
 export interface ServiceSettings {
+  // Whether a browser the provider's library takes for a robot may report. Only a test build sets it: the browsers that run our tests
+  // announce themselves as robots, and without it they report nothing. It is refused where real people sign in (see `@repo/config`).
+  readonly allowAutomation?: boolean;
   // Where the provider's ingest lives (the reverse proxy forwards to it); null when the provider needs none.
   readonly ingestOrigin: string | null;
   // The provider's name, one of the registry's keys.
@@ -19,6 +22,7 @@ export function serviceSettingsSchema(
 ) {
   return z
     .object({
+      allowAutomation: z.boolean().optional(),
       ingestOrigin: z.url().nullable(),
       provider: z.string(),
       token: z.string().min(1).nullable(),

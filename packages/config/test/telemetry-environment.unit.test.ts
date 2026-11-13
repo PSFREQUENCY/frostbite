@@ -56,4 +56,41 @@ describe("the telemetry environment", () => {
       parseTelemetryEnvironment({ NEXT_PUBLIC_ANALYTICS_PROVIDER: "mystery" }),
     ).not.toThrow(/ERROR_REPORTING/u);
   });
+
+  it("lets robots report only when asked, and only in a test build", () => {
+    const plain = parseTelemetryEnvironment({});
+    expect(plain.errorReporting).not.toHaveProperty("allowAutomation");
+    expect(
+      parseTelemetryEnvironment({
+        APP_ENV: "test",
+        NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
+      }).errorReporting,
+    ).toMatchObject({ allowAutomation: true });
+    // The browser has no APP_ENV: the server's start checks it, with the whole environment.
+    expect(
+      parseTelemetryEnvironment({
+        NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
+      }).errorReporting,
+    ).toMatchObject({ allowAutomation: true });
+    expect(
+      parseTelemetryEnvironment({
+        NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "false",
+      }).errorReporting,
+    ).not.toHaveProperty("allowAutomation");
+    for (const APP_ENV of ["preview", "production"])
+      expect(() =>
+        parseTelemetryEnvironment({
+          APP_ENV,
+          NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
+        }),
+      ).toThrow(/not allowed when APP_ENV is/u);
+  });
+
+  it("does not let analytics be told to admit robots", () => {
+    expect(
+      parseTelemetryEnvironment({
+        NEXT_PUBLIC_ERROR_REPORTING_ALLOW_AUTOMATION: "true",
+      }).analytics,
+    ).not.toHaveProperty("allowAutomation");
+  });
 });

@@ -44,6 +44,7 @@
     "@frostbite/scenes": "workspace:*",
     "@frostbite/share": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@repo/config": "workspace:*",
     "@repo/configs": "workspace:*",
     "@repo/ui": "workspace:*",

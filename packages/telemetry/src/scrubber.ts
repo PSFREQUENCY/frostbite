@@ -66,3 +66,31 @@ export function scrubProperties(
     ]),
   );
 }
+
+export type Scrubbable =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | readonly Scrubbable[]
+  | { readonly [key: string]: Scrubbable };
+
+// How deep a payload is followed before the rest is dropped: a report is a shallow thing, and a cycle must not run forever.
+const maxDepth = 12;
+
+// A whole payload with every text in it scrubbed, however deep (a vendor puts an error's message several levels down). This is for what a
+// vendor library hands back to be sent, which is why it takes any shape; the platform's own events are checked against the catalogue instead.
+export function scrubDeep(value: Scrubbable, depth = 0): Scrubbable {
+  if (typeof value === "string") return scrubText(value);
+  if (value === null || typeof value !== "object") return value;
+  if (depth >= maxDepth) return removed;
+  if (Array.isArray(value))
+    return value.map((item: Scrubbable) => scrubDeep(item, depth + 1));
+  return Object.fromEntries(
+    Object.entries(value).map(([name, item]) => [
+      name,
+      scrubDeep(item, depth + 1),
+    ]),
+  );
+}

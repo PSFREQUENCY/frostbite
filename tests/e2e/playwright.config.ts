@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 import { resolve } from "node:path";
 
+import { errorReportingStubOrigin } from "./src/error-reporting-stub.ts";
 import { resolveE2EServerConfig } from "./src/server-config.ts";
 
 const { baseURL, port: serverPort } = resolveE2EServerConfig(
@@ -69,7 +70,12 @@ export default defineConfig({
   webServer: {
     command: "pnpm --filter web start:standalone",
     cwd: repositoryRoot,
-    env: { HOSTNAME: "127.0.0.1", PORT: serverPort },
+    // The platform forwards a page's error reports to the stand-in for the error provider that one spec starts (tests/error-reporting.spec.ts).
+    env: {
+      ERROR_REPORTING_INGEST_ORIGIN: errorReportingStubOrigin,
+      HOSTNAME: "127.0.0.1",
+      PORT: serverPort,
+    },
     reuseExistingServer: false,
     url: baseURL,
   },
