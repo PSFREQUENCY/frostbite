@@ -17,6 +17,7 @@
     "test:coverage": "node --experimental-strip-types ../database/test/support/run-postgres.ts coverage"
   },
   "dependencies": {
+    "@frostbite/chain": "workspace:*",
     "@frostbite/database": "workspace:*",
     "@frostbite/rewards": "workspace:*",
     "@frostbite/shared": "workspace:*",

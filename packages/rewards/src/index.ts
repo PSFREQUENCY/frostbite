@@ -1,4 +1,9 @@
-export { assetKeyOf, chainOfAssetKey, isAssetKey } from "./asset.ts";
+export {
+  assetKeyOf,
+  assetOfKey,
+  chainOfAssetKey,
+  isAssetKey,
+} from "./asset.ts";
 export type { AccrueResult, ReverseResult } from "./accrual.ts";
 export {
   createExecutorRegistry,

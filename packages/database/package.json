@@ -30,6 +30,7 @@
     "./schema/passkey-sign-in": "./src/schema/passkey-sign-in.ts",
     "./schema/platform": "./src/schema/platform.ts",
     "./schema/rate-limit": "./src/schema/rate-limit.ts",
+    "./schema/referral-batches": "./src/schema/referral-batches.ts",
     "./schema/referrals": "./src/schema/referrals.ts",
     "./schema/rewards": "./src/schema/rewards.ts",
     "./schema/uploads": "./src/schema/uploads.ts",
