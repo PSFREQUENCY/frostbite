@@ -159,7 +159,10 @@ describe("asset validation activity", () => {
   });
 
   it("applies the configured dimension and pixel limits", async () => {
-    const policy = resolveUploadPolicy({ maxImageDimension: 6 });
+    const policy = resolveUploadPolicy({
+      maxImageDimension: 6,
+      svg: { rasterSide: 6 },
+    });
     const { service, subject } = setup({ bytes: png }, {}, policy);
     expect(await service.validate({ assetId: subject.assetId })).toMatchObject({
       outcome: { reason: "dimensions-exceeded" },
