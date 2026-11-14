@@ -7,9 +7,12 @@ import {
   referralAdminRoutes,
   referralBatchRoutes,
   referralPayoutRoute,
+  referralCoverResponseSchema,
   refreshReferralBatchResponseSchema,
   startReferralBatchResponseSchema,
   submitReferralBatchResponseSchema,
+  type ReferralCoverInput,
+  type ReferralCoverResponse,
   type RefreshReferralBatchInput,
   type RefreshReferralBatchResponse,
   type StartReferralBatchInput,
@@ -34,6 +37,7 @@ export const startBatchTimeoutMs = 10_000;
 // The two things an administrator changes, as the page reaches them: one same-origin request each, with the session of whoever is signed in.
 // A failure (including no session) is thrown as the requester throws it, for the caller to say.
 export interface ReferralsApi {
+  cover(input: ReferralCoverInput): Promise<ReferralCoverResponse>;
   refreshBatch(
     input: RefreshReferralBatchInput,
   ): Promise<RefreshReferralBatchResponse>;
@@ -57,6 +61,11 @@ export function createReferralsApi(
 ): ReferralsApi {
   const request = createRequester(fetchImpl);
   return {
+    cover: (input) =>
+      request(referralBatchRoutes.cover, referralCoverResponseSchema, {
+        query: input,
+        signal: AbortSignal.timeout(referralsRequestTimeoutMs),
+      }),
     refreshBatch: (input) =>
       request(referralBatchRoutes.refresh, refreshReferralBatchResponseSchema, {
         body: input,

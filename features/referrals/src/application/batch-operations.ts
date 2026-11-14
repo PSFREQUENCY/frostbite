@@ -3,6 +3,10 @@ import { unauthenticated } from "@frostbite/http/outcome";
 import { signedTransactionSchema } from "@frostbite/shared/chain";
 import {
   referralBatchRoutes,
+  referralCoverInputSchema,
+  referralCoverResponseSchema,
+  type ReferralCoverInput,
+  type ReferralCoverResponse,
   referralPayCapability,
   refreshReferralBatchInputSchema,
   refreshReferralBatchResponseSchema,
@@ -123,4 +127,33 @@ export function createRefreshBatchOperation(resolve: Resolve) {
     RefreshReferralBatchInput,
     RefreshReferralBatchResponse
   >;
+}
+
+// Whether the wallet that would pay holds what is waiting, said before a batch is built so staff know before they ask. A read of the chain and
+// the ledger; nothing is kept and nothing changes.
+export function createCoverOperation(resolve: Resolve) {
+  return {
+    ...base,
+    cache: { kind: "no-store" },
+    execute: async (input) => {
+      const { cover } = await resolve();
+      const result = await cover(input);
+      return {
+        ok: true,
+        value: result.ok
+          ? {
+              heldUnits: result.heldUnits.toString(),
+              payments: result.payments,
+              pendingUnits: result.pendingUnits.toString(),
+              status: "ok",
+              waitingUnits: result.waitingUnits.toString(),
+            }
+          : { reason: result.reason, status: "refused" },
+      } as const;
+    },
+    input: "query",
+    inputSchema: referralCoverInputSchema,
+    outputSchema: referralCoverResponseSchema,
+    ...referralBatchRoutes.cover,
+  } satisfies HttpOperation<ReferralCoverInput, ReferralCoverResponse>;
 }

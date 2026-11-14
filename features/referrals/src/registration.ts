@@ -79,6 +79,7 @@ export function createReferralsFeature(config: ReferralsFeatureConfig) {
         referralAdminRoutes.setProgram,
         referralAdminRoutes.setFrozen,
         referralPayoutRoute,
+        referralBatchRoutes.cover,
         referralBatchRoutes.start,
         referralBatchRoutes.submit,
         referralBatchRoutes.refresh,

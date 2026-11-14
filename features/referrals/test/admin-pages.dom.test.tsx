@@ -44,7 +44,7 @@ describe("the admin section's links", () => {
 });
 
 describe("the overview", () => {
-  it("counts the people and totals what is owed from the ledger, and says it does not check the treasury", async () => {
+  it("counts the people and totals what is owed from the ledger, and says where what the paying wallet holds is checked", async () => {
     const container = await mount(
       <AdminOverview navigation={staff} overview={overview()} />,
     );
@@ -56,7 +56,9 @@ describe("the overview", () => {
     expect(text).toContain("Owed in all130 sats");
     expect(text).toContain("Ready to pay100 sats");
     expect(text).toContain("Paid so far500 sats");
-    expect(text).toContain("Checking them against what the treasury holds");
+    expect(text).toContain(
+      "checked against what is waiting on the Payouts page",
+    );
     expect(hrefs(container)).toContain("/admin/referrals/referrers");
   });
 

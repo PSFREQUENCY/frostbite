@@ -36,7 +36,7 @@ export const overviewWords = {
     payable: "Ready to pay",
   },
   treasuryNote:
-    "These figures come from the ledger. Checking them against what the treasury holds comes with payouts.",
+    "These figures come from the ledger. What the wallet that pays holds is checked against what is waiting on the Payouts page, before a batch is built.",
 } as const;
 
 export const programWords = {

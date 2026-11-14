@@ -115,6 +115,14 @@
   color: var(--arcade-text-subtle);
   font-size: var(--arcade-text-sm);
 }
+.ref-cover {
+  display: grid;
+  gap: var(--arcade-space-2);
+  justify-items: start;
+}
+.ref-cover p {
+  margin: 0;
+}
 .ref-fields {
   display: grid;
   gap: var(--arcade-space-4);

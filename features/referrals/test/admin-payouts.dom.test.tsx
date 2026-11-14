@@ -126,7 +126,9 @@ describe("the payouts page", () => {
     const container = await mount(
       <AdminOverview navigation={navigationFor(false)} overview={overview()} />,
     );
-    expect(textOf(container)).not.toContain("Payouts");
+    expect(
+      [...container.querySelectorAll("a")].map((link) => link.textContent),
+    ).not.toContain("Payouts");
   });
 });
 

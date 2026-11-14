@@ -14,6 +14,7 @@ describe("the referral feature's registration", () => {
       "setReferralProgram",
       "setReferrerFrozen",
       "requestReferralPayout",
+      "getReferralCover",
       "startReferralBatch",
       "submitReferralBatch",
       "refreshReferralBatch",

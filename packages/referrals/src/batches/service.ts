@@ -1,6 +1,7 @@
 import {
   BuildRefusedError,
   InvalidAddressError,
+  type ChainObserver,
   type ContractGateway,
   type TransactionBuilder,
 } from "@frostbite/chain/ports";
@@ -29,6 +30,8 @@ export const batchExecutorId = "staff-batch";
 // What a batch needs of a chain: to check where a payment goes and what it may carry, to build, check and send the transaction, to see
 // whether the sender can afford it, and to follow it.
 export interface BatchChainPorts extends FollowedPorts {
+  // Also what an address holds, to say before a batch is built whether the wallet that would pay covers it.
+  readonly observer: Pick<ChainObserver, "balance" | "observe">;
   readonly addressCodec: {
     minimumOutput(address: Address): bigint;
     parse(chain: ChainRef, text: string): Address;

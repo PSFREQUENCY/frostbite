@@ -19,6 +19,7 @@ import {
 } from "@frostbite/shared/referrals";
 
 import {
+  createCoverOperation,
   createRefreshBatchOperation,
   createStartBatchOperation,
   createSubmitBatchOperation,
@@ -79,6 +80,7 @@ export function createReferralsEntrypoint(
       registerHttpOperation(createSetProgramOperation(resolve)),
       registerHttpOperation(createSetFrozenOperation(resolve)),
       registerHttpOperation(createRequestPayoutOperation(resolve)),
+      registerHttpOperation(createCoverOperation(resolve)),
       registerHttpOperation(createStartBatchOperation(resolve)),
       registerHttpOperation(createSubmitBatchOperation(resolve)),
       registerHttpOperation(createRefreshBatchOperation(resolve)),
