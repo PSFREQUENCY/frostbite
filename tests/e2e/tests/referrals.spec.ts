@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { creatorE2EFixtures } from "../src/creator-fixtures.ts";
 import { asAdmin } from "./support/admin-session.ts";
+import { openWalletMenu, walletMenu } from "./support/fake-wallet.ts";
 import { closeMatrix, prepare, skipToMain } from "./support/quality.ts";
 
 // The referral pages on the real stack (ADR-026, REF-1c). The pages that only read run on every viewport, each with the accessibility and
@@ -48,6 +49,20 @@ test("a signed-in person has their link, a pot of nothing and an empty history, 
   await heading(page, "Your referral history");
   await expect(page.getByText("Nothing earned yet.")).toBeVisible();
   await closeMatrix(page, "referrals-history-empty.png");
+});
+
+test("the way to the referral page is in the wallet menu of someone signed in", async ({
+  baseURL,
+  page,
+}) => {
+  await prepare(page, baseURL, creatorE2EFixtures.applicant.sessionToken);
+  await page.goto("/account");
+  await openWalletMenu(page);
+  await walletMenu(page)
+    .getByRole("link", { exact: true, name: "Referrals" })
+    .click();
+  await expect(page).toHaveURL(/\/referrals$/u);
+  await heading(page, "Bring a friend, earn from every mint");
 });
 
 test("a person's link leads to the sign-in page with the code, and the history needs a session", async ({

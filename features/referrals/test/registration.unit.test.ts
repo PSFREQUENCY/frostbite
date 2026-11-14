@@ -31,7 +31,7 @@ describe("the referral feature's registration", () => {
     ]);
   });
 
-  it("puts the overview in the admin navigation for staff, the program only for those who may open it, and nothing in the bar every visitor sees", () => {
+  it("puts the overview in the admin navigation for staff, the program only for those who may open it, and nothing in the bar every visitor sees or in the account menu (the wallet menu links the page itself)", () => {
     expect(
       feature().manifest.navigation.map(({ access, area, href }) => [
         area,
