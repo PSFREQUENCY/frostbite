@@ -73,11 +73,11 @@ export function requireSignedPsbt(
   ) {
     throw new Error("LaserEyes returned an incomplete signed PSBT.");
   }
-  // Some wallets (Xverse) answer with the transaction's id although they were told not to send it. That id is the transaction's own, so
-  // it is taken as a name; an id that is not this transaction's is not trusted. The platform sends the transaction itself, after it has
+  // Some wallets (Xverse) answer with an empty id, or with the transaction's own id, although they were told not to send it. Both are
+  // taken as nothing sent; an id that is not this transaction's is not trusted. The platform sends the transaction itself, after it has
   // checked what was signed.
   const own = psbtTransactionId(result.signedPsbtBase64);
-  if (result.txId !== undefined && result.txId !== own) {
+  if (result.txId !== undefined && result.txId !== "" && result.txId !== own) {
     throw new Error(
       `LaserEyes broadcast a PSBT that was requested for signing only (the wallet named ${result.txId}, the signed transaction is ${own ?? "not readable"}).`,
     );

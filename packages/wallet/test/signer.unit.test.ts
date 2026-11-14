@@ -142,6 +142,11 @@ describe("createLaserEyesSigner", () => {
     await expect(signer.signPsbt("psbt")).resolves.toMatchObject({
       psbtBase64: answeredPsbt,
     });
+    // Xverse's answer when it sent nothing: an empty id.
+    dependencies.client.signPsbt = vi.fn(async () => answer(""));
+    await expect(signer.signPsbt("psbt")).resolves.toMatchObject({
+      psbtBase64: answeredPsbt,
+    });
     dependencies.client.signPsbt = vi.fn(async () => answer("00".repeat(32)));
     await expect(signer.signPsbt("psbt")).rejects.toThrow("broadcast a PSBT");
   });
