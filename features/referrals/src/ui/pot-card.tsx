@@ -1,6 +1,7 @@
 import type { Mine } from "@frostbite/referrals";
 import type { ReferralProgram } from "@frostbite/referrals";
-import { ArcadeProgress, ConsoleCard } from "@repo/ui/arcade";
+import { referralsHistoryPath } from "@frostbite/shared/referrals";
+import { ArcadeButton, ArcadeProgress, ConsoleCard } from "@repo/ui/arcade";
 
 import { mineWords, stateWords } from "../domain/copy.ts";
 import { unitsLabel } from "../domain/format.ts";
@@ -56,6 +57,7 @@ export function PotCard({
           </div>
         );
       })}
+      <ArcadeButton href={referralsHistoryPath}>See every earning</ArcadeButton>
     </ConsoleCard>
   );
 }

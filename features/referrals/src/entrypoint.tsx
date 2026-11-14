@@ -64,6 +64,7 @@ export function createReferralsEntrypoint(
     pages: [
       {
         access: { kind: "public" },
+        actor: "optional",
         metadata: () => ({
           description: clipDescription(pageWords.explainerIntro),
           kind: "shared",

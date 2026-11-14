@@ -3,6 +3,9 @@
 
 /* The three routes of the admin section, as links. The one being shown is marked, by colour and by the border, so it never depends on colour. */
 .ref-sections {
+  /* A row of its own above the cards of the grid it sits in, however wide the grid is. */
+  grid-column: 1 / -1;
+  align-items: flex-start;
   display: flex;
   flex-wrap: wrap;
   gap: var(--arcade-space-2);

@@ -47,8 +47,17 @@ export default async function FeaturePage({
   const homeSections = await platformComposition.features.listHomeSections();
   const token = (await cookies()).get(platformSessionCookieName)?.value;
   if (contribution.access.kind === "public") {
+    // Only a page that asks for the signed-in person is given them; the rest are rendered the same for everyone.
+    const session =
+      contribution.actor === "optional"
+        ? await resolvePageAccess(
+            { kind: "authenticated" },
+            token,
+            getPageAccessDependencies,
+          )
+        : null;
     return contribution.render({
-      actorUserId: null,
+      actorUserId: session?.kind === "allowed" ? session.actorUserId : null,
       homeSections,
       navigation: await navigationForSession(
         navigationContributions,

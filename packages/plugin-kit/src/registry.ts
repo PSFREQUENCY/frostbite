@@ -19,6 +19,9 @@ export type { PageMetadata } from "./page-metadata.ts";
 
 export interface FeaturePageContribution {
   readonly access: PageAccessRequirement;
+  // A public page is rendered with no actor unless it asks for one: "optional" gives it the signed-in person when there is one (and none
+  // when there is not), for a page anyone may read that shows more to a person who is signed in.
+  readonly actor?: "optional";
   // What the page tells a search engine or a link preview. A page that declares none is `private`: kept out of search results.
   readonly metadata?: (
     context: PageMetadataContext,

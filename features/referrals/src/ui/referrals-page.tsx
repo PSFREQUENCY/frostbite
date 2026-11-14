@@ -83,13 +83,6 @@ export function ReferralsPage({
         </>
       )}
       <Terms program={program} />
-      {mine === null ? null : (
-        <ConsoleCard glyph="☰" title="Your history">
-          <ArcadeButton href="/referrals/history">
-            See every earning
-          </ArcadeButton>
-        </ConsoleCard>
-      )}
     </UserFrame>
   );
 }
