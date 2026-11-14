@@ -17,6 +17,10 @@ import {
 } from "@frostbite/database";
 import { createHeldMethodKinds } from "@frostbite/feature-accounts";
 import { createRedeemSetupLinkOperation } from "@frostbite/feature-accounts/setup-operation";
+import {
+  createScratchDatabase,
+  dropScratchDatabase,
+} from "@frostbite/database/test-scratch-database";
 import { correlationIdSchema } from "@frostbite/shared/http";
 import { createUuidV7, type UuidV7 } from "@frostbite/shared/identifiers";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -26,8 +30,20 @@ import { authorizationPolicy } from "@repo/configs/authorization";
 
 // The setup link as the page drives it, against real PostgreSQL: the HTTP operation, the service and the platform's real sign-in
 // method registry together (the framing around them, with its session and origin checks, is covered with the other auth routes).
+//
+// It runs in a database of its own. Setup is possible only while no administrator exists, and each test starts from an empty set of accounts,
+// both of which are facts about the whole database: in the one the other files share, emptying the accounts meets their rows (a ledger entry
+// holds on to the account behind it) and an administrator made there ends setup for this file.
 const environment = parseDatabaseEnvironment(process.env);
-const pool = createDatabasePool(environment);
+const databaseName = "setup_link_flow_test";
+const scratchUrl = new URL(environment.DATABASE_URL);
+scratchUrl.pathname = `/${databaseName}`;
+const scratchEnvironment = {
+  ...environment,
+  DATABASE_MIGRATION_URL: scratchUrl.toString(),
+};
+const admin = createDatabasePool(environment);
+const pool = createDatabasePool(environment, scratchUrl.toString());
 const database = createDatabaseClient(pool);
 const service = createSetupLinkService({
   clock: () => new Date(),
@@ -40,13 +56,18 @@ const service = createSetupLinkService({
 });
 const operation = createRedeemSetupLinkOperation(() => service);
 
-async function person(withWallet: boolean): Promise<UuidV7> {
+const shared = createDatabaseClient(admin);
+
+async function person(
+  withWallet: boolean,
+  into: typeof database = database,
+): Promise<UuidV7> {
   const id = createUuidV7();
-  await database
+  await into
     .insert(authUsers)
     .values({ email: `${id}@example.test`, id, name: "Person" });
   if (withWallet)
-    await database.insert(walletIdentities).values({
+    await into.insert(walletIdentities).values({
       address: `tb1q${id.replaceAll("-", "").slice(0, 30)}`,
       id: createUuidV7(),
       network: "signet",
@@ -84,11 +105,16 @@ async function clean() {
   await database.delete(authUsers);
 }
 
-beforeAll(async () => runMigrations(environment));
+beforeAll(async () => {
+  await runMigrations(environment);
+  await createScratchDatabase(admin, databaseName);
+  await runMigrations(scratchEnvironment);
+});
 beforeEach(clean);
 afterAll(async () => {
-  await clean();
   await pool.end();
+  await dropScratchDatabase(admin, databaseName);
+  await admin.end();
 });
 
 describe("opening a setup link", () => {
@@ -106,6 +132,31 @@ describe("opening a setup link", () => {
     expect(
       await operation.execute({ token }, asUser(await person(true))),
     ).toMatchObject({ error: "not_found", ok: false });
+  });
+
+  it("is not disturbed by an administrator in the database the other files share", async () => {
+    const elsewhere = await person(true, shared);
+    await shared.insert(platformRoleAssignments).values({
+      id: createUuidV7(),
+      role: "admin",
+      userId: elsewhere,
+    });
+    try {
+      expect(
+        await operation.execute(
+          { token: await mintToken() },
+          asUser(await person(true)),
+        ),
+      ).toEqual({ ok: true, value: { status: "granted" } });
+    } finally {
+      for (const table of ["platform_role_assignments", "wallet_identities"])
+        await admin.query(`delete from frostbite.${table} where user_id = $1`, [
+          elsewhere,
+        ]);
+      await admin.query("delete from frostbite.auth_users where id = $1", [
+        elsewhere,
+      ]);
+    }
   });
 
   it("asks a person with no wallet to add one, without spending the link", async () => {
