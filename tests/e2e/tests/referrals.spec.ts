@@ -187,7 +187,7 @@ test.describe("running the program", () => {
       page
         .getByRole("navigation", { name: "Referral sections" })
         .getByRole("link"),
-    ).toHaveText(["Overview", "Program", "Referrers"]);
+    ).toHaveText(["Overview", "Program", "Referrers", "Payouts"]);
     await page.getByLabel("Earning is on").check();
     await page
       .getByLabel("Share of the fee (hundredths of a percent)")
