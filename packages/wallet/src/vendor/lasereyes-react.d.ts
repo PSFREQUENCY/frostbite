@@ -16,6 +16,7 @@ declare module "@omnisat/lasereyes-react" {
 
   export function useLaserEyes(): {
     readonly address: string;
+    readonly publicKey: string;
     readonly connected: boolean;
     readonly isConnecting: boolean;
     readonly network: WalletNetwork;

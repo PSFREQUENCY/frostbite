@@ -9,6 +9,8 @@ export interface WalletConnectionClient {
   readonly connecting: boolean;
   readonly network: WalletNetwork;
   readonly provider: LaserEyesProviderId | null;
+  // The connected account's public key (hex), empty when none is connected.
+  readonly publicKey: string;
   connect(provider: LaserEyesProviderId): Promise<void>;
   disconnect(): void;
   signMessage(message: string): Promise<string>;
@@ -37,6 +39,7 @@ export function idleConnection(
     isInstalled: () => false,
     network,
     provider: null,
+    publicKey: "",
     signMessage: () => Promise.reject(new Error(noConnectedAccountMessage)),
     signPsbt: () => Promise.reject(new Error(noConnectedAccountMessage)),
   };

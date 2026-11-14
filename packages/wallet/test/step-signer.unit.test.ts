@@ -34,6 +34,7 @@ describe("having the connected wallet sign a built transaction", () => {
     chain.withWalletSignatures.mockReturnValue("signed");
     const order: string[] = [];
     const wallet = {
+      publicKey: "abcd",
       signPsbt: vi.fn(async (psbt: string) => {
         order.push(`start ${psbt}`);
         await Promise.resolve();
@@ -56,9 +57,11 @@ describe("having the connected wallet sign a built transaction", () => {
       "start reveal",
       "end reveal",
     ]);
+    // The wallet's own key goes with the request, so inputs it owns can name it.
     expect(chain.walletRequests).toHaveBeenCalledWith(
       transaction.format,
       transaction.payload,
+      "abcd",
     );
     expect(chain.withWalletSignatures).toHaveBeenCalledWith(
       transaction.format,
@@ -68,7 +71,7 @@ describe("having the connected wallet sign a built transaction", () => {
   });
 
   it("signs nothing for a family it has no mapping for, or a format it does not know", async () => {
-    const wallet = { signPsbt: vi.fn() };
+    const wallet = { publicKey: "", signPsbt: vi.fn() };
     expect(
       await signWithWallet(wallet, { ...transaction, family: "simulated" }),
     ).toBeNull();
@@ -81,7 +84,7 @@ describe("having the connected wallet sign a built transaction", () => {
   it("does not ask the wallet when there is nothing left to sign", async () => {
     chain.walletRequests.mockReturnValue([]);
     chain.withWalletSignatures.mockReturnValue("same");
-    const wallet = { signPsbt: vi.fn() };
+    const wallet = { publicKey: "", signPsbt: vi.fn() };
     expect(await signWithWallet(wallet, transaction)).toMatchObject({
       payload: "same",
     });
@@ -92,13 +95,19 @@ describe("having the connected wallet sign a built transaction", () => {
     chain.walletRequests.mockReturnValue([{ inputs: [0], psbt: "commit" }]);
     await expect(
       signWithWallet(
-        { signPsbt: vi.fn().mockRejectedValue(new Error("User declined")) },
+        {
+          publicKey: "",
+          signPsbt: vi.fn().mockRejectedValue(new Error("User declined")),
+        },
         transaction,
       ),
     ).rejects.toThrow("User declined");
     chain.withWalletSignatures.mockReturnValue(null);
     await expect(
-      signWithWallet({ signPsbt: vi.fn(async () => "x") }, transaction),
+      signWithWallet(
+        { publicKey: "", signPsbt: vi.fn(async () => "x") },
+        transaction,
+      ),
     ).rejects.toBeInstanceOf(WalletRefusedError);
   });
 });

@@ -3,11 +3,13 @@ import { Psbt } from "bitcoinjs-lib";
 import { bundleFormat, decodeBundle, encodeBundle } from "./admin/bundle.ts";
 import { psbtFormat } from "./format.ts";
 import { psbtToBase64 } from "./psbt-text.ts";
+import { addTaprootKey } from "./taproot-key.ts";
 import { inputIsSigned, parse } from "./verify.ts";
 
 // What a person's wallet is asked to sign for a built transaction, and how its answer is put back. A step is one PSBT, or a pair
 // (the commit and the reveal, which is signed already except for the input that spends the game's auth token); the wallet is asked
-// only for the inputs nothing has signed yet, so it never sees a request for what the platform signed itself.
+// only for the inputs nothing has signed yet, so it never sees a request for what the platform signed itself. `walletKey` is the
+// wallet's public key (hex): the taproot inputs it owns name it, as some wallets need (see `taproot-key.ts`).
 export interface WalletRequest {
   // The inputs the wallet is asked to sign.
   readonly inputs: readonly number[];
@@ -38,12 +40,15 @@ function psbtsOf(format: string, payload: string): Psbt[] | null {
 export function walletRequests(
   format: string,
   payload: string,
+  walletKey = "",
 ): WalletRequest[] | null {
   const psbts = psbtsOf(format, payload);
   if (psbts === null) return null;
   return psbts.flatMap((psbt) => {
     const inputs = unsignedInputs(psbt);
-    return inputs.length === 0 ? [] : [{ inputs, psbt: psbtToBase64(psbt) }];
+    if (inputs.length === 0) return [];
+    addTaprootKey(psbt, inputs, walletKey);
+    return [{ inputs, psbt: psbtToBase64(psbt) }];
   });
 }
 

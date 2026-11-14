@@ -27,11 +27,15 @@ export class WalletRefusedError extends Error {
 // what it answers is put back into the transaction. Null when this family's transactions are not ones a wallet signs here. The
 // platform checks the result against what it built before it sends anything.
 export async function signWithWallet(
-  wallet: Pick<WalletConnectionClient, "signPsbt">,
+  wallet: Pick<WalletConnectionClient, "publicKey" | "signPsbt">,
   transaction: StepTransaction,
 ): Promise<StepTransaction | null> {
   if (transaction.family !== bitcoinAlkanes) return null;
-  const requests = walletRequests(transaction.format, transaction.payload);
+  const requests = walletRequests(
+    transaction.format,
+    transaction.payload,
+    wallet.publicKey,
+  );
   if (requests === null) return null;
   const answers: string[] = [];
   for (const { inputs, psbt } of requests)
