@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   referralAdminRoutes,
+  referralPayoutRoute,
+  requestReferralPayoutInputSchema,
+  requestReferralPayoutResponseSchema,
   referralsAdminReferrerHref,
   setReferralProgramInputSchema,
   setReferrerFrozenInputSchema,
@@ -63,5 +66,48 @@ describe("the routes", () => {
     expect(referralsAdminReferrerHref("abc")).toBe(
       "/admin/referrals/referrers/abc",
     );
+  });
+});
+
+describe("asking to be paid", () => {
+  it("takes an asset and a wallet address, trimmed, and nothing else", () => {
+    expect(
+      requestReferralPayoutInputSchema.parse({
+        assetKey: "a/native/b",
+        destination: "  tb1qx  ",
+      }).destination,
+    ).toBe("tb1qx");
+    for (const bad of [
+      { assetKey: "", destination: "x" },
+      { assetKey: "a", destination: "  " },
+      { assetKey: "a", destination: "x", userId: "someone" },
+    ])
+      expect(requestReferralPayoutInputSchema.safeParse(bad).success).toBe(
+        false,
+      );
+  });
+
+  it("answers with an amount, or a refusal with a reason from the list and the figures where they matter", () => {
+    expect(referralPayoutRoute.method).toBe("POST");
+    expect(
+      requestReferralPayoutResponseSchema.safeParse({
+        amountUnits: "150",
+        status: "requested",
+      }).success,
+    ).toBe(true);
+    expect(
+      requestReferralPayoutResponseSchema.safeParse({
+        minimumUnits: "546",
+        payableUnits: "150",
+        reason: "below-dust",
+        status: "refused",
+      }).success,
+    ).toBe(true);
+    expect(
+      requestReferralPayoutResponseSchema.safeParse({
+        reason: "because",
+        status: "refused",
+      }).success,
+    ).toBe(false);
   });
 });

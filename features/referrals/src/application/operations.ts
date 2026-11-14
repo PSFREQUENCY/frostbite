@@ -3,6 +3,11 @@ import { unauthenticated } from "@frostbite/http/outcome";
 import {
   referralAdministerCapability,
   referralAdminRoutes,
+  referralPayoutRoute,
+  requestReferralPayoutInputSchema,
+  requestReferralPayoutResponseSchema,
+  type RequestReferralPayoutInput,
+  type RequestReferralPayoutResponse,
   setReferralProgramInputSchema,
   setReferralProgramResponseSchema,
   setReferrerFrozenInputSchema,
@@ -82,4 +87,49 @@ export function createSetFrozenOperation(resolve: Resolve) {
     outputSchema: setReferrerFrozenResponseSchema,
     ...referralAdminRoutes.setFrozen,
   } satisfies HttpOperation<SetReferrerFrozenInput, SetReferrerFrozenResponse>;
+}
+
+// A referrer asks to be paid what is payable, to one of the wallets of their own account. Who is asking is the session, never a field of the
+// request. Anything that stops it is an answer with the reason (and, for a pot that is too small, the figures), not an error.
+export function createRequestPayoutOperation(resolve: Resolve) {
+  const respond = (value: RequestReferralPayoutResponse) =>
+    ({ ok: true, value }) as const;
+  return {
+    access: { kind: "authenticated" },
+    applicationErrors: ["unauthorized"],
+    execute: async (input, context) => {
+      if (context.actorUserId === null) return unauthenticated;
+      const { payouts } = await resolve();
+      const result = await payouts.claim({
+        assetKey: input.assetKey,
+        destination: input.destination,
+        userId: context.actorUserId,
+      });
+      switch (result.kind) {
+        case "requested":
+          return respond({
+            amountUnits: result.payout.amount.toString(),
+            status: "requested",
+          });
+        case "below-dust":
+        case "below-minimum":
+          return respond({
+            minimumUnits: result.minimum.toString(),
+            payableUnits: result.payable.toString(),
+            reason: result.kind,
+            status: "refused",
+          });
+        default:
+          return respond({ reason: result.kind, status: "refused" });
+      }
+    },
+    idempotency: "none",
+    input: "json",
+    inputSchema: requestReferralPayoutInputSchema,
+    outputSchema: requestReferralPayoutResponseSchema,
+    ...referralPayoutRoute,
+  } satisfies HttpOperation<
+    RequestReferralPayoutInput,
+    RequestReferralPayoutResponse
+  >;
 }

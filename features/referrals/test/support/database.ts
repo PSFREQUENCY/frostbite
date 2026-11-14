@@ -8,11 +8,11 @@ import {
   rewardProgramSettings,
   runMigrations,
 } from "@frostbite/database";
-import { createReferralReads } from "@frostbite/referrals";
+import { createPayoutClaims, createReferralReads } from "@frostbite/referrals";
 import { max } from "drizzle-orm";
 import { afterAll, beforeAll } from "vitest";
 
-import { feeAsset } from "./data.ts";
+import { feeAsset, policy } from "./data.ts";
 
 // The feature against real PostgreSQL: one pool for the test's own rows, and the same reads the feature makes, to put the program and the
 // earnings there that its pages then show.
@@ -20,14 +20,10 @@ export const environment = parseDatabaseEnvironment(process.env);
 export const pool = createDatabasePool(environment);
 export const database = createDatabaseClient(pool);
 
-export const policy = {
-  maximumMaturitySeconds: 2_592_000,
-  maximumMinimumPayout: 10_000_000n,
-};
-
 // A day ago, so what is earned now can be paid now (the pages read the real clock). Each file starts after the newest setting any file made
 // (the database lasts for the whole run), so the setting a test makes is always the newest.
 const aDayAgo = () => new Date(Date.now() - 86_400_000);
+export { policy };
 export const clock = { now: aDayAgo() };
 export const reads = createReferralReads({
   clock: () => clock.now,
@@ -75,3 +71,14 @@ export async function earn(referrer: string, fee: bigint, claimId: string) {
     type: "claim.completed",
   });
 }
+
+// Paying to an address the test says is fine (the chain's own rules are the platform's, tested where the codec is).
+export const payouts = createPayoutClaims({
+  check: async (_asset, address) => ({
+    address,
+    minimumOutput: 100n,
+    ok: true,
+  }),
+  database,
+  rewards: reads.rewards,
+});

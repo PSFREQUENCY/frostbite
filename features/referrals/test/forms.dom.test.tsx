@@ -21,6 +21,10 @@ const initial = {
   rateBasisPoints: "300",
 };
 const api = (over: Partial<ReferralsApi> = {}): ReferralsApi => ({
+  requestPayout: vi.fn(async () => ({
+    amountUnits: "150",
+    status: "requested" as const,
+  })),
   setFrozen: vi.fn(async () => ({ frozen: true, status: "saved" as const })),
   setProgram: vi.fn(async () => ({ status: "saved" as const })),
   ...over,

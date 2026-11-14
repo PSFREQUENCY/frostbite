@@ -1240,6 +1240,9 @@ importers:
 
   features/referrals:
     dependencies:
+      '@frostbite/chain':
+        specifier: workspace:*
+        version: link:../../packages/chain
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http

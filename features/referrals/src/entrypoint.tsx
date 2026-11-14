@@ -4,7 +4,7 @@ import {
   clipDescription,
   privatePage,
 } from "@frostbite/plugin-kit/page-metadata";
-import type { ReferralsConfig } from "@frostbite/referrals";
+
 import {
   referralAdministerCapability,
   referralsAdminPath,
@@ -17,11 +17,13 @@ import {
 } from "@frostbite/shared/referrals";
 
 import {
+  createRequestPayoutOperation,
   createSetFrozenOperation,
   createSetProgramOperation,
 } from "./application/operations.ts";
 import { pageWords } from "./domain/copy.ts";
 import { afterFrom, listViewFrom, queryOf } from "./domain/list-query.ts";
+import type { ReferralsFeatureConfig } from "./config.ts";
 import { createReferralsResolver } from "./runtime.ts";
 import { AdminOverview } from "./ui/admin-overview.tsx";
 import { AdminProgram } from "./ui/admin-program.tsx";
@@ -41,7 +43,7 @@ const adminAccess = {
 } as const;
 
 export function createReferralsEntrypoint(
-  config: ReferralsConfig,
+  config: ReferralsFeatureConfig,
 ): FeatureEntrypoint {
   const resolve = createReferralsResolver(config);
   const ceilings = {
@@ -60,6 +62,7 @@ export function createReferralsEntrypoint(
     operations: [
       registerHttpOperation(createSetProgramOperation(resolve)),
       registerHttpOperation(createSetFrozenOperation(resolve)),
+      registerHttpOperation(createRequestPayoutOperation(resolve)),
     ],
     pages: [
       {
@@ -73,15 +76,19 @@ export function createReferralsEntrypoint(
         path: referralsPath,
         render: async ({ actorUserId, navigation }) => {
           const reads = await resolve();
-          const [program, mine] = await Promise.all([
+          const [program, mine, wallets, open] = await Promise.all([
             reads.program.current(),
             actorUserId === null ? null : reads.mine.summary(actorUserId),
+            actorUserId === null ? [] : reads.payouts.wallets(actorUserId),
+            actorUserId === null ? [] : reads.payouts.open(actorUserId),
           ]);
           return (
             <ReferralsPage
               mine={mine}
               navigation={navigation}
+              open={open}
               program={program}
+              wallets={wallets}
             />
           );
         },

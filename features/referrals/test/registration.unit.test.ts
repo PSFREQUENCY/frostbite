@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { createReferralsFeature } from "../src/registration.ts";
+import { featureConfig } from "./support/config.ts";
 
-const feature = () =>
-  createReferralsFeature({
-    policy: { maximumMaturitySeconds: 60, maximumMinimumPayout: 1n },
-  });
+const feature = () => createReferralsFeature(featureConfig());
 
 describe("the referral feature's registration", () => {
   it("declares the routes, the pages and the navigation, so that removing it removes them all", () => {
@@ -15,6 +13,7 @@ describe("the referral feature's registration", () => {
     expect(manifest.routes.map(({ operationId }) => operationId)).toEqual([
       "setReferralProgram",
       "setReferrerFrozen",
+      "requestReferralPayout",
     ]);
     expect(
       manifest.pages.map(({ access, path }) => [

@@ -5,11 +5,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { createReferralsFeature } from "../src/registration.ts";
+import { featureConfig } from "./support/config.ts";
 import { navigationFor } from "./support/data.ts";
 import {
   clock,
   earn,
-  policy,
   reads,
   registerDatabase,
   seedUser,
@@ -18,7 +18,7 @@ import {
 registerDatabase();
 
 const load = () =>
-  createReferralsFeature({ policy }).load({
+  createReferralsFeature(featureConfig()).load({
     registeredFeatureCount: 1,
     registeredFeatureIds: ["referrals"],
   });
@@ -66,7 +66,11 @@ describe("the feature's pages as the platform renders them", () => {
     ]);
     expect(
       entrypoint.operations?.map(({ route }) => route.operationId),
-    ).toEqual(["setReferralProgram", "setReferrerFrozen"]);
+    ).toEqual([
+      "setReferralProgram",
+      "setReferrerFrozen",
+      "requestReferralPayout",
+    ]);
   });
 
   it("lets only the public page be found and shared, and keeps every other out of search", async () => {

@@ -13,3 +13,8 @@ const assetKeyPattern =
 export function isAssetKey(value: string): boolean {
   return assetKeyPattern.test(value);
 }
+
+// The chain an asset is on, the first part of its key (the chain's name has colons and no slash, so the first slash ends it).
+export function chainOfAssetKey(assetKey: string): string {
+  return assetKey.split("/", 1)[0] ?? "";
+}

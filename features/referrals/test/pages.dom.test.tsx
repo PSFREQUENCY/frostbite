@@ -94,6 +94,7 @@ describe("the referral page, before and after signing in", () => {
       />,
     );
     expect(textOf(reached)).toContain("You have reached the minimum.");
+    expect(textOf(reached)).toContain("you need a wallet on your account");
     const frozen = await mount(
       <ReferralsPage
         mine={mine({ frozen: true })}

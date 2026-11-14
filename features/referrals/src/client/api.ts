@@ -5,6 +5,10 @@ import {
 } from "@frostbite/client-http";
 import {
   referralAdminRoutes,
+  referralPayoutRoute,
+  requestReferralPayoutResponseSchema,
+  type RequestReferralPayoutInput,
+  type RequestReferralPayoutResponse,
   setReferralProgramResponseSchema,
   setReferrerFrozenResponseSchema,
   type SetReferralProgramInput,
@@ -18,6 +22,9 @@ export const referralsRequestTimeoutMs = 5_000;
 // The two things an administrator changes, as the page reaches them: one same-origin request each, with the session of whoever is signed in.
 // A failure (including no session) is thrown as the requester throws it, for the caller to say.
 export interface ReferralsApi {
+  requestPayout(
+    input: RequestReferralPayoutInput,
+  ): Promise<RequestReferralPayoutResponse>;
   setFrozen(input: SetReferrerFrozenInput): Promise<SetReferrerFrozenResponse>;
   setProgram(
     input: SetReferralProgramInput,
@@ -29,6 +36,11 @@ export function createReferralsApi(
 ): ReferralsApi {
   const request = createRequester(fetchImpl);
   return {
+    requestPayout: (input) =>
+      request(referralPayoutRoute, requestReferralPayoutResponseSchema, {
+        body: input,
+        signal: AbortSignal.timeout(referralsRequestTimeoutMs),
+      }),
     setFrozen: (input) =>
       request(referralAdminRoutes.setFrozen, setReferrerFrozenResponseSchema, {
         body: input,
