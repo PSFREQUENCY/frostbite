@@ -1,4 +1,4 @@
-import { Psbt } from "bitcoinjs-lib";
+import { Psbt, Transaction } from "bitcoinjs-lib";
 
 import { bundleFormat, decodeBundle, encodeBundle } from "./admin/bundle.ts";
 import { psbtFormat } from "./format.ts";
@@ -81,4 +81,20 @@ export function withWalletSignatures(
   return first === undefined || second === undefined
     ? null
     : encodeBundle({ commit: first, reveal: second });
+}
+
+// The id the network will know the PSBT's transaction by, from its inputs and outputs alone (a signature does not change it), or null
+// for text that is not a PSBT. A wallet that answers a signing request with an id may have sent the transaction or may only be naming
+// it; an id that is not this one is neither.
+export function psbtTransactionId(psbt: string): string | null {
+  const parsed = parse(psbt);
+  if (parsed === null) return null;
+  const transaction = new Transaction();
+  transaction.version = parsed.version;
+  transaction.locktime = parsed.locktime;
+  for (const input of parsed.txInputs)
+    transaction.addInput(input.hash, input.index, input.sequence);
+  for (const output of parsed.txOutputs)
+    transaction.addOutput(output.script, output.value);
+  return transaction.getId();
 }

@@ -123,4 +123,26 @@ describe("createLaserEyesSigner", () => {
 
     await expect(signer.signPsbt("psbt")).rejects.toThrow(message);
   });
+
+  // An unsigned transaction (one input, one output) as a wallet returns it, and the id the network knows it by.
+  const answeredPsbt =
+    "cHNidP8BAFICAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAD/////AegDAAAAAAAAFgAUEREREREREREREREREREREREREREAAAAAAAAA";
+  const answeredId =
+    "141be641d2ee90803ed9b47dfc7a6518aaade5e5dfcbb127648db839cab282ee";
+
+  it("takes the wallet's naming of the transaction it signed, and refuses any other id", async () => {
+    const answer = (txId: string) => ({
+      signedPsbtBase64: answeredPsbt,
+      signedPsbtHex: "hex",
+      txId,
+    });
+    const dependencies = createDependencies();
+    const signer = createLaserEyesSigner(dependencies);
+    dependencies.client.signPsbt = vi.fn(async () => answer(answeredId));
+    await expect(signer.signPsbt("psbt")).resolves.toMatchObject({
+      psbtBase64: answeredPsbt,
+    });
+    dependencies.client.signPsbt = vi.fn(async () => answer("00".repeat(32)));
+    await expect(signer.signPsbt("psbt")).rejects.toThrow("broadcast a PSBT");
+  });
 });
