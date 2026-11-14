@@ -1,0 +1,142 @@
+/* The referral pages (ADR-026): the section links of the admin area, the pot a referrer came to see, the link and its buttons, and the
+   lists. They build on the console cards and tokens; nothing here sets a colour of its own. */
+
+/* The three routes of the admin section, as links. The one being shown is marked, by colour and by the border, so it never depends on colour. */
+.ref-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--arcade-space-2);
+}
+.ref-sections__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 var(--arcade-space-4);
+  border: 0.125rem solid var(--arcade-border-strong);
+  border-radius: var(--arcade-radius-small);
+  color: var(--arcade-text);
+  background: var(--arcade-surface-recessed);
+  font-size: var(--arcade-text-sm);
+  text-decoration: none;
+}
+.ref-sections__link:hover {
+  border-color: var(--arcade-cyan);
+}
+.ref-sections__link:focus-visible {
+  outline: 0.1875rem solid var(--arcade-yellow);
+  outline-offset: 0.125rem;
+}
+.ref-sections__link[aria-current] {
+  border-color: var(--arcade-mint);
+  box-shadow: inset 0 -0.25rem 0 var(--arcade-mint);
+  font-weight: 700;
+}
+
+/* What is ready to be paid, as the one big number of the page, with what else there is in a quiet row under it. */
+.ref-pot {
+  display: grid;
+  gap: var(--arcade-space-3);
+}
+.ref-pot__figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--arcade-space-2) var(--arcade-space-3);
+  margin: 0;
+}
+.ref-pot__figure strong {
+  font-family: var(--arcade-font-display);
+  font-size: clamp(1.75rem, 6vw, 3rem);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--arcade-mint);
+  text-shadow: 0.1rem 0.1rem 0 var(--arcade-ink);
+  overflow-wrap: anywhere;
+}
+.ref-pot__figure span {
+  color: var(--arcade-text-muted);
+}
+.ref-pot__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--arcade-space-2) var(--arcade-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--arcade-text-muted);
+  font-size: var(--arcade-text-sm);
+}
+
+/* The link as text to read and select, with its buttons under it on a narrow screen and beside it on a wide one. */
+.ref-link {
+  display: grid;
+  gap: var(--arcade-space-3);
+}
+.ref-link__text {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--arcade-space-3);
+  border: 0.125rem solid var(--arcade-border-strong);
+  border-radius: var(--arcade-radius-small);
+  color: var(--arcade-text);
+  background: var(--arcade-ink);
+  font-family: ui-monospace, monospace;
+  font-size: var(--arcade-text-sm);
+}
+.ref-link__text:focus-visible {
+  outline: 0.1875rem solid var(--arcade-yellow);
+  outline-offset: 0.125rem;
+}
+.ref-link__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--arcade-space-2);
+}
+.ref-link__live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ref-terms {
+  display: grid;
+  gap: var(--arcade-space-3);
+  margin: 0;
+  padding-inline-start: var(--arcade-space-5);
+  line-height: 1.55;
+}
+.ref-note {
+  margin: 0;
+  color: var(--arcade-text-subtle);
+  font-size: var(--arcade-text-sm);
+}
+.ref-fields {
+  display: grid;
+  gap: var(--arcade-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.ref-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--arcade-space-2);
+  min-height: 2.75rem;
+}
+.ref-switch input {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.ref-pager {
+  display: flex;
+  gap: var(--arcade-space-4);
+}
+.ref-pager a {
+  color: var(--arcade-cyan);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ref-sections__link {
+    transition: border-color 120ms ease;
+  }
+}

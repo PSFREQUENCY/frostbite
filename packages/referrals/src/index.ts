@@ -23,8 +23,10 @@ export {
 } from "./kind.ts";
 export { linkNewAccount } from "./links.ts";
 export {
+  createReferralReads,
   createReferralRewards,
   createReferrals,
+  type ReferralReads,
   type Referrals,
   type ReferralsConfig,
   type ReferralsDependencies,

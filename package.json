@@ -15,6 +15,7 @@
     "@frostbite/feature-games": "workspace:*",
     "@frostbite/feature-platform-shell": "workspace:*",
     "@frostbite/feature-profiles": "workspace:*",
+    "@frostbite/feature-referrals": "workspace:*",
     "@frostbite/feature-public-collections": "workspace:*",
     "@frostbite/feature-public-products": "workspace:*",
     "@frostbite/feature-uploads": "workspace:*",

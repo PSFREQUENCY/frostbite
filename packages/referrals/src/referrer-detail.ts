@@ -9,7 +9,7 @@ import { describeEarnings, type EarningState } from "./earnings.ts";
 import type { Freeze, Freezes } from "./freezes.ts";
 import { claimIdOfSource, referralProgramKey } from "./kind.ts";
 import { potsOf, type Pot } from "./pot.ts";
-import { claimsBehind, type ClaimBehind } from "./referrers.ts";
+import { claimsBehind, uuidPattern, type ClaimBehind } from "./referrers.ts";
 
 // One earning as an admin sees it: where it stands, and the claim it was for, so the figure can be followed to the mint behind it.
 export interface AdminEarning {
@@ -49,6 +49,8 @@ export function createReferrerDetail(dependencies: {
     referrerId: string,
     options: { readonly after?: string | null; readonly limit?: number } = {},
   ): Promise<ReferrerDetail | null> {
+    // An id that is not one (an edited address) is nobody, not an error for the database to raise.
+    if (!uuidPattern.test(referrerId)) return null;
     const [user] = await database
       .select({ name: authUsers.name })
       .from(authUsers)

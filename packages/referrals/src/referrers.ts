@@ -156,7 +156,7 @@ export interface ClaimBehind {
   readonly milestoneId: string;
 }
 
-const uuidPattern =
+export const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 // The claims some earnings were for, so each earning can be followed to the mint behind it.

@@ -256,6 +256,8 @@ describe("one referrer, whole", () => {
 
   it("is none for a person who is not there, and has no code for one who never opened the page", async () => {
     expect(await referrals.admin.referrer(crypto.randomUUID())).toBeNull();
+    expect(await referrals.admin.referrer("")).toBeNull();
+    expect(await referrals.admin.referrer("not-an-id")).toBeNull();
     const quiet = await seedUser();
     expect((await referrals.admin.referrer(quiet))?.code).toBeNull();
     expect(await referrals.codes.existing(quiet)).toBeNull();
