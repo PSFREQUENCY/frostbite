@@ -29,7 +29,8 @@ import { claimScript } from "./tx/claim-call.ts";
 import { buildClaimPsbt } from "./tx/psbt.ts";
 import { platformFeeOutput } from "./tx/platform-fee.ts";
 import { transactionParts } from "./signed-transactions.ts";
-import { verifySignedClaim } from "./verify.ts";
+import { buildPayBatch, payBatchMatchesSummary } from "./pay-batch.ts";
+import { verifySignedClaim, verifySignedPsbt } from "./verify.ts";
 
 export function createTransactionBuilder(
   chains: ReadonlyMap<ChainRef, ServedChain>,
@@ -49,10 +50,12 @@ export function createTransactionBuilder(
         }
         return buildAdmin(intent, { admin, chains, family, options }, funding);
       }
+      if (intent.operation === "pay-batch")
+        return buildPayBatch(intent, { chains, family, options }, funding);
       if (intent.operation !== "mint-milestone") {
         throw new BuildRefusedError(
           "unsupported-operation",
-          `The bitcoin-alkanes adapter builds milestone claims and game administration only, not ${intent.operation}.`,
+          `The bitcoin-alkanes adapter builds milestone claims, game administration and batches of payments only, not ${intent.operation}.`,
         );
       }
       const { network, node } = servedChain(chains, intent.chain);
@@ -143,6 +146,10 @@ export function createTransactionBuilder(
     verifySigned: (unsigned, signed) =>
       admin !== undefined && isAdminOperation(unsigned.summary.operation)
         ? verifySignedAdmin(admin, unsigned, signed)
-        : verifySignedClaim(chains, unsigned, signed),
+        : unsigned.summary.operation === "pay-batch"
+          ? verifySignedPsbt(unsigned, signed, (built) =>
+              payBatchMatchesSummary(unsigned, built, chains),
+            )
+          : verifySignedClaim(chains, unsigned, signed),
   };
 }
