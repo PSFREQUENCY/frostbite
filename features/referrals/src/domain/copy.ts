@@ -80,3 +80,36 @@ export const historyWords = {
     requested: "Waiting for a batch",
   },
 } as const;
+
+// Asking to be paid. Every refusal says what stopped it and, where it is a matter of size, the figures; nothing is taken from the pot by a
+// refusal.
+export const payoutWords = {
+  ask: "Ask to be paid",
+  asking: "Asking…",
+  heading: "Get paid",
+  inBatch: (amount: string) =>
+    `Your payout of ${amount} is being paid now. It is in a transaction the team has built and is sending.`,
+  linkWallet:
+    "To be paid you need a wallet on your account. Add one on your account page.",
+  linkWalletAction: "Add a wallet",
+  noWalletTitle: "No wallet yet",
+  requested: (amount: string) =>
+    `Your payout of ${amount} is asked for. It is paid in the team's next batch, which is signed by a person, so it takes a little while.`,
+  refusals: {
+    "already-open": "You already have a payout that is not paid yet.",
+    "chain-unavailable":
+      "The platform cannot check that address on its network right now. Try again shortly.",
+    "invalid-destination":
+      "That address is not one the network accepts. Choose another wallet.",
+    "not-your-wallet": "That wallet is not on your account.",
+    "program-not-set":
+      "The referral program is not set up, so nothing can be paid yet.",
+  },
+  tooSmall: (minimum: string, have: string) =>
+    `Payouts start at ${minimum}, and you have ${have} ready.`,
+  unreachable:
+    "The platform did not answer, so nothing is known to have changed. Look at your payouts below and try again.",
+  walletLabel: "Pay to",
+  waitingForBatch: (amount: string) =>
+    `Your payout of ${amount} is waiting for the team's next batch.`,
+} as const;

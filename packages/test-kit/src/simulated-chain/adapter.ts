@@ -111,7 +111,17 @@ export function createSimulatedChain(
     // The simulated family has no contracts, so it truthfully reports none.
     inspect: (ref) => Promise.resolve({ codeHash: null, exists: false, ref }),
     simulate: (intent) => {
-      if (intent.operation !== "transfer") {
+      // What the transaction moves out of the sender, besides the fee: a transfer's amount, a batch's sum, nothing for the rest.
+      const spent =
+        intent.operation === "transfer"
+          ? intent.amount.baseUnits
+          : intent.operation === "pay-batch"
+            ? intent.payments.reduce(
+                (sum, { amount }) => sum + amount.baseUnits,
+                0n,
+              )
+            : null;
+      if (spent === null) {
         return Promise.resolve({
           fee: { asset: nativeAsset(intent.chain), baseUnits: simulatedFee },
           ok: true,
@@ -119,7 +129,7 @@ export function createSimulatedChain(
       }
       const held = balances.get(`${intent.chain}|${intent.sender.value}`) ?? 0n;
       return Promise.resolve(
-        held >= intent.amount.baseUnits + simulatedFee
+        held >= spent + simulatedFee
           ? {
               fee: {
                 asset: nativeAsset(intent.chain),

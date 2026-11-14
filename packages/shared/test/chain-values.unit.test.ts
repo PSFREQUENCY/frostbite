@@ -193,6 +193,7 @@ describe("chainConfigListSchema", () => {
     "publish-template": { kind: "confirmations", required: 3 },
     "define-milestone": { kind: "confirmations", required: 3 },
     "set-claims-paused": { kind: "confirmations", required: 1 },
+    "pay-batch": { kind: "confirmations", required: 1 },
     transfer: { kind: "finalized" },
   };
   const entry = {

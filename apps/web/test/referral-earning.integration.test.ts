@@ -31,7 +31,7 @@ registerClaimsWorld();
 // be refused. Truncating is the one way a test may put the ledger back (it is not a row deleted); this file does it when it is done.
 afterAll(async () => {
   await pool.query(
-    'truncate "frostbite"."reward_entries", "frostbite"."reward_balances", "frostbite"."reward_payout_transitions", "frostbite"."reward_payouts", "frostbite"."reward_program_settings"',
+    'truncate "frostbite"."referral_payout_batch_items", "frostbite"."referral_payout_batches", "frostbite"."reward_entries", "frostbite"."reward_balances", "frostbite"."reward_payout_transitions", "frostbite"."reward_payouts", "frostbite"."reward_program_settings"',
   );
 });
 
@@ -118,7 +118,7 @@ async function claimToComplete(userId: string) {
   const session = sessionFor(userId);
   const started = await start.execute(input, session);
   if (!started.ok || started.value.status !== "started")
-    throw new Error("not started");
+    throw new Error(`not started: ${JSON.stringify(started)}`);
   const { claim } = started.value;
   if (claim.toSign === null) throw new Error("nothing to sign");
   await submit.execute(
@@ -162,7 +162,7 @@ describe("the referrer's cut of a claim", () => {
     const session = sessionFor(player);
     const started = await start.execute(input, session);
     if (!started.ok || started.value.status !== "started")
-      throw new Error("not started");
+      throw new Error(`not started: ${JSON.stringify(started)}`);
     if (started.value.claim.toSign === null) throw new Error("nothing to sign");
     await submit.execute(
       {

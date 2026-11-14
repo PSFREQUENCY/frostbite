@@ -62,6 +62,47 @@ export const setReferrerFrozenResponseSchema = z.discriminatedUnion("status", [
     .strict(),
 ]);
 
+// A referrer asks to be paid what is payable: in which asset, and to which of their account's wallets. The platform takes all that is payable
+// at once, or nothing.
+export const requestReferralPayoutInputSchema = z
+  .object({
+    assetKey: z.string().min(1).max(200),
+    destination: z.string().trim().min(1).max(256),
+  })
+  .strict();
+export const referralPayoutRefusals = [
+  "already-open",
+  "below-dust",
+  "below-minimum",
+  "chain-unavailable",
+  "invalid-destination",
+  "not-your-wallet",
+  "program-not-set",
+] as const;
+export const requestReferralPayoutResponseSchema = z.discriminatedUnion(
+  "status",
+  [
+    z
+      .object({ amountUnits: unitsSchema, status: z.literal("requested") })
+      .strict(),
+    z
+      .object({
+        // For the two refusals about size: the least that would do, and what there is.
+        minimumUnits: unitsSchema.optional(),
+        payableUnits: unitsSchema.optional(),
+        reason: z.enum(referralPayoutRefusals),
+        status: z.literal("refused"),
+      })
+      .strict(),
+  ],
+);
+
+export const referralPayoutRoute = {
+  method: "POST",
+  operationId: "requestReferralPayout",
+  path: "/api/v1/referrals/payout",
+} as const;
+
 export const referralAdminRoutes = {
   setFrozen: {
     method: "POST",
@@ -86,4 +127,10 @@ export type SetReferrerFrozenInput = z.infer<
 >;
 export type SetReferrerFrozenResponse = z.infer<
   typeof setReferrerFrozenResponseSchema
+>;
+export type RequestReferralPayoutInput = z.infer<
+  typeof requestReferralPayoutInputSchema
+>;
+export type RequestReferralPayoutResponse = z.infer<
+  typeof requestReferralPayoutResponseSchema
 >;

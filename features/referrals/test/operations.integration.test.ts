@@ -1,17 +1,24 @@
 import { randomUUID } from "node:crypto";
 
+import { walletIdentities } from "@frostbite/database";
 import {
   referralAdministerCapability,
   referralAdminRoutes,
+  referralPayoutRoute,
 } from "@frostbite/shared/referrals";
 import { describe, expect, it } from "vitest";
 
 import {
+  createRequestPayoutOperation,
   createSetFrozenOperation,
   createSetProgramOperation,
 } from "../src/application/operations.ts";
+import { createReferralsResolver } from "../src/runtime.ts";
+import { addressOf, featureConfig } from "./support/config.ts";
 import {
   clock,
+  database,
+  earn,
   policy,
   reads,
   registerDatabase,
@@ -20,17 +27,20 @@ import {
 
 registerDatabase();
 
-const resolve = async () => ({
-  ...reads,
-  names: async () => new Map<string, string>(),
-});
+const resolve = createReferralsResolver(
+  featureConfig(),
+  process.env,
+  () => clock.now,
+);
 const as = (actorUserId: string | null) => ({
   actorSession: null,
   actorUserId: actorUserId as never,
   correlationId: "c0ffee00-0000-4000-8000-000000000000" as never,
 });
+const payee = addressOf("0a0b0c");
 const setProgram = createSetProgramOperation(resolve);
 const setFrozen = createSetFrozenOperation(resolve);
+const requestPayout = createRequestPayoutOperation(resolve);
 const input = {
   enabled: true,
   maturitySeconds: 3_600,
@@ -175,5 +185,97 @@ describe("pausing and resuming a referrer", () => {
       value: { reason: "invalid-reason", status: "refused" },
     });
     expect(await reads.freezes.isFrozen(referrer)).toBe(false);
+  });
+});
+
+describe("asking to be paid", () => {
+  it("is for anyone signed in, a post of JSON on its route, and turns away a caller who is not signed in", async () => {
+    expect(requestPayout).toMatchObject({
+      access: { kind: "authenticated" },
+      idempotency: "none",
+      input: "json",
+      ...referralPayoutRoute,
+    });
+    expect(
+      await requestPayout.execute(
+        { assetKey: "a/native/b", destination: "x" },
+        as(null),
+      ),
+    ).toMatchObject({ ok: false });
+  });
+
+  it("takes what is payable as the signed-in person, to a wallet of theirs, and says the amount; and says why when it cannot", async () => {
+    const admin = await seedUser();
+    clock.now = new Date(clock.now.getTime() + 1_000);
+    await reads.program.set(admin, {
+      enabled: true,
+      maturitySeconds: 0,
+      minimumPayout: 0n,
+      rateBasisPoints: 300,
+    });
+    const referrer = await seedUser();
+    await database.insert(walletIdentities).values({
+      address: payee,
+      id: randomUUID(),
+      network: "signet",
+      scriptIdentity: randomUUID(),
+      userId: referrer,
+      walletAdapter: "unisat",
+    });
+    await earn(referrer, 5_000n, randomUUID());
+    const assetKey = "simnet:one/native/sim";
+    expect(
+      await requestPayout.execute(
+        { assetKey, destination: addressOf("0d0e0f") },
+        as(referrer),
+      ),
+    ).toEqual({
+      ok: true,
+      value: { reason: "not-your-wallet", status: "refused" },
+    });
+    expect(
+      await requestPayout.execute(
+        { assetKey, destination: payee },
+        as(referrer),
+      ),
+    ).toEqual({
+      ok: true,
+      value: { amountUnits: "150", status: "requested" },
+    });
+    expect(
+      await requestPayout.execute(
+        { assetKey, destination: payee },
+        as(referrer),
+      ),
+    ).toEqual({
+      ok: true,
+      value: { reason: "already-open", status: "refused" },
+    });
+  });
+
+  it("gives the figures when the pot is under what the network would relay", async () => {
+    const referrer = await seedUser();
+    await database.insert(walletIdentities).values({
+      address: payee,
+      id: randomUUID(),
+      network: "signet",
+      scriptIdentity: randomUUID(),
+      userId: referrer,
+      walletAdapter: "unisat",
+    });
+    expect(
+      await requestPayout.execute(
+        { assetKey: "simnet:one/native/sim", destination: payee },
+        as(referrer),
+      ),
+    ).toEqual({
+      ok: true,
+      value: {
+        minimumUnits: "10",
+        payableUnits: "0",
+        reason: "below-dust",
+        status: "refused",
+      },
+    });
   });
 });

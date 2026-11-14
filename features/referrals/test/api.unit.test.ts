@@ -1,8 +1,12 @@
 import type { FetchLike } from "@frostbite/client-http";
-import { referralAdminRoutes } from "@frostbite/shared/referrals";
+import {
+  referralAdminRoutes,
+  referralBatchRoutes,
+} from "@frostbite/shared/referrals";
 import { describe, expect, it, vi } from "vitest";
 
 import { createReferralsApi } from "../src/client/api.ts";
+import { batchOf, signedTransaction } from "./support/batch.ts";
 
 const json = (body: object) =>
   new Response(JSON.stringify(body), {
@@ -66,5 +70,42 @@ describe("the routes as the page reaches them", () => {
         rateBasisPoints: 300,
       }),
     ).rejects.toBeDefined();
+  });
+
+  it("builds, signs and follows a batch with posts to the batch routes, reading each answer against the contract", async () => {
+    const batch = batchOf();
+    const wallet = { assetKey: "simnet:one/native/sim", wallet: "w" };
+    const start = vi.fn<FetchLike>(async () =>
+      json({ batch, resumed: false, skipped: [], status: "started" }),
+    );
+    expect(await createReferralsApi(start).startBatch(wallet)).toMatchObject({
+      status: "started",
+    });
+    expect(sent(start)).toEqual([
+      referralBatchRoutes.start.path,
+      "POST",
+      wallet,
+    ]);
+    const submit = vi.fn<FetchLike>(async () =>
+      json({ batch, status: "submitted" }),
+    );
+    const signed = { batchId: batch.id, signed: signedTransaction };
+    expect(await createReferralsApi(submit).submitBatch(signed)).toMatchObject({
+      status: "submitted",
+    });
+    expect(sent(submit)).toEqual([
+      referralBatchRoutes.submit.path,
+      "POST",
+      signed,
+    ]);
+    const refresh = vi.fn<FetchLike>(async () => json({ batch, status: "ok" }));
+    expect(
+      await createReferralsApi(refresh).refreshBatch({ batchId: batch.id }),
+    ).toMatchObject({ status: "ok" });
+    expect(sent(refresh)).toEqual([
+      referralBatchRoutes.refresh.path,
+      "POST",
+      { batchId: batch.id },
+    ]);
   });
 });

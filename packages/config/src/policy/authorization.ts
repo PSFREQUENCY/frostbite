@@ -6,6 +6,7 @@ import { collectionReviewCapability } from "@frostbite/shared/collections";
 import { gameAdminCapability } from "@frostbite/shared/games";
 import {
   referralAdministerCapability,
+  referralPayCapability,
   referralViewCapability,
 } from "@frostbite/shared/referrals";
 
@@ -19,6 +20,8 @@ const staffCapabilities = [
   "platform:operate",
   gameAdminCapability,
   referralViewCapability,
+  // Paying referrers moves the platform's money, signed by the staff member with their own wallet, like the other steps staff sign.
+  referralPayCapability,
 ] as const;
 
 export const authorizationPolicy = {
@@ -44,5 +47,5 @@ export const authorizationPolicy = {
   // Staff and admin take effect only while the account holds a wallet (ADR-021): they sign chain steps with one, and an email code
   // alone is too weak a way to hold them.
   requiredMethods: { admin: ["wallet"], staff: ["wallet"] },
-  version: "beta-v4",
+  version: "beta-v5",
 } as const satisfies AuthorizationPolicy;

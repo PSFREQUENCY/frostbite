@@ -163,3 +163,9 @@ export const navigationFor = (admin: boolean) => [
       ]
     : []),
 ];
+
+// The ceilings the tests run under.
+export const policy = {
+  maximumMaturitySeconds: 2_592_000,
+  maximumMinimumPayout: 10_000_000n,
+};

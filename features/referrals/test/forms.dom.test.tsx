@@ -10,6 +10,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import type { ReferralsApi } from "../src/client/api.ts";
+import { fakeApi } from "./support/fake-api.ts";
 import { CopyLink } from "../src/ui/copy-link.tsx";
 import { FreezeForm } from "../src/ui/freeze-form.tsx";
 import { ProgramPanel } from "../src/ui/program-panel.tsx";
@@ -20,11 +21,7 @@ const initial = {
   minimumPayoutUnits: "10000",
   rateBasisPoints: "300",
 };
-const api = (over: Partial<ReferralsApi> = {}): ReferralsApi => ({
-  setFrozen: vi.fn(async () => ({ frozen: true, status: "saved" as const })),
-  setProgram: vi.fn(async () => ({ status: "saved" as const })),
-  ...over,
-});
+const api = fakeApi;
 const panel = (a: ReferralsApi) => (
   <ProgramPanel
     api={a}

@@ -174,6 +174,7 @@ describe("the rewards chain", () => {
       "deploy",
       "mint",
       "mint-milestone",
+      "pay-batch",
       "publish-template",
       "set-claims-paused",
       "transfer",

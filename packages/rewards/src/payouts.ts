@@ -43,6 +43,37 @@ export function createPayouts(dependencies: PayoutsDependencies) {
       return rows.map(toPayout);
     },
 
+    // Payouts waiting for a batch in one asset, oldest first: what a batch may take.
+    async requestedIn(
+      assetKey: string,
+      programKey: string,
+      limit = 100,
+    ): Promise<readonly Payout[]> {
+      const rows = await database
+        .select()
+        .from(rewardPayouts)
+        .where(
+          and(
+            eq(rewardPayouts.assetKey, assetKey),
+            eq(rewardPayouts.programKey, programKey),
+            eq(rewardPayouts.state, "requested"),
+          ),
+        )
+        .orderBy(rewardPayouts.createdAt)
+        .limit(limit);
+      return rows.map(toPayout);
+    },
+
+    // The payouts with these ids, in any order.
+    async many(ids: readonly string[]): Promise<readonly Payout[]> {
+      if (ids.length === 0) return [];
+      const rows = await database
+        .select()
+        .from(rewardPayouts)
+        .where(inArray(rewardPayouts.id, [...ids]));
+      return rows.map(toPayout);
+    },
+
     // A person's payouts under a program, newest first.
     async listFor(
       beneficiaryId: string,

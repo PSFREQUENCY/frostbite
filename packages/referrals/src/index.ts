@@ -69,3 +69,20 @@ export {
   type ReferrersQuery,
   type ReferrerSort,
 } from "./referrers.ts";
+export {
+  batchExecutorId,
+  createBatches,
+  type BatchChainPorts,
+  type BatchDependencies,
+  type Batches,
+  type SkippedPayout,
+  type StartBatchResult,
+} from "./batches/service.ts";
+export { createBatchRepository } from "./batches/repository.ts";
+export type { BatchRepository, StoredBatch } from "./batches/types.ts";
+export {
+  createPayoutClaims,
+  type DestinationCheck,
+  type PayoutClaimResult,
+  type PayoutClaims,
+} from "./payout-claims.ts";

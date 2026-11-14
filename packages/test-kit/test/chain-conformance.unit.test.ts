@@ -16,6 +16,12 @@ defineChainAdapterConformance("simulated (mint-milestone)", () => {
   return { adapter, fixtures: claimFixtures, rewards };
 });
 
+// ...and with a batch payment of several people as the transaction it builds, signs and broadcasts.
+defineChainAdapterConformance("simulated (pay-batch)", () => {
+  const { adapter, batchFixtures, rewards } = simulated();
+  return { adapter, fixtures: batchFixtures, rewards };
+});
+
 // Invented references: which CAIP-2 id is which network is configuration, not code.
 const main = chainRefSchema.parse("bip122:00000000000000000000000000000001");
 const test = chainRefSchema.parse("bip122:00000000000000000000000000000002");

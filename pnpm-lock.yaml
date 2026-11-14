@@ -1240,12 +1240,18 @@ importers:
 
   features/referrals:
     dependencies:
+      '@frostbite/chain':
+        specifier: workspace:*
+        version: link:../../packages/chain
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@frostbite/feature-chain-status':
+        specifier: workspace:*
+        version: link:../chain-status
       '@frostbite/http':
         specifier: workspace:*
         version: link:../../packages/http
@@ -1261,6 +1267,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/wallet':
+        specifier: workspace:*
+        version: link:../../packages/wallet
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -2893,6 +2902,9 @@ importers:
 
   packages/referrals:
     dependencies:
+      '@frostbite/chain':
+        specifier: workspace:*
+        version: link:../chain
       '@frostbite/database':
         specifier: workspace:*
         version: link:../database

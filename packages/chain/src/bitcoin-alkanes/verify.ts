@@ -145,11 +145,12 @@ export function isSigned(psbt: Psbt): boolean {
 }
 
 // Checks that what the wallet signed is what was built and shown. That each signature is valid is Bitcoin's to decide when the
-// transaction is sent; this checks that every input carries one and that nothing else changed.
-export function verifySignedClaim(
-  chains: ReadonlyMap<ChainRef, ServedChain>,
+// transaction is sent; this checks that every input carries one and that nothing else changed. `matches` says whether the built
+// transaction does what its summary says, which is for each operation to know.
+export function verifySignedPsbt(
   unsigned: UnsignedTransaction,
   signed: SignedTransaction,
+  matches: (built: Psbt) => boolean,
 ): VerificationResult {
   if (
     signed.chain !== unsigned.chain ||
@@ -168,9 +169,18 @@ export function verifySignedClaim(
   ) {
     return { ok: false, reason: "payload-mismatch" };
   }
-  if (!matchesSummary(unsigned, built, chains))
-    return { ok: false, reason: "summary-mismatch" };
+  if (!matches(built)) return { ok: false, reason: "summary-mismatch" };
   return isSigned(returned)
     ? { ok: true }
     : { ok: false, reason: "signature-invalid" };
+}
+
+export function verifySignedClaim(
+  chains: ReadonlyMap<ChainRef, ServedChain>,
+  unsigned: UnsignedTransaction,
+  signed: SignedTransaction,
+): VerificationResult {
+  return verifySignedPsbt(unsigned, signed, (built) =>
+    matchesSummary(unsigned, built, chains),
+  );
 }

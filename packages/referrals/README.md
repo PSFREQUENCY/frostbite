@@ -24,7 +24,16 @@ maturity, the pot and the payouts are `@frostbite/rewards`.
   hundredths of a percent of the platform fee the claim carried (rounded down), in the fee's asset, **once for that claim** whatever the number of
   times it is told, so it may be told again after a failure. A person nobody referred, a frozen referrer, a program that is off, a fee of nothing and
   a cut that rounds to nothing earn nothing.
-- `rewards`: the `@frostbite/rewards` service with this package's kind registered (programs, balances, payouts; no executor yet, that is REF-1d).
+- `rewards`: the `@frostbite/rewards` service with this package's kind registered (programs, balances, payouts).
+- `payouts` (`createPayoutClaims({ check, database, rewards })`): a referrer asking to be paid. They are paid to a wallet on their own account,
+  written as the chain writes it, and only if the whole pot reaches the program's minimum and what the network would relay to that address; one
+  payout is open at a time. `check` is given by the platform (it alone knows the chains).
+- `batches` (`createBatches({ clock, delay, funding, newId, ports, repository, rewards })`, `createBatchRepository`): the **staff batch**, the
+  executor of payouts (`staff-batch`). `start` builds one transaction that pays every payout waiting for an asset (to its own address; a payout
+  under the network's dust limit or to an address it does not accept is left out and said so), `submit` checks what the wallet signed against
+  what was built, keeps it and sends it once, `refresh` follows it to the chain and moves the payouts with it: handed over when sent, paid when
+  the network confirms, back in the pot when the network reverted it. The follow-up is the shared `createFollower` of `@frostbite/chain`. The
+  rows are `referral_batches` and `referral_batch_payouts` (migration `referral_batches`); a payout is in one open batch at most.
 
 `referralCut` is the kind (`defineRewardKind`): event `claim.completed`, settings `{ rateBasisPoints }` (1 to 9,999, so a cut is always below the
 whole fee), payload checked on the way in. The program key is `referral`; **the program is off until an admin turns it on** (REF-1c gives them the

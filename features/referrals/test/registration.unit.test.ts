@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { createReferralsFeature } from "../src/registration.ts";
+import { featureConfig } from "./support/config.ts";
 
-const feature = () =>
-  createReferralsFeature({
-    policy: { maximumMaturitySeconds: 60, maximumMinimumPayout: 1n },
-  });
+const feature = () => createReferralsFeature(featureConfig());
 
 describe("the referral feature's registration", () => {
   it("declares the routes, the pages and the navigation, so that removing it removes them all", () => {
@@ -15,6 +13,10 @@ describe("the referral feature's registration", () => {
     expect(manifest.routes.map(({ operationId }) => operationId)).toEqual([
       "setReferralProgram",
       "setReferrerFrozen",
+      "requestReferralPayout",
+      "startReferralBatch",
+      "submitReferralBatch",
+      "refreshReferralBatch",
     ]);
     expect(
       manifest.pages.map(({ access, path }) => [
@@ -27,11 +29,12 @@ describe("the referral feature's registration", () => {
       ["/admin/referrals", "referral:view"],
       ["/admin/referrals/program", "referral:administer"],
       ["/admin/referrals/referrers", "referral:view"],
+      ["/admin/referrals/payouts", "referral:pay"],
       ["/admin/referrals/referrers/[referrerId]", "referral:view"],
     ]);
   });
 
-  it("puts the overview in the admin navigation for staff, the program only for those who may open it, and nothing in the bar every visitor sees or in the account menu (the wallet menu links the page itself)", () => {
+  it("puts the overview in the admin navigation for staff, the program and the payouts only for those who may open them, and nothing in the bar every visitor sees or in the account menu (the wallet menu links the page itself)", () => {
     expect(
       feature().manifest.navigation.map(({ access, area, href }) => [
         area,
@@ -41,6 +44,7 @@ describe("the referral feature's registration", () => {
     ).toEqual([
       ["admin", "/admin/referrals", "referral:view"],
       ["admin", "/admin/referrals/program", "referral:administer"],
+      ["admin", "/admin/referrals/payouts", "referral:pay"],
     ]);
   });
 });

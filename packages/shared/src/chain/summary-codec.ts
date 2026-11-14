@@ -15,6 +15,8 @@ export function encodeSummary(summary: TransactionSummary): unknown {
 
 function revive(value: unknown, key = ""): unknown {
   if (key === "baseUnits" && typeof value === "string") return BigInt(value);
+  // A list keeps being a list, each of its items read the same way (a batch's payments each carry amounts).
+  if (Array.isArray(value)) return value.map((item) => revive(item, key));
   if (typeof value === "object" && value !== null)
     return Object.fromEntries(
       Object.entries(value).map(([name, entry]) => [name, revive(entry, name)]),

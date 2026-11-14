@@ -14,6 +14,7 @@ export const adminWords = {
     "How the referral program is doing, what it is set to, and who is earning.",
   sections: {
     overview: "Overview",
+    payouts: "Payouts",
     program: "Program",
     referrers: "Referrers",
   },

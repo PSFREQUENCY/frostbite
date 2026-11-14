@@ -32,6 +32,27 @@ describe("a stored summary", () => {
     expect(decodeSummary(encodeSummary(summary))).toEqual(summary);
   });
 
+  it("keeps a list a list: a batch's payments come back in order, each with its amount as a bigint", () => {
+    const batch = transactionSummarySchema.parse({
+      chain,
+      expiresAt: "2026-10-16T13:00:00.000Z",
+      fee: { asset, baseUnits: 1n },
+      operation: "pay-batch",
+      payments: [
+        { amount: { asset, baseUnits: 5n }, recipient: sender },
+        {
+          amount: { asset, baseUnits: 12_345_678_901_234_567_890n },
+          recipient: { chain, value: "sim:one:d4e5f6" },
+        },
+      ],
+    });
+    const stored = encodeSummary(batch);
+    expect(Array.isArray((stored as { payments: unknown }).payments)).toBe(
+      true,
+    );
+    expect(decodeSummary(stored)).toEqual(batch);
+  });
+
   it("is checked on the way out: stored text that is not a summary is refused", () => {
     expect(() => decodeSummary({ chain })).toThrow();
     const stored = encodeSummary(summary) as { fee: { baseUnits: string } };

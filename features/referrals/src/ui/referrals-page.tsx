@@ -4,6 +4,8 @@ import { referralLinkPath } from "@frostbite/shared/referrals";
 import { signInHref } from "@frostbite/shared/auth/sign-in-path";
 import { ArcadeButton, ConsoleCard, KeyValueList } from "@repo/ui/arcade";
 
+import type { Payout } from "@frostbite/rewards";
+import type { ReferralsApi } from "../client/api.ts";
 import { mineWords, pageWords, stateWords, termsOf } from "../domain/copy.ts";
 import { CopyLink } from "./copy-link.tsx";
 import { UserFrame } from "./frames.tsx";
@@ -55,11 +57,17 @@ function YourLink({ mine }: { readonly mine: Mine }) {
 // `/referrals`: readable by anyone, so the incentive is stated before anyone joins (the terms come from the program record in force); a
 // signed-in referrer also sees their link, who came, and the pot. `mine` is none for a visitor who is not signed in.
 export function ReferralsPage({
+  api,
   mine,
   navigation,
+  open = [],
   program,
+  wallets = [],
 }: {
+  readonly api?: ReferralsApi | undefined;
   readonly mine: Mine | null;
+  readonly open?: readonly Payout[];
+  readonly wallets?: readonly string[];
   readonly navigation: readonly NavigationItem[];
   readonly program: ReferralProgram | null;
 }) {
@@ -78,7 +86,14 @@ export function ReferralsPage({
         </ConsoleCard>
       ) : (
         <>
-          <PotCard frozen={mine.frozen} pots={mine.pots} program={program} />
+          <PotCard
+            api={api}
+            frozen={mine.frozen}
+            open={open}
+            pots={mine.pots}
+            program={program}
+            wallets={wallets}
+          />
           <YourLink mine={mine} />
         </>
       )}

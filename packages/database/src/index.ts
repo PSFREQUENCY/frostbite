@@ -124,6 +124,10 @@ export {
 } from "./schema/game-claims.ts";
 export { platformFeeSettings } from "./schema/platform-fee.ts";
 export {
+  referralPayoutBatches,
+  referralPayoutBatchItems,
+} from "./schema/referral-batches.ts";
+export {
   referralCodes,
   referralFreezes,
   referralLinks,
