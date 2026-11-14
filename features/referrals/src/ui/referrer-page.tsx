@@ -14,24 +14,9 @@ import type { ReferralsApi } from "../client/api.ts";
 import { referrerWords } from "../domain/admin-copy.ts";
 import { historyWords } from "../domain/copy.ts";
 import { unitsLabel, whenLabel } from "../domain/format.ts";
+import { EarningRow } from "./earning-row.tsx";
 import { FreezeForm } from "./freeze-form.tsx";
 import { AdminFrame, canAdminister } from "./frames.tsx";
-
-const tones = {
-  "in-payout": "yellow",
-  maturing: "yellow",
-  paid: "mint",
-  payable: "cyan",
-  reversal: "pink",
-} as const;
-
-// One earning followed to the mint behind it: the game and milestone, and the claim's id, so a figure can be traced to what earned it.
-const claimLine = (
-  claim: ReferrerDetail["earnings"]["items"][number]["claim"],
-) =>
-  claim === null
-    ? "Not from a claim"
-    : `${claim.gameId} · ${claim.milestoneId} · claim ${claim.claimId}`;
 
 // `/admin/referrals/referrers/<id>`: one referrer whole. For staff, who may see who a person is. Pausing is for administrators, so the form is
 // shown only to someone who also has the Program section (the server refuses everyone else whatever the page shows).
@@ -103,15 +88,11 @@ export function ReferrerPage({
         ) : (
           <ul className="console-list">
             {detail.earnings.items.map((earning) => (
-              <ConsoleRow
-                action={
-                  <ArcadeBadge tone={tones[earning.state]}>
-                    {historyWords.states[earning.state]}
-                  </ArcadeBadge>
-                }
-                detail={`${whenLabel(earning.at)} · ${claimLine(earning.claim)}`}
+              <EarningRow
+                api={api}
+                earning={earning}
                 key={earning.id}
-                name={`${earning.amount < 0n ? "−" : "+"}${unitsLabel(earning.amount < 0n ? -earning.amount : earning.amount)}`}
+                mayTakeBack={canAdminister(navigation)}
               />
             ))}
           </ul>

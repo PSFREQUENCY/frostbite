@@ -112,6 +112,7 @@ export const detail = (
         claim: { claimId: "claim-9", gameId: "game-one", milestoneId: "first" },
         id: "e1",
         state: "payable",
+        takenBack: null,
       },
       {
         amount: -30n,
@@ -120,6 +121,7 @@ export const detail = (
         claim: null,
         id: "e2",
         state: "reversal",
+        takenBack: null,
       },
     ],
     next: "2026-11-14T12:00:00.000Z|e2",
@@ -169,3 +171,18 @@ export const policy = {
   maximumMaturitySeconds: 2_592_000,
   maximumMinimumPayout: 10_000_000n,
 };
+
+// An earning of the detail page in the state given, for the page that offers to take it back.
+export const earningIn = (
+  state: "in-payout" | "maturing" | "paid" | "payable" | "reversal",
+  change: Partial<ReferrerDetail["earnings"]["items"][number]> = {},
+): ReferrerDetail["earnings"]["items"][number] => ({
+  amount: state === "reversal" ? -300n : 300n,
+  assetKey: feeAsset,
+  at,
+  claim: { claimId: "claim-9", gameId: "game-one", milestoneId: "first" },
+  id: "0198a5c4-7b3e-7c1a-8f2d-4e5b6a7c8d9e",
+  state,
+  takenBack: null,
+  ...change,
+});

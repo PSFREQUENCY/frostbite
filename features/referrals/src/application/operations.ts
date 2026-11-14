@@ -23,7 +23,7 @@ import type { ReferralsRuntime } from "../runtime.ts";
 type Resolve = () => Promise<ReferralsRuntime>;
 
 // Changing the program and freezing a referrer are for administrators: the policy grants the capability, so who may is stated in one place.
-const base = {
+export const administerBase = {
   access: { capability: referralAdministerCapability, kind: "platform" },
   applicationErrors: ["unauthorized"],
   idempotency: "none",
@@ -36,7 +36,7 @@ export function createSetProgramOperation(resolve: Resolve) {
   const respond = (value: SetReferralProgramResponse) =>
     ({ ok: true, value }) as const;
   return {
-    ...base,
+    ...administerBase,
     execute: async (input, context) => {
       if (context.actorUserId === null) return unauthenticated;
       const { program } = await resolve();
@@ -67,7 +67,7 @@ export function createSetFrozenOperation(resolve: Resolve) {
   const respond = (value: SetReferrerFrozenResponse) =>
     ({ ok: true, value }) as const;
   return {
-    ...base,
+    ...administerBase,
     execute: async (input, context) => {
       if (context.actorUserId === null) return unauthenticated;
       const { admin, freezes } = await resolve();

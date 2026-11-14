@@ -12,6 +12,7 @@ import {
 
 import { authUsers } from "./auth.ts";
 import { platformSchema } from "./platform.ts";
+import { rewardEntries } from "./rewards.ts";
 
 // Who brought whom (ADR-026). A person has at most one referral CODE, made the first time it is needed; it is opaque and says nothing of the
 // account. The shape of a code is stated once in `@frostbite/shared/referrals`, and the table holds only codes of that shape.
@@ -86,6 +87,35 @@ export const referralFreezes = platformSchema.table(
     ),
     check(
       "referral_freezes_reason_length",
+      sql`char_length(${table.reason}) between 1 and 500`,
+    ),
+  ],
+);
+
+// An earning that was taken back, with who did it and why: one row per earning, written in the same transaction as the reversal entry in the
+// ledger. The ledger holds the amounts and never changes; this is the reason. Nothing is updated or deleted (an account being deleted does not
+// take it, because the ledger it explains stays).
+export const referralReversals = platformSchema.table(
+  "referral_reversals",
+  {
+    changedBy: uuid("changed_by").references(() => authUsers.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    earningId: uuid("earning_id")
+      .primaryKey()
+      .references(() => rewardEntries.id, { onDelete: "restrict" }),
+    reason: text("reason").notNull(),
+    reversalId: uuid("reversal_id")
+      .notNull()
+      .references(() => rewardEntries.id, { onDelete: "restrict" }),
+  },
+  (table) => [
+    uniqueIndex("referral_reversals_reversal_idx").on(table.reversalId),
+    check(
+      "referral_reversals_reason_length",
       sql`char_length(${table.reason}) between 1 and 500`,
     ),
   ],

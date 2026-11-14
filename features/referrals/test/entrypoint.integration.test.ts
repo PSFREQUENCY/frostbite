@@ -80,6 +80,7 @@ describe("the feature's pages as the platform renders them", () => {
     ).toEqual([
       "setReferralProgram",
       "setReferrerFrozen",
+      "takeBackReferralEarning",
       "requestReferralPayout",
       "getReferralCover",
       "startReferralBatch",

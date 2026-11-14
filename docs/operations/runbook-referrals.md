@@ -65,13 +65,31 @@ If something goes wrong:
 
 One batch per asset is in progress at a time; asking again returns it. A second staff member opening the page sees the batch in progress.
 
-## Reverse an earning
+## Take an earning back
 
-There is **no console action to reverse an earning yet** (filed as a follow-up). The ledger can undo one (`rewards.accrual.reverse`: a new entry of the
-opposite amount, once per earning; a reversal after the money was paid becomes a debt that later earnings pay off first), but nothing calls it from
-a page or a command. Until there is, an engineer does it on a request from an administrator, with the earning's entry id from the referrer's page.
+Use this when an earning should not have been paid: abuse found afterwards, a referral attributed to the wrong person, a mistake in the program's
+settings, or a claim that did not stick. Only an administrator can. **Freezing** (below) stops _new_ earning; taking back undoes one that already
+happened.
 
-What an administrator can do from the console today is stop **new** earning for a person (below).
+1. **Referrals → Referrers**, open the person. Each earning in the list has a **Take back** button.
+2. Press it. The page opens a form under that earning, which says in plain words what will happen to the money **before** you confirm. It depends on
+   where the earning has got to:
+
+   | The earning is…                         | What taking it back does                                                                                                                                                        |
+   | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | **Waiting** or **Ready** (in no payout) | The amount leaves their pot. Nothing was paid, so nothing is owed back.                                                                                                         |
+   | **In a payout** that has not finished   | That payout still goes out as it is. The same amount is then held back from what they earn next. If the payout fails, the earning returns to the pot and this removes it there. |
+   | **Paid**                                | It cannot be taken from their wallet. The same amount is held back from what they earn next, until it is paid off.                                                              |
+
+3. Write the reason (required, up to 500 characters). It is kept with your name and the time and is **not** shown to the referrer.
+4. Press **Take back** (the button names the amount). The page then says, in the past tense, what happened. **Show the updated list** reloads it.
+
+What you will see afterwards: the earning stays in the list with a **Taken back** badge and a line saying who did it, when and why, and a new line
+beside it (also **Taken back**, a negative amount) that undoes it. Nothing is deleted or edited, and it cannot be undone or done twice. A
+referrer's own history shows the line as **Taken back**, without the reason.
+
+If the amount is being held back, their pot can show a minus figure on this page until later earnings pay it off; they cannot ask to be paid
+while it is below the minimum. Say so to anyone who asks why a payout is not offered.
 
 ## Freeze or resume a referrer
 

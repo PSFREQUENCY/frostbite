@@ -5,6 +5,7 @@ import {
   referralAdminRoutes,
   referralPayCapability,
   referralBatchRoutes,
+  takeBackRoute,
   referralPayoutRoute,
   referralsAdminPath,
   referralsAdminPayoutsPath,
@@ -78,6 +79,7 @@ export function createReferralsFeature(config: ReferralsFeatureConfig) {
       routes: [
         referralAdminRoutes.setProgram,
         referralAdminRoutes.setFrozen,
+        takeBackRoute,
         referralPayoutRoute,
         referralBatchRoutes.cover,
         referralBatchRoutes.start,

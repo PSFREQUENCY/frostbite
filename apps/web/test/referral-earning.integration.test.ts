@@ -31,7 +31,7 @@ registerClaimsWorld();
 // be refused. Truncating is the one way a test may put the ledger back (it is not a row deleted); this file does it when it is done.
 afterAll(async () => {
   await pool.query(
-    'truncate "frostbite"."referral_payout_batch_items", "frostbite"."referral_payout_batches", "frostbite"."reward_entries", "frostbite"."reward_balances", "frostbite"."reward_payout_transitions", "frostbite"."reward_payouts", "frostbite"."reward_program_settings"',
+    'truncate "frostbite"."referral_reversals", "frostbite"."referral_payout_batch_items", "frostbite"."referral_payout_batches", "frostbite"."reward_entries", "frostbite"."reward_balances", "frostbite"."reward_payout_transitions", "frostbite"."reward_payouts", "frostbite"."reward_program_settings"',
   );
 });
 

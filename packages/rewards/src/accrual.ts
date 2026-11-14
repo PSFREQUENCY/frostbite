@@ -1,4 +1,7 @@
-import type { DatabaseClient } from "@frostbite/database/connection";
+import type {
+  DatabaseClient,
+  DatabaseTransaction,
+} from "@frostbite/database/connection";
 import { rewardEntries } from "@frostbite/database/schema/rewards";
 import { and, eq } from "drizzle-orm";
 
@@ -107,9 +110,15 @@ export function createAccrual(dependencies: AccrualDependencies) {
     // Undoes an earning with a new entry of the opposite amount (the earning itself is never changed). The reversal matures with the earning,
     // or now if that has passed, so the two reach the payable pot together and net to nothing; if the earning was already paid, the
     // reversal is a debt that later earnings pay off first. Once only: a second reversal of the same earning writes nothing.
+    // `within`, when given, runs in the same transaction once the reversal is written (and not when there was nothing to write), so whatever
+    // the caller keeps about it (who did it and why) exists exactly when the reversal does.
     async reverse(input: {
       readonly programKey: string;
       readonly sourceKey: string;
+      readonly within?: (
+        transaction: DatabaseTransaction,
+        written: { readonly earningId: string; readonly reversalId: string },
+      ) => Promise<void>;
     }): Promise<ReverseResult> {
       return database.transaction(async (transaction) => {
         const [original] = await transaction
@@ -142,9 +151,13 @@ export function createAccrual(dependencies: AccrualDependencies) {
           .onConflictDoNothing()
           .returning({ id: rewardEntries.id });
         const [reversal] = written;
-        return reversal === undefined
-          ? ({ kind: "already-reversed" } as const)
-          : ({ entryId: reversal.id, kind: "reversed" } as const);
+        if (reversal === undefined)
+          return { kind: "already-reversed" } as const;
+        await input.within?.(transaction, {
+          earningId: original.id,
+          reversalId: reversal.id,
+        });
+        return { entryId: reversal.id, kind: "reversed" } as const;
       });
     },
   };

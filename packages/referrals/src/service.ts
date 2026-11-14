@@ -22,6 +22,7 @@ import {
   type ReferrersQuery,
 } from "./referrers.ts";
 import { createFreezes, type Freezes } from "./freezes.ts";
+import { createReversals, type Reversals } from "./reversals.ts";
 import { referralCut } from "./kind.ts";
 import { linkNewAccount } from "./links.ts";
 
@@ -74,6 +75,8 @@ export interface ReferralReads {
   // The program in force, and how an admin sets it.
   readonly program: Program;
   readonly rewards: Rewards;
+  // Taking an earning back, with who and why kept, and which earnings were.
+  readonly reversals: Reversals;
 }
 
 export function createReferralReads(
@@ -89,6 +92,7 @@ export function createReferralReads(
     database,
     ...(randomCode === undefined ? {} : { randomCode }),
   });
+  const reversals = createReversals({ clock, database, rewards });
   return {
     admin: {
       overview: createOverview({ clock, database }),
@@ -97,6 +101,7 @@ export function createReferralReads(
         codes,
         database,
         freezes,
+        reversals,
         rewards,
       }),
       referrers: createReferrers({ database }),
@@ -106,6 +111,7 @@ export function createReferralReads(
     mine: createMine({ clock, codes, database, freezes, rewards }),
     program: createProgram(rewards),
     rewards,
+    reversals,
   };
 }
 

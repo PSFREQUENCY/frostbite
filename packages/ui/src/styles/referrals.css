@@ -115,6 +115,29 @@
   color: var(--arcade-text-subtle);
   font-size: var(--arcade-text-sm);
 }
+.ref-takeback {
+  display: grid;
+  gap: var(--arcade-space-3);
+}
+.ref-takeback h3,
+.ref-takeback p {
+  margin: 0;
+}
+.ref-takeback__effect {
+  border-left: 3px solid var(--arcade-yellow, currentColor);
+  padding-left: var(--arcade-space-3);
+}
+.ref-takeback__actions,
+.ref-takeback__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--arcade-space-2);
+}
+.ref-takeback__panel {
+  list-style: none;
+  padding: var(--arcade-space-3);
+}
 .ref-cover {
   display: grid;
   gap: var(--arcade-space-2);

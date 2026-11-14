@@ -28,6 +28,7 @@ maturity, the pot and the payouts are `@frostbite/rewards`.
 - `payouts` (`createPayoutClaims({ check, database, rewards })`): a referrer asking to be paid. They are paid to a wallet on their own account,
   written as the chain writes it, and only if the whole pot reaches the program's minimum and what the network would relay to that address; one
   payout is open at a time. `check` is given by the platform (it alone knows the chains).
+- `reversals` (`createReversals`): `takeBack(actorId, earningId, reason)` undoes one earning through the ledger and keeps who and why in `referral_reversals`, in the same transaction; it answers what that did to the money (`pot`, `pending-payout` or `paid`, stated once in `@frostbite/shared/referrals`). `takenBack(entryIds)` says which entries were taken back, by whom and why.
 - `createCover({ ports, rewards })`: what a wallet holds (what a step can spend, and what waits for its first confirmation) against what the waiting payouts add up to, before a batch is built. A read; the network fee is not in it.
 - `batches` (`createBatches({ clock, delay, funding, newId, ports, repository, rewards })`, `createBatchRepository`): the **staff batch**, the
   executor of payouts (`staff-batch`). `start` builds one transaction that pays every payout waiting for an asset (to its own address; a payout
