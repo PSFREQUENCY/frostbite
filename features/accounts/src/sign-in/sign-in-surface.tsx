@@ -2,6 +2,11 @@
 
 import { useAnalytics } from "@frostbite/client-react";
 import { returnTarget } from "@frostbite/shared/auth/sign-in-path";
+import {
+  normalizeReferralCode,
+  referralCodeLength,
+} from "@frostbite/shared/referrals";
+import { ArcadeTextField } from "@repo/ui/arcade";
 import type { WalletNetwork } from "@frostbite/wallet/contracts";
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 
@@ -17,13 +22,20 @@ const assign = (path: string): void => window.location.assign(path);
 export function SignInSurface({
   expectedNetwork,
   navigate = assign,
+  acceptsInvitation = false,
   offered,
+  referralCode = null,
   views = signInViews,
 }: {
   readonly expectedNetwork: WalletNetwork;
   // How to go to a page; the destination is checked by `returnTarget`, which only ever gives a path on this site.
   readonly navigate?: (path: string) => void;
+  // Whether the page asks for an invitation code, which the person may type or which came with the address. Only the page for signing in
+  // does; the page that sets the platform up does not.
+  readonly acceptsInvitation?: boolean;
   readonly offered: readonly string[];
+  // The code of whoever referred the person, from the address of the page; it starts the field and is handed on to every method's view.
+  readonly referralCode?: string | null;
   readonly views?: readonly SignInView[];
 }) {
   const shown = selectSignInViews(offered, views);
@@ -31,6 +43,9 @@ export function SignInSurface({
   const [chosen, choose] = useState(first?.kind ?? "");
   const group = useId();
   const analytics = useAnalytics();
+  // What the person typed (or came with), and the code it is if it is the shape of one. Only a code of that shape is sent on.
+  const [typed, setTyped] = useState(referralCode ?? "");
+  const invitation = acceptsInvitation ? normalizeReferralCode(typed) : null;
   // The methods a person has begun on this page. A method that finds them already signed in takes them on without a sign-in, which is not
   // one to count.
   const begun = useRef(new Set<string>());
@@ -108,6 +123,7 @@ export function SignInSurface({
                 analytics.capture("sign_in_succeeded", { method: kind });
               navigate(returnTarget(window.location.search));
             }}
+            referralCode={invitation}
             track={{
               failed: (reason) =>
                 analytics.capture("sign_in_failed", { method: kind, reason }),
@@ -119,6 +135,27 @@ export function SignInSurface({
           />
         </section>
       ))}
+      {acceptsInvitation ? (
+        <details
+          className="sign-in-invitation"
+          open={referralCode === null ? undefined : true}
+        >
+          <summary>Have an invitation code?</summary>
+          <ArcadeTextField
+            autoComplete="off"
+            error={
+              typed.trim() !== "" && invitation === null
+                ? `An invitation code is ${String(referralCodeLength)} letters and numbers.`
+                : null
+            }
+            hint="If signing in makes you a new account, it counts for the person who invited you."
+            label="Invitation code (optional)"
+            maxLength={referralCodeLength + 8}
+            onChange={setTyped}
+            value={typed}
+          />
+        </details>
+      ) : null}
     </div>
   );
 }

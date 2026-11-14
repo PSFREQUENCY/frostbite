@@ -82,6 +82,22 @@
   font-size: var(--arcade-text-xs);
   line-height: 1.5;
 }
+.sign-in-invitation {
+  grid-column: 1 / -1;
+  margin: var(--arcade-space-3) 0 0;
+  color: var(--arcade-text-muted);
+  font-size: var(--arcade-text-sm);
+}
+.sign-in-invitation summary {
+  cursor: pointer;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+.sign-in-invitation summary:focus-visible {
+  outline: 0.125rem solid var(--arcade-mint);
+  outline-offset: 0.125rem;
+}
 .sign-in-network {
   display: inline-flex;
   align-items: center;

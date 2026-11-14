@@ -59,3 +59,26 @@ test("the sign-in page offers each method as a key, shows one method at a time, 
     panel.getByRole("button", { name: "Connect wallet" }),
   ).toBeVisible();
 });
+
+test("a referral link leads to the sign-in page with the invitation code filled in, sets no cookie, and the code can be typed instead", async ({
+  context,
+  page,
+}) => {
+  await page.goto("/r/bcdfghjk");
+  await expect(page).toHaveURL(/\/sign-in\?ref=BCDFGHJK$/u);
+  const field = page.getByLabel("Invitation code (optional)");
+  await expect(field).toHaveValue("BCDFGHJK");
+  // Nothing is kept in the browser: the code is in the address and goes with the sign-in request.
+  const cookies = await context.cookies();
+  expect(cookies.map(({ name }) => name)).toEqual([]);
+
+  // A link that is not a code leads to the plain page, where the code may be typed and is checked as it is.
+  await page.goto("/r/nothing");
+  await expect(page).toHaveURL(/\/sign-in$/u);
+  await page.getByText("Have an invitation code?").click();
+  await page.getByLabel("Invitation code (optional)").fill("nope");
+  const mistake = page.getByText("8 letters and numbers");
+  await expect(mistake).toBeVisible();
+  await page.getByLabel("Invitation code (optional)").fill("23456789");
+  await expect(mistake).toHaveCount(0);
+});

@@ -23,10 +23,13 @@ export function SignInPage({
   expectedNetwork,
   navigation,
   offered,
+  referralCode = null,
 }: {
   readonly expectedNetwork: WalletNetwork;
   readonly navigation: readonly NavigationItem[];
   readonly offered: readonly string[];
+  // The code of whoever sent the visitor here (the `ref` of the address, if it is the shape of a code); it goes with the sign-in request.
+  readonly referralCode?: string | null;
 }) {
   return (
     <AppShell homeHref="/" navigation={navigation}>
@@ -57,7 +60,12 @@ export function SignInPage({
             Network · {networkName(expectedNetwork)}
           </p>
         </div>
-        <SignInSurface expectedNetwork={expectedNetwork} offered={offered} />
+        <SignInSurface
+          acceptsInvitation
+          expectedNetwork={expectedNetwork}
+          offered={offered}
+          referralCode={referralCode}
+        />
       </section>
     </AppShell>
   );

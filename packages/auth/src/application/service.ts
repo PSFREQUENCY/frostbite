@@ -188,6 +188,7 @@ export function createWalletAuthService(dependencies: {
         },
         now,
         dependencies.policy.maximumVerificationAttempts,
+        input.referralCode ?? null,
       );
       // Reached only once the signature has verified, so only whoever holds the wallet's key is told why it cannot be used.
       if (result.kind === "identity-conflict")

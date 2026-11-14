@@ -45,6 +45,8 @@
     "@frostbite/plugin-kit": "workspace:*",
     "@frostbite/scenes": "workspace:*",
     "@frostbite/share": "workspace:*",
+    "@frostbite/referrals": "workspace:*",
+    "@frostbite/rewards": "workspace:*",
     "@frostbite/shared": "workspace:*",
     "@frostbite/telemetry": "workspace:*",
     "@frostbite/wallet": "workspace:*",

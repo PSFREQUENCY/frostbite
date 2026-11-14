@@ -10,6 +10,7 @@ import {
 import { createUuidV7 } from "@frostbite/shared/identifiers";
 import { and, asc, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
 
+import type { AccountCreatedHook } from "../application/account-created.ts";
 import type { ContactCodeRepository } from "./repository.ts";
 
 // Everything about one destination (sending, trying, creating its account) is serialized on this lock, so the limits and the "one
@@ -26,6 +27,7 @@ async function lockDestination(
 
 export function createDrizzleContactCodeRepository(
   database: DatabaseClient,
+  hooks: { readonly onAccountCreated?: AccountCreatedHook } = {},
 ): ContactCodeRepository {
   return {
     issue: (input) =>
@@ -165,6 +167,11 @@ export function createDrizzleContactCodeRepository(
             userId,
             value: input.destination,
             verifiedAt: input.now,
+          });
+          await hooks.onAccountCreated?.(transaction, {
+            referralCode: input.referralCode ?? null,
+            source: { kind: "contact" },
+            userId,
           });
         }
         await transaction.insert(authSessions).values({

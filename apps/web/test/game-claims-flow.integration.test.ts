@@ -1,169 +1,22 @@
-import { randomUUID } from "node:crypto";
+import { gameMilestoneClaims, gameContracts } from "@frostbite/database";
+import { describe, expect, it } from "vitest";
 
 import {
-  authUsers,
-  createDatabaseClient,
-  gameAdminSteps,
-  gameContracts,
-  publishedTemplates,
-  createDatabasePool,
-  gameMilestoneClaims,
-  gameMilestoneUnlocks,
-  parseDatabaseEnvironment,
-  runMigrations,
-} from "@frostbite/database";
-import { writeRecording } from "@frostbite/database/game-contracts";
-import {
-  createListGameClaimsOperation,
-  createRefreshGameClaimOperation,
-  createStartGameClaimOperation,
-  createSubmitGameClaimOperation,
-} from "@frostbite/feature-games/claims-operations";
-import { createGameClaimsResolver } from "@frostbite/feature-games/claims-runtime";
-import { chainRefSchema } from "@frostbite/shared/chain";
-import { defineGame, type GameClaim } from "@frostbite/shared/games";
-import { correlationIdSchema } from "@frostbite/shared/http";
-import { uuidV7Schema } from "@frostbite/shared/identifiers";
-import { createSimulatedChain } from "@frostbite/test-kit/simulated-chain";
-import {
-  nativeAsset,
-  simulatedFamily,
-} from "@frostbite/test-kit/simulated-chain-transaction";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+  chain,
+  database,
+  gameId,
+  input,
+  operations,
+  registerClaimsWorld,
+  seedPlayer,
+  sessionFor,
+  sign,
+  wallet,
+  world,
+} from "./support/claims-world.ts";
 
-// The claim path as the page drives it, against real PostgreSQL and the simulated chain, with a game the platform has never
-// heard of that declares a rewards contract: start, sign, send, watch until complete. Only the HTTP framing around the four
-// operations is left out (the route's session, origin and rate limit are covered where they live).
-const environment = parseDatabaseEnvironment(process.env);
-const pool = createDatabasePool(environment);
-const database = createDatabaseClient(pool);
-const chain = chainRefSchema.parse("simnet:one");
-const gameId = "claim-game";
-const wallet = "sim:one:a1b2c3fe";
-const game = defineGame({
-  capabilities: ["milestone:claim"],
-  description: "",
-  id: gameId,
-  launch: { mode: "embedded" },
-  milestones: [
-    {
-      claimPolicy: "once",
-      criteria: "Win.",
-      description: "You won.",
-      id: "first-win",
-      title: "First win",
-    },
-  ],
-  network: chain,
-  rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
-  schemaVersion: 1,
-  summary: "A game.",
-  tags: ["arcade"],
-  title: "Claim game",
-  version: "1",
-});
-const sessionFor = (userId: string | null) => ({
-  actorSession: null,
-  actorUserId: userId === null ? null : uuidV7Schema.parse(userId),
-  correlationId: correlationIdSchema.parse(randomUUID()),
-});
-
-let now = new Date("2026-10-16T12:00:00.000Z");
-let network = createSimulatedChain({ chains: [chain], now: () => now });
-const ports = () => {
-  const { addressCodec, broadcaster, builder, contracts, observer, rewards } =
-    network.adapter.ports;
-  if (
-    !addressCodec ||
-    !broadcaster ||
-    !builder ||
-    !contracts ||
-    !observer ||
-    !rewards
-  )
-    throw new Error("The simulated adapter lacks a port.");
-  return { addressCodec, broadcaster, builder, contracts, observer, rewards };
-};
-const configured = () => ({
-  clock: () => now,
-  delay: { maxLagBlocks: 2, maxUnsettledMs: 60 * 60_000 },
-  chain: () => ({
-    funding: { maxFee: { asset: nativeAsset(chain), baseUnits: 10n } },
-    ports: ports(),
-  }),
-});
-// The game's contract on record, as the step that created it left it: nothing is configured, so a game has a contract only once
-// that step completed.
-async function recordContract() {
-  const id = randomUUID();
-  await database.insert(gameAdminSteps).values({
-    chain,
-    expiresAt: now,
-    gameId,
-    id,
-    operation: "deploy",
-    state: "awaiting_signature",
-    summary: {},
-    unsignedFamily: simulatedFamily,
-    unsignedFormat: "f",
-    unsignedPayload: "p",
-  });
-  await writeRecording(
-    database,
-    { chain, id },
-    {
-      address: "rewards-1",
-      family: simulatedFamily,
-      gameId,
-      kind: "game",
-      maxDrawingBytes: 4096,
-    },
-  );
-}
-const operations = () => {
-  const resolver = createGameClaimsResolver([game], configured());
-  return {
-    list: createListGameClaimsOperation(resolver),
-    refresh: createRefreshGameClaimOperation(resolver),
-    start: createStartGameClaimOperation(resolver),
-    submit: createSubmitGameClaimOperation(resolver),
-  };
-};
-
-async function seedPlayer(earned = true) {
-  const random = randomUUID();
-  const id = `0198a000-${random.slice(9, 13)}-7${random.slice(15, 18)}-8${random.slice(20, 23)}-${random.slice(24)}`;
-  await database
-    .insert(authUsers)
-    .values({ email: `${id}@example.test`, id, name: "Player" });
-  if (earned)
-    await database.insert(gameMilestoneUnlocks).values({
-      count: 1,
-      gameId,
-      milestoneId: "first-win",
-      unlockedAt: now,
-      userId: id,
-      verification: "self-reported",
-    });
-  return id;
-}
-const input = { gameId, milestoneId: "first-win", wallet };
-// The wallet's part: the simulated wallet signs by appending its marker to what it was shown.
-const sign = (toSign: NonNullable<GameClaim["toSign"]>) => ({
-  ...toSign,
-  payload: `${toSign.payload}.sig`,
-});
-
-beforeAll(async () => runMigrations(environment));
-beforeEach(async () => {
-  now = new Date("2026-10-16T12:00:00.000Z");
-  network = createSimulatedChain({ chains: [chain], now: () => now });
-  await database.delete(gameContracts);
-  await database.delete(publishedTemplates);
-  await database.delete(gameAdminSteps);
-  await recordContract();
-});
-afterAll(async () => pool.end());
+// The claim path through the operations, as the page drives it: start, sign, send, watch until complete.
+registerClaimsWorld();
 
 describe("claiming a milestone through the operations", () => {
   it("goes from earned to complete, the player's own wallet signing what they were shown", async () => {
@@ -193,7 +46,7 @@ describe("claiming a milestone through the operations", () => {
       value: { claim: { state: "pending" }, status: "submitted" },
     });
 
-    network.controls.advance(chain, 3);
+    world.network.controls.advance(chain, 3);
     const states: string[] = [];
     for (let look = 0; look < 3; look += 1) {
       const looked = await refresh.execute({ claimId: claim.id }, session);

@@ -23,6 +23,8 @@ import {
   builtIntents,
   chainFailure,
   collectible,
+  completedHook,
+  completedTold,
   indexer,
   indexerLag,
   reported,
@@ -169,6 +171,12 @@ export const delay = { maxLagBlocks: 2, maxUnsettledMs: 60 * 60_000 };
 
 export const service = createGameClaimsService({
   clock: () => clock.now,
+  completed: (claim) => {
+    completedTold.push(claim.id);
+    return completedHook.fails
+      ? Promise.reject(new Error("the follower broke"))
+      : Promise.resolve();
+  },
   delay,
   earned: (userId, id, milestoneId) =>
     Promise.resolve(earnedKeys.has(`${userId}|${id}|${milestoneId}`)),
@@ -240,6 +248,8 @@ export function registerDatabase(): void {
     chainFailure.build = false;
     builtIntents.length = 0;
     reported.length = 0;
+    completedTold.length = 0;
+    completedHook.fails = false;
     chainFailure.observe = false;
     chainFailure.simulate = false;
     collectible.created = null;

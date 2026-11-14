@@ -25,6 +25,7 @@ import { type DatabaseTransaction } from "@frostbite/database/connection";
 import { randomBytes } from "node:crypto";
 
 import { createHeldMethodKinds } from "./held-method-kinds.ts";
+import { linkReferralOnNewAccount } from "./referral-link.ts";
 import { database } from "./shared-database.ts";
 import type { WalletAuthServices } from "./application/wallet-services.ts";
 import type { WalletAuthConfig } from "./wallet-config.ts";
@@ -121,7 +122,9 @@ export function createWalletServicesResolver(
           maximumVerificationAttempts: config.maximumVerificationAttempts,
           ...lifetimes,
         },
-        repository: createDrizzleWalletAuthRepository(database()),
+        repository: createDrizzleWalletAuthRepository(database(), {
+          onAccountCreated: linkReferralOnNewAccount,
+        }),
         verifier: strictBip322Verifier,
       }),
       methods: createWalletMethodsService({

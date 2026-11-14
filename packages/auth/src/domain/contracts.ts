@@ -88,5 +88,7 @@ export interface VerifyWalletChallengeInput {
   readonly expectedAction: WalletAuthAction;
   // The account the session verifying it belongs to; absent for sign-in, where there is no session yet.
   readonly expectedUserId?: UuidV7;
+  // The code of whoever referred the person, when this sign-in makes a new account (ignored otherwise).
+  readonly referralCode?: string | null;
   readonly signature: string;
 }

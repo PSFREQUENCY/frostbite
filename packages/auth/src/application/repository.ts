@@ -57,5 +57,7 @@ export interface WalletAuthRepository {
     session: SessionMaterial,
     now: Date,
     maximumAttempts: number,
+    // The referral code a sign-in that makes a new account arrived with; it is used only for an account made by this step.
+    referralCode?: string | null,
   ): Promise<ConsumeChallengeResult>;
 }

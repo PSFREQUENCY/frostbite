@@ -16,6 +16,8 @@ import {
   type ClaimableGame,
 } from "@frostbite/game-claims";
 import { milestoneLevel } from "@frostbite/game-saves";
+import { createReferrals } from "@frostbite/referrals";
+import { assetKeyOf } from "@frostbite/rewards";
 import { memoizeUntilFailure } from "@frostbite/plugin-kit/lazy";
 import { chainRefSchema, contractRefSchema } from "@frostbite/shared/chain";
 import {
@@ -77,8 +79,33 @@ export function createGameClaimsResolver(
       createDatabasePool(parseDatabaseEnvironment(environment)),
     );
     const fee = createPlatformFeeReader(database);
+    const referrals = createReferrals({
+      ...config.referrals,
+      clock,
+      database,
+      // A platform fee is paid in the chain's own coin, the asset its fees are capped in.
+      feeAssetKey: (chain) => {
+        const offered = config.chain(chainRefSchema.parse(chain));
+        if (offered === null)
+          throw new Error(`No chain is configured for claims on ${chain}.`);
+        return assetKeyOf(offered.funding.maxFee.asset);
+      },
+      newId: randomUUID,
+    });
     return createGameClaimsService({
       clock,
+      // A claim that took effect earns whoever referred the player a cut of the platform fee it carried, once however often it is told.
+      completed: async (claim) => {
+        await referrals.accrual.claimCompleted({
+          chain: claim.chain,
+          claimId: claim.id,
+          completedAt: claim.updatedAt,
+          gameId: claim.gameId,
+          milestoneId: claim.milestoneId,
+          platformFee: claim.platformFeeSats,
+          userId: claim.userId,
+        });
+      },
       delay: config.delay,
       // Held at the level the milestone's manifest asks for: a milestone only a replay can prove is not claimable on the game's word.
       earned: async (userId, gameId, milestoneId) => {

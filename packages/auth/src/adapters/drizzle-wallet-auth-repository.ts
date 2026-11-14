@@ -4,15 +4,12 @@ import {
   authUsers,
   walletChallenges,
   walletIdentities,
-  type WalletChallenge,
 } from "@frostbite/database/schema/auth";
 import { releasedWallets } from "@frostbite/database/schema/wallet-release";
 import type {
   DatabaseClient,
   DatabaseTransaction,
 } from "@frostbite/database/connection";
-import { validateBitcoinAddress } from "@frostbite/chain/bitcoin";
-import { isWalletNetwork } from "@frostbite/shared/chain";
 import {
   createUuidV7,
   uuidV7Schema,
@@ -20,11 +17,9 @@ import {
 } from "@frostbite/shared/identifiers";
 import { and, eq, isNull, lt, sql } from "drizzle-orm";
 
+import type { AccountCreatedHook } from "../application/account-created.ts";
 import { sha256 } from "../domain/crypto.ts";
-import {
-  walletAuthActions,
-  type WalletAuthAction,
-} from "../domain/contracts.ts";
+import { mapChallenge, rowMatchesChallenge } from "./wallet-challenge-rows.ts";
 import type {
   ConsumeChallengeResult,
   StoredWalletChallenge,
@@ -33,69 +28,17 @@ import type {
 
 const WALLET_USER_NAME = "Bitcoin wallet user";
 
-function isAction(value: string): value is WalletAuthAction {
-  return walletAuthActions.some((action) => action === value);
-}
-
-function mapChallenge(row: WalletChallenge): StoredWalletChallenge | null {
-  if (!isWalletNetwork(row.network) || !isAction(row.action)) return null;
-  const address = validateBitcoinAddress(row.address, row.network);
-  const challengeId = uuidV7Schema.safeParse(row.id);
-  const requestId = uuidV7Schema.safeParse(row.requestId);
-  const expectedUserId =
-    row.expectedUserId === null
-      ? null
-      : uuidV7Schema.safeParse(row.expectedUserId);
-  if (!address.ok || !challengeId.success || !requestId.success) return null;
-  if (expectedUserId !== null && !expectedUserId.success) return null;
-  return {
-    action: row.action,
-    address: address.value.address,
-    attempts: row.attempts,
-    challengeId: challengeId.data,
-    consumedAt: row.consumedAt,
-    domain: row.domain,
-    expectedUserId: expectedUserId?.data ?? null,
-    expiresAt: row.expiresAt,
-    issuedAt: row.issuedAt,
-    messageHash: row.messageHash,
-    network: row.network,
-    nonce: row.nonce,
-    origin: row.origin,
-    requestId: requestId.data,
-    scriptIdentity: row.scriptIdentity,
-    uri: row.uri,
-    walletAdapter: row.walletAdapter,
-  };
-}
-
-function rowMatchesChallenge(
-  row: WalletChallenge,
-  challenge: StoredWalletChallenge,
-): boolean {
-  return (
-    row.action === challenge.action &&
-    row.address === challenge.address &&
-    row.domain === challenge.domain &&
-    row.expectedUserId === challenge.expectedUserId &&
-    row.issuedAt.getTime() === challenge.issuedAt.getTime() &&
-    row.messageHash === challenge.messageHash &&
-    row.network === challenge.network &&
-    row.nonce === challenge.nonce &&
-    row.origin === challenge.origin &&
-    row.requestId === challenge.requestId &&
-    row.scriptIdentity === challenge.scriptIdentity &&
-    row.uri === challenge.uri &&
-    row.walletAdapter === challenge.walletAdapter
-  );
-}
-
 async function resolveUser(
   transaction: DatabaseTransaction,
   challenge: StoredWalletChallenge,
   now: Date,
 ): Promise<
-  | { readonly ok: true; readonly userId: UuidV7 }
+  | {
+      // Whether this step made the account: only then is anyone told of a new account.
+      readonly created: boolean;
+      readonly ok: true;
+      readonly userId: UuidV7;
+    }
   | {
       readonly ok: false;
       readonly reason: "held" | "not-on-account" | "other-account" | "unusable";
@@ -119,7 +62,7 @@ async function resolveUser(
     return challenge.expectedUserId !== null &&
       challenge.expectedUserId !== userId
       ? { ok: false, reason: "other-account" }
-      : { ok: true, userId };
+      : { created: false, ok: true, userId };
   }
   if (challenge.action === "step-up")
     return { ok: false, reason: "not-on-account" };
@@ -169,11 +112,12 @@ async function resolveUser(
     userId,
     walletAdapter: challenge.walletAdapter,
   });
-  return { ok: true, userId };
+  return { created: challenge.expectedUserId === null, ok: true, userId };
 }
 
 export function createDrizzleWalletAuthRepository(
   database: DatabaseClient,
+  hooks: { readonly onAccountCreated?: AccountCreatedHook } = {},
 ): WalletAuthRepository {
   return {
     async findChallenge(challengeId) {
@@ -224,6 +168,7 @@ export function createDrizzleWalletAuthRepository(
       session,
       now,
       maximumAttempts,
+      referralCode = null,
     ): Promise<ConsumeChallengeResult> {
       return database.transaction(async (transaction) => {
         const [locked] = await transaction
@@ -243,6 +188,16 @@ export function createDrizzleWalletAuthRepository(
 
         const user = await resolveUser(transaction, challenge, now);
         if (!user.ok) return { kind: "identity-conflict", reason: user.reason };
+        if (user.created)
+          await hooks.onAccountCreated?.(transaction, {
+            referralCode,
+            source: {
+              kind: "wallet",
+              network: challenge.network,
+              scriptIdentity: challenge.scriptIdentity,
+            },
+            userId: user.userId,
+          });
         if (challenge.action !== "sign-in") {
           await transaction
             .update(authSessions)

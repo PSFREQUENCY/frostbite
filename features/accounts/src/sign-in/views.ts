@@ -21,6 +21,9 @@ export interface SignInViewProps {
   readonly expectedNetwork: WalletNetwork;
   // Called once the server has said the person is signed in.
   readonly onSignedIn: () => void;
+  // The code of whoever referred the person, from the address they arrived by; the sign-in request carries it, and it is used only if the
+  // sign-in makes a new account. None when they came another way.
+  readonly referralCode: string | null;
   readonly track: SignInTracker;
 }
 

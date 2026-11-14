@@ -41,3 +41,7 @@ export const item = "sim-item-1";
 export const drawing = new TextEncoder().encode("<svg></svg>");
 
 export const reported: { error: unknown; step: string }[] = [];
+
+// The claims the service told its `completed` hook of, in order, and whether the hook is to fail.
+export const completedTold: string[] = [];
+export const completedHook = { fails: false };

@@ -28,6 +28,8 @@ import {
 } from "@frostbite/test-kit/simulated-chain-transaction";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { testReferrals } from "./support/referrals-config.ts";
+
 // A player (or a script posing as the game's page) can send the account any state it likes. What it sends is read as the game's own
 // report, so a milestone the game's manifest says only a replay can prove must not become a claim on the strength of that report.
 const environment = parseDatabaseEnvironment(process.env);
@@ -93,6 +95,7 @@ const claims = () => {
       }),
       clock: () => now,
       delay: { maxLagBlocks: 2, maxUnsettledMs: 60 * 60_000 },
+      referrals: testReferrals,
     }),
   );
 };
