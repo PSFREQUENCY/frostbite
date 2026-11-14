@@ -213,7 +213,7 @@ const coreDefinitions = [
   {
     key: "SECURITY_CSP_MODE",
     description:
-      "Content Security Policy mode: report-only (violations are reported, nothing is blocked) or enforce; blank means report-only.",
+      "Content Security Policy mode: report-only (violations are reported, nothing is blocked) or enforce; blank means enforce.",
     exposure: "server",
     required: false,
     secret: false,

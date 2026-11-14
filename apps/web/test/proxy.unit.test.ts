@@ -17,33 +17,33 @@ afterEach(() => {
 
 const nonceOf = (response: Response) =>
   /nonce-([^']+)/u.exec(
-    response.headers.get("Content-Security-Policy-Report-Only") ?? "",
+    response.headers.get("Content-Security-Policy") ?? "",
   )?.[1];
 
 describe("the proxy", () => {
-  it("gives every response its security headers, in report-only mode by default", () => {
-    const response = proxy(
-      new NextRequest("https://platform.example.com/games"),
-    );
-    expect(
-      response.headers.get("Content-Security-Policy-Report-Only"),
-    ).toContain("default-src 'self'");
-    expect(response.headers.get("Content-Security-Policy")).toBeNull();
-    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
-    expect(response.headers.get("Strict-Transport-Security")).not.toBeNull();
-  });
-
-  it("enforces the policy when the deployment says so", () => {
-    vi.stubEnv("SECURITY_CSP_MODE", "enforce");
+  it("gives every response its security headers, with the policy enforced by default", () => {
     const response = proxy(
       new NextRequest("https://platform.example.com/games"),
     );
     expect(response.headers.get("Content-Security-Policy")).toContain(
-      "script-src",
+      "default-src 'self'",
     );
     expect(
       response.headers.get("Content-Security-Policy-Report-Only"),
     ).toBeNull();
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(response.headers.get("Strict-Transport-Security")).not.toBeNull();
+  });
+
+  it("only reports what the policy would block when the deployment says so", () => {
+    vi.stubEnv("SECURITY_CSP_MODE", "report-only");
+    const response = proxy(
+      new NextRequest("https://platform.example.com/games"),
+    );
+    expect(
+      response.headers.get("Content-Security-Policy-Report-Only"),
+    ).toContain("script-src");
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
 
   it("uses a new nonce for every request, and none is guessable from another", () => {
@@ -72,9 +72,9 @@ describe("the proxy", () => {
     vi.stubEnv("PUBLIC_BASE_URL", "http://localhost:3000");
     const response = proxy(new NextRequest("http://localhost:3000/"));
     expect(response.headers.get("Strict-Transport-Security")).toBeNull();
-    expect(
-      response.headers.get("Content-Security-Policy-Report-Only"),
-    ).not.toContain("upgrade-insecure-requests");
+    expect(response.headers.get("Content-Security-Policy")).not.toContain(
+      "upgrade-insecure-requests",
+    );
   });
 
   it("leaves out static files and prefetches", () => {
@@ -101,9 +101,7 @@ describe("the proxy", () => {
       expect(response.headers.get("x-middleware-rewrite")).toBe(
         "https://eu.i.example.com/e/?ip=0",
       );
-      expect(
-        response.headers.get("Content-Security-Policy-Report-Only"),
-      ).toBeNull();
+      expect(response.headers.get("Content-Security-Policy")).toBeNull();
       expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
     });
 

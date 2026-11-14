@@ -94,7 +94,7 @@ const blankAsUnset = (value: string | undefined) =>
   value === undefined || value.trim() === "" ? undefined : value.trim();
 
 export const securityEnvironmentSchema = z.object({
-  SECURITY_CSP_MODE: z.enum(["report-only", "enforce"]).default("report-only"),
+  SECURITY_CSP_MODE: z.enum(["report-only", "enforce"]).default("enforce"),
   TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
 });
 

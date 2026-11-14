@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { parseSecurityEnvironment } from "../src/env/runtime.ts";
 
 describe("parseSecurityEnvironment", () => {
-  it("defaults to reporting before blocking, one trusted proxy, and no storage origin", () => {
+  it("defaults to enforcing the policy, one trusted proxy, and no storage origin", () => {
     expect(parseSecurityEnvironment({})).toEqual({
-      cspMode: "report-only",
+      cspMode: "enforce",
       storageOrigin: null,
       trustedProxyHops: 1,
     });
@@ -19,7 +19,7 @@ describe("parseSecurityEnvironment", () => {
         TRUSTED_PROXY_HOPS: blank,
       }),
     ).toEqual({
-      cspMode: "report-only",
+      cspMode: "enforce",
       storageOrigin: null,
       trustedProxyHops: 1,
     });
@@ -29,11 +29,11 @@ describe("parseSecurityEnvironment", () => {
     expect(
       parseSecurityEnvironment({
         R2_ENDPOINT: "https://acct.r2.cloudflarestorage.com/some/path",
-        SECURITY_CSP_MODE: "enforce",
+        SECURITY_CSP_MODE: "report-only",
         TRUSTED_PROXY_HOPS: "0",
       }),
     ).toEqual({
-      cspMode: "enforce",
+      cspMode: "report-only",
       storageOrigin: "https://acct.r2.cloudflarestorage.com",
       trustedProxyHops: 0,
     });
@@ -41,6 +41,12 @@ describe("parseSecurityEnvironment", () => {
       parseSecurityEnvironment({ R2_ENDPOINT: "http://localhost:9000" })
         .storageOrigin,
     ).toBe("http://localhost:9000");
+  });
+
+  it("takes enforce when it is written out", () => {
+    expect(
+      parseSecurityEnvironment({ SECURITY_CSP_MODE: "enforce" }).cspMode,
+    ).toBe("enforce");
   });
 
   it.each([
