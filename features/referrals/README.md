@@ -28,7 +28,7 @@ earning (in the claims) does not depend on it.
 ## Who may do what
 
 Looking is for staff (`referral:view`); changing the program and pausing a referrer are for administrators (`referral:administer`). Both
-capabilities are granted by `configs`' authorization policy (`@repo/config/authorization`), nowhere else. The Program section and the pause form
+capabilities are granted by `configs`' authorization policy (`@repo/config/authorization`), nowhere else. The pages are not linked from the bar every visitor sees (the navigation spec lists it exactly); the admin sidebar has Referrals and, for administrators, Referral program. The Program section and the pause form
 are shown only to someone who has the Program entry in their navigation (the server refuses everyone else whatever the page shows).
 
 ## Dependencies and configuration

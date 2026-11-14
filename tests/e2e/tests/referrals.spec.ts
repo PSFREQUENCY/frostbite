@@ -71,8 +71,9 @@ test("a person's link leads to the sign-in page with the code, and the history n
 
 test.describe("running the program", () => {
   test.describe.configure({ mode: "serial" });
-  test.beforeEach(({}, testInfo) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "Desktop only.");
+    await page.emulateMedia({ reducedMotion: "reduce" });
   });
 
   test("staff may look and not change: they have the overview and the referrers, not the program, and the routes refuse them", async ({

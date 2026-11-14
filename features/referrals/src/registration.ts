@@ -38,13 +38,6 @@ export function createReferralsFeature(config: ReferralsConfig) {
       id: "referrals",
       navigation: [
         {
-          access: { kind: "public" },
-          area: "main",
-          href: referralsPath,
-          label: referralsNavigationLabel,
-          order: 70,
-        },
-        {
           access: view,
           area: "admin",
           href: referralsAdminPath,

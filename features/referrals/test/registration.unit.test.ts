@@ -31,7 +31,7 @@ describe("the referral feature's registration", () => {
     ]);
   });
 
-  it("puts the program in the admin navigation only for those who may open it, and the public page in the main one", () => {
+  it("puts the overview in the admin navigation for staff, the program only for those who may open it, and nothing in the bar every visitor sees", () => {
     expect(
       feature().manifest.navigation.map(({ access, area, href }) => [
         area,
@@ -39,7 +39,6 @@ describe("the referral feature's registration", () => {
         access.kind === "platform" ? access.capability : access.kind,
       ]),
     ).toEqual([
-      ["main", "/referrals", "public"],
       ["admin", "/admin/referrals", "referral:view"],
       ["admin", "/admin/referrals/program", "referral:administer"],
     ]);
