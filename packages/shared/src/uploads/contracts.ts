@@ -1,15 +1,38 @@
 import { z } from "zod";
 
 import { uuidV7TextSchema } from "../identifiers/uuid-v7.ts";
-import { uploadPurposeSchema } from "./upload-policy.ts";
+import {
+  defaultUploadPolicy,
+  uploadPurposeSchema,
+  type SvgPolicy,
+  type UploadPurpose,
+} from "./upload-policy.ts";
 
-export const uploadContentTypes = [
+// Pictures that are decoded as they are, and the one kind of file that is cleaned and drawn first (a vector picture is a program,
+// not pixels, so it is never kept or shown as sent: see `@frostbite/media/svg`).
+export const rasterContentTypes = [
   "image/jpeg",
   "image/png",
   "image/webp",
 ] as const;
+export type RasterContentType = (typeof rasterContentTypes)[number];
+export const svgContentType = "image/svg+xml";
+export const uploadContentTypes = [
+  ...rasterContentTypes,
+  svgContentType,
+] as const;
 export const uploadContentTypeSchema = z.enum(uploadContentTypes);
 export type UploadContentType = z.infer<typeof uploadContentTypeSchema>;
+
+// What may be sent for a use: the pictures that are decoded as they are, and a vector picture only where the policy says so.
+export function uploadContentTypesFor(
+  purpose: UploadPurpose,
+  svg: Pick<SvgPolicy, "purposes"> = defaultUploadPolicy.svg,
+): readonly UploadContentType[] {
+  return svg.purposes.includes(purpose)
+    ? uploadContentTypes
+    : rasterContentTypes;
+}
 
 export const uploadFileNameMaxLength = 255;
 // The name the file had on the creator's device, kept so a list of items can name its images. A bare name:
@@ -58,6 +81,8 @@ export const assetRejectionReasons = [
   "decoded-size-mismatch",
   "content-changed",
   "processing-limit-exceeded",
+  // A vector picture that uses something that is not accepted (script, text, images, styles, filters) or is too complex to read.
+  "svg-unsupported",
 ] as const;
 export const derivativeKinds = ["thumbnail", "preview"] as const;
 export const derivativeKindSchema = z.enum(derivativeKinds);

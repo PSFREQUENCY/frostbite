@@ -37,6 +37,8 @@ export function createUploadIntentOperation(
         return uploadFailure("upload-limit-reached");
       if (result.kind === "invalid-size")
         return uploadFailure("file-over-limit");
+      if (result.kind === "invalid-type")
+        return uploadFailure("file-type-not-allowed");
       return {
         ok: true,
         value: {

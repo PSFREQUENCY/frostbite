@@ -13,6 +13,8 @@ export interface AssetProcessingSubject {
   readonly assetId: UuidV7;
   readonly byteLength: number;
   readonly contentSha256: string;
+  // What was sent, as found by validation: a vector picture is cleaned and drawn at its recorded size before anything is made from it.
+  readonly contentType: UploadContentType;
   readonly height: number;
   readonly objectKey: ObjectKey;
   readonly storageProviderId: ProviderId;

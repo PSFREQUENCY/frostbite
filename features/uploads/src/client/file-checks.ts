@@ -1,6 +1,9 @@
 import {
   defaultUploadPolicy,
+  svgContentType,
   uploadContentTypes,
+  uploadContentTypesFor,
+  type SvgPolicy,
   type UploadContentType,
   type UploadPurpose,
 } from "@frostbite/shared/uploads";
@@ -29,16 +32,23 @@ export function checkFile(
   maxBytesByPurpose: Readonly<
     Record<UploadPurpose, number>
   > = defaultUploadPolicy.maxBytesByPurpose,
+  svg: SvgPolicy = defaultUploadPolicy.svg,
 ):
   | { readonly file: CheckedFile; readonly ok: true }
   | { readonly ok: false; readonly rejection: FileRejection } {
   if (file.size <= 0) return { ok: false, rejection: { kind: "empty" } };
-  if (!isSupported(file.type))
+  if (
+    !isSupported(file.type) ||
+    !uploadContentTypesFor(purpose, svg).includes(file.type)
+  )
     return {
       ok: false,
       rejection: { contentType: file.type, kind: "unsupported-type" },
     };
-  const maxBytes = maxBytesByPurpose[purpose];
+  const maxBytes =
+    file.type === svgContentType
+      ? Math.min(svg.maxBytes, maxBytesByPurpose[purpose])
+      : maxBytesByPurpose[purpose];
   if (file.size > maxBytes)
     return { ok: false, rejection: { kind: "too-large", maxBytes } };
   return { file: { byteLength: file.size, contentType: file.type }, ok: true };

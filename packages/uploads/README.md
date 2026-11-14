@@ -48,7 +48,10 @@ completed are removed by abandoned-upload cleanup (below).
 
 `createAssetProcessingService.process({ assetId })` takes a `validated` asset, reads its private
 object (bounded by the recorded size), requires the bytes to hash to the recorded SHA-256 (otherwise
-`unprocessable: content-changed`), and passes them to an injected `ImageProcessor`. The processor is a
+`unprocessable: content-changed`), and passes them to an injected `ImageProcessor`. For a vector
+picture (`image/svg+xml`, accepted only for the uses in the policy's `svg.purposes`, up to `svg.maxBytes`) the bytes are first cleaned by
+`prepareSvg` of `@frostbite/media/svg`, and only the cleaned text, at the size recorded by validation, goes to the decoder; the file as
+sent is never served. A picture that is not acceptable is `unprocessable: svg-unsupported`. The processor is a
 port; this package never imports a decoder. Derivatives are written as private, write-once,
 content-addressed objects (`derivatives/<asset>/<spec-version>/<kind>-<sha256>.webp`); a retry that
 finds an identical object continues. One transaction then moves the asset to `processed` and inserts

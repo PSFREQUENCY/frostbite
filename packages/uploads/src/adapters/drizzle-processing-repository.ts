@@ -72,6 +72,7 @@ export function createDrizzleAssetProcessingRepository(
             assetId: uuidV7Schema.parse(asset.id),
             byteLength: asset.observedByteLength,
             contentSha256: required(asset.contentSha256),
+            contentType: required(asset.detectedContentType),
             height: required(asset.heightPixels),
             objectKey: parseObjectKey(asset.objectKey),
             storageProviderId: providerIdSchema.parse(asset.storageProviderId),

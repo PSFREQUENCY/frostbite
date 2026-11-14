@@ -2,7 +2,7 @@
 
 import {
   defaultUploadPolicy,
-  uploadContentTypes,
+  uploadContentTypesFor,
   type UploadPurpose,
 } from "@frostbite/shared/uploads";
 import { ArcadeFileDrop } from "@repo/ui/arcade";
@@ -20,8 +20,6 @@ import {
 import type { UploadEvent } from "../client/upload-state.ts";
 import { UploadFeedback } from "./components/upload-feedback.tsx";
 import { useUploadSession } from "./hooks/use-upload-session.ts";
-
-const accept = uploadContentTypes.join(",");
 
 // An uploader for one purpose, for use inside another page (a collection's images step) so a creator
 // never has to leave it. It reports the new image once it has been validated and processed, never
@@ -58,7 +56,7 @@ export function InlineUpload({
   return (
     <div className="arcade-form">
       <ArcadeFileDrop
-        accept={accept}
+        accept={uploadContentTypesFor(purpose).join(",")}
         disabled={session.busy}
         hint={describeUploadHint(limit)}
         label={`Upload ${purposeLabels[purpose].toLowerCase()}`}

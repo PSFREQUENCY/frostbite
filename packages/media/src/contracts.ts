@@ -1,6 +1,6 @@
 import type {
   AssetRejectionReason,
-  UploadContentType,
+  RasterContentType,
 } from "@frostbite/shared/uploads";
 
 // Names the structural parser generation; stored with each outcome so a later decoder-backed
@@ -14,7 +14,7 @@ export interface ImageLimits {
 
 export interface ImageGeometry {
   readonly height: number;
-  readonly mediaType: UploadContentType;
+  readonly mediaType: RasterContentType;
   readonly width: number;
 }
 

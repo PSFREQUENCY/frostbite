@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { defaultUploadPolicy } from "@frostbite/shared/uploads";
 import { describe, expect, it } from "vitest";
 
 import { detectMediaType } from "../src/signature.ts";
@@ -8,6 +9,7 @@ import { pngWithHeader } from "./support/builders.ts";
 import { fixture, text } from "./support/files.ts";
 
 const limits = { maxDimension: 100, maxPixels: 5_000 };
+const svg = defaultUploadPolicy.svg;
 
 describe("signature detection", () => {
   it.each([
@@ -36,7 +38,7 @@ describe("image validation", () => {
   it("returns geometry, size, and an independently verifiable SHA-256", () => {
     const bytes = fixture("real-rgb.png");
     expect(
-      validateImage({ bytes, declaredMediaType: "image/png", limits }),
+      validateImage({ bytes, declaredMediaType: "image/png", limits, svg }),
     ).toEqual({
       byteLength: bytes.length,
       height: 5,
@@ -52,6 +54,7 @@ describe("image validation", () => {
       validateImage({
         bytes: fixture("real-rgb.png"),
         declaredMediaType: "image/jpeg",
+        svg,
         limits,
       }),
     ).toEqual({ ok: false, reason: "media-type-mismatch" });
@@ -62,6 +65,7 @@ describe("image validation", () => {
       validateImage({
         bytes: text("<svg/>"),
         declaredMediaType: "image/png",
+        svg,
         limits,
       }),
     ).toEqual({ ok: false, reason: "unsupported-format" });
@@ -70,7 +74,7 @@ describe("image validation", () => {
   it("propagates structural rejection before applying limits", () => {
     const bytes = fixture("real-rgb.png").subarray(0, 40);
     expect(
-      validateImage({ bytes, declaredMediaType: "image/png", limits }),
+      validateImage({ bytes, declaredMediaType: "image/png", limits, svg }),
     ).toEqual({ ok: false, reason: "malformed" });
   });
 
@@ -79,6 +83,7 @@ describe("image validation", () => {
       validateImage({
         bytes: pngWithHeader(width, height),
         declaredMediaType: "image/png",
+        svg,
         limits: bounds,
       });
     expect(check(100, 50)).toMatchObject({ ok: true });

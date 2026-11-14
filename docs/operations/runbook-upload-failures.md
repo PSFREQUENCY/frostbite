@@ -29,10 +29,11 @@ Asset states: `pending-validation`, `validated`, `rejected`, `processed`, `unpro
 | Message in the product                                                                    | Likely cause                                                                        | First check                                                                    |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | "You may have reached the limit of active uploads"                                        | 2 reserved intents not finished (a stuck tab, or a bulk batch in another tab)       | Section A                                                                      |
-| "Only PNG, JPEG, and WebP" / too large                                                    | Client check; or server `invalid_request`                                           | The file; limits per purpose (25 MB item and cover, 15 MB banner, 5 MB avatar) |
+| "Only PNG, JPEG, WebP, and SVG" / too large                                               | Client check; or server `invalid_request`                                           | The file; limits per purpose (25 MB item and cover, 15 MB banner, 5 MB avatar) |
 | "The file could not be sent. Check your connection" / "storage did not accept the upload" | Network, expired URL (15 min), CORS, R2 credentials                                 | Section B                                                                      |
 | "Processing is taking longer than usual"                                                  | Worker, relay or Inngest not progressing                                            | Section C                                                                      |
 | "The file is not a valid image", "too large in width or height" and similar               | The file was refused; copy is in the product                                        | Section D                                                                      |
+| "This SVG uses something that cannot be accepted"                                         | A vector picture with script, text, images, styles, filters or a link               | Section D (vector pictures)                                                    |
 | "Too many requests in a short time. Wait a moment, then retry."                           | The person or address went over a rate limit (HTTP 429, with `Retry-After` seconds) | Section H                                                                      |
 | Image tile says "Preview unavailable"                                                     | Processed but renditions could not be signed                                        | Section E                                                                      |
 | Image missing from the library                                                            | Library shows the newest 48 only                                                    | Section F                                                                      |
@@ -104,11 +105,20 @@ select id, processing_state, rejection_reason, created_at from frostbite.assets 
 
 `unsupported-format`, `media-type-mismatch`, `malformed`, `animation-unsupported`, `size-exceeded`,
 `byte-length-mismatch`, `dimensions-exceeded`, `pixels-exceeded` (8192 px side, 40 megapixels),
-`decode-failed`, `decoded-size-mismatch`, `content-changed`, `processing-limit-exceeded`. These are decisions,
+`decode-failed`, `decoded-size-mismatch`, `content-changed`, `processing-limit-exceeded`, `svg-unsupported`. These are decisions,
 not outages: the person is told in the product and uploads a different file. Raise a ticket only for a
 spike of `decode-failed` or `processing-limit-exceeded` (a decoder or resource problem), or a refusal of an
 image the policy should accept (send the asset id to engineering; do not ask for the file by email).
 Refused originals are kept until the retention policy is implemented (see the approval briefs).
+
+**Vector pictures (SVG).** A vector picture is accepted for collection covers, banners and item images only (up to 2 MB), cleaned, and
+drawn into the usual thumbnail and preview; the file as sent is never served. `svg-unsupported` means it carried something that is not
+accepted: script, text, an embedded or linked image, a link, a style element, a filter, animation, or a doctype or entity. The person is told
+to export it again with text turned into outlines and nothing embedded (or to upload a PNG). A creator who says an ordinary picture is
+refused: ask which editor made it and what it uses (text and filters are the usual cause); the list of what is taken is in
+`packages/media/README.md`. Never relax the reader to let one picture in: widen its allow-list in `@frostbite/milestone-art` deliberately,
+with a test for each new element and attribute. A spike of `svg-unsupported` right after a deploy is worth a look, since it can mean the
+cleaner is failing to load in the worker (the worker must start; `GET /health` on it is liveness only).
 
 ## E. "Preview unavailable" on a processed image
 

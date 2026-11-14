@@ -46,6 +46,7 @@ export function setup(
     assetId: createUuidV7(),
     byteLength: source.length,
     contentSha256: sha(source),
+    contentType: "image/png",
     height: 5,
     objectKey: parseObjectKey("drafts/object"),
     storageProviderId: providerId,
