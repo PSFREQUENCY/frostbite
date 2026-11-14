@@ -13,6 +13,7 @@ describe("the referral feature's registration", () => {
     expect(manifest.routes.map(({ operationId }) => operationId)).toEqual([
       "setReferralProgram",
       "setReferrerFrozen",
+      "takeBackReferralEarning",
       "requestReferralPayout",
       "getReferralCover",
       "startReferralBatch",

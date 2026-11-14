@@ -8,6 +8,10 @@ import {
   referralBatchRoutes,
   referralPayoutRoute,
   referralCoverResponseSchema,
+  takeBackResponseSchema,
+  takeBackRoute,
+  type TakeBackInput,
+  type TakeBackResponse,
   refreshReferralBatchResponseSchema,
   startReferralBatchResponseSchema,
   submitReferralBatchResponseSchema,
@@ -37,6 +41,7 @@ export const startBatchTimeoutMs = 10_000;
 // The two things an administrator changes, as the page reaches them: one same-origin request each, with the session of whoever is signed in.
 // A failure (including no session) is thrown as the requester throws it, for the caller to say.
 export interface ReferralsApi {
+  takeBack(input: TakeBackInput): Promise<TakeBackResponse>;
   cover(input: ReferralCoverInput): Promise<ReferralCoverResponse>;
   refreshBatch(
     input: RefreshReferralBatchInput,
@@ -61,6 +66,11 @@ export function createReferralsApi(
 ): ReferralsApi {
   const request = createRequester(fetchImpl);
   return {
+    takeBack: (input) =>
+      request(takeBackRoute, takeBackResponseSchema, {
+        body: input,
+        signal: AbortSignal.timeout(referralsRequestTimeoutMs),
+      }),
     cover: (input) =>
       request(referralBatchRoutes.cover, referralCoverResponseSchema, {
         query: input,

@@ -8,6 +8,7 @@ import { countReferred, type ReferredCounts } from "./counts.ts";
 import { describeEarnings, type EarningState } from "./earnings.ts";
 import type { Freeze, Freezes } from "./freezes.ts";
 import { claimIdOfSource, referralProgramKey } from "./kind.ts";
+import type { Reversals, TakenBack } from "./reversals.ts";
 import { potsOf, type Pot } from "./pot.ts";
 import { claimsBehind, uuidPattern, type ClaimBehind } from "./referrers.ts";
 
@@ -19,6 +20,8 @@ export interface AdminEarning {
   readonly claim: ClaimBehind | null;
   readonly id: string;
   readonly state: EarningState;
+  // Set for an earning that was taken back, and for the entry that took it back: who did it, when and why.
+  readonly takenBack: TakenBack | null;
 }
 
 export interface ReferrerDetail extends ReferredCounts {
@@ -42,9 +45,10 @@ export function createReferrerDetail(dependencies: {
   readonly codes: Pick<Codes, "existing">;
   readonly database: DatabaseClient;
   readonly freezes: Pick<Freezes, "history" | "isFrozen">;
+  readonly reversals: Pick<Reversals, "takenBack">;
   readonly rewards: Pick<Rewards, "balances" | "payouts">;
 }) {
-  const { clock, codes, database, freezes, rewards } = dependencies;
+  const { clock, codes, database, freezes, reversals, rewards } = dependencies;
   return async function detail(
     referrerId: string,
     options: { readonly after?: string | null; readonly limit?: number } = {},
@@ -71,6 +75,9 @@ export function createReferrerDetail(dependencies: {
       database,
       described.flatMap(({ entry }) => claimIdOfSource(entry.sourceKey) ?? []),
     );
+    const taken = await reversals.takenBack(
+      described.map(({ entry }) => entry.id),
+    );
     return {
       ...counts,
       code,
@@ -84,6 +91,7 @@ export function createReferrerDetail(dependencies: {
             claim: claimId === null ? null : (claims.get(claimId) ?? null),
             id: entry.id,
             state,
+            takenBack: taken.get(entry.id) ?? null,
           };
         }),
         next: page.next,

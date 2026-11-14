@@ -161,3 +161,49 @@ describe("undoing an earning", () => {
     await expectTotalsToMatchEntries(referrer, programKey);
   });
 });
+
+describe("what a caller keeps about a reversal", () => {
+  it("runs in the same transaction, told which earning and which entry, and only when a reversal was written", async () => {
+    const { event, programKey, referrer } = await earn();
+    const told: { earningId: string; reversalId: string }[] = [];
+    const sourceKey = `sale:${event.id}`;
+    const first = await rewards.accrual.reverse({
+      programKey,
+      sourceKey,
+      within: async (_transaction, written) => {
+        told.push(written);
+      },
+    });
+    const [original, reversal] = await entriesOf(referrer, programKey);
+    expect(first.kind).toBe("reversed");
+    expect(told).toEqual([
+      { earningId: original?.id, reversalId: reversal?.id },
+    ]);
+    await rewards.accrual.reverse({
+      programKey,
+      sourceKey,
+      within: async (_transaction, written) => {
+        told.push(written);
+      },
+    });
+    expect(told).toHaveLength(1);
+  });
+
+  it("takes the reversal back with it when what the caller keeps cannot be written", async () => {
+    const { event, programKey, referrer } = await earn();
+    await expect(
+      rewards.accrual.reverse({
+        programKey,
+        sourceKey: `sale:${event.id}`,
+        within: async () => {
+          throw new Error("the reason could not be kept");
+        },
+      }),
+    ).rejects.toThrow("the reason could not be kept");
+    const entries = await entriesOf(referrer, programKey);
+    expect(entries.map(({ kind }) => kind)).toEqual(["accrual"]);
+    expect(
+      await expectTotalsToMatchEntries(referrer, programKey),
+    ).toMatchObject({ unpaid: 300n });
+  });
+});

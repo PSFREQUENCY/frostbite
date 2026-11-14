@@ -24,6 +24,7 @@ import {
   createStartBatchOperation,
   createSubmitBatchOperation,
 } from "./application/batch-operations.ts";
+import { createTakeBackOperation } from "./application/take-back-operation.ts";
 import {
   createRequestPayoutOperation,
   createSetFrozenOperation,
@@ -79,6 +80,7 @@ export function createReferralsEntrypoint(
     operations: [
       registerHttpOperation(createSetProgramOperation(resolve)),
       registerHttpOperation(createSetFrozenOperation(resolve)),
+      registerHttpOperation(createTakeBackOperation(resolve)),
       registerHttpOperation(createRequestPayoutOperation(resolve)),
       registerHttpOperation(createCoverOperation(resolve)),
       registerHttpOperation(createStartBatchOperation(resolve)),

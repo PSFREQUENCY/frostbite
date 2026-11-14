@@ -131,6 +131,7 @@ export {
   referralCodes,
   referralFreezes,
   referralLinks,
+  referralReversals,
 } from "./schema/referrals.ts";
 export {
   rewardBalances,

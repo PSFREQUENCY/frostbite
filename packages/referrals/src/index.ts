@@ -79,6 +79,12 @@ export {
   type StartBatchResult,
 } from "./batches/service.ts";
 export { createBatchRepository } from "./batches/repository.ts";
+export {
+  createReversals,
+  type Reversals,
+  type TakeBackResult,
+  type TakenBack,
+} from "./reversals.ts";
 export { createCover, type CoverResult } from "./batches/cover.ts";
 export type { BatchRepository, StoredBatch } from "./batches/types.ts";
 export {

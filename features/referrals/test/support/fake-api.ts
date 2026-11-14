@@ -10,6 +10,7 @@ const nothing = (name: string) => () => {
 // answers saved by default.
 export const fakeApi = (over: Partial<ReferralsApi> = {}): ReferralsApi => ({
   cover: vi.fn(nothing("cover")),
+  takeBack: vi.fn(nothing("takeBack")),
   refreshBatch: vi.fn(nothing("refreshBatch")),
   requestPayout: vi.fn(async () => ({
     amountUnits: "150",
