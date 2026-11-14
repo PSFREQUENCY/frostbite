@@ -50,7 +50,7 @@ describe("the catalogue of upload outcomes", () => {
 
 describe("the formats that may be uploaded, as a sentence needs them", () => {
   it("lists them to choose from, or to say what is allowed, in the same order", () => {
-    expect(describeUploadFormats("or")).toBe("PNG, JPEG, or WebP");
-    expect(describeUploadFormats("and")).toBe("PNG, JPEG, and WebP");
+    expect(describeUploadFormats("or")).toBe("PNG, JPEG, WebP, or SVG");
+    expect(describeUploadFormats("and")).toBe("PNG, JPEG, WebP, and SVG");
   });
 });

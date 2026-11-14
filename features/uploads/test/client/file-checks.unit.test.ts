@@ -1,5 +1,6 @@
 import {
   assetRejectionReasons,
+  defaultUploadPolicy,
   uploadOutcomes,
   uploadPurposes,
 } from "@frostbite/shared/uploads";
@@ -68,11 +69,6 @@ describe("local file checks", () => {
       { size: 5, type: "" },
       { contentType: "", kind: "unsupported-type" },
     ],
-    [
-      "a svg",
-      { size: 5, type: "image/svg+xml" },
-      { contentType: "image/svg+xml", kind: "unsupported-type" },
-    ],
   ])("rejects %s", (_name, file, rejection) => {
     expect(checkFile(file, "collection-artwork")).toEqual({
       ok: false,
@@ -83,6 +79,62 @@ describe("local file checks", () => {
   it("checks every purpose the platform defines", () => {
     for (const purpose of uploadPurposes)
       expect(checkFile({ size: 1, type: "image/png" }, purpose).ok).toBe(true);
+  });
+});
+
+describe("a vector picture", () => {
+  const svg = { size: 1_000, type: "image/svg+xml" };
+
+  it.each([
+    "collection-artwork",
+    "collection-banner",
+    "collection-item-artwork",
+  ] as const)("is accepted for %s", (purpose) => {
+    expect(checkFile(svg, purpose)).toEqual({
+      file: { byteLength: 1_000, contentType: "image/svg+xml" },
+      ok: true,
+    });
+  });
+
+  it("is refused for a use that does not take it, as a type that is not supported there", () => {
+    expect(checkFile(svg, "creator-avatar")).toEqual({
+      ok: false,
+      rejection: { contentType: "image/svg+xml", kind: "unsupported-type" },
+    });
+  });
+
+  it("has its own, lower size limit, never above the limit of the use", () => {
+    const limit = defaultUploadPolicy.svg.maxBytes;
+    expect(checkFile({ ...svg, size: limit }, "collection-artwork").ok).toBe(
+      true,
+    );
+    expect(
+      checkFile({ ...svg, size: limit + 1 }, "collection-artwork"),
+    ).toEqual({
+      ok: false,
+      rejection: { kind: "too-large", maxBytes: limit },
+    });
+    expect(
+      checkFile({ ...svg, size: 600 }, "collection-artwork", {
+        "collection-artwork": 500,
+        "collection-banner": 500,
+        "collection-item-artwork": 500,
+        "creator-avatar": 500,
+      }),
+    ).toMatchObject({ rejection: { maxBytes: 500 } });
+  });
+
+  it("follows the policy it is given for which uses take it", () => {
+    expect(
+      checkFile(svg, "creator-avatar", defaultUploadPolicy.maxBytesByPurpose, {
+        ...defaultUploadPolicy.svg,
+        purposes: ["creator-avatar"],
+      }).ok,
+    ).toBe(true);
+  });
+
+  it("is told to the person in words that name what to change", () => {
+    expect(assetRejectionCopy["svg-unsupported"]).toMatch(/outlines/u);
   });
 });
 
@@ -101,21 +153,21 @@ describe("rejection copy", () => {
     expect(describeFileRejection({ kind: "empty" })).toMatch(/empty/i);
     expect(
       describeFileRejection({ contentType: "x", kind: "unsupported-type" }),
-    ).toMatch(/PNG, JPEG, and WebP/);
+    ).toMatch(/PNG, JPEG, WebP, and SVG/);
     expect(
       describeFileRejection({ kind: "too-large", maxBytes: 25_000_000 }),
     ).toContain("25 MB");
   });
 
   it("says the accepted formats the same wherever they are named, from the one list of what is accepted", () => {
-    expect(formatsToChoose).toBe("PNG, JPEG, or WebP");
+    expect(formatsToChoose).toBe("PNG, JPEG, WebP, or SVG");
     // These two sentences are what the browser tests read on the page.
     expect(assetRejectionCopy["unsupported-format"]).toBe(
-      "This image format is not supported. Use PNG, JPEG, or WebP.",
+      "This image format is not supported. Use PNG, JPEG, WebP, or SVG.",
     );
     expect(
       describeFileRejection({ contentType: "x", kind: "unsupported-type" }),
-    ).toBe("Only PNG, JPEG, and WebP images can be uploaded.");
+    ).toBe("Only PNG, JPEG, WebP, and SVG images can be uploaded.");
     expect(assetRejectionCopy.malformed).toContain(formatsToChoose);
     expect(assetRejectionCopy["media-type-mismatch"]).toContain(
       formatsToChoose,
@@ -124,7 +176,7 @@ describe("rejection copy", () => {
 
   it("tells a file picker's hint the same way for every picker, with the size limit and that animated images are out", () => {
     expect(describeUploadHint("25 MB")).toBe(
-      "PNG, JPEG, or WebP, up to 25 MB. Animated images are not supported.",
+      "PNG, JPEG, WebP, or SVG, up to 25 MB. Animated images are not supported.",
     );
     expect(assetRejectionCopy["animation-unsupported"]).toBe(
       "Animated images are not supported. Upload a still image.",

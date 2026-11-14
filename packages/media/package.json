@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/validate.ts",
-    "./processing": "./src/processing.ts"
+    "./processing": "./src/processing.ts",
+    "./svg": "./src/svg.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -16,6 +17,7 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage"
   },
   "dependencies": {
+    "@frostbite/milestone-art": "workspace:*",
     "@frostbite/plugin-kit": "workspace:*",
     "@frostbite/shared": "workspace:*"
   },

@@ -124,7 +124,9 @@ test("a file that is not an image is rejected with a plain explanation", async (
   );
   await expect(
     page
-      .getByText("This image format is not supported. Use PNG, JPEG, or WebP.")
+      .getByText(
+        "This image format is not supported. Use PNG, JPEG, WebP, or SVG.",
+      )
       .first(),
   ).toBeVisible({
     timeout: processingTimeout,
@@ -166,7 +168,7 @@ test("an unsupported file type never reaches the server", async ({
   await page.goto(uploadsNewPath);
   await chooseImage(page, "animation.gif", "image/gif", Buffer.from("GIF89a"));
   await expect(
-    page.getByText("Only PNG, JPEG, and WebP images can be uploaded."),
+    page.getByText("Only PNG, JPEG, WebP, and SVG images can be uploaded."),
   ).toBeVisible();
   expect(intentRequests).toEqual([]);
 });

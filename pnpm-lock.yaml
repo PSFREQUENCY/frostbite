@@ -2730,6 +2730,9 @@ importers:
 
   packages/media:
     dependencies:
+      '@frostbite/milestone-art':
+        specifier: workspace:*
+        version: link:../milestone-art
       '@frostbite/plugin-kit':
         specifier: workspace:*
         version: link:../plugin-kit

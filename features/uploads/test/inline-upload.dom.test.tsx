@@ -86,7 +86,7 @@ describe("inline upload", () => {
       />,
     );
     await chooseFile(container, imageFile(3, "image/gif"));
-    expect(textOf(container)).toContain("Only PNG, JPEG, and WebP");
+    expect(textOf(container)).toContain("Only PNG, JPEG, WebP, and SVG");
     expect(services.api.createIntent).not.toHaveBeenCalled();
     expect(onUploaded).not.toHaveBeenCalled();
   });

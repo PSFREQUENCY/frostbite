@@ -154,6 +154,12 @@ export const creatorE2EFixtures = {
     sessionToken: "e2e-collection-inline-creator-session-token",
     userId: "01994b10-0000-7000-8000-000000000060",
   },
+  // A vector picture uploaded as a cover (SVG): one creator who sends one that is drawn and one that is refused.
+  collectionVectorCreator: {
+    sessionId: "01994b10-0000-7000-8000-0000000000c1",
+    sessionToken: "e2e-collection-vector-creator-session-token",
+    userId: "01994b10-0000-7000-8000-0000000000c0",
+  },
   // Many images at once (bulk upload): one creator who uploads a batch of named images in the browser.
   collectionBulkCreator: {
     sessionId: "01994b10-0000-7000-8000-000000000067",
@@ -211,6 +217,7 @@ export const approvedCreators = [
   creatorE2EFixtures.collectionWizardCreator,
   creatorE2EFixtures.collectionQualityList,
   creatorE2EFixtures.collectionInlineCreator,
+  creatorE2EFixtures.collectionVectorCreator,
   creatorE2EFixtures.collectionBulkCreator,
   creatorE2EFixtures.collectionImportCreator,
   creatorE2EFixtures.alphaCreator,

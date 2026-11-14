@@ -1,14 +1,40 @@
 # `@frostbite/media`
 
-Pure structural validation of PNG, JPEG, and WebP bytes with no third-party dependencies
-(ADR-004, D07, W3-04). It depends only on the shared contract types in `@frostbite/shared`.
+Pure structural validation of PNG, JPEG, and WebP bytes, and the cleaning of vector pictures (SVG), with no third-party dependencies
+(ADR-004, D07, W3-04). It depends only on the shared contract types in `@frostbite/shared` and the strict drawing reader of `@frostbite/milestone-art`.
 
 ## Public API
 
-`validateImage({ bytes, declaredMediaType, limits })` returns either geometry, byte length and a
+`validateImage({ bytes, declaredMediaType, limits, svg })` returns either geometry, byte length and a
 SHA-256, or a stable `AssetRejectionReason`. `mediaValidatorVersion` names this parser generation
 (`structural-v1`) and is stored with every outcome. The package imports no storage, database, or
 framework code and performs no I/O.
+
+## Vector pictures (SVG)
+
+A vector picture is a program, not pixels (it can carry script, link to files and addresses, and run animation), so it is **never kept or
+shown as sent**. `@frostbite/media/svg` exports `prepareSvg(bytes, policy)`, used in two places that must agree: validation records the
+size it will be drawn at and the hash of what was sent, and processing cleans the same bytes again before the decoder sees them.
+
+1. `tidySvg` takes away what an editor adds and cannot matter: the XML header, comments, titles and descriptions, metadata, the markup of
+   the common editors (`inkscape`, `sodipodi`, `rdf`, `cc`, `dc`, `sketch`, `x`), namespaced and `data-`/`class` attributes, `px` units on
+   the root, and it turns a `style` attribute and a basic colour name into the attributes the strict reader takes. It only removes or
+   rewrites, and a doctype, an entity, CDATA, or a comment that never ends is refused outright.
+2. `sanitizeDrawing` (`@frostbite/milestone-art`) is the real gate: an allow-list of shapes, gradients, clip paths and groups, with every
+   attribute value checked against a fixed shape, no text between elements, no entity, and references only to an id inside the picture.
+   Anything else (script, text, image, link, `use`, style element, filter, animation, `foreignObject`) is **refused whole**, not repaired.
+3. The text is written out again in one canonical form with `width` and `height` set so the longest side is `svg.rasterSide`, and only that
+   is drawn, by the same decoder as every other picture, into the usual WebP thumbnail and preview. The uploaded file stays private and is
+   never served.
+
+Nothing the tidy step does can let something through: whatever it leaves is still judged by step 2, so a mistake there can refuse a good
+picture but not accept a bad one. Limits (bytes, nesting, elements, attribute length, drawn size, and which uses accept SVG) are the
+`svg` part of the upload policy in `@frostbite/shared/uploads`. The cleaner is also loaded by the worker under Node's type stripping, so it
+and `@frostbite/milestone-art` use no constructor parameter properties or enums (guarded by a test that loads it that way).
+
+**Known limits** (a picture with these is refused with "svg-unsupported"; the person is told to export it again with text turned into
+outlines and nothing embedded): text, embedded images, filters, masks, patterns, `use`/`symbol`, stylesheets, and colour names beyond the
+basic set. Gradients that inherit through `xlink:href` lose the inheritance (the link is dropped), which can change how they look.
 
 ## What is and is not validated
 

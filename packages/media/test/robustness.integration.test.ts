@@ -1,10 +1,14 @@
-import { assetRejectionReasons } from "@frostbite/shared/uploads";
+import {
+  assetRejectionReasons,
+  defaultUploadPolicy,
+} from "@frostbite/shared/uploads";
 import { describe, expect, it } from "vitest";
 
 import { validateImage } from "../src/validate.ts";
 import { fixture } from "./support/files.ts";
 
 const limits = { maxDimension: 8_192, maxPixels: 40_000_000 };
+const svg = defaultUploadPolicy.svg;
 const files = [
   ["real-rgb.png", "image/png"],
   ["real-rgba.png", "image/png"],
@@ -60,7 +64,7 @@ describe("validation of hostile byte streams", () => {
       const source = fixture(name);
       for (let iteration = 0; iteration < 1_500; iteration += 1) {
         const bytes = mutate(source, next);
-        const result = validateImage({ bytes, declaredMediaType, limits });
+        const result = validateImage({ bytes, declaredMediaType, limits, svg });
         const label = `${name} #${iteration}`;
         if (result.ok) {
           expect(result.width, label).toBeGreaterThan(0);
@@ -93,7 +97,7 @@ describe("validation of hostile byte streams", () => {
           "image/webp",
         ] as const)
           expect(() =>
-            validateImage({ bytes, declaredMediaType, limits }),
+            validateImage({ bytes, declaredMediaType, limits, svg }),
           ).not.toThrow();
       }
   });

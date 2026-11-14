@@ -39,6 +39,8 @@ export const assetRejectionCopy: Readonly<
   "processing-limit-exceeded":
     "The image was too heavy to process safely. Use a smaller image.",
   "size-exceeded": uploadOutcomes["file-over-limit"].message,
+  "svg-unsupported":
+    "This SVG uses something that cannot be accepted (script, text, images, styles or filters). Export it again with text turned into outlines and nothing embedded, or upload a PNG.",
   "unsupported-format": `This image format is not supported. Use ${formatsToChoose}.`,
 };
 

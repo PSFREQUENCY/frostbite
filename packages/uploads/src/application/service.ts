@@ -11,6 +11,8 @@ import {
   type AssetProcessingState,
   type CompleteUploadIntentInput,
   resolveUploadPolicy,
+  svgContentType,
+  uploadContentTypesFor,
   type CreateUploadIntentInput,
   type UploadPolicyOverrides,
 } from "@frostbite/shared/uploads";
@@ -33,6 +35,7 @@ export type CreateIntentResult =
     }
   | { readonly kind: "conflict" }
   | { readonly kind: "invalid-size" }
+  | { readonly kind: "invalid-type" }
   | { readonly kind: "quota-exceeded" };
 
 export type CompleteIntentResult =
@@ -126,7 +129,21 @@ export function createUploadIntentService(dependencies: {
       },
     ): Promise<CreateIntentResult> {
       const input = createUploadIntentInputSchema.parse(unvalidatedInput);
-      if (input.byteLength > policy.maxBytesByPurpose[input.purpose]) {
+      if (
+        !uploadContentTypesFor(input.purpose, policy.svg).includes(
+          input.contentType,
+        )
+      ) {
+        return { kind: "invalid-type" };
+      }
+      const maxBytes =
+        input.contentType === svgContentType
+          ? Math.min(
+              policy.svg.maxBytes,
+              policy.maxBytesByPurpose[input.purpose],
+            )
+          : policy.maxBytesByPurpose[input.purpose];
+      if (input.byteLength > maxBytes) {
         return { kind: "invalid-size" };
       }
       const createdAt = dependencies.clock();

@@ -58,6 +58,7 @@ export function createAssetValidationService(dependencies: {
         maxDimension: policy.maxImageDimension,
         maxPixels: policy.maxImagePixels,
       },
+      svg: policy.svg,
     });
     return result.ok
       ? {

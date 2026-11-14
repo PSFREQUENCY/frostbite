@@ -82,3 +82,60 @@ test("a creator uploads a cover and a banner inside the wizard and never leaves 
     )
     .toBeGreaterThan(0);
 });
+
+const svg = (name: string, body: string) => ({
+  buffer: Buffer.from(
+    `<?xml version="1.0"?>\n<!-- exported -->\n<svg xmlns="http://www.w3.org/2000/svg" width="64px" height="48px" viewBox="0 0 64 48"><title>${name}</title>${body}</svg>`,
+  ),
+  mimeType: "image/svg+xml",
+  name,
+});
+
+// A vector picture is cleaned and drawn on the server, so what is shown is a picture made from it; one that does more than draw is refused
+// with words that say what to change, and nothing of it is kept as an image.
+test("a creator uploads a vector cover, which is drawn, and one that carries a script, which is refused", async ({
+  baseURL,
+  page,
+}) => {
+  await signIn(page, baseURL, creatorE2EFixtures.collectionVectorCreator);
+  await page.goto("/studio/collections");
+  await page.getByRole("link", { name: "Start your first collection" }).click();
+  await page.getByLabel("Collection name").fill("Drawn from a vector");
+  await page.getByLabel("Planned supply").fill("1");
+  await page.getByRole("button", { name: "Create collection" }).click();
+  await expect(page).toHaveURL(/\/studio\/collections\/[0-9a-f-]{36}$/u);
+  await page.getByRole("button", { name: "3. Images" }).click();
+  const cover = page.getByRole("group", { name: "Cover image" });
+  await expect(cover.locator('input[type="file"]')).toHaveAttribute(
+    "accept",
+    /image\/svg\+xml/u,
+  );
+
+  await cover
+    .locator('input[type="file"]')
+    .setInputFiles(
+      svg(
+        "script.svg",
+        '<rect width="64" height="48" fill="#ff0000"/><script>alert(1)</script>',
+      ),
+    );
+  await expect(
+    cover.getByText(/This SVG uses something that cannot be accepted/u),
+  ).toBeVisible({ timeout: 90_000 });
+  await expect(cover.getByText("You have no ready images")).toBeVisible();
+
+  await cover
+    .locator('input[type="file"]')
+    .setInputFiles(
+      svg(
+        "cover.svg",
+        '<rect style="fill:#1E90FF" width="64" height="48"/><circle cx="32" cy="24" r="10" fill="white"/>',
+      ),
+    );
+  await expect(cover.getByText("You have no ready images")).toHaveCount(0, {
+    timeout: 90_000,
+  });
+  await expect(
+    cover.getByRole("radio", { name: "Choose this image", checked: true }),
+  ).toHaveCount(1);
+});

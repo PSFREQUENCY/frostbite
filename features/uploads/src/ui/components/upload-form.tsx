@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   defaultUploadPolicy,
-  uploadContentTypes,
+  uploadContentTypesFor,
   type UploadPurpose,
 } from "@frostbite/shared/uploads";
 import { ArcadeFileDrop, ArcadeSelect } from "@repo/ui/arcade";
@@ -11,8 +11,6 @@ import {
   describeByteLimit,
   describeUploadHint,
 } from "../../client/rejection-copy.ts";
-
-const accept = uploadContentTypes.join(",");
 
 // The inputs for starting an upload: what the file is for, and the file itself. It holds only the
 // chosen purpose; the upload itself is the parent's concern.
@@ -37,7 +35,7 @@ export function UploadForm({
         value={purpose}
       />
       <ArcadeFileDrop
-        accept={accept}
+        accept={uploadContentTypesFor(purpose).join(",")}
         disabled={disabled}
         hint={describeUploadHint(limit)}
         label="Choose an image or drop it here"
