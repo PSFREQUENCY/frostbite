@@ -28,6 +28,7 @@ export {
   type RewardsPolicy,
   type SetProgramResult,
 } from "./programs.ts";
+export { onlyRow } from "./rows.ts";
 export {
   createRewards,
   type Rewards,

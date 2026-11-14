@@ -1,8 +1,18 @@
+import { randomUUID } from "node:crypto";
+
 import { referralCodePattern } from "@frostbite/shared/referrals";
 import { describe, expect, it } from "vitest";
 
 import { createCodes, drawCode } from "../src/codes.ts";
-import { database, registerDatabase, seedUser } from "./support/fixture.ts";
+import { createReferrals } from "../src/service.ts";
+import {
+  clock,
+  database,
+  feeAsset,
+  policy,
+  registerDatabase,
+  seedUser,
+} from "./support/fixture.ts";
 
 registerDatabase();
 
@@ -55,5 +65,20 @@ describe("a person's referral code", () => {
   it("draws only characters of the alphabet", () => {
     for (let index = 0; index < 200; index += 1)
       expect(drawCode()).toMatch(referralCodePattern);
+  });
+});
+
+describe("the codes of the whole referral service", () => {
+  it("are drawn by the function the service is given, when it is given one", async () => {
+    const service = createReferrals({
+      clock: () => clock.now,
+      database,
+      feeAssetKey: () => feeAsset,
+      newId: randomUUID,
+      policy,
+      randomCode: () => "BCDFGHJK",
+    });
+    const user = await seedUser();
+    expect(await service.codes.ensure(user)).toBe("BCDFGHJK");
   });
 });
