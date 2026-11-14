@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { accountReasonCodeSchema } from "../accounts/contracts.ts";
+import { webUrlSchema } from "../http/web-url.ts";
 import { uuidV7Schema } from "../identifiers/uuid-v7.ts";
 
 export const creatorApplicationSchemaVersion = 1;
@@ -48,9 +49,10 @@ export const creatorApplicationFieldLimits = Object.freeze({
 
 const boundedText = (maximum: number) => z.string().trim().min(1).max(maximum);
 
-const portfolioLinkSchema = z
-  .url()
-  .max(creatorApplicationFieldLimits.linkLength);
+// A link a person gives or a reviewer cites is a web address, never another scheme: it may be shown and followed.
+const portfolioLinkSchema = webUrlSchema.max(
+  creatorApplicationFieldLimits.linkLength,
+);
 
 export const creatorApplicationDraftSchema = z
   .object({
@@ -110,7 +112,7 @@ export const creatorReviewDecisionSchema = z
       .trim()
       .max(creatorApplicationFieldLimits.reviewerFeedback),
     evidenceReferences: z
-      .array(z.url().max(creatorApplicationFieldLimits.linkLength))
+      .array(webUrlSchema.max(creatorApplicationFieldLimits.linkLength))
       .max(creatorApplicationFieldLimits.evidenceReferences),
     privateNotes: z
       .string()
