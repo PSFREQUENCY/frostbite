@@ -1,12 +1,12 @@
 import { z } from "zod";
 
+import { webUrlSchema } from "../http/web-url.ts";
+
 // The longest description of a cover picture (for a person who cannot see it).
 export const gameCoverAltLimit = 200;
 
 // How a game is reached and shown: where it lives (an origin and a base path), the picture the catalog shows for it, and the
 // two ways a player gets to it. Split from the manifest, which lists what a game declares about itself.
-
-export const webUrlSchema = z.url({ protocol: /^https?$/u });
 
 // A host with no path, query or fragment: `https://play.example.com` or `https://example.com:8443`. Where a
 // game lives under that host is its base path, so the two cannot be confused or smuggle a query.
