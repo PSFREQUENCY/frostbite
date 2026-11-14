@@ -9,6 +9,8 @@ import { authUsers } from "@frostbite/database/schema/auth";
 import { memoizeUntilFailure } from "@frostbite/plugin-kit/lazy";
 import { InvalidAddressError } from "@frostbite/chain/ports";
 import {
+  createBatchRepository,
+  createBatches,
   createPayoutClaims,
   createReferralReads,
   type DestinationCheck,
@@ -56,6 +58,22 @@ export function createReferralsResolver(
     };
     return {
       ...reads,
+      // Paying referrers in a batch: staff build it, sign it, and the platform sends it and follows it.
+      batches: createBatches({
+        clock,
+        delay: config.delay,
+        // A chain the platform does not serve has no policy; its batches never get as far as asking (the ports are none first).
+        funding: (chain) => {
+          const served = config.chain(chain);
+          if (served === null)
+            throw new Error(`No funding policy for ${chain}.`);
+          return served.funding;
+        },
+        newId: randomUUID,
+        ports: (chain) => config.chain(chain)?.ports ?? null,
+        repository: createBatchRepository(database, { clock }),
+        rewards: reads.rewards,
+      }),
       payouts: createPayoutClaims({ check, database, rewards: reads.rewards }),
       // The names of the accounts that changed the program, for the log of changes; an account that is gone has none.
       names: async (ids: readonly string[]): Promise<Map<string, string>> =>

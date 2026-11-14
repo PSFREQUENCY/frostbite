@@ -23,7 +23,6 @@ import { emailAddressPolicy } from "./email-addresses.ts";
 import { emailCodePolicy } from "./email-code.ts";
 import { targetChains } from "./chains.ts";
 import { gameAdminConfig } from "./game-admin.ts";
-import { rewardsChain } from "./game-rewards.ts";
 import { gameClaimsConfig } from "./game-claims.ts";
 import { shareConfig } from "./share.ts";
 import { gameRunsConfig } from "./game-runs.ts";
@@ -66,7 +65,7 @@ export const featureRegistry = createFeatureRegistry([
   ),
   createProfilesFeature(games, targetChains, profilePolicy, shareConfig),
   createGameAdminFeature(games, gameAdminConfig),
-  createReferralsFeature({ ...referralsConfig, chain: rewardsChain }),
+  createReferralsFeature(referralsConfig),
   createUploadsFeature(providerRegistry),
   createCollectionStudioFeature(providerRegistry, targetChains),
   createCollectionReviewFeature(authorizationPolicy, providerRegistry),

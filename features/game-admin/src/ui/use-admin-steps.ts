@@ -6,7 +6,10 @@ import type {
   ListGameAdminStepsResponse,
   ListGameAdminTemplatesResponse,
 } from "@frostbite/shared/games";
-import { walletRefusedCopy } from "@frostbite/wallet/client";
+import {
+  pastedSignatureMissingCopy,
+  walletRefusedCopy,
+} from "@frostbite/wallet/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { GameAdminApi } from "../client/api.ts";
@@ -261,8 +264,7 @@ export function useAdminSteps(options: {
     async (payload: string) => {
       const transaction = active?.toSign ?? null;
       if (transaction === null) return;
-      if (payload.trim() === "")
-        return setMessage("Paste the signed transaction first.");
+      if (payload.trim() === "") return setMessage(pastedSignatureMissingCopy);
       setWorking(true);
       setMessage(null);
       try {

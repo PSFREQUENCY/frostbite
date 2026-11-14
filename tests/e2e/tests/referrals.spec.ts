@@ -91,7 +91,7 @@ test.describe("running the program", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
   });
 
-  test("staff may look and not change: they have the overview and the referrers, not the program, and the routes refuse them", async ({
+  test("staff may look and pay but not change: they have the overview, the referrers and the payouts, not the program, and the routes refuse them", async ({
     baseURL,
     page,
   }) => {
@@ -104,6 +104,7 @@ test.describe("running the program", () => {
     await expect(sections.getByRole("link")).toHaveText([
       "Overview",
       "Referrers",
+      "Payouts",
     ]);
     await expect(
       sections.getByRole("link", { name: "Overview" }),
@@ -140,6 +141,34 @@ test.describe("running the program", () => {
             reason: "No",
             referrerId: "0198a5c4-7b3e-7c1a-8f2d-4e5b6a7c8d9e",
           },
+        })
+      ).status(),
+    ).toBe(403);
+  });
+
+  test("staff open the payouts: nothing waiting, nothing to build, and a reviewer is turned away", async ({
+    baseURL,
+    page,
+  }) => {
+    await prepare(page, baseURL, creatorE2EFixtures.staff.sessionToken);
+    await page.goto("/admin/referrals/payouts");
+    await heading(page, "Referral payouts");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Referral sections" })
+        .getByRole("link", { name: "Payouts" }),
+    ).toHaveAttribute("aria-current", "page");
+    await expect(page.getByText("Nothing is waiting.")).toBeVisible();
+    await expect(page.getByText("No batch has been built yet.")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Build the batch" }),
+    ).toBeDisabled();
+    await closeMatrix(page, "referrals-admin-payouts.png");
+    await prepare(page, baseURL, creatorE2EFixtures.reviewer.sessionToken);
+    expect(
+      (
+        await page.request.post("/api/v1/referrals/payouts/start", {
+          data: { assetKey: "x/native/y", wallet: "w" },
         })
       ).status(),
     ).toBe(403);

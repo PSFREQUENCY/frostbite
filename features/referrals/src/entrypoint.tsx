@@ -7,7 +7,9 @@ import {
 
 import {
   referralAdministerCapability,
+  referralPayCapability,
   referralsAdminPath,
+  referralsAdminPayoutsPath,
   referralsAdminProgramPath,
   referralsAdminReferrerPath,
   referralsAdminReferrersPath,
@@ -17,14 +19,24 @@ import {
 } from "@frostbite/shared/referrals";
 
 import {
+  createRefreshBatchOperation,
+  createStartBatchOperation,
+  createSubmitBatchOperation,
+} from "./application/batch-operations.ts";
+import {
   createRequestPayoutOperation,
   createSetFrozenOperation,
   createSetProgramOperation,
 } from "./application/operations.ts";
 import { pageWords } from "./domain/copy.ts";
 import { afterFrom, listViewFrom, queryOf } from "./domain/list-query.ts";
+import { chainOfAssetKey } from "@frostbite/rewards";
+import { chainRefSchema } from "@frostbite/shared/chain";
+
 import type { ReferralsFeatureConfig } from "./config.ts";
 import { createReferralsResolver } from "./runtime.ts";
+import { AdminPayouts } from "./ui/admin-payouts.tsx";
+import { toWireBatch } from "./application/present.ts";
 import { AdminOverview } from "./ui/admin-overview.tsx";
 import { AdminProgram } from "./ui/admin-program.tsx";
 import { HistoryPage } from "./ui/history-page.tsx";
@@ -35,6 +47,10 @@ import { NotFoundPage } from "./ui/not-found-page.tsx";
 
 const viewAccess = {
   capability: referralViewCapability,
+  kind: "platform",
+} as const;
+const payAccess = {
+  capability: referralPayCapability,
   kind: "platform",
 } as const;
 const adminAccess = {
@@ -63,6 +79,9 @@ export function createReferralsEntrypoint(
       registerHttpOperation(createSetProgramOperation(resolve)),
       registerHttpOperation(createSetFrozenOperation(resolve)),
       registerHttpOperation(createRequestPayoutOperation(resolve)),
+      registerHttpOperation(createStartBatchOperation(resolve)),
+      registerHttpOperation(createSubmitBatchOperation(resolve)),
+      registerHttpOperation(createRefreshBatchOperation(resolve)),
     ],
     pages: [
       {
@@ -139,6 +158,40 @@ export function createReferralsEntrypoint(
               navigation={navigation}
               program={program}
               who={who}
+            />
+          );
+        },
+      },
+      {
+        access: payAccess,
+        metadata: () => privatePage,
+        path: referralsAdminPayoutsPath,
+        render: async ({ navigation }) => {
+          const reads = await resolve();
+          const [queue, batches] = await Promise.all([
+            reads.rewards.payouts.open(100),
+            reads.batches.list(10),
+          ]);
+          const names = await reads.names(
+            queue.map(({ beneficiaryId }) => beneficiaryId),
+          );
+          // A payout waiting on a network the platform does not serve cannot be paid until it does, and the page says so.
+          const served = [
+            ...new Set(queue.map(({ assetKey }) => assetKey)),
+          ].every(
+            (assetKey) =>
+              config.chain(chainRefSchema.parse(chainOfAssetKey(assetKey))) !==
+              null,
+          );
+          return (
+            <AdminPayouts
+              batches={batches.map(toWireBatch)}
+              explorerTxUrl={config.explorerTxUrl}
+              names={names}
+              navigation={navigation}
+              queue={queue}
+              served={served}
+              signingWallets={config.signingWallets}
             />
           );
         },

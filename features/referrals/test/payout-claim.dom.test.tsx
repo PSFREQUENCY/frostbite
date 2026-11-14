@@ -8,20 +8,12 @@ import {
 } from "@frostbite/test-kit/dom";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ReferralsApi } from "../src/client/api.ts";
 import { PayoutClaim } from "../src/ui/payout-claim.tsx";
 import { ReferralsPage } from "../src/ui/referrals-page.tsx";
+import { fakeApi } from "./support/fake-api.ts";
 import { feeAsset, mine, navigationFor, program } from "./support/data.ts";
 
-const api = (over: Partial<ReferralsApi> = {}): ReferralsApi => ({
-  requestPayout: vi.fn(async () => ({
-    amountUnits: "20000",
-    status: "requested" as const,
-  })),
-  setFrozen: vi.fn(),
-  setProgram: vi.fn(),
-  ...over,
-});
+const api = fakeApi;
 const wallets = ["tb1qfirst", "tb1qsecond"];
 const ready = mine({
   pots: [

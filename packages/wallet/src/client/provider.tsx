@@ -7,6 +7,7 @@ export { hasRememberedWallet } from "./remembered.ts";
 export { useStepWallet } from "./step-signer.ts";
 export type { StepWallet } from "./step-signer.ts";
 export {
+  pastedSignatureMissingCopy,
   WalletRefusedError,
   walletRefusedCopy,
 } from "../bridge/step-signer.ts";

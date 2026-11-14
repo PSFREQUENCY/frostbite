@@ -13,11 +13,12 @@ import {
   createSetFrozenOperation,
   createSetProgramOperation,
 } from "../src/application/operations.ts";
+import { createReferralsResolver } from "../src/runtime.ts";
+import { addressOf, featureConfig } from "./support/config.ts";
 import {
   clock,
   database,
   earn,
-  payouts,
   policy,
   reads,
   registerDatabase,
@@ -26,16 +27,17 @@ import {
 
 registerDatabase();
 
-const resolve = async () => ({
-  ...reads,
-  payouts,
-  names: async () => new Map<string, string>(),
-});
+const resolve = createReferralsResolver(
+  featureConfig(),
+  process.env,
+  () => clock.now,
+);
 const as = (actorUserId: string | null) => ({
   actorSession: null,
   actorUserId: actorUserId as never,
   correlationId: "c0ffee00-0000-4000-8000-000000000000" as never,
 });
+const payee = addressOf("0a0b0c");
 const setProgram = createSetProgramOperation(resolve);
 const setFrozen = createSetFrozenOperation(resolve);
 const requestPayout = createRequestPayoutOperation(resolve);
@@ -213,7 +215,7 @@ describe("asking to be paid", () => {
     });
     const referrer = await seedUser();
     await database.insert(walletIdentities).values({
-      address: "tb1qpayee",
+      address: payee,
       id: randomUUID(),
       network: "signet",
       scriptIdentity: randomUUID(),
@@ -224,7 +226,7 @@ describe("asking to be paid", () => {
     const assetKey = "simnet:one/native/sim";
     expect(
       await requestPayout.execute(
-        { assetKey, destination: "tb1qother" },
+        { assetKey, destination: addressOf("0d0e0f") },
         as(referrer),
       ),
     ).toEqual({
@@ -233,7 +235,7 @@ describe("asking to be paid", () => {
     });
     expect(
       await requestPayout.execute(
-        { assetKey, destination: "tb1qpayee" },
+        { assetKey, destination: payee },
         as(referrer),
       ),
     ).toEqual({
@@ -242,7 +244,7 @@ describe("asking to be paid", () => {
     });
     expect(
       await requestPayout.execute(
-        { assetKey, destination: "tb1qpayee" },
+        { assetKey, destination: payee },
         as(referrer),
       ),
     ).toEqual({
@@ -254,7 +256,7 @@ describe("asking to be paid", () => {
   it("gives the figures when the pot is under what the network would relay", async () => {
     const referrer = await seedUser();
     await database.insert(walletIdentities).values({
-      address: "tb1qsmall",
+      address: payee,
       id: randomUUID(),
       network: "signet",
       scriptIdentity: randomUUID(),
@@ -263,13 +265,13 @@ describe("asking to be paid", () => {
     });
     expect(
       await requestPayout.execute(
-        { assetKey: "simnet:one/native/sim", destination: "tb1qsmall" },
+        { assetKey: "simnet:one/native/sim", destination: payee },
         as(referrer),
       ),
     ).toEqual({
       ok: true,
       value: {
-        minimumUnits: "100",
+        minimumUnits: "10",
         payableUnits: "0",
         reason: "below-dust",
         status: "refused",

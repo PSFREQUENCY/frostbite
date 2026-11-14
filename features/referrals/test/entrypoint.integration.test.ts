@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 
 import { referralKindId, referralProgramKey } from "@frostbite/referrals";
+import { WalletProvider } from "@frostbite/wallet/client";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { createReferralsFeature } from "../src/registration.ts";
-import { featureConfig } from "./support/config.ts";
-import { navigationFor } from "./support/data.ts";
+import { addressOf, featureConfig } from "./support/config.ts";
+import { feeAsset, navigationFor } from "./support/data.ts";
 import {
   clock,
   earn,
@@ -17,22 +19,30 @@ import {
 
 registerDatabase();
 
-const load = () =>
-  createReferralsFeature(featureConfig()).load({
+const load = (config = featureConfig()) =>
+  createReferralsFeature(config).load({
     registeredFeatureCount: 1,
     registeredFeatureIds: ["referrals"],
   });
-const render = async (path: string, context: object = {}) => {
-  const entrypoint = await load();
+const render = async (
+  path: string,
+  context: object = {},
+  config = featureConfig(),
+) => {
+  const entrypoint = await load(config);
   const page = entrypoint.pages?.find((candidate) => candidate.path === path);
   if (page === undefined) throw new Error(`no page ${path}`);
+  // The app's layout provides the wallet connection above every page; a page rendered alone needs the same.
   return renderToStaticMarkup(
-    await page.render({
-      actorUserId: null,
-      navigation: navigationFor(true),
-      params: {},
-      ...context,
-    } as never),
+    createElement(WalletProvider, {
+      children: await page.render({
+        actorUserId: null,
+        navigation: navigationFor(true),
+        params: {},
+        ...context,
+      } as never),
+      network: "signet",
+    }),
   );
 };
 const setProgram = async (rateBasisPoints: number, enabled = true) => {
@@ -49,7 +59,7 @@ const setProgram = async (rateBasisPoints: number, enabled = true) => {
 };
 
 describe("the feature's pages as the platform renders them", () => {
-  it("are the person's two, public and signed-in, and staff's four, with the access each needs", async () => {
+  it("are the person's two, public and signed-in, and staff's five, with the access each needs", async () => {
     const entrypoint = await load();
     expect(
       entrypoint.pages?.map(({ access, path }) => [
@@ -61,6 +71,7 @@ describe("the feature's pages as the platform renders them", () => {
       ["/referrals/history", "authenticated"],
       ["/admin/referrals", "referral:view"],
       ["/admin/referrals/program", "referral:administer"],
+      ["/admin/referrals/payouts", "referral:pay"],
       ["/admin/referrals/referrers", "referral:view"],
       ["/admin/referrals/referrers/[referrerId]", "referral:view"],
     ]);
@@ -70,6 +81,9 @@ describe("the feature's pages as the platform renders them", () => {
       "setReferralProgram",
       "setReferrerFrozen",
       "requestReferralPayout",
+      "startReferralBatch",
+      "submitReferralBatch",
+      "refreshReferralBatch",
     ]);
   });
 
@@ -146,5 +160,30 @@ describe("the feature's pages as the platform renders them", () => {
     const noParam = await render("/admin/referrals/referrers/[referrerId]");
     expect(noParam).toContain("Nothing here");
     expect(person).toBeTruthy();
+  });
+
+  it("shows staff what waits to be paid and where, with the way to build a batch, and says paying is not available on a network the platform does not serve", async () => {
+    await setProgram(300);
+    const referrer = await seedUser("Rita Referrer");
+    // 3% of this is over the program's minimum payout.
+    await earn(referrer, 1_000_000n, randomUUID());
+    const asked = await reads.rewards.payouts.request({
+      assetKey: feeAsset,
+      beneficiaryId: referrer,
+      destination: addressOf("0a0b0c"),
+      programKey: referralProgramKey,
+    });
+    expect(asked.kind).toBe("requested");
+    const html = await render("/admin/referrals/payouts");
+    expect(html).toContain("Rita Referrer");
+    expect(html).toContain(addressOf("0a0b0c"));
+    expect(html).toContain("Build the batch");
+    const unserved = await render(
+      "/admin/referrals/payouts",
+      {},
+      featureConfig({ chain: () => null }),
+    );
+    expect(unserved).toContain("Paying is not available");
+    expect(unserved).not.toContain("Build the batch");
   });
 });

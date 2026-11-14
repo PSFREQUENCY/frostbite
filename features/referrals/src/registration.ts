@@ -3,8 +3,11 @@ import type { ReferralsFeatureConfig } from "./config.ts";
 import {
   referralAdministerCapability,
   referralAdminRoutes,
+  referralPayCapability,
+  referralBatchRoutes,
   referralPayoutRoute,
   referralsAdminPath,
+  referralsAdminPayoutsPath,
   referralsAdminProgramPath,
   referralsAdminReferrerPath,
   referralsAdminReferrersPath,
@@ -17,6 +20,7 @@ import {
 export type { ReferralsFeatureConfig } from "./config.ts";
 
 const view = { capability: referralViewCapability, kind: "platform" } as const;
+const pay = { capability: referralPayCapability, kind: "platform" } as const;
 const administer = {
   capability: referralAdministerCapability,
   kind: "platform",
@@ -52,6 +56,13 @@ export function createReferralsFeature(config: ReferralsFeatureConfig) {
           label: "Referral program",
           order: 31,
         },
+        {
+          access: pay,
+          area: "admin",
+          href: referralsAdminPayoutsPath,
+          label: "Referral payouts",
+          order: 32,
+        },
       ],
       pages: [
         { access: { kind: "public" }, path: referralsPath },
@@ -59,6 +70,7 @@ export function createReferralsFeature(config: ReferralsFeatureConfig) {
         { access: view, path: referralsAdminPath },
         { access: administer, path: referralsAdminProgramPath },
         { access: view, path: referralsAdminReferrersPath },
+        { access: pay, path: referralsAdminPayoutsPath },
         { access: view, path: referralsAdminReferrerPath },
       ],
       requiredDecisionGates: [],
@@ -67,6 +79,9 @@ export function createReferralsFeature(config: ReferralsFeatureConfig) {
         referralAdminRoutes.setProgram,
         referralAdminRoutes.setFrozen,
         referralPayoutRoute,
+        referralBatchRoutes.start,
+        referralBatchRoutes.submit,
+        referralBatchRoutes.refresh,
       ],
       version: "1.0.0",
     },

@@ -23,11 +23,13 @@
     "@frostbite/chain": "workspace:*",
     "@frostbite/client-http": "workspace:*",
     "@frostbite/database": "workspace:*",
+    "@frostbite/feature-chain-status": "workspace:*",
     "@frostbite/http": "workspace:*",
     "@frostbite/plugin-kit": "workspace:*",
     "@frostbite/referrals": "workspace:*",
     "@frostbite/rewards": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/wallet": "workspace:*",
     "@repo/ui": "workspace:*",
     "drizzle-orm": "1.0.0-rc.4",
     "react": "19.2.8"

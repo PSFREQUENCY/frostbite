@@ -1,6 +1,7 @@
 import type { NavigationItem } from "@frostbite/plugin-kit/navigation";
 import {
   referralsAdminPath,
+  referralsAdminPayoutsPath,
   referralsAdminProgramPath,
   referralsAdminReferrersPath,
 } from "@frostbite/shared/referrals";
@@ -34,18 +35,23 @@ export function UserFrame({
   );
 }
 
-export type AdminSection = "overview" | "program" | "referrers";
+export type AdminSection = "overview" | "payouts" | "program" | "referrers";
 
 const sections = [
   { href: referralsAdminPath, id: "overview" },
   { href: referralsAdminProgramPath, id: "program" },
   { href: referralsAdminReferrersPath, id: "referrers" },
+  { href: referralsAdminPayoutsPath, id: "payouts" },
 ] as const;
 
 // Whether the person looking may change the program: the Program section is offered only to those who may open it, so its presence in their
 // navigation is the answer (the server refuses everyone else regardless).
 export const canAdminister = (navigation: readonly NavigationItem[]): boolean =>
   navigation.some(({ href }) => href === referralsAdminProgramPath);
+
+// Likewise for paying: the Payouts section is offered to those who may open it.
+export const canPay = (navigation: readonly NavigationItem[]): boolean =>
+  navigation.some(({ href }) => href === referralsAdminPayoutsPath);
 
 // The three routes of the admin referral section, as links, so each has its own address and its own check on who may open it. The one
 // being shown is marked as the current page.
@@ -57,7 +63,9 @@ function SectionLinks({
   readonly navigation: readonly NavigationItem[];
 }) {
   const shown = sections.filter(
-    ({ id }) => id !== "program" || canAdminister(navigation),
+    ({ id }) =>
+      (id !== "program" || canAdminister(navigation)) &&
+      (id !== "payouts" || canPay(navigation)),
   );
   return (
     <nav aria-label="Referral sections" className="ref-sections">

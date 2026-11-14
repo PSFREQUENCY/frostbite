@@ -4,7 +4,7 @@ import { walletIdentities } from "@frostbite/database";
 import { describe, expect, it } from "vitest";
 
 import { createReferralsResolver } from "../src/runtime.ts";
-import { featureConfig, servedChain } from "./support/config.ts";
+import { addressOf, featureConfig, servedChain } from "./support/config.ts";
 import {
   clock,
   database,
@@ -47,18 +47,19 @@ describe("where a payout may go, as the platform's chains say", () => {
       minimumPayout: 0n,
       rateBasisPoints: 300,
     });
-    const referrer = await referrerWith("good-address");
+    const good = addressOf("0a0b0c");
+    const referrer = await referrerWith(good);
     await earn(referrer, 5_000n, randomUUID());
     const { payouts } = await resolve();
     expect(
       await payouts.claim({
         assetKey: asset,
-        destination: "good-address",
+        destination: good,
         userId: referrer,
       }),
     ).toMatchObject({
       kind: "requested",
-      payout: { destination: "GOOD-ADDRESS" },
+      payout: { destination: good },
     });
   });
 
