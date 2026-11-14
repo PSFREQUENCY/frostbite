@@ -4,6 +4,7 @@ import {
   authUsers,
   createDatabaseClient,
   createDatabasePool,
+  gameMilestoneClaims,
   parseDatabaseEnvironment,
   rewardProgramSettings,
   runMigrations,
@@ -105,4 +106,51 @@ export function registerDatabase(): void {
     clock.now = new Date(clock.now.getTime() + 1_000);
   });
   afterAll(async () => pool.end());
+}
+
+// Two people, the second brought by the first, as the sign-in step makes them.
+export async function referredPair() {
+  const referrer = await seedUser();
+  const person = await seedUser();
+  const code = await referrals.codes.ensure(referrer);
+  await database.transaction((transaction) =>
+    referrals.linkNewAccount(transaction, {
+      code,
+      identity: { kind: "contact" },
+      referredUserId: person,
+    }),
+  );
+  return { code, person, referrer };
+}
+
+// A claim row for a person in the given state (a complete one is a mint); it carries what the table needs and nothing the tests read.
+export async function claimRow(
+  userId: string,
+  state: "complete" | "signed" = "complete",
+): Promise<string> {
+  const id = randomUUID();
+  const done = state === "complete";
+  await database.insert(gameMilestoneClaims).values({
+    broadcastAt: done ? clock.now : null,
+    chain: "simnet:one",
+    contractFamily: "simulated",
+    contractId: "rewards-1",
+    expectedClaims: 1,
+    expiresAt: new Date(clock.now.getTime() + 86_400_000),
+    gameId: "game-one",
+    id,
+    milestoneId: "first",
+    platformFeeSats: 0n,
+    signedPayload: "signed",
+    state,
+    summary: {},
+    transactionId: done ? randomUUID().replaceAll("-", "") : null,
+    unsignedFamily: "simulated",
+    unsignedFormat: "sim-json/1",
+    unsignedPayload: "unsigned",
+    updatedAt: clock.now,
+    userId,
+    walletAddress: "sim:simnet:one:a1b2c3",
+  });
+  return id;
 }

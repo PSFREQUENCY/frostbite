@@ -35,6 +35,12 @@ export const referralCutParams = z
 export const sourceKeyOfClaim = (claimId: string): string =>
   `${claimCompletedEvent}:${claimId}`;
 
+// The claim an earning was for, read back from its source key (none for a key that is not a claim's).
+export function claimIdOfSource(sourceKey: string): string | null {
+  const prefix = `${claimCompletedEvent}:`;
+  return sourceKey.startsWith(prefix) ? sourceKey.slice(prefix.length) : null;
+}
+
 // How a claim earns the referrer a cut: a share of the platform fee the claim carried, once for each claim, nothing for a person nobody
 // referred, nothing while the referrer is frozen, and nothing when the share rounds down to nothing.
 export const referralCut = defineRewardKind({

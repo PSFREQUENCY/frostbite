@@ -39,6 +39,9 @@ export function createCodes(dependencies: CodesDependencies) {
   }
 
   return {
+    // The person's code if they have one; reading it makes none (for an admin looking at a person who never opened the page).
+    existing,
+
     // The person's code, made now if they have none. Two requests at once get the same code: the table holds one per person.
     async ensure(userId: string): Promise<string> {
       for (let attempt = 0; attempt < triesToFindFreeCode; attempt += 1) {

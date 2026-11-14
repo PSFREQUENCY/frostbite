@@ -9,6 +9,18 @@ import {
 
 import { createReferralAccrual, type ReferralAccrual } from "./accrual.ts";
 import { createCodes, type Codes } from "./codes.ts";
+import { createMine, type MineReader } from "./mine.ts";
+import { createOverview, type Overview } from "./overview.ts";
+import { createProgram, type Program } from "./program.ts";
+import {
+  createReferrerDetail,
+  type ReferrerDetail,
+} from "./referrer-detail.ts";
+import {
+  createReferrers,
+  type ReferrersPage,
+  type ReferrersQuery,
+} from "./referrers.ts";
 import { createFreezes, type Freezes } from "./freezes.ts";
 import { referralCut } from "./kind.ts";
 import { linkNewAccount } from "./links.ts";
@@ -43,29 +55,79 @@ export function createReferralRewards(
   });
 }
 
-// Everything the platform does with referrals: codes, the link made when an account is made, freezing, and the cut a claim earns.
-export interface Referrals {
-  readonly accrual: ReferralAccrual;
+// What a person or an admin looks at and changes, which needs no chain: the program, codes, freezes, and the views of the ledger. The pages of
+// the platform are made with this alone; the claims, which know what a fee is an amount of, add the cut they earn on top (`createReferrals`).
+export interface ReferralReads {
+  // What staff see: the program in numbers, who the referrers are, and one of them whole.
+  readonly admin: {
+    readonly overview: () => Promise<Overview>;
+    readonly referrer: (
+      referrerId: string,
+      options?: { readonly after?: string | null; readonly limit?: number },
+    ) => Promise<ReferrerDetail | null>;
+    readonly referrers: (query: ReferrersQuery) => Promise<ReferrersPage>;
+  };
   readonly codes: Codes;
   readonly freezes: Freezes;
-  readonly linkNewAccount: typeof linkNewAccount;
+  // What a referrer sees of themselves: their code, counts, pot and history.
+  readonly mine: MineReader;
+  // The program in force, and how an admin sets it.
+  readonly program: Program;
   readonly rewards: Rewards;
+}
+
+export function createReferralReads(
+  dependencies: Pick<
+    ReferralsDependencies,
+    "clock" | "database" | "newId" | "policy" | "randomCode"
+  >,
+): ReferralReads {
+  const { clock, database, newId, randomCode } = dependencies;
+  const rewards = createReferralRewards(dependencies);
+  const freezes = createFreezes({ clock, database, newId });
+  const codes = createCodes({
+    database,
+    ...(randomCode === undefined ? {} : { randomCode }),
+  });
+  return {
+    admin: {
+      overview: createOverview({ clock, database }),
+      referrer: createReferrerDetail({
+        clock,
+        codes,
+        database,
+        freezes,
+        rewards,
+      }),
+      referrers: createReferrers({ database }),
+    },
+    codes,
+    freezes,
+    mine: createMine({ clock, codes, database, freezes, rewards }),
+    program: createProgram(rewards),
+    rewards,
+  };
+}
+
+// Everything the platform does with referrals: the reads above, the link made when an account is made, and the cut a claim earns.
+export interface Referrals extends ReferralReads {
+  readonly accrual: ReferralAccrual;
+  readonly linkNewAccount: typeof linkNewAccount;
 }
 
 export function createReferrals(
   dependencies: ReferralsDependencies,
 ): Referrals {
-  const { clock, database, feeAssetKey, newId, randomCode } = dependencies;
-  const rewards = createReferralRewards(dependencies);
-  const freezes = createFreezes({ clock, database, newId });
+  const { database, feeAssetKey } = dependencies;
+  const reads = createReferralReads(dependencies);
   return {
-    accrual: createReferralAccrual({ database, feeAssetKey, freezes, rewards }),
-    codes: createCodes({
+    ...reads,
+    accrual: createReferralAccrual({
       database,
-      ...(randomCode === undefined ? {} : { randomCode }),
+      feeAssetKey,
+      freezes: reads.freezes,
+      rewards: reads.rewards,
     }),
-    freezes,
     linkNewAccount,
-    rewards,
   };
 }

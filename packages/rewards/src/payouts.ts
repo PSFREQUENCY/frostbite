@@ -3,13 +3,13 @@ import {
   rewardPayoutTransitions,
   rewardPayouts,
 } from "@frostbite/database/schema/rewards";
-import { eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { createPayoutMoves } from "./payout-moves.ts";
 import { createPayoutRequests } from "./payout-request.ts";
 import { createPayoutStore, toPayout } from "./payout-store.ts";
 import type { Programs } from "./programs.ts";
-import type { Payout } from "./types.ts";
+import type { Payout, PayoutState } from "./types.ts";
 
 export type { MoveResult, Who } from "./payout-store.ts";
 export type { PayoutRequest, RequestPayoutResult } from "./payout-request.ts";
@@ -43,12 +43,42 @@ export function createPayouts(dependencies: PayoutsDependencies) {
       return rows.map(toPayout);
     },
 
+    // A person's payouts under a program, newest first.
+    async listFor(
+      beneficiaryId: string,
+      programKey: string,
+      limit = 50,
+    ): Promise<readonly Payout[]> {
+      const rows = await database
+        .select()
+        .from(rewardPayouts)
+        .where(
+          and(
+            eq(rewardPayouts.beneficiaryId, beneficiaryId),
+            eq(rewardPayouts.programKey, programKey),
+          ),
+        )
+        .orderBy(desc(rewardPayouts.createdAt))
+        .limit(limit);
+      return rows.map(toPayout);
+    },
+
     async payout(id: string): Promise<Payout | null> {
       const [row] = await database
         .select()
         .from(rewardPayouts)
         .where(eq(rewardPayouts.id, id));
       return row === undefined ? null : toPayout(row);
+    },
+
+    // The state of each of the payouts named, for a page of entries that says where each stands.
+    async statesOf(ids: readonly string[]): Promise<Map<string, PayoutState>> {
+      if (ids.length === 0) return new Map();
+      const rows = await database
+        .select()
+        .from(rewardPayouts)
+        .where(inArray(rewardPayouts.id, [...ids]));
+      return new Map(rows.map((row) => [row.id, toPayout(row).state]));
     },
 
     // A payout's moves, oldest first: the audit of how it got where it is.
