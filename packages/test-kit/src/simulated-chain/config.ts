@@ -20,6 +20,7 @@ export function simulatedChainConfig(
       "publish-template": finalized,
       "define-milestone": finalized,
       "set-claims-paused": finalized,
+      "pay-batch": finalized,
       transfer: finalized,
     },
     displayName: `Simulated ${chainId}`,

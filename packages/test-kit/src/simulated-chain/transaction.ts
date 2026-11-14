@@ -35,6 +35,8 @@ const bodySchema = z
     nonce: z.number(),
     operation: z.string(),
     paused: z.boolean().optional(),
+    // For a batch: "recipient:amount" for each payment, in order.
+    payments: z.array(z.string()).optional(),
     platformFeeAmount: z.string().optional(),
     platformFeeTo: z.string().optional(),
     recipient: z.string().optional(),
@@ -77,6 +79,12 @@ export function decodeSimulated(payload: string): SimulatedBody | undefined {
   }
 }
 
+const paymentText = (payment: {
+  readonly amount: { readonly baseUnits: bigint };
+  readonly recipient: { readonly value: string };
+}): string =>
+  `${payment.recipient.value}:${payment.amount.baseUnits.toString()}`;
+
 // The fields of the body that describe what a transaction does, derived from the summary a person was shown.
 function detailsOfSummary(summary: UnsignedTransaction["summary"]) {
   return {
@@ -89,6 +97,7 @@ function detailsOfSummary(summary: UnsignedTransaction["summary"]) {
     maxDrawingBytes: summary.maxDrawingBytes,
     milestoneId: summary.milestone?.id,
     paused: summary.paused,
+    payments: summary.payments?.map(paymentText),
     platformFeeAmount: summary.platformFee?.amount.baseUnits.toString(),
     platformFeeTo: summary.platformFee?.recipient.value,
     recipient: summary.recipient?.value,
@@ -111,7 +120,8 @@ function summaryMatches(unsigned: UnsignedTransaction): boolean {
   }
   const expected = detailsOfSummary(summary);
   return (Object.keys(expected) as (keyof typeof expected)[]).every(
-    (key) => body[key] === expected[key],
+    // Compared as text, for a field that is a list.
+    (key) => JSON.stringify(body[key]) === JSON.stringify(expected[key]),
   );
 }
 
@@ -214,6 +224,13 @@ function describe(intent: TransactionIntent): Described {
         templateVersion: intent.templateVersion,
       };
     }
+    case "pay-batch":
+      return {
+        contract: undefined,
+        milestoneId: undefined,
+        payments: intent.payments.map(paymentText),
+        summary: { payments: intent.payments },
+      };
     case "mint":
       return { contract: undefined, milestoneId: undefined, summary: {} };
   }

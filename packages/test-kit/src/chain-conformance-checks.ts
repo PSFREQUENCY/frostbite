@@ -147,6 +147,13 @@ export async function checkSummaryFidelity(
       "the amount shown is the amount built",
     );
   }
+  if (intent.operation === "pay-batch") {
+    assert.deepEqual(
+      summary.payments,
+      intent.payments,
+      "every payment shown is a payment built, in order",
+    );
+  }
   if (intent.operation === "mint-milestone") {
     assert.deepEqual(
       summary.milestone,
