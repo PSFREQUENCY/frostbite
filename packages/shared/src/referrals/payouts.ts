@@ -145,7 +145,37 @@ export const refreshReferralBatchResponseSchema = z.discriminatedUnion(
   ],
 );
 
+// Whether the wallet that would pay holds enough for what is waiting, before a batch is built: what it holds that a step can spend (and what
+// still waits for its first confirmation), and what the payouts waiting for the asset add up to. The network fee comes on top when the batch
+// is built, so "covers" means the payments, not the fee.
+export const referralCoverInputSchema = z
+  .object({
+    assetKey: z.string().min(1).max(200),
+    wallet: z.string().trim().min(1).max(256),
+  })
+  .strict();
+export const coverRefusals = ["chain-unavailable", "invalid-wallet"] as const;
+export const referralCoverResponseSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      heldUnits: unitsSchema,
+      payments: z.number().int().min(0),
+      pendingUnits: unitsSchema,
+      status: z.literal("ok"),
+      waitingUnits: unitsSchema,
+    })
+    .strict(),
+  z
+    .object({ reason: z.enum(coverRefusals), status: z.literal("refused") })
+    .strict(),
+]);
+
 export const referralBatchRoutes = {
+  cover: {
+    method: "GET",
+    operationId: "getReferralCover",
+    path: "/api/v1/referrals/payouts/cover",
+  },
   refresh: {
     method: "POST",
     operationId: "refreshReferralBatch",
@@ -163,6 +193,8 @@ export const referralBatchRoutes = {
   },
 } as const;
 
+export type ReferralCoverInput = z.infer<typeof referralCoverInputSchema>;
+export type ReferralCoverResponse = z.infer<typeof referralCoverResponseSchema>;
 export type ReferralBatch = z.infer<typeof referralBatchSchema>;
 export type StartReferralBatchInput = z.infer<
   typeof startReferralBatchInputSchema

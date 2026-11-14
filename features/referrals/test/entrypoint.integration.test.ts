@@ -81,6 +81,7 @@ describe("the feature's pages as the platform renders them", () => {
       "setReferralProgram",
       "setReferrerFrozen",
       "requestReferralPayout",
+      "getReferralCover",
       "startReferralBatch",
       "submitReferralBatch",
       "refreshReferralBatch",

@@ -1,5 +1,6 @@
 import type {
   ReferralBatch,
+  ReferralCoverResponse,
   RefreshReferralBatchResponse,
   StartReferralBatchResponse,
   SubmitReferralBatchResponse,
@@ -89,6 +90,9 @@ export const settledBatch = (state: ReferralBatch["state"]): boolean =>
   state === "broadcast_rejected" ||
   state === "indexed_failure";
 
+const notAnAddressOnNetwork =
+  "That is not an address on this network. Check the paying wallet's address.";
+
 export function startRefusalCopy(
   answer: Extract<StartReferralBatchResponse, { status: "refused" }>,
 ): string {
@@ -102,7 +106,7 @@ export function startRefusalCopy(
     case "could-not-build":
       return `The batch could not be built${answer.detail === undefined ? "" : ` (${answer.detail})`}. Try again, or with a different wallet.`;
     case "invalid-sender":
-      return "That is not an address on this network. Check the paying wallet's address.";
+      return notAnAddressOnNetwork;
     case "nothing-to-pay":
       return "Nothing is waiting for a batch, or what is waiting cannot be paid (see below).";
   }
@@ -142,3 +146,33 @@ export const skippedWords = {
 
 export const totalLine = (batch: ReferralBatch): string =>
   `${String(batch.payments.length)} ${batch.payments.length === 1 ? "payment" : "payments"}, ${unitsLabel(batch.totalUnits)} in all, and ${unitsLabel(batch.feeUnits)} of network fee on top`;
+
+// What a look at the paying wallet says. The network fee is added when the batch is built, so "enough" is for the payments alone.
+export const coverWords = {
+  check: "Check the wallet covers it",
+  checking: "Looking…",
+  nothingWaiting:
+    "Nothing is waiting in this asset, so there is nothing to cover.",
+  refused: {
+    "chain-unavailable":
+      "The platform cannot read that network just now, so it cannot say what the wallet holds. Try again shortly.",
+    "invalid-wallet": notAnAddressOnNetwork,
+  },
+  unreachable:
+    "The platform did not answer, so what the wallet holds is not known. Try again.",
+} as const;
+
+export function coverLine(
+  cover: Extract<ReferralCoverResponse, { status: "ok" }>,
+): string {
+  const held = BigInt(cover.heldUnits);
+  const waiting = BigInt(cover.waitingUnits);
+  const pending =
+    cover.pendingUnits === "0"
+      ? ""
+      : ` A further ${unitsLabel(cover.pendingUnits)} is still waiting for its first confirmation and cannot be spent yet.`;
+  const waits = `${String(cover.payments)} ${cover.payments === 1 ? "payout waits" : "payouts wait"}, ${unitsLabel(cover.waitingUnits)} in all`;
+  return held >= waiting
+    ? `The wallet holds ${unitsLabel(cover.heldUnits)} that can be spent; ${waits}. That covers the payments; the network fee comes on top when the batch is built.${pending}`
+    : `The wallet holds ${unitsLabel(cover.heldUnits)} that can be spent; ${waits}. It is short by ${unitsLabel((waiting - held).toString())} before any network fee: fund it, or use another wallet.${pending}`;
+}

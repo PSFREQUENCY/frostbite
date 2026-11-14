@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { createReferralsApi, type ReferralsApi } from "../client/api.ts";
 import { payoutsWords } from "../domain/batch-copy.ts";
 import { BatchReview } from "./batch-review.tsx";
+import { CoverCheck } from "./cover-check.tsx";
 import { useBatch, type BatchSigner } from "./use-batch.ts";
 
 // Where staff pay referrers: choose the asset waiting, say which wallet pays, build the batch, review it, sign it and watch it to its end. A
@@ -102,6 +103,7 @@ export function PayoutsPanel({
         onChange={setTyped}
         value={wallet}
       />
+      <CoverCheck api={api} assetKey={chosen} wallet={wallet} />
       {state.working ? (
         <ActionProgress
           detail="Reading the network for its fees and building the transaction. Nothing is sent, and nothing is signed yet."

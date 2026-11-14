@@ -8,6 +8,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  createCoverOperation,
   createRefreshBatchOperation,
   createStartBatchOperation,
   createSubmitBatchOperation,
@@ -37,6 +38,7 @@ const resolve = createReferralsResolver(
 const start = createStartBatchOperation(resolve);
 const submit = createSubmitBatchOperation(resolve);
 const refresh = createRefreshBatchOperation(resolve);
+const cover = createCoverOperation(resolve);
 const as = (actorUserId: string | null) => ({
   actorSession: null,
   actorUserId: actorUserId as never,
@@ -189,5 +191,47 @@ describe("the operations that pay referrers", () => {
     expect(
       wire(await refresh.execute({ batchId: randomUUID() }, as(staff))),
     ).toEqual({ reason: "not-found", status: "refused" });
+  });
+
+  it("says what the paying wallet holds against what waits, as a read, before a batch is built", async () => {
+    const payout = await waiting();
+    const looked = wire(await cover.execute({ assetKey, wallet: treasury }));
+    expect(looked).toMatchObject({
+      heldUnits: "1000000",
+      pendingUnits: "0",
+      status: "ok",
+    });
+    expect(Number(looked.payments)).toBeGreaterThanOrEqual(1);
+    expect(BigInt(String(looked.waitingUnits))).toBeGreaterThanOrEqual(
+      payout.amount,
+    );
+    const empty = wire(
+      await cover.execute({ assetKey, wallet: addressOf("ffffff") }),
+    );
+    expect(empty).toMatchObject({ heldUnits: "0", status: "ok" });
+  });
+
+  it("says when the wallet is not an address, the network is not served or cannot be asked, and is for staff who may pay", async () => {
+    expect(wire(await cover.execute({ assetKey, wallet: "nobody" }))).toEqual({
+      reason: "invalid-wallet",
+      status: "refused",
+    });
+    expect(
+      wire(
+        await cover.execute({
+          assetKey: "simnet:two/native/sim",
+          wallet: treasury,
+        }),
+      ),
+    ).toEqual({ reason: "chain-unavailable", status: "refused" });
+    expect(
+      wire(await cover.execute({ assetKey, wallet: "down-codec" })),
+    ).toEqual({ reason: "chain-unavailable", status: "refused" });
+    expect(cover).toMatchObject({
+      access: { capability: referralPayCapability, kind: "platform" },
+      cache: { kind: "no-store" },
+      input: "query",
+      ...referralBatchRoutes.cover,
+    });
   });
 });

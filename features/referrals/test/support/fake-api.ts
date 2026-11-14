@@ -9,6 +9,7 @@ const nothing = (name: string) => () => {
 // The page's way of reaching the platform, with every request unexpected unless a test gives it an answer; what changes the program or pays
 // answers saved by default.
 export const fakeApi = (over: Partial<ReferralsApi> = {}): ReferralsApi => ({
+  cover: vi.fn(nothing("cover")),
   refreshBatch: vi.fn(nothing("refreshBatch")),
   requestPayout: vi.fn(async () => ({
     amountUnits: "150",

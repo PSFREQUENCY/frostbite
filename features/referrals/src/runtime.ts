@@ -11,6 +11,7 @@ import { InvalidAddressError } from "@frostbite/chain/ports";
 import {
   createBatchRepository,
   createBatches,
+  createCover,
   createPayoutClaims,
   createReferralReads,
   type DestinationCheck,
@@ -72,6 +73,11 @@ export function createReferralsResolver(
         newId: randomUUID,
         ports: (chain) => config.chain(chain)?.ports ?? null,
         repository: createBatchRepository(database, { clock }),
+        rewards: reads.rewards,
+      }),
+      // What the paying wallet holds against what waits, before a batch is built.
+      cover: createCover({
+        ports: (chain) => config.chain(chain)?.ports ?? null,
         rewards: reads.rewards,
       }),
       payouts: createPayoutClaims({ check, database, rewards: reads.rewards }),

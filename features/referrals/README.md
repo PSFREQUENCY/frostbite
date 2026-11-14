@@ -21,12 +21,13 @@ earning (in the claims) does not depend on it.
 | `/admin/referrals/payouts`                | `referral:pay` (staff, admin)  | What waits to be paid, the batch (build, review, sign with a wallet or elsewhere, send, follow to the chain) and the batches there have been |
 | `/admin/referrals/referrers/[referrerId]` | `referral:view`                | One referrer: counts, pot, each earning followed to its claim, payouts, the log of pauses; the pause form for administrators                 |
 
-| Operation                                                             | Route                                                   | Notes                                                                                         |
-| --------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `setReferralProgram`                                                  | `POST /api/v1/referrals/admin/program`                  | Every setting together, as the signed-in administrator; refusals say which ceiling or range   |
-| `setReferrerFrozen`                                                   | `POST /api/v1/referrals/admin/freeze`                   | Pauses or resumes earning for a referrer, with the reason kept; `not-found`, `invalid-reason` |
-| `requestReferralPayout`                                               | `POST /api/v1/referrals/payouts/request`                | A referrer asks to be paid the pot, to a wallet on their account                              |
-| `startReferralBatch` / `submitReferralBatch` / `refreshReferralBatch` | `POST /api/v1/referrals/payouts/{start,submit,refresh}` | Staff (`referral:pay`): build the batch, send what the wallet signed, look at the chain       |
+| Operation                                                             | Route                                                   | Notes                                                                                                                                                 |
+| --------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `setReferralProgram`                                                  | `POST /api/v1/referrals/admin/program`                  | Every setting together, as the signed-in administrator; refusals say which ceiling or range                                                           |
+| `setReferrerFrozen`                                                   | `POST /api/v1/referrals/admin/freeze`                   | Pauses or resumes earning for a referrer, with the reason kept; `not-found`, `invalid-reason`                                                         |
+| `requestReferralPayout`                                               | `POST /api/v1/referrals/payouts/request`                | A referrer asks to be paid the pot, to a wallet on their account                                                                                      |
+| `getReferralCover`                                                    | `GET /api/v1/referrals/payouts/cover`                   | Staff (`referral:pay`): what the paying wallet holds against what waits in the asset, before a batch is built (a read; the fee comes on top at build) |
+| `startReferralBatch` / `submitReferralBatch` / `refreshReferralBatch` | `POST /api/v1/referrals/payouts/{start,submit,refresh}` | Staff (`referral:pay`): build the batch, send what the wallet signed, look at the chain                                                               |
 
 ## Who may do what
 
@@ -55,4 +56,4 @@ are shown only to someone who has the Program entry in their navigation (the ser
 
 ## Ownership
 
-Product + engineering. Plan: `docs/referral-plan.md` (REF-1c). Decision: `docs/decisions/ADR-026-reward-programs-ledger-and-payouts.md`.
+Product + engineering. Plan: `docs/referral-plan.md`; runbook: `docs/operations/runbook-referrals.md`. Decision: `docs/decisions/ADR-026-reward-programs-ledger-and-payouts.md`.
