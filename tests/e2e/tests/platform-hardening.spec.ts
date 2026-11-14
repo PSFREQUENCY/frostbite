@@ -23,7 +23,7 @@ test("the web service says it is ready, naming each check and nothing else", asy
   ]);
 });
 
-test("every response carries the security headers, and the policy reports rather than blocks until it is enforced", async ({
+test("every response carries the security headers, and the policy is enforced", async ({
   request,
 }) => {
   for (const path of ["/", "/games", "/api/v1/platform"]) {
@@ -32,10 +32,10 @@ test("every response carries the security headers, and the policy reports rather
     expect(headers["x-frame-options"]).toBe("DENY");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(headers["permissions-policy"]).toContain("camera=()");
-    expect(headers["content-security-policy-report-only"]).toContain(
+    expect(headers["content-security-policy"]).toContain(
       "frame-ancestors 'none'",
     );
-    expect(headers["content-security-policy"]).toBeUndefined();
+    expect(headers["content-security-policy-report-only"]).toBeUndefined();
     // The platform is plain http here, so no HTTPS-only header is sent.
     expect(headers["strict-transport-security"]).toBeUndefined();
   }
@@ -46,9 +46,8 @@ test("a new nonce comes with every page", async ({ request }) => {
     [1, 2].map(
       async () =>
         /nonce-([^']+)/u.exec(
-          (await request.get("/games")).headers()[
-            "content-security-policy-report-only"
-          ] ?? "",
+          (await request.get("/games")).headers()["content-security-policy"] ??
+            "",
         )?.[1],
     ),
   );
@@ -56,7 +55,7 @@ test("a new nonce comes with every page", async ({ request }) => {
   expect(nonces[0]).not.toBe(nonces[1]);
 });
 
-test("pages and the studio break no part of the policy they report against, except one known probe of the wallet library", async ({
+test("pages and the studio break no part of the policy they are held to, except one known probe of the wallet library", async ({
   baseURL,
   page,
 }) => {

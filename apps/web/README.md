@@ -39,7 +39,7 @@ build. Shared domain logic belongs in a domain-specific package rather than in t
 ## Hardening (W8-06)
 
 - `src/proxy.ts` gives every page and API response its security headers and a fresh nonce for the Content Security
-  Policy (`src/server/security/headers.ts`). The policy is sent report-only until `SECURITY_CSP_MODE=enforce`; violations are
+  Policy (`src/server/security/headers.ts`). The policy is enforced unless `SECURITY_CSP_MODE=report-only` (blank is enforce); violations are
   posted to `/api/csp-report`, bounded and logged. The root layout sets the validation library not to compile
   schemas at run time, which the policy does not allow.
 - `GET /api/ready` is readiness (database and object storage); the worker's is `GET /ready`.

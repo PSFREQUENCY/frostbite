@@ -129,10 +129,13 @@ Written from the code; none of it has been exercised against a real platform yet
       `X-Forwarded-For: 6.6.6.6` and check the platform's own address is the last entry the app sees. A wrong
       value either lets a client choose its own address (too low) or counts everyone as one address (too high).
       A direct run with no proxy sets `0`; then address limits are skipped.
-- [ ] **`SECURITY_CSP_MODE`** (blank = `report-only`). Start in preview with `report-only`, open the main pages,
-      and read the `csp-report` lines in the web service log: the only report expected is the wallet library's
-      probe of script evaluation, now reported on every page (the wallet library is mounted once, in the layout, for the header wallet widget). Then set `enforce`. In a browser run of the end-to-end suite
-      with `enforce`, the wallet, passkey, upload, collection, bulk upload, import and acceptance journeys all pass.
+- [ ] **`SECURITY_CSP_MODE`** (blank = `enforce`, which blocks what the policy does not allow). Leave it blank, open the main pages and
+      read the `csp-report` lines in the web service log: the only report expected is the wallet library's probe of script
+      evaluation, now reported on every page (the wallet library is mounted once, in the layout, for the header wallet widget); it is
+      blocked and the wallet works without it. In a browser run of the end-to-end suite the wallet, passkey, upload, collection, bulk
+      upload, import and acceptance journeys all pass. Set `report-only` only to find out what a change would block: it sends the
+      same policy under `Content-Security-Policy-Report-Only` and blocks nothing. Not yet tried: Xverse and OYL, and a transaction
+      signed in a real extension; try each by hand before the first real launch.
 - [ ] `R2_ENDPOINT` also sets the one external origin the page policy allows images and uploads to; a different
       public asset domain for images needs adding to the policy.
 - [ ] HSTS (`Strict-Transport-Security`) is sent only when `PUBLIC_BASE_URL` is https. Do not set a long
