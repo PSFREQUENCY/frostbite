@@ -105,8 +105,8 @@ export interface SecurityEnvironment {
   readonly trustedProxyHops: number;
 }
 
-// The settings the security headers and the rate limiter share. Blank values mean the safe default: report
-// before blocking, and one trusted proxy.
+// The settings the security headers and the rate limiter share. Blank values mean the safe default: the
+// policy is enforced (not only reported), and one trusted proxy.
 export function parseSecurityEnvironment(
   source: NodeJS.ProcessEnv,
 ): SecurityEnvironment {
