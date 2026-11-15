@@ -72,6 +72,7 @@ function browserStorage(): {
       kept: false,
       storage: {
         getItem: (key) => memory.get(key) ?? null,
+        removeItem: (key) => void memory.delete(key),
         setItem: (key, value) => void memory.set(key, value),
       },
     };

@@ -14,6 +14,8 @@ export type AccountSyncResult =
   | { readonly kind: "signed-out" }
   | { readonly kind: "failed" };
 
+const nothing: LocalSnapshot = { counters: [], milestones: [], progress: null };
+
 export interface AccountPort {
   sync(state: LocalSnapshot): Promise<AccountSyncResult>;
 }
@@ -57,16 +59,43 @@ export function createSyncedBackend(options: {
   type Apply = "all" | "none" | "verified";
   let verifiedWanted = false;
 
+  // Whether the records in this browser were synced with an account other than the one signed in now. Asked of the account with nothing
+  // to merge, so that nothing of the other account's is ever sent to this one. "unknown" when the account cannot be reached: nothing is sent
+  // then either, and the next change tries again. While signed out there is no other account to protect, so the sync below says so.
+  async function whoseRecords(): Promise<"another" | "unknown" | "yours"> {
+    const owner = local.owner();
+    if (owner === null) return "yours";
+    try {
+      const probe = await remote.sync(nothing);
+      if (probe.kind === "failed") return "unknown";
+      return probe.kind === "synced" && probe.playerId !== owner
+        ? "another"
+        : "yours";
+    } catch {
+      return "unknown";
+    }
+  }
+
   async function exchange(apply: Apply): Promise<void> {
     if (signedOut) return;
     let result: AccountSyncResult;
     try {
+      if (apply === "all") {
+        const whose = await whoseRecords();
+        if (whose === "unknown") {
+          setStatus("pending");
+          return;
+        }
+        if (whose === "another") local.forget();
+      }
       result = await remote.sync(local.snapshot());
       // Storage that refuses the merged state (full, or blocked) is a failed sync like any other.
       if (result.kind === "synced" && apply === "all")
         local.replace(result.state);
       if (result.kind === "synced" && apply === "verified")
         local.adoptVerified(result.state.milestones);
+      if (result.kind === "synced" && local.owner() !== result.playerId)
+        local.setOwner(result.playerId);
       if (result.kind === "synced" && result.playerId !== accountId) {
         accountId = result.playerId;
         options.onIdentity?.({ id: accountId, kind: "account" });
@@ -76,6 +105,8 @@ export function createSyncedBackend(options: {
     }
     if (result.kind === "signed-out") {
       signedOut = true;
+      // Records that belong to an account are not left for whoever uses the browser next: the account has them.
+      if (local.owner() !== null) local.forget();
       setStatus("local");
     } else setStatus(result.kind === "failed" ? "pending" : "account");
   }
