@@ -91,6 +91,25 @@ test.describe("running the program", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
   });
 
+  test("on a wide window the admin page fills the column beside the sidebar, and does not shrink to a strip in the middle", async ({
+    baseURL,
+    page,
+  }) => {
+    await prepare(page, baseURL, creatorE2EFixtures.staff.sessionToken);
+    await page.setViewportSize({ height: 1080, width: 1920 });
+    await page.goto("/admin/referrals");
+    await heading(page, "Referrals");
+    const widths = await page.evaluate(() => ({
+      hero:
+        document.querySelector(".console-hero")?.getBoundingClientRect()
+          .width ?? 0,
+      main: document.querySelector("main")?.getBoundingClientRect().width ?? 0,
+    }));
+    expect(widths.main).toBeGreaterThan(0);
+    // The page's own edge is small; the first card is nearly the whole column.
+    expect(widths.hero / widths.main).toBeGreaterThan(0.85);
+  });
+
   test("staff may look and pay but not change: they have the overview, the referrers and the payouts, not the program, and the routes refuse them", async ({
     baseURL,
     page,
