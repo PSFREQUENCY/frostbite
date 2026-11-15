@@ -12,6 +12,7 @@ describe("the browser's own record", () => {
   ): KeyValueStorage & { map: Map<string, string> } => ({
     getItem: (key) => map.get(key) ?? null,
     map,
+    removeItem: (key) => void map.delete(key),
     setItem: (key, value) => void map.set(key, value),
   });
   const at = new Date("2026-10-13T10:00:00.000Z");

@@ -269,13 +269,15 @@ export function GamePlayer({
         onClose={claimUi.dismiss}
         onSign={() => void claimUi.sign()}
         preparing={claimUi.preparing !== null}
+        refusal={claimUi.refusal?.text ?? null}
         signerNote={claimUi.signerNote}
         title={
           claimUi.active !== null
             ? (titles[claimUi.active.milestoneId] ?? claimUi.active.milestoneId)
-            : claimUi.preparing === null
-              ? ""
-              : (titles[claimUi.preparing] ?? claimUi.preparing)
+            : (() => {
+                const id = claimUi.preparing ?? claimUi.refusal?.milestoneId;
+                return id === undefined ? "" : (titles[id] ?? id);
+              })()
         }
         working={claimUi.working}
       />

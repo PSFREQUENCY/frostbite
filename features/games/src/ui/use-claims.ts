@@ -31,6 +31,11 @@ export type ClaimSigner = (
   transaction: ClaimTransaction,
 ) => Promise<ClaimTransaction | null>;
 
+export interface ClaimRefusal {
+  readonly milestoneId: string;
+  readonly text: string;
+}
+
 // How often an unsettled claim is looked at.
 export const defaultClaimPollMs = 4_000;
 
@@ -57,6 +62,9 @@ export function useClaims(options: {
   const [claims, setClaims] = useState<readonly GameClaim[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // Why a claim that was asked for could not start, and for which milestone: shown in the dialog that was opened for it, which would
+  // otherwise close with no word said where the player is looking.
+  const [refusal, setRefusal] = useState<ClaimRefusal | null>(null);
   const [working, setWorking] = useState(false);
   // The milestone whose claim is being made ready: the platform builds the transaction, which takes a moment, and only one is made at a time.
   const [preparing, setPreparing] = useState<string | null>(null);
@@ -130,6 +138,7 @@ export function useClaims(options: {
       countClaimStarted(analytics, gameId);
       setActiveId(claim.id);
       setMessage(null);
+      setRefusal(null);
     },
     [analytics, gameId, upsert],
   );
@@ -140,6 +149,7 @@ export function useClaims(options: {
       // A second press while one is being made ready starts nothing: the first is the one the player will see.
       if (preparingNow.current !== null) return;
       setMessage(null);
+      setRefusal(null);
       prepare(milestoneId);
       try {
         const answer = await api.start({
@@ -151,14 +161,19 @@ export function useClaims(options: {
         if (answer.status === "started") begin(answer.claim);
         else {
           countClaimRefused(analytics, gameId, answer.reason);
-          setMessage(claimUnavailableCopy[answer.reason]);
+          setRefusal({
+            milestoneId,
+            text: claimUnavailableCopy[answer.reason],
+          });
         }
       } catch (error) {
-        setMessage(
-          error instanceof ApiError && error.code === "unauthorized"
-            ? claimUnavailableCopy["signed-out"]
-            : unreachableCopy,
-        );
+        setRefusal({
+          milestoneId,
+          text:
+            error instanceof ApiError && error.code === "unauthorized"
+              ? claimUnavailableCopy["signed-out"]
+              : unreachableCopy,
+        });
       } finally {
         prepare(null);
       }
@@ -205,17 +220,25 @@ export function useClaims(options: {
             wallet === null ? "not-connected" : "wallet-cannot-sign"
           ],
     claims,
-    dismiss: useCallback(() => setActiveId(null), []),
+    dismiss: useCallback(() => {
+      setActiveId(null);
+      setRefusal(null);
+    }, []),
     feeSpeed,
     prepare,
     preparing,
+    refusal,
     setFeeSpeed,
     message,
     // Tells the player why a claim a game asked for could not start, in the page's own words (the game is given only a coarse reason).
     refuse: useCallback(
       (reason: GameClaimUnavailableReason) => {
         countClaimRefused(analytics, gameId, reason);
-        setMessage(claimUnavailableCopy[reason]);
+        // Still being made ready, so the dialog that was opened for it knows which milestone this is.
+        setRefusal({
+          milestoneId: preparingNow.current ?? "",
+          text: claimUnavailableCopy[reason],
+        });
       },
       [analytics, gameId],
     ),

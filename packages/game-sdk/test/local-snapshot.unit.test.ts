@@ -8,6 +8,7 @@ const storage = () => {
     map,
     store: {
       getItem: (k: string) => map.get(k) ?? null,
+      removeItem: (k: string) => void map.delete(k),
       setItem: (k: string, v: string) => void map.set(k, v),
     },
   };

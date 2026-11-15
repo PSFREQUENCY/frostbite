@@ -50,6 +50,9 @@ metadata. A preview picture is cached for up to an hour at the edge, so an ended
 
 In a game, the platform reads the best score from the progress the game saves (`{ best }`, the SDK's `Progress`), so no game has to say it:
 the best the game loaded is the bar, and a save that beats it is a new best (`domain/best-score.ts`, watched in `use-game-session.ts`).
+A claim that cannot start (the platform said no, or could not be reached) is said in the dialog that was opened for it
+(`data-testid="claim-refused"`), with the reason in the platform's words; closing it clears it, and the next claim starts clean.
+
 A signed-in player whose progress is on their account (`sync === "account"`) then gets a small **Share** chip in the game's top bar, outside
 the picture and never over the play area, that shares that score; the page it opens calls it self-reported, because no replay verifier
 returns a score. A milestone the player holds has the same chip on its card in the game's milestone list. A player with no account sees

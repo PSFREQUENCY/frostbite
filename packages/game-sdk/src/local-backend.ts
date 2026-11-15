@@ -11,6 +11,7 @@ import {
 
 export interface KeyValueStorage {
   getItem(key: string): string | null;
+  removeItem(key: string): void;
   setItem(key: string, value: string): void;
 }
 
@@ -57,9 +58,16 @@ export interface LocalBackend extends GameHostBackend {
   // Takes the replay-verified milestones among the account's into this browser (a reported one is ignored): each is set to the account's record (its level, its
   // unlock time and the larger count), and nothing else is touched, so what the game is doing meanwhile is not lost.
   adoptVerified(records: LocalSnapshot["milestones"]): void;
+  // Empties what the browser holds for this game, and who it belongs to, so the next account to sign in starts from its own records. The
+  // browser's own id for the player stays: it is not a record.
+  forget(): void;
+  // The account's id for the player in this game that the records here were last synced with, or null for records made while nobody was
+  // signed in. Records that belong to an account are never merged into another one.
+  owner(): string | null;
   // Replaces what the browser holds with a merged state from the account (the account's state already
   // includes everything this browser sent).
   replace(snapshot: LocalSnapshot): void;
+  setOwner(accountPlayerId: string): void;
   snapshot(): LocalSnapshot;
 }
 
@@ -80,6 +88,7 @@ export function createLocalBackend(options: {
   const milestonesKey = `frostbite:game:${gameId}:milestones`;
   const playerKey = `frostbite:game:${gameId}:player-id`;
   const countersKey = `frostbite:game:${gameId}:counters`;
+  const ownerKey = `frostbite:game:${gameId}:owner`;
   const newId = options.newId ?? (() => globalThis.crypto.randomUUID());
 
   function read<Output>(key: string, schema: z.ZodType<Output>): Output | null {
@@ -123,7 +132,20 @@ export function createLocalBackend(options: {
           };
       storage.setItem(milestonesKey, JSON.stringify(records));
     },
+    forget: () => {
+      for (const key of [
+        progressKey,
+        savedAtKey,
+        milestonesKey,
+        countersKey,
+        ownerKey,
+      ])
+        storage.removeItem(key);
+    },
     identity: async () => ({ id: localId(), kind: "local" }),
+    owner: () => read(ownerKey, localIdSchema),
+    setOwner: (accountPlayerId) =>
+      storage.setItem(ownerKey, JSON.stringify(accountPlayerId)),
     replace: (snapshot) => {
       if (snapshot.progress !== null) {
         storage.setItem(progressKey, JSON.stringify(snapshot.progress.state));
