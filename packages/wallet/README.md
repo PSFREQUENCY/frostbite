@@ -31,7 +31,10 @@ The single platform boundary around the exact-pinned LaserEyes React/Core pair.
 
 Signing requires a connected provider, the configured network, and a complete account. The bridge
 always requests signing without broadcast and rejects an unexpected transaction ID or incomplete
-PSBT encodings. Application and server layers must independently validate addresses, challenges,
+PSBT encodings. A wallet that was told not to send may still answer with an empty id (Xverse) or the
+transaction's own id (read from the PSBT by `bridge/psbt-id.ts`, with no Bitcoin library, to stay under
+the bundle ceiling); both mean nothing was sent, and any other id is refused. The platform sends the
+transaction itself, from its own node, after checking what was signed. Application and server layers must independently validate addresses, challenges,
 signatures, transaction intent, and returned PSBTs.
 
 No wallet is enabled merely because LaserEyes exposes it. Provider enablement requires the shared

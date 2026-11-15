@@ -44,6 +44,7 @@ const walletOf = (
   isInstalled: (id) => id === "unisat",
   network: "signet",
   provider: null,
+  publicKey: "",
   signMessage: async () => "",
   signPsbt: async () => "",
   ...overrides,
