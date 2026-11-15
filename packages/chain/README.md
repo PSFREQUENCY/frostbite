@@ -52,6 +52,9 @@ bridge, `providers/chain/`, conformance tests, and the recorded `packages/auth/`
 
 ## Invariants
 
+- `walletRequests` (`@frostbite/chain/wallet-signing`) names the wallet's own public key (`tapInternalKey`, `bitcoin-alkanes/taproot-key.ts`) on
+  every taproot input it asks the wallet to sign. Some wallets (Xverse) sign a taproot input only then; UniSat finds its key itself. The key is
+  not part of the transaction, so the check of what was signed is unchanged. Only unsigned inputs are asked for, and those are the wallet's.
 - A chain is a CAIP-2 `ChainRef` from validated configuration. No chain identifier is hard-coded.
 - Boot fails when an enabled chain has no adapter for its family, when two adapters claim a family,
   when an adapter does not support a chain it is configured for, when a feature needs a capability the

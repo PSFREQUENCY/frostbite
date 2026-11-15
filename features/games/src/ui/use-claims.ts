@@ -58,6 +58,13 @@ export function useClaims(options: {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  // The milestone whose claim is being made ready: the platform builds the transaction, which takes a moment, and only one is made at a time.
+  const [preparing, setPreparing] = useState<string | null>(null);
+  const preparingNow = useRef<string | null>(null);
+  const prepare = useCallback((milestoneId: string | null) => {
+    preparingNow.current = milestoneId;
+    setPreparing(milestoneId);
+  }, []);
   const known = useRef(new Map<string, GameClaimState>());
   const changed = useRef(onChange);
   useEffect(() => {
@@ -130,7 +137,10 @@ export function useClaims(options: {
   const start = useCallback(
     async (milestoneId: string) => {
       if (wallet === null) return setMessage(claimUnavailableCopy["no-wallet"]);
+      // A second press while one is being made ready starts nothing: the first is the one the player will see.
+      if (preparingNow.current !== null) return;
       setMessage(null);
+      prepare(milestoneId);
       try {
         const answer = await api.start({
           ...(feeSpeed === null ? {} : { feeSpeed }),
@@ -149,9 +159,11 @@ export function useClaims(options: {
             ? claimUnavailableCopy["signed-out"]
             : unreachableCopy,
         );
+      } finally {
+        prepare(null);
       }
     },
-    [analytics, api, begin, feeSpeed, gameId, wallet],
+    [analytics, api, begin, feeSpeed, gameId, prepare, wallet],
   );
 
   const active = claims.find(({ id }) => id === activeId) ?? null;
@@ -195,6 +207,8 @@ export function useClaims(options: {
     claims,
     dismiss: useCallback(() => setActiveId(null), []),
     feeSpeed,
+    prepare,
+    preparing,
     setFeeSpeed,
     message,
     // Tells the player why a claim a game asked for could not start, in the page's own words (the game is given only a coarse reason).

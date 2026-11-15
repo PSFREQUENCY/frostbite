@@ -61,9 +61,9 @@ async function render(
 }
 
 describe("a game whose milestones can be claimed", () => {
-  it("is given a claims section, with the wallet connection behind it, and the player's wallet is not shown on the game's account", async () => {
+  it("is given a Mints section, with the wallet connection behind it, and the player's wallet is not shown on the game's account", async () => {
     const markup = await render([rewardsGame], "/games/[slug]", "rewards-game");
-    expect(markup).toContain("Claims");
+    expect(markup).toContain(">Mints<");
     expect(markup).not.toContain("Your wallet");
   });
 
@@ -73,7 +73,7 @@ describe("a game whose milestones can be claimed", () => {
       "/games/[slug]",
       "embedded-game",
     );
-    expect(markup).not.toContain("Claims");
+    expect(markup).not.toContain(">Mints<");
   });
 });
 

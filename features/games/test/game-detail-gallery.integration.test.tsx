@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { createGameCatalog } from "../src/domain/catalog.ts";
-import { galleryCopy } from "../src/domain/gallery-copy.ts";
+import { mintsCopy } from "../src/domain/mints-copy.ts";
 import { leaderboardCopy } from "../src/domain/leaderboard-copy.ts";
 import { GameDetail } from "../src/ui/game-detail.tsx";
 import {
@@ -28,9 +28,9 @@ const render = (source: Parameters<typeof createGameCatalog>[0][number]) => {
 };
 
 describe("a game's page", () => {
-  it("has a Minted section in its dock when the game mints milestones, and none when it does not", () => {
-    expect(render(rewardsGame)).toContain(galleryCopy.title);
-    expect(render(embeddedGame)).not.toContain(`>${galleryCopy.title}<`);
+  it("has a Mints section in its dock when the game mints milestones, and none when it does not", () => {
+    expect(render(rewardsGame)).toContain(`>${mintsCopy.title}<`);
+    expect(render(embeddedGame)).not.toContain(`>${mintsCopy.title}<`);
   });
 
   it("has a Leaderboard section in its dock when the platform replays the game's runs, and none when it does not", () => {

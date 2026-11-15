@@ -1,4 +1,4 @@
-/* A game's public gallery of mints, in the dock: milestone counts as chips, then the mints as lit cards. */
+/* A game's public gallery of mints, in the dock: milestone counts as chips, then the mints as short rows. */
 .mint-gallery {
   display: grid;
   gap: var(--arcade-space-4);
@@ -34,8 +34,7 @@
 }
 .mint-gallery__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-  gap: var(--arcade-space-4);
+  gap: var(--arcade-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -44,18 +43,9 @@
   display: grid;
   gap: 0.125rem;
   min-inline-size: 0;
-}
-.mint-gallery-card__art {
-  container-type: inline-size;
-  position: relative;
-  display: block;
-  aspect-ratio: 1;
-  overflow: hidden;
-  margin-block-end: var(--arcade-space-2);
-  border: 0.1875rem solid var(--arcade-border-strong);
+  padding: var(--arcade-space-2) var(--arcade-space-3);
+  border: 0.125rem solid var(--arcade-border-strong);
   border-radius: var(--arcade-radius-medium);
-  background: var(--arcade-ink);
-  box-shadow: 0 0.75rem 1.25rem -0.75rem var(--arcade-cyan);
 }
 .mint-gallery-card strong,
 .mint-gallery-card small,

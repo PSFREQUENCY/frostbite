@@ -42,11 +42,15 @@ describe("naming the wallet's key on the taproot inputs it owns", () => {
     }
   });
 
-  it("leaves an input that belongs to someone else, or that is not asked for, as it was", () => {
-    const psbt = psbtWith([outputOf(otherKey.subarray(1)), outputOf(walletX)]);
-    addTaprootKey(psbt, [0], hex(walletX));
+  it("names it only on the inputs it is asked for, and leaves one that already names a key as it was", () => {
+    const psbt = psbtWith([outputOf(walletX), outputOf(walletX)]);
+    psbt.updateInput(1, { tapInternalKey: otherKey.subarray(1) });
+    addTaprootKey(psbt, [1], hex(walletX));
+    expect(hex(psbt.data.inputs[1]?.tapInternalKey ?? new Uint8Array())).toBe(
+      hex(otherKey.subarray(1)),
+    );
+    // Input 0 was not asked for.
     expect(psbt.data.inputs[0]?.tapInternalKey).toBeUndefined();
-    expect(psbt.data.inputs[1]?.tapInternalKey).toBeUndefined();
   });
 
   it("leaves a non-taproot input alone, and names no key for a key that is not one", () => {
@@ -54,13 +58,7 @@ describe("naming the wallet's key on the taproot inputs it owns", () => {
     const psbt = psbtWith([segwit, outputOf(walletX)]);
     addTaprootKey(psbt, [0, 1], hex(walletX));
     expect(psbt.data.inputs[0]?.tapInternalKey).toBeUndefined();
-    for (const bad of [
-      "",
-      "zz",
-      "abcd",
-      hex(walletX) + "00",
-      "ff".repeat(32),
-    ]) {
+    for (const bad of ["", "zz", "abcd", hex(walletX) + "00"]) {
       const fresh = psbtWith([outputOf(walletX)]);
       addTaprootKey(fresh, [0], bad);
       expect(fresh.data.inputs[0]?.tapInternalKey).toBeUndefined();

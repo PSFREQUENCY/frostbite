@@ -78,7 +78,7 @@ export function useLiveWalletConnection(): WalletConnectionClient {
     },
     signPsbt: async (psbt, inputs) => {
       requireConnectedAccount();
-      const signed = requireSignedPsbt(
+      const signed = await requireSignedPsbt(
         await state.signPsbt({
           broadcast: false,
           finalize: true,
