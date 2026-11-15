@@ -6,6 +6,7 @@ import { defineMilestoneCall } from "../../src/bitcoin-alkanes/admin/calls.ts";
 import { planEnvelopeStep } from "../../src/bitcoin-alkanes/admin/envelope-step.ts";
 import { psbtToBase64 } from "../../src/bitcoin-alkanes/psbt-text.ts";
 import {
+  psbtTransactionId,
   walletRequests,
   withWalletSignatures,
 } from "../../src/bitcoin-alkanes/wallet-signing.ts";
@@ -54,5 +55,20 @@ describe("a PSBT as text, however large", () => {
     );
     expect(signed).not.toBeNull();
     expect(JSON.parse(signed ?? "{}")).toHaveProperty("reveal");
+  });
+});
+
+describe("the id of the transaction a PSBT holds", () => {
+  it("is the id the network knows it by, whether or not it is signed, and null for text that is no PSBT", () => {
+    const step = bigStep();
+    const unsigned = psbtToBase64(step.reveal);
+    const signed = psbtToBase64(signRemaining(Psbt.fromBase64(unsigned)));
+    const id = psbtTransactionId(unsigned);
+    expect(id).toMatch(/^[0-9a-f]{64}$/u);
+    expect(psbtTransactionId(signed)).toBe(id);
+    expect(psbtTransactionId("not a psbt")).toBeNull();
+    const other = Psbt.fromBase64(unsigned);
+    other.setLocktime(1);
+    expect(psbtTransactionId(psbtToBase64(other))).not.toBe(id);
   });
 });

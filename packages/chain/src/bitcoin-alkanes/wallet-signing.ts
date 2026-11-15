@@ -1,13 +1,15 @@
-import { Psbt } from "bitcoinjs-lib";
+import { Psbt, Transaction } from "bitcoinjs-lib";
 
 import { bundleFormat, decodeBundle, encodeBundle } from "./admin/bundle.ts";
 import { psbtFormat } from "./format.ts";
 import { psbtToBase64 } from "./psbt-text.ts";
+import { addTaprootKey } from "./taproot-key.ts";
 import { inputIsSigned, parse } from "./verify.ts";
 
 // What a person's wallet is asked to sign for a built transaction, and how its answer is put back. A step is one PSBT, or a pair
 // (the commit and the reveal, which is signed already except for the input that spends the game's auth token); the wallet is asked
-// only for the inputs nothing has signed yet, so it never sees a request for what the platform signed itself.
+// only for the inputs nothing has signed yet, so it never sees a request for what the platform signed itself. `walletKey` is the
+// wallet's public key (hex): the taproot inputs it owns name it, as some wallets need (see `taproot-key.ts`).
 export interface WalletRequest {
   // The inputs the wallet is asked to sign.
   readonly inputs: readonly number[];
@@ -38,12 +40,15 @@ function psbtsOf(format: string, payload: string): Psbt[] | null {
 export function walletRequests(
   format: string,
   payload: string,
+  walletKey = "",
 ): WalletRequest[] | null {
   const psbts = psbtsOf(format, payload);
   if (psbts === null) return null;
   return psbts.flatMap((psbt) => {
     const inputs = unsignedInputs(psbt);
-    return inputs.length === 0 ? [] : [{ inputs, psbt: psbtToBase64(psbt) }];
+    if (inputs.length === 0) return [];
+    addTaprootKey(psbt, inputs, walletKey);
+    return [{ inputs, psbt: psbtToBase64(psbt) }];
   });
 }
 
@@ -76,4 +81,20 @@ export function withWalletSignatures(
   return first === undefined || second === undefined
     ? null
     : encodeBundle({ commit: first, reveal: second });
+}
+
+// The id the network will know the PSBT's transaction by, from its inputs and outputs alone (a signature does not change it), or null
+// for text that is not a PSBT. A wallet that answers a signing request with an id may have sent the transaction or may only be naming
+// it; an id that is not this one is neither.
+export function psbtTransactionId(psbt: string): string | null {
+  const parsed = parse(psbt);
+  if (parsed === null) return null;
+  const transaction = new Transaction();
+  transaction.version = parsed.version;
+  transaction.locktime = parsed.locktime;
+  for (const input of parsed.txInputs)
+    transaction.addInput(input.hash, input.index, input.sequence);
+  for (const output of parsed.txOutputs)
+    transaction.addOutput(output.script, output.value);
+  return transaction.getId();
 }
