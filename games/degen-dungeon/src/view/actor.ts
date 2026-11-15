@@ -1,6 +1,6 @@
 import { Group } from "three";
 
-import { buildBody, type Body } from "./body.ts";
+import { buildBody, type Body, type Seat } from "./body.ts";
 import {
   bitLook,
   copLook,
@@ -23,6 +23,9 @@ export interface Actor {
     cheering?: boolean,
   ): void;
   readonly root: Group;
+  // How it rides from now on (null on foot), and how high its hips are above its feet (metres) to sit it on a seat.
+  seat(kind: Seat): void;
+  hip(): number;
   // Swaps the built body for a model.
   wear(model: Rigged): void;
 }
@@ -35,12 +38,17 @@ function actorOf(look: Look, name: string): Actor {
   const body: Body = buildBody(look);
   root.add(body.root);
   let model: Rigged | null = null;
+  let riding: Seat = null;
   return {
+    hip: () => (model === null ? body.hip : model.hip),
     move(pace, seconds, dt, talking = false, cheering = false) {
-      if (model === null) body.pose(pace, seconds, talking);
-      else model.update(pace, dt, cheering);
+      if (model === null) body.pose(pace, seconds, talking, riding);
+      else model.update(pace, dt, cheering, riding);
     },
     root,
+    seat(kind) {
+      riding = kind;
+    },
     wear(next) {
       if (model !== null) root.remove(model.root);
       model = next;

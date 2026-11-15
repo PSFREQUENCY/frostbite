@@ -98,3 +98,58 @@
     opacity: 0;
   }
 }
+
+/* Money on the move: a figure floating up beside the DUN readout, and the digital receipt under it. */
+.bar,
+.score {
+  position: relative;
+}
+.coin-pop {
+  position: absolute;
+  left: 2.6rem;
+  top: 1.4rem;
+  font-weight: 800;
+  pointer-events: none;
+  animation: coin-rise 1.4s ease-out forwards;
+}
+.coin-pop.gain,
+.receipt .gain {
+  color: #3fff8b;
+}
+.coin-pop.loss,
+.receipt .loss {
+  color: #ff4d6d;
+}
+.receipt {
+  position: absolute;
+  right: 0.75rem;
+  top: 4.2rem;
+  z-index: 6;
+  min-width: 12rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed #38e8ff;
+  border-radius: 0.6rem;
+  background: rgb(10 8 30 / 88%);
+  color: #e8e2ff;
+  font:
+    600 0.78rem/1.35 ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+.receipt p {
+  margin: 0;
+}
+.receipt .head {
+  color: #38e8ff;
+  letter-spacing: 0.12em;
+}
+.receipt .small {
+  color: #9b90c9;
+  font-size: 0.68rem;
+}
+@keyframes coin-rise {
+  to {
+    opacity: 0;
+    transform: translateY(-2.2rem);
+  }
+}

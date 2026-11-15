@@ -49,6 +49,10 @@ export function counter(day: Draft, kind: string): string | null {
   }
   if (day.pocket < cost) return "not enough DUN";
   day.pocket -= cost;
+  // Glow sticks and pizza: the gifts the saucers' visitors like.
+  const gift =
+    kind === "hardware" ? "item-glow" : kind === "pizza" ? "item-pizza" : "";
+  if (gift !== "" && !day.done.includes(gift)) day.done = [...day.done, gift];
   const most = 2 * visionTicks;
   if (kind === "coffee") day.fomo = Math.max(0, day.fomo - 25);
   if (kind === "noodles") {

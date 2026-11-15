@@ -5,7 +5,7 @@ import type { DayState } from "../rules/types.ts";
 import { questAt } from "../quest.ts";
 import { buildBeacon } from "./beacon.ts";
 import { buildLanterns } from "./lanterns.ts";
-import { buildParked } from "./parked.ts";
+import { buildParked, type Parked } from "./parked.ts";
 import { buildShops } from "./shops.ts";
 import { buildStreet } from "./street.ts";
 import { buildTraffic } from "./traffic.ts";
@@ -20,8 +20,9 @@ export interface Town {
   idle(seconds: number): void;
   // Where the hero's own lantern is (metres), while it rises; null otherwise.
   lantern(seconds: number): readonly [number, number, number] | null;
-  // The colour of a parked ride, by its id.
+  // The colour of a parked ride, by its id, and where one left on the street stands.
   paintOf(id: string): string;
+  leftAt: Parked["leftAt"];
   readonly root: Group;
   show(
     day: DayState,
@@ -30,6 +31,8 @@ export interface Town {
     heading: number,
     seconds: number,
     dt: number,
+    // A ride left on the street that is drawn elsewhere for a moment (its door shutting).
+    hidden?: string,
   ): void;
   // Writes the player's message on the hero's lantern.
   write(message: string): void;
@@ -85,16 +88,17 @@ export function buildTown(): Town {
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
+    leftAt: (id) => parked.leftAt(id),
     paintOf: (id) => parked.paintOf(id),
     root,
-    show(day, x, z, heading, seconds, dt) {
+    show(day, x, z, heading, seconds, dt, hidden = "") {
       const { along, dark } = timeOf(day.tick);
       if (day.wish > 0 && wished === 0) sent = seconds;
       if (day.wish === 0) sent = null;
       wished = day.wish;
       street.run(seconds, dark);
       shops.show(x, z, dt);
-      parked.show(day, x, z, heading, seconds);
+      parked.show(day, x, z, heading, seconds, hidden);
       walkers.show(seconds, 1 - dark * 0.6);
       traffic.show(seconds, along, dark, x, z);
       venues.show(seconds, dark, x, z);

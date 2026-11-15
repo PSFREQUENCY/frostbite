@@ -25,6 +25,9 @@ import { createNewbie } from "./newbie.ts";
 import { createPeople } from "./npcs.ts";
 import { buildNorth } from "./north.ts";
 import { buildRides } from "./rides.ts";
+import { createRiding } from "./riding.ts";
+import { buildSaucers } from "./saucers.ts";
+import { buildWeatherFx } from "./weather-fx.ts";
 import { createRing, ring } from "./ring.ts";
 import { intentFor, roomFor } from "./shot.ts";
 import { createStage, type Stage } from "./stage.ts";
@@ -69,6 +72,9 @@ export function createWorldView(
   const rides = buildRides();
   const statue = buildStatue();
   const town = buildTown();
+  const riding = createRiding(rides, town);
+  const saucers = buildSaucers();
+  const skies = buildWeatherFx();
   const moon = buildMoon();
   const cast: Actor[] = Array.from({ length: heroCount + 1 }, (_, hero) =>
     buildActor(hero),
@@ -91,6 +97,8 @@ export function createWorldView(
     statue.root,
     town.root,
     moon.root,
+    saucers.root,
+    skies.root,
     shadow,
     ...cast.map(({ root }) => root),
     ...chasers.actors.map(({ root }) => root),
@@ -159,7 +167,6 @@ export function createWorldView(
         y: state.level * levelHeight,
         z: metres(state.z),
       };
-      const riding = state.ride !== "foot";
       const { along, dark } = timeOf(state.tick);
       clock = seconds;
       light.set(
@@ -174,7 +181,16 @@ export function createWorldView(
         moon.on(at.x, at.z),
       );
       city.night(dark);
-      town.show(state, at.x, at.z, heading, seconds, dt);
+      skies.show(state.weather, at.x, at.z, seconds, scene);
+      town.show(
+        state,
+        at.x,
+        at.z,
+        heading,
+        seconds,
+        dt,
+        riding.track(state, seconds),
+      );
       city.mark(state, seconds);
       north.show(state.gate > 0, seconds);
       crowd.show(gatheringOf(state), seconds);
@@ -203,22 +219,10 @@ export function createWorldView(
       city.root.visible = !up;
       town.root.visible = !up;
       moon.show(at.x, at.z, seconds, state.tick);
+      saucers.show(state, seconds, up);
       people.show(state, at, seconds, dt);
-      // A ride taken from the kerb keeps its colour, and a car its broken window.
-      const taken = [...state.done]
-        .reverse()
-        .find((id) => id.startsWith(`${state.ride}-`));
-      if (riding)
-        rides.show(
-          state.ride,
-          at.x,
-          at.y,
-          at.z,
-          Math.PI / 2 - heading,
-          seconds,
-          taken === undefined ? undefined : town.paintOf(taken),
-          state.ride === "car" && taken !== undefined,
-        );
+      // A ride taken from the kerb keeps its colour, and a car its broken window; a door swings as the hero gets in or out.
+      riding.show(state, at, Math.PI / 2 - heading, seconds);
       chasers.show(state, at, seconds, dt);
       // How open the ground is round the hero, looked at a few times a second.
       if (Math.abs(seconds - sampled) > 0.3) {

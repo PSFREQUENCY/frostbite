@@ -1,9 +1,46 @@
 // One day in Nakasato, as the rules hold it. Everything is a whole number or a name, so a replay ends exactly where the player did.
-export type Ride = "bike" | "boat" | "car" | "foot" | "heli" | "scooter";
-// How a day ended: closed by the player, frozen by a tux, asleep at home, inside the Time Machine, out of time, on SHA Beach at sunrise,
-// or with Max's Vests first to the beach.
+export type Ride =
+  | "bike"
+  | "boat"
+  | "car"
+  | "foot"
+  | "heli"
+  | "moto"
+  | "scooter"
+  | "semi"
+  | "truck"
+  | "van";
+// The rides that stand on the street: some pedalled or kicked, the rest with engines (`motors`).
+export type Wheels =
+  "bike" | "car" | "moto" | "scooter" | "semi" | "truck" | "van";
+export const motors: readonly Wheels[] = [
+  "car",
+  "moto",
+  "semi",
+  "truck",
+  "van",
+];
+// A ride the hero stepped off, which stays where it was left and can be taken again: its id, kind and place.
+export interface Left {
+  readonly id: string;
+  readonly ride: Wheels;
+  readonly x: number;
+  readonly z: number;
+}
+// How a day ended: taken up by the saucers, closed by the player, frozen by a tux, asleep at home, inside the Time Machine, out of time,
+// on SHA Beach at sunrise, or with Max's Vests first to the beach.
 export type Cause =
-  "beach" | "closed" | "frozen" | "home" | "machine" | "timeout" | "vested";
+  | "abducted"
+  | "beach"
+  | "closed"
+  | "frozen"
+  | "home"
+  | "machine"
+  | "timeout"
+  | "vested";
+// The sky over the island: clear, or a spell of harsh weather (`weather.ts`).
+export type Weather =
+  "blizzard" | "clear" | "fog" | "gale" | "heat" | "snow" | "storm";
 
 export interface Point {
   readonly x: number;
@@ -118,6 +155,12 @@ export interface DayState {
   // A moonshot in the air: the DUN staked (0 for none) and the tick of the launch it rides on.
   readonly shot: number;
   readonly shotAt: number;
+  // The parked ride under the hero (its spot's id, or "" for none or a hired one), and the rides left on the street (the last six).
+  readonly rideId: string;
+  readonly left: readonly Left[];
+  // The weather now, and how long the hero has stood in a saucer's beam (ticks).
+  readonly weather: Weather;
+  readonly beamed: number;
   readonly words: number;
   readonly x: number;
   readonly z: number;

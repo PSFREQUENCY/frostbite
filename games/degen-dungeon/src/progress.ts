@@ -91,18 +91,20 @@ export function afterDay(
     progress: {
       ...progress,
       best: Math.max(progress.best, score),
-      day: trip
-        ? 1
-        : told && day.day === progress.day
-          ? Math.min(5, progress.day + 1)
-          : progress.day,
+      // Taken up by the saucers, the hero wakes at the start of the story again.
+      day:
+        trip || day.cause === "abducted"
+          ? 1
+          : told && day.day === progress.day
+            ? Math.min(5, progress.day + 1)
+            : progress.day,
       fate: trip
         ? Math.max(-99, Math.min(99, progress.fate + day.fate))
         : progress.fate,
       loops: Math.min(99, progress.loops + (trip ? 1 : 0)),
       machine: !trip && (progress.machine || won || day.cause === "machine"),
       slip: progress.slip || (day.day === stormDay && day.storm > 0),
-      wish: trip ? 0 : day.wish,
+      wish: trip || day.cause === "abducted" ? 0 : day.wish,
     },
   };
 }

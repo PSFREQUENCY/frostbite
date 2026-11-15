@@ -29,7 +29,9 @@ export function createPeople(scene: Scene, cast: readonly Actor[]) {
       "move" in body
         ? body
         : {
+            hip: () => body.hip,
             move: (pace, seconds) => body.pose(pace, seconds, false),
+            seat: () => undefined,
             root: (() => {
               const root = new Group();
               root.name = id;

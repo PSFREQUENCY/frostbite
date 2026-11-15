@@ -4,18 +4,22 @@ import { ticksPerSecond } from "../rules/constants.ts";
 import { statusOf } from "../rules/status.ts";
 import { element } from "./elements.ts";
 import { starsText } from "./hud.ts";
-import { goalFor, rankNames, talkOf } from "./words.ts";
+import { createReceipts } from "./receipts.ts";
+import { goalFor, rankNames, talkOf, weatherNames } from "./words.ts";
 
 // Everything beside the picture that follows the day: the readouts, Pip's line, the talk with its answer buttons, frost vision's button
 // with the seconds left, and the helicopter's climb and drop, shown only in a helicopter.
 export function createPanel(hands: {
   readonly answer: (choice: number) => void;
+  // A chime as money comes in or goes out.
+  readonly chime?: (gain: boolean) => void;
 }) {
   const outs = {
     best: element("best", "strong"),
     fomo: element("fomo", "strong"),
     heat: element("heat", "strong"),
     mood: element("mood", "strong"),
+    weather: element("weather", "strong"),
     rank: element("rank", "strong"),
     score: element("score", "strong"),
   };
@@ -28,6 +32,11 @@ export function createPanel(hands: {
   const up = element("up", "button");
   const down = element("down", "button");
   let shown = "";
+  const receipts = createReceipts(
+    outs.score.closest("p") ?? outs.score,
+    element("receipt", "aside"),
+    (gain) => hands.chime?.(gain),
+  );
 
   return {
     // How many answers the waiting talk has (two for a yes or no).
@@ -39,6 +48,8 @@ export function createPanel(hands: {
       outs.mood.textContent = day === null ? "GM" : statusOf(day);
       outs.rank.textContent = rankNames[day === null ? 0 : rankOf(day)] ?? "";
       outs.fomo.textContent = String(day?.fomo ?? 0);
+      outs.weather.textContent = weatherNames[day?.weather ?? "clear"];
+      receipts.show(day, performance.now());
       goal.textContent = day === null ? "" : goalFor(day);
       const left = Math.ceil((day?.vision ?? 0) / ticksPerSecond);
       look.disabled = day === null || (left === 0 && !day.looking);

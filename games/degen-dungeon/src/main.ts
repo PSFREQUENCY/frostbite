@@ -47,7 +47,10 @@ const screen = element("screen", "canvas");
 const worldCanvas = element("world", "canvas");
 const guideLayer = createGuideLayer(screen);
 const earnedList = element("earned", "ul");
-const panel = createPanel({ answer: (choice) => hands.answer(choice) });
+const panel = createPanel({
+  answer: (choice) => hands.answer(choice),
+  chime: (gain) => sound.sfx(gain ? "coinIn" : "coinOut"),
+});
 const bag = createBag();
 const clips = createClips();
 const wishText = element("wish-text", "input");

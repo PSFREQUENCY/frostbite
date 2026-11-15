@@ -22,12 +22,12 @@ const once = (
 
 // Degen Dungeon: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over five story days by honest gigs, a
 // crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and the Time Machine. A run is one day of one hero. Walk-in
-// shops, parked rides, the lantern night and the moon colony fill the city between the story's beats. The title, the words and every
+// shops, parked rides, the saucers, the weather, the lantern night and the moon colony fill the city between the story's beats. The title, the words and every
 // milestone are a draft for the owner; a milestone's id is one the game's rules decide (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, borrow a parked car, scooter or bike, and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. On day two, flying saucers come for the city: bring glow sticks and pizza to make peace, or meme coins to trade, or wake up back at the start. Weather turns from fog to blizzards to thunderstorms. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -283,7 +283,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "00cd172f754e808663839ad2412ff952db5300342f93df37ab39024edca263a7",
+        "d6c73b2f103a30251bd153705d4af85b5ee95c70c7202113fb161f7f01dcc664",
       version: 1,
     },
   },

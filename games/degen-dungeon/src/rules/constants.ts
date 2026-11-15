@@ -72,6 +72,8 @@ export const fateDun = 500;
 // The rest of the island. Frost vision lasts this long a day (Lumen's lamp twice as long). The seed paper is tested this long after it is
 // written, and a drained pocket loses this much every ten ticks (a permission slip leaks one). Crossing the riot is a star; loot taken in front of a crowd adds witnesses.
 export const visionTicks = 450;
+// Frost vision comes back to at least `visionTicks` every thirty seconds.
+export const visionEvery = 900;
 export const paperTest = 2_400;
 export const drainPace = 4;
 export const riotHeat = 130;

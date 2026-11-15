@@ -1,3 +1,4 @@
+import { invade } from "./invasion.ts";
 import { launch } from "./moonshot.ts";
 import {
   drainPace,
@@ -10,11 +11,14 @@ import {
   riotHeat,
   stormStart,
   stormTicks,
+  visionEvery,
+  visionTicks,
   waterline,
 } from "./constants.ts";
 import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import type { Draft } from "./types.ts";
+import { fadeIn, skies } from "./weather.ts";
 import { inPark, inRiot } from "./world.ts";
 
 // Everything a tick does besides moving and chasing: the riot on the first morning, heat fading (fast under the city), FOMO rising in
@@ -44,8 +48,10 @@ function moods(day: Draft): void {
         : low
           ? heatFadeTicks / 2
           : heatFadeTicks;
-  if (day.heat > 0 && day.tick % fade === 0) cooled(day, 1);
-  const rising = day.day === 2 || day.day === 5 ? fomoTicks : fomoTicks * 3;
+  if (day.heat > 0 && day.tick % fadeIn(day, fade) === 0) cooled(day, 1);
+  const rising =
+    (day.day === 2 || day.day === 5 ? fomoTicks : fomoTicks * 3) /
+    (day.weather === "storm" || day.weather === "gale" ? 2 : 1);
   if (day.tick % rising === 0) day.fomo = Math.min(100, day.fomo + 1);
   const sitting = day.ride === "foot" && day.dir < 0 && inPark(day.x, day.z);
   if (sitting && day.fomo > 0 && day.tick % grassTicks === 0) day.fomo -= 1;
@@ -74,9 +80,14 @@ function money(day: Draft): void {
 
 export function ticked(day: Draft): void {
   zones(day);
+  skies(day);
   moods(day);
   money(day);
   launch(day);
+  invade(day);
+  // Frost vision comes back every thirty seconds.
+  if (day.tick % visionEvery === 0)
+    day.vision = Math.max(day.vision, visionTicks);
   if (day.looking) {
     day.vision = Math.max(0, day.vision - 1);
     day.looking = day.vision > 0;

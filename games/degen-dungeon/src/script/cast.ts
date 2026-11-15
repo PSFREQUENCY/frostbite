@@ -55,6 +55,7 @@ export const recruitLine = (name: string): string =>
 
 // How a day ended, for the card after it.
 export const endings = {
+  abducted: "TAKEN UP BY THE SAUCERS",
   closed: "YOU CALLED IT A DAY",
   frozen: "FROZEN BY THE TUXES",
   home: "HOME SAFE",

@@ -70,6 +70,8 @@ describe("the sound", () => {
     for (const voice of track.voices) expect(voice.notes).toHaveLength(16);
     expect(Object.keys(effects).sort()).toEqual([
       "catch",
+      "coinIn",
+      "coinOut",
       "milestone",
       "miss",
       "start",

@@ -21,8 +21,8 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   recovery expert, the dream job, the fake Fed, the permission slip, the sticker on the meter and the honeypot coin.
 - **Heat:** stealing earns stars. Two bring a beat cop who fines you; three bring a tux who freezes what he touches; at four even the
   sky is not safe and the wallet locks. Lie low in the hideout under your home, or pay the rebrand booth. Nobody is ever hurt.
-- **Frost vision** (V, or its button) shows hidden words, the watcher's footprints and the tells of a scam, for fifteen seconds a day
-  (thirty by Lumen's lamp).
+- **Frost vision** (V, or its button) shows hidden words, the watcher's footprints and the tells of a scam: fifteen seconds of it (thirty
+  by Lumen's lamp), topped back up every thirty seconds.
 - **The mystery:** twenty-one letters signed S lie on the avenues, a few each day; three street words open a dead locker; the watcher
   leaves footprints at one corner a day. The game never says who S is.
 - **Status** over your head: GM, SAFU, GRINDER, WAGMI, TOUCHING GRASS, BASED, DIAMOND HANDS, DOWN BAD, PAPER HANDS, DEGEN, BAGHOLDER,
@@ -39,8 +39,21 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   Pixel Vault Gallery, cut a track at Bassline Records, go live at Clipstream Studios, and freeze or thaw DUN at First Block Bank's
   teller. The Meme Market Skate Park and Gig Street Green are open to the sky. Lookout posts, NFT vending machines and company names on
   the tallest towers finish it. Every name is an original gag.
-- **Rides on the street:** about a hundred cars, fifty scooters and fifty bikes are parked along the kerbs. Breaking into a car brings a
-  star of heat; a scooter or a bike is free. Park beside another to step off.
+- **Rides on the street:** cars, scooters, bikes, minivans, motorbikes, pickups and semi cabs are parked along the kerbs. Anything with
+  an engine brings a star of heat; a scooter or a bike is free. The hero sits in the saddle and pedals a bike, sits astride a motorbike,
+  stands on a scooter's deck, and climbs in through a swinging driver's door to sit inside the rest, behind tinted glass. The crew take
+  the other seats; whoever has no seat runs alongside. Step off anywhere (act again) and the ride stays where you left it, the last six
+  of them, to be taken again.
+- **The saucers:** on the second story day, a quarter of the way in, flying saucers come down over four street crossings with their
+  beams on the ground, and more circle the sky. Stand still in a beam and you are taken up. Glow sticks from the hardware store and a
+  pizza make peace (standing, and frost vision); a bag of the Exchange's meme coin can be traded for three times what the market pays.
+  Go up with nothing to offer, or go quietly, and you pass out, see the moon go by, and wake in your own bed on the first morning of the
+  story again.
+- **Weather:** three times a day the sky may turn harsh for three minutes: a blizzard, thick fog, a thunderstorm with lightning, a gale,
+  snow or a heatwave. Fog, snow and blizzards hide you (heat fades twice as fast), a heatwave keeps it on you longer, and storms and gales
+  make FOMO climb twice as fast. A player of good standing sees calmer skies.
+- **Money on the move:** every DUN in or out floats up beside the readout (green in, red out) with a chime and a digital receipt: the
+  amount, the new balance, the block and a transaction id.
 - **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
   cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
 - **The moonshot and the moon:** stake 1,000, 5,000 or 10,000 DUN at the Moonshot Launchpad under Moon Tower; it rides the next launch

@@ -4,6 +4,7 @@ import {
   Group,
   LoopOnce,
   Mesh,
+  Quaternion,
   Vector3,
   type AnimationAction,
   type AnimationClip,
@@ -13,6 +14,7 @@ import {
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
+import { seatAngles, type Seat } from "../body.ts";
 import { modelNames, packed, type ModelName } from "./packed.ts";
 import { holo, pulse, spirit, standard } from "./shaders.ts";
 
@@ -84,9 +86,31 @@ export async function loadModels(): Promise<ReadonlyMap<ModelName, Model>> {
 }
 
 export interface Rigged {
+  // How high the hips stand above the feet (metres).
+  readonly hip: number;
   readonly root: Group;
-  update(pace: number, dt: number, cheering: boolean): void;
+  update(pace: number, dt: number, cheering: boolean, seat?: Seat): void;
 }
+
+// The bones a seat bends, by the names the models give them (a loader drops the dots), and which of the seat's angles each takes.
+const bent: readonly (readonly [
+  string,
+  "elbow" | "hip" | "knee" | "shoulder",
+  number,
+])[] = [
+  ["legL", "hip", 0],
+  ["legR", "hip", 1],
+  ["shinL", "knee", 0],
+  ["shinR", "knee", 1],
+  ["footL", "knee", 0],
+  ["footR", "knee", 1],
+  ["armL", "shoulder", 0],
+  ["armR", "shoulder", 1],
+  ["foreL", "elbow", 0],
+  ["foreR", "elbow", 1],
+];
+const turn = new Quaternion();
+const across = new Vector3(1, 0, 0);
 
 // One copy of a model, stood up to a height in metres and facing along its root's +z, with its clips blended by what it is doing.
 export function rigged(model: Model, height: number): Rigged {
@@ -113,13 +137,33 @@ export function rigged(model: Model, height: number): Rigged {
     current = next;
   };
   play("Idle");
+  // Each bone a seat bends, with its resting turn, found once.
+  const bones = bent.flatMap(([name, angle, side]) => {
+    const bone =
+      body.getObjectByName(name) ??
+      body.getObjectByName(name.replace(/([LR])$/, ".$1"));
+    return bone === undefined
+      ? []
+      : [{ angle, bone, rest: bone.quaternion.clone(), side }];
+  });
+  let clock = 0;
   return {
+    hip: height * 0.48,
     root,
-    update(pace, dt, cheering) {
-      play(cheering ? "Win" : pace > 0 ? "Run" : "Idle");
+    update(pace, dt, cheering, seat = null) {
+      play(cheering ? "Win" : pace > 0 && seat === null ? "Run" : "Idle");
       if (current !== null)
         current.timeScale = pace > 0 ? Math.max(0.6, pace / 14) : 1;
       mixer.update(dt);
+      clock += dt;
+      if (seat === null) return;
+      const crank = clock * (pace > 0 ? 3 + pace * 0.25 : 0.4);
+      for (const { angle, bone, rest, side } of bones)
+        bone.quaternion
+          .copy(rest)
+          .multiply(
+            turn.setFromAxisAngle(across, seatAngles(seat, side, crank)[angle]),
+          );
     },
   };
 }

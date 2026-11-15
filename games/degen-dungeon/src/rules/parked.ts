@@ -1,12 +1,42 @@
+import type { Wheels } from "./types.ts";
 import { reach } from "./constants.ts";
 import { rooms } from "./rooms.ts";
 import type { Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
 import { at, slotOf } from "./world.ts";
 
-// Cars, scooters and bikes left along the kerbs of every borough's streets: half of them cars, a quarter scooters, a quarter bikes. A
+// Rides left along the kerbs of every borough's streets, in a steady mix: cars, scooters, minivans, bikes, motorbikes, pickup trucks and
+// the odd semi truck's cab. A
 // spot is kept only if it is clear of every other place and story beat, so none crowds another.
 const along = [1_600, 3_300, 5_200] as const;
+
+const mix: readonly Wheels[] = [
+  "car",
+  "scooter",
+  "van",
+  "bike",
+  "car",
+  "moto",
+  "truck",
+  "car",
+  "car",
+  "scooter",
+  "van",
+  "bike",
+  "car",
+  "moto",
+  "semi",
+  "bike",
+];
+const labels: Readonly<Record<Wheels, string>> = {
+  bike: "A bike",
+  car: "A parked car",
+  moto: "A motorbike",
+  scooter: "A scooter",
+  semi: "A semi truck's cab",
+  truck: "A pickup truck",
+  van: "A minivan",
+};
 
 export function parkedRides(taken: readonly Point[]): readonly Spot[] {
   const kept: Spot[] = [];
@@ -45,18 +75,12 @@ export function parkedRides(taken: readonly Point[]): readonly Spot[] {
               )
             )
               continue;
-            const ride =
-              count % 4 === 1 ? "scooter" : count % 4 === 3 ? "bike" : "car";
+            const ride = mix[count % mix.length] ?? "car";
             kept.push({
               ...point,
               id: `${ride}-${String(count)}`,
               kind: "parked",
-              label:
-                ride === "car"
-                  ? "A parked car"
-                  : ride === "bike"
-                    ? "A bike"
-                    : "A scooter",
+              label: labels[ride],
               ride,
             });
             count += 1;

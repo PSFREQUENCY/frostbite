@@ -1,4 +1,4 @@
-import type { Point, Ride } from "./types.ts";
+import type { Point, Ride, Wheels } from "./types.ts";
 
 // What a place is. `on` is the days it is open (bit 1 is day one), `hidden` needs frost vision, and `only` is for one hero.
 interface Base extends Point {
@@ -34,10 +34,10 @@ export type Spot = Base &
       }
     | { readonly kind: "gig"; readonly pay: number; readonly to: string }
     | { readonly kind: "loot"; readonly value: number }
-    // A car, scooter or bike left on the street: a car's window has to be broken, which brings heat; scooters and bikes are for anyone.
+    // A ride left on the street: anything with an engine has to be broken into, which brings heat; scooters and bikes are for anyone.
     | {
         readonly kind: "parked";
-        readonly ride: "bike" | "car" | "scooter";
+        readonly ride: Wheels;
       }
     | { readonly kind: "ride"; readonly rank: number; readonly ride: Ride }
     | { readonly kind: "stop"; readonly next: string }

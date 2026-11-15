@@ -1,5 +1,6 @@
 import { heatPerStar } from "./constants.ts";
 import { counter, counters, games, lunar, play } from "./counters.ts";
+import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
 import { activities, teller, venture } from "./venues.ts";
 import { cooled, rankOf } from "./heat.ts";
@@ -68,6 +69,8 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
     leave,
   ],
   colony: [{ does: "colony" }, leave],
+  // Aboard a saucer there is no walking away: the page's "no" is going quietly.
+  abduction: [{ does: "peace" }, { does: "trade" }, { does: "quietly" }],
   launchpad: [
     { does: "shot-0" },
     { does: "shot-1" },
@@ -181,6 +184,8 @@ function deed(day: Draft, name: string): string | null {
   if (name.startsWith("shot-")) return stake(day, Number(name.slice(5)));
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
+  if (name === "peace" || name === "trade" || name === "quietly")
+    return aboard(day, name);
   if (name.startsWith("wish-")) {
     if (day.done.includes("lantern")) return "your lantern is already up";
     day.wish = Number(name.slice(5));

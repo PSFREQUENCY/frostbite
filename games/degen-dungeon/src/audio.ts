@@ -51,6 +51,11 @@ export const effects = {
   catch: [tone("square", 660, 880, 0.12, 0.3)],
   miss: [tone("sawtooth", 220, 80, 0.4, 0.4), tone("noise", 0, 0, 0.25, 0.2)],
   milestone: commonEffects.win,
+  coinIn: [
+    tone("square", 988, 1319, 0.07, 0.2),
+    tone("square", 1319, 1760, 0.12, 0.18),
+  ],
+  coinOut: [tone("triangle", 523, 262, 0.2, 0.22)],
   start: commonEffects.start,
 } as const satisfies Record<string, Effect>;
 

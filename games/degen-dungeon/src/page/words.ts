@@ -1,9 +1,10 @@
+import { invading, peaceable } from "../rules/invasion.ts";
 import { heroes } from "../rules/heroes.ts";
 import { echoAt, recklessOn } from "../rules/machine.ts";
 import { priceAt } from "../rules/market.ts";
 import { spotNamed } from "../rules/places.ts";
 import { chapterDone, dayOneGoal } from "../rules/story.ts";
-import type { DayState } from "../rules/types.ts";
+import type { DayState, Weather } from "../rules/types.ts";
 import {
   echoPlaces,
   echoTells,
@@ -29,10 +30,25 @@ export const rankNames = [
 const told = "Today's story is told. Hustle on, or go home and sleep.";
 
 // Pip's line: what today is about, or what is urgent.
+// The weather readout's words.
+export const weatherNames: Readonly<Record<Weather, string>> = {
+  blizzard: "Blizzard",
+  clear: "Clear skies",
+  fog: "Thick fog",
+  gale: "Gale",
+  heat: "Heatwave",
+  snow: "Snow",
+  storm: "Thunderstorm",
+};
+
 export function goalFor(day: DayState): string {
   if (day.drain > 0)
     return "Your balance is draining! Race home to the hideout terminal.";
   if (day.fake) return "Check the hideout terminal at home before you panic.";
+  if (invading(day))
+    return peaceable(day) || day.bag > 0
+      ? "Saucers over the city! Stand still in a beam and get taken up."
+      : "Saucers over the city! Grab glow sticks and a pizza, or a bag of meme coins, then stand in a beam.";
   if (day.gate > 0) return tunnelLine;
   if (day.loop > 0) {
     const echo = echoAt(day);

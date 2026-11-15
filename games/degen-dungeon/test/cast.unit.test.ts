@@ -1,3 +1,4 @@
+import type { Seat } from "../src/view/body.ts";
 import { Group, type Object3D } from "three";
 import { describe, expect, it, vi } from "vitest";
 
@@ -33,12 +34,19 @@ describe("the cast", () => {
       buildVest().root.name,
     ]).toEqual(["tux", "cop", "vest"]);
     const update =
-      vi.fn<(pace: number, dt: number, cheering: boolean) => void>();
-    const model = { root: new Group(), update };
+      vi.fn<
+        (pace: number, dt: number, cheering: boolean, seat?: Seat) => void
+      >();
+    const model = { hip: 0.8, root: new Group(), update };
+    expect(giant.hip()).toBeGreaterThan(0.5);
     giant.wear(model);
     giant.wear(model);
     giant.move(5, 1, 0.02, false, true);
-    expect(update).toHaveBeenCalledWith(5, 0.02, true);
+    expect(update).toHaveBeenCalledWith(5, 0.02, true, null);
+    giant.seat("pedal");
+    giant.move(5, 1, 0.02);
+    expect(update).toHaveBeenLastCalledWith(5, 0.02, false, "pedal");
+    expect(giant.hip()).toBe(0.8);
     expect(giant.root.children.filter((child) => child.visible)).toHaveLength(
       1,
     );

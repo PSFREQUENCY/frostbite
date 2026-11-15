@@ -3,7 +3,9 @@
 The game is playable end to end: ten heroes, five story days each, the city's systems, the mystery, Moon Night to SHA Beach, and the
 Time Machine. Round three added living streets, walk-in shops, parked rides, run, crouch, crawl and jump, a shoulder camera, the
 backpack, the quest beacon, landmarks, day and night with the lantern night, and the moon colony. Round four opened every landmark,
-rounded the city, added the moonshot and the cinematic clips. What follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
+rounded the city, added the moonshot and the cinematic clips. Round five fixed riding (seats, pedalling, a deck to stand on, doors,
+the crew aboard or running alongside), added minivans, motorbikes, pickups and semi cabs and rides that stay where they are left,
+the saucers on day two, weather, money pop-ups with receipts, and frost vision that tops back up. What follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
 polish. The plan it follows is the "Degen Dungeon: game plan" doc (Plan, Stories and Lore tabs).
 
 ## How it fits together
@@ -50,6 +52,19 @@ at the start of the very first day and can be skipped.
 - **Real brands** asked for (a famous record label's tower, a video site's studio) became original stand-ins with original names and
   shapes: Bassline Records (a dark tower with a dancing equaliser) and Clipstream Studios (a camera lens and an on-air light).
 
+- **Round five's rules** (the verifier was re-pinned): `Ride` adds `moto`, `van`, `truck` and `semi` (anything with an engine brings
+  `borrowHeat`). `rideId` names the kerb ride under the hero and `left` keeps the last six stepped off (where the hero stood); acting
+  near one takes it again, unless a fresh kerb ride is nearer to hand. Hired rides (the scooter, boat and helicopter sites) are never
+  left. The saucers (`invasion.ts`): story day 2 from tick 4,500, four beams (`beams`), taken after `beamWait` ticks standing still on
+  foot in one; "item-glow" and "item-pizza" mark the hardware and pizza buys; peace adds 100 standing and frost vision, a trade pays
+  `tradeTimes` the market; the new cause `abducted` ends the day on the moon pad and `afterDay` sends the story back to day one. The
+  weather (`weather.ts`) turns at ticks 1,500, 7,500 and 13,500 for 5,400 ticks; it changes the heat fade and FOMO, never the pace, so
+  every bot day still fits. Frost vision is topped up to `visionTicks` every 900 ticks. No milestone was added (the cap of 40 is
+  reached).
+- **Riding on the screen** (`view/seats.ts`, `riding.ts`, `body.ts`): each ride has seats in its own frame; a code-built body takes a
+  seat pose joint by joint, and Frost Run's models bend their leg and arm bones the same way. Cabins have tinted glass so whoever sits
+  inside shows through.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they
@@ -61,6 +76,11 @@ at the start of the very first day and can be skipped.
 5. Sound per era and effects for the drain, the freeze and the airdrop (one loop and four effects today).
 6. Balance (including the moon fare): pay, prices and the coin's swings are first guesses; play each hero's five days and tune.
 7. The Time Machine: more meetings on later loops, and the newbie walking between places.
+8. Hrimm (the big ice model) still towers over a bike; Volt, a four-legged model, stands on a deck rather than sitting. The saucer
+   abduction is a cut to the moon and a clip, not an authored beam-up.
+9. The next rounds asked for (see PR.md's roadmap): the nine statues and the clue book, the basketball court, six parks and the WAGMI
+   hill, the ADOR department store and businesses, the Global DEX, three theatres, the hacker and mining lines, car lots, alleys, the
+   studio apartment and storage, The Fuzzy Spot, the fashion districts, the jeweler to wizard line, the music career and the art gala.
 
 ## Checks, from the repo root unless noted
 

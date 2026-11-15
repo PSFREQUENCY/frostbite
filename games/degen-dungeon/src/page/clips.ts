@@ -1,3 +1,4 @@
+import { invading } from "../rules/invasion.ts";
 import { spotNamed } from "../rules/places.ts";
 import { roomAt } from "../rules/rooms.ts";
 import type { DayState } from "../rules/types.ts";
@@ -29,7 +30,8 @@ const clip = (key: string, title?: string): Clip | null => {
 // The words for a newly finished thing, by its id.
 const finished = (id: string): Clip | null => {
   const kind = id.split("-")[0] ?? "";
-  if (["bike", "car", "scooter"].includes(kind)) return clip(kind);
+  if (["bike", "car", "moto", "scooter", "semi", "truck", "van"].includes(kind))
+    return clip(kind);
   if (["fit", "game", "letter"].includes(kind)) return clip(kind);
   if (clipWords[id] !== undefined) return clip(id);
   const label = spotNamed(id)?.label;
@@ -47,6 +49,9 @@ export function clipFor(
 ): Clip | null {
   if (before.shot > 0 && after.shot === 0)
     return after.pocket > before.pocket ? clip("moonshot") : clip("rugged");
+  if (!before.ended && after.ended && after.cause === "abducted")
+    return clip("abducted");
+  if (!invading(before) && invading(after)) return clip("saucers");
   const fresh = after.done.filter((id) => !before.done.includes(id));
   for (const id of fresh) {
     const found = finished(id);

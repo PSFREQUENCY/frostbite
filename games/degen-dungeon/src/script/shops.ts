@@ -63,6 +63,14 @@ export const shopTalks: Readonly<
     answers: ["Two slices, 10", "Leave"],
     say: "Two slices, still hot. Somebody once paid a fortune in coins for a pair of these.",
   },
+  abduction: {
+    answers: [
+      "Offer the glow sticks and pizza",
+      "Show them your meme coins",
+      "Go quietly",
+    ],
+    say: "A hum, a light, and the street drops away. You are aboard a saucer. Small silver visitors blink at you, very politely, and wait.",
+  },
   colony: {
     answers: ["Say hello", "Leave"],
     say: "The airlock hisses. A colonist in a patched suit waves you in: they grow beans under the domes and mine nothing at all.",

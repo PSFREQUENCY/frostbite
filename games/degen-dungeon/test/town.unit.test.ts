@@ -142,18 +142,23 @@ describe("the mom-and-pop shops", () => {
 describe("parked rides", () => {
   const parked = spots.filter((spot) => spot.kind === "parked");
 
-  it("line the kerbs of every borough: half cars, the rest scooters and bikes, all on the street", () => {
+  it("line the kerbs of every borough: cars most of all, then scooters, bikes, minivans, motorbikes, pickups and cabs, all on the street", () => {
     const count = (ride: string): number =>
       parked.filter((spot) => spot.kind === "parked" && spot.ride === ride)
         .length;
     expect(parked.length).toBeGreaterThan(150);
-    expect(count("car")).toBe(Math.ceil(parked.length / 2));
-    expect(Math.abs(count("scooter") - count("bike"))).toBeLessThanOrEqual(1);
+    const kinds = ["bike", "car", "moto", "scooter", "semi", "truck", "van"];
+    for (const kind of kinds) expect(count(kind), kind).toBeGreaterThan(4);
+    expect(kinds.reduce((sum, kind) => sum + count(kind), 0)).toBe(
+      parked.length,
+    );
+    expect(count("car")).toBeGreaterThan(count("scooter"));
+    expect(count("scooter")).toBeGreaterThan(count("semi"));
     for (const spot of parked)
       expect(onStreet(spot.x, spot.z), spot.id).toBe(true);
   });
 
-  it("can be ridden once a day each: a car's window broken brings heat, a scooter or a bike none, and either parks beside another", () => {
+  it("can be taken from the kerb once a day each and again where left: an engine brings heat, a scooter or a bike none", () => {
     const bot = createBot(2, 7, 2);
     const home = bot.here();
     const car = parkedNear("car", home.x, home.z);
@@ -164,12 +169,23 @@ describe("parked rides", () => {
     bot.use(scooter.id);
     expect(bot.here().ride).toBe("foot");
     bot.act();
-    expect(bot.here().ride).toBe("scooter");
+    expect([bot.here().ride, bot.here().rideId]).toEqual([
+      "scooter",
+      scooter.id,
+    ]);
     bot.act();
     expect(bot.here().ride).toBe("foot");
-    expect(refusal(bot.here(), "act", { tick: bot.here().tick })).toBe(
-      "that is used up for today",
-    );
+    expect(bot.here().left.map((ride) => ride.id)).toEqual([
+      car.id,
+      scooter.id,
+    ]);
+    // The ride just left is the one taken again; off the street, the kerb is used up.
+    bot.act();
+    expect([bot.here().ride, bot.here().left.length]).toEqual(["scooter", 1]);
+    bot.act();
+    expect(
+      refusal({ ...bot.here(), left: [] }, "act", { tick: bot.here().tick }),
+    ).toBe("that is used up for today");
     const bike = parkedNear("bike", scooter.x, scooter.z);
     bot.use(bike.id);
     expect([bot.here().ride, paceOf(bot.here())]).toEqual(["bike", 18]);

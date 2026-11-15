@@ -40,7 +40,11 @@ const ridePace: Readonly<Record<Ride, number>> = {
   car: 32,
   foot: 10,
   heli: 36,
+  moto: 30,
   scooter: 22,
+  semi: 20,
+  truck: 24,
+  van: 26,
 };
 // On foot the gait changes the pace (running, crouching, crawling); a tuned car is quicker.
 export const paceOf = (

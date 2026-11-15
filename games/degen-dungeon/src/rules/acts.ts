@@ -15,10 +15,10 @@ import { cooled, heated, rankOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { actMachine, pickMachine } from "./machine.ts";
 import { actMystery } from "./mystery.ts";
-import { nearest, spotNamed, spots, type Spot } from "./places.ts";
+import { inReach, nearest, spotNamed, spots, type Spot } from "./places.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
-import type { Draft, Ride } from "./types.ts";
+import { motors, type Draft, type Ride } from "./types.ts";
 import { dockLand, dockWater, onStreet } from "./world.ts";
 
 // The act button, the answer to a question and a helicopter's climb. Each answers null when it is done, or why it cannot be. The statue,
@@ -73,12 +73,14 @@ function ask(day: Draft, spot: Spot): string | null {
 function board(day: Draft, ride: Ride, rank: number): string | null {
   if (day.ride === ride) {
     day.ride = "foot";
+    day.rideId = "";
     if (ride === "boat") Object.assign(day, dockLand);
     return null;
   }
   if (day.ride !== "foot") return "leave the ride you are on first";
   if (rankOf(day) < rank) heated(day, borrowHeat);
   day.ride = ride;
+  day.rideId = "";
   day.level = 0;
   if (ride === "boat") Object.assign(day, dockWater);
   return null;
@@ -161,13 +163,11 @@ function useSpot(day: Draft, spot: Spot): string | null {
       return once(day, spot.id, () => loot(day, spot));
     case "parked":
       // Beside another parked ride, the one being ridden is parked too.
-      if (day.ride !== "foot") {
-        day.ride = "foot";
-        return null;
-      }
+      if (day.ride !== "foot") return stepOff(day);
       return once(day, spot.id, () => {
         day.ride = spot.ride;
-        if (spot.ride === "car") heated(day, borrowHeat);
+        day.rideId = spot.id;
+        if (motors.includes(spot.ride)) heated(day, borrowHeat);
       });
     case "offer":
     case "recruit":
@@ -202,10 +202,38 @@ export function act(day: Draft): string | null {
     const answer = special(day);
     if (answer !== undefined) return answer;
   }
+  // A ride left on the street within reach (the last one left first) is taken again, unless a fresh one stands at the kerb here.
   const spot = nearest(day);
+  const fresh = spot?.kind === "parked" && !day.done.includes(spot.id);
+  const mine =
+    day.ride === "foot" && !fresh
+      ? [...day.left].reverse().find((ride) => inReach(day, ride))
+      : undefined;
+  if (mine !== undefined) {
+    day.left = day.left.filter((ride) => ride !== mine);
+    day.ride = mine.ride;
+    day.rideId = mine.id;
+    return null;
+  }
   if (spot !== null) return useSpot(day, spot);
   if (day.ride === "foot" || day.ride === "boat") return "nothing to do here";
+  return stepOff(day);
+}
+
+// Stepping off a ride: one taken from the kerb stays where it is left (the last six are remembered) and can be taken again.
+function stepOff(day: Draft): null {
+  if (
+    day.rideId !== "" &&
+    day.ride !== "foot" &&
+    day.ride !== "boat" &&
+    day.ride !== "heli"
+  )
+    day.left = [
+      ...day.left,
+      { id: day.rideId, ride: day.ride, x: day.x, z: day.z },
+    ].slice(-6);
   day.ride = "foot";
+  day.rideId = "";
   return null;
 }
 

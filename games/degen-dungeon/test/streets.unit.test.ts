@@ -60,8 +60,21 @@ describe("the street", () => {
     parked.show(taken, 10, 10, 0, 1);
     parked.show(taken, 10, 10, 0, 1.3);
     expect(glass?.visible).toBe(true);
-    parked.show({ ...taken, ride: "foot" }, 20, 20, 0, 3);
+    const stepped = {
+      ...taken,
+      left: [{ id: car.id, ride: "car" as const, x: 2_000, z: 2_000 }],
+      ride: "foot" as const,
+      x: 2_000,
+      z: 2_000,
+    };
+    parked.show(stepped, 20, 20, 0, 3);
     expect(glass?.visible).toBe(false);
+    expect(parked.leftAt(car.id)?.z).toBeCloseTo(21.35);
+    expect(parked.leftAt("nobody")).toBeUndefined();
+    parked.show(stepped, 25, 25, 1, 3.1, car.id);
+    parked.show({ ...stepped, left: [] }, 25, 25, 1, 3.2);
+    expect(parked.leftAt(car.id)).toBeUndefined();
+    parked.show(stepped, 20, 20, 0, 3.3);
     const matrix = new Matrix4();
     if (mesh === undefined || !("getMatrixAt" in mesh) || !("count" in mesh))
       throw new Error("no cars");

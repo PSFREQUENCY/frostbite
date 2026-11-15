@@ -4,12 +4,44 @@ export type ClipKind = "crane" | "orbit" | "push" | "sky" | "spin";
 export const clipWords: Readonly<
   Record<string, readonly [kind: ClipKind, title: string, line: string]>
 > = {
+  abducted: [
+    "sky",
+    "TAKEN UP",
+    "Lights, a hum, the moon going by... and then your own ceiling.",
+  ],
   bike: ["orbit", "ON TWO WHEELS", "Somebody left the lock open."],
   car: [
     "push",
     "JOYRIDE",
     "The window gives, the engine purrs, and a star of heat climbs on.",
   ],
+  contact: [
+    "orbit",
+    "FIRST CONTACT",
+    "Glow sticks for them, pizza for everyone. The saucers wink and head home.",
+  ],
+  moto: [
+    "push",
+    "ON THE PEGS",
+    "Kick the stand up and lean into the first bend.",
+  ],
+  saucers: [
+    "sky",
+    "THEY ARE HERE",
+    "Saucers over Nakasato, beams down. Somebody up there wants a word.",
+  ],
+  semi: [
+    "crane",
+    "BIG RIG",
+    "You climb up into the cab and the whole street looks smaller.",
+  ],
+  traded: [
+    "orbit",
+    "INTERGALACTIC OTC",
+    "They pay over the odds for your meme coins and fly off delighted.",
+  ],
+  truck: ["push", "PICKUP", "High cab, heavy door, and a bed full of nothing."],
+  van: ["push", "MINIVAN", "Seats for the whole crew and a cup holder each."],
   colony: [
     "orbit",
     "THE COLONY",

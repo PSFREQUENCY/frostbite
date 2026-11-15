@@ -15,9 +15,57 @@ import type { Look } from "./looks.ts";
 // in layers each frame: a walk or run from the pace (stride, knee bend, arm swing, a bob and a sway), breathing and a slow weight shift
 // while still, a blink every few seconds, and a nod while talking.
 export interface Body {
-  // Moves every joint for a pace (centimetres a tick, 0 standing), the clock, and whether the body is in a conversation.
-  pose(pace: number, seconds: number, talking: boolean): void;
+  // Moves every joint for a pace (centimetres a tick, 0 standing), the clock, whether the body is in a conversation, and how it rides.
+  pose(pace: number, seconds: number, talking: boolean, seat?: Seat): void;
+  // How high the hips stand above the feet (metres), to sit a body on a seat.
+  readonly hip: number;
   readonly root: Group;
+}
+
+// How a body rides: astride a saddle pedalling (a bike), astride with its feet up on pegs (a motorbike), in a seat with its knees bent
+// (inside a car, minivan, pickup or cab), or standing on a deck with a hand on the bar (a scooter).
+export type Seat = "deck" | "pedal" | "saddle" | "seat" | null;
+
+// The joint angles (radians) of a ride's pose: hip, knee and a spread for each leg; shoulder and elbow for the arms; the lean forward.
+// A pedalling body turns its legs round a crank, opposite each other.
+export function seatAngles(
+  seat: Exclude<Seat, null>,
+  side: number,
+  crank: number,
+): {
+  readonly elbow: number;
+  readonly hip: number;
+  readonly knee: number;
+  readonly lean: number;
+  readonly shoulder: number;
+  readonly spread: number;
+} {
+  const turn = crank + (side === 0 ? 0 : Math.PI);
+  const astride = seat === "pedal" || seat === "saddle";
+  return {
+    elbow: seat === "seat" ? -0.7 : -0.45,
+    hip:
+      seat === "deck"
+        ? side === 0
+          ? -0.2
+          : 0.25
+        : seat === "pedal"
+          ? -1.0 + Math.sin(turn) * 0.4
+          : seat === "saddle"
+            ? -1.2
+            : -1.45,
+    knee:
+      seat === "deck"
+        ? 0.3
+        : seat === "pedal"
+          ? 1.05 + Math.cos(turn) * 0.45
+          : seat === "saddle"
+            ? 1.6
+            : 1.4,
+    lean: seat === "deck" ? 0.12 : seat === "seat" ? 0.04 : 0.34,
+    shoulder: seat === "deck" ? -0.7 : seat === "seat" ? -0.75 : -1.0,
+    spread: astride ? 0.14 : 0.04,
+  };
 }
 
 interface Limb {
@@ -124,14 +172,54 @@ export function buildBody(look: Look): Body {
     piece.rotation.x = Math.PI / 2.6;
   }
 
+  // On a ride: the legs and arms set by the seat, the body leaning in, breathing and blinking as ever.
+  const ride = (
+    seat: Exclude<Seat, null>,
+    pace: number,
+    seconds: number,
+    talking: boolean,
+  ): void => {
+    const crank = seconds * (pace > 0 ? 3 + pace * 0.25 : 0.4);
+    legs.forEach((one, side) => {
+      const angles = seatAngles(seat, side, crank);
+      one.upper.rotation.x = angles.hip;
+      one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.spread;
+      one.lower.rotation.x = angles.knee;
+    });
+    arms.forEach((one, side) => {
+      const angles = seatAngles(seat, side, crank);
+      one.upper.rotation.x = angles.shoulder;
+      one.upper.rotation.z = (side === 0 ? 1 : -1) * 0.1;
+      one.lower.rotation.x = angles.elbow;
+    });
+    const angles = seatAngles(seat, 0, crank);
+    hips.position.y = leg + 0.1;
+    spine.rotation.set(angles.lean, 0, 0);
+    neck.rotation.set(
+      talking ? Math.sin(seconds * 6) * 0.08 : -angles.lean * 0.6,
+      0,
+      0,
+    );
+    const breath = Math.sin(seconds * 2.1) * 0.015;
+    torso.scale.set(1 + breath, 1 + breath, 0.75 + breath);
+    const blink = seconds % 4.3 < 0.12 ? 0.1 : 1;
+    for (const { eye, open } of eyes) eye.scale.y = open * blink;
+  };
+
   return {
-    pose(pace, seconds, talking) {
+    hip: (leg + 0.1) * size,
+    pose(pace, seconds, talking, seat = null) {
+      if (seat !== null) {
+        ride(seat, pace, seconds, talking);
+        return;
+      }
       const moving = Math.min(1, pace / 14);
       const step = seconds * (4 + pace * 0.35);
       const swing = Math.sin(step) * 0.7 * moving;
       legs.forEach((one, side) => {
         const phase = side === 0 ? swing : -swing;
         one.upper.rotation.x = phase;
+        one.upper.rotation.z = 0;
         one.lower.rotation.x =
           Math.max(0, -Math.sin(step + (side === 0 ? 0 : Math.PI))) *
           0.9 *

@@ -13,13 +13,19 @@ import {
 
 import { block } from "../rules/constants.ts";
 import { spots } from "../rules/places.ts";
-import type { DayState, Ride } from "../rules/types.ts";
+import {
+  motors,
+  type DayState,
+  type Left,
+  type Wheels,
+} from "../rules/types.ts";
 import { hash } from "./hash.ts";
 import { kits, mergedKit } from "./kits.ts";
 import { toonSteps } from "./textures.ts";
 
-// The cars, scooters and bikes parked along the kerbs (the rules' parked spots), each its own colour, parked along its street. One taken
-// is gone from its kerb; a ride left on the street stays where the hero stepped off it. Breaking into a car throws a burst of glass.
+// The rides parked along the kerbs (the rules' parked spots), each its own colour, parked along its street. One taken is gone from its
+// kerb; one stepped off stays where the rules say it was left (the last six), its driver's door beside where the hero stood. Breaking into
+// anything with an engine throws a burst of glass.
 export interface Parked {
   readonly root: Group;
   show(
@@ -28,12 +34,31 @@ export interface Parked {
     z: number,
     heading: number,
     seconds: number,
+    // A ride left on the street not to draw here (it is shown with its door swinging shut).
+    hidden?: string,
   ): void;
   // The colour of a parked ride, by its id, for the ride under the hero.
   paintOf(id: string): string;
+  // Where a ride left on the street is drawn (metres) and which way it faces, by its id.
+  leftAt(
+    id: string,
+  ):
+    | { readonly turn: number; readonly x: number; readonly z: number }
+    | undefined;
 }
 
-type Kind = "bike" | "car" | "scooter";
+const kinds: readonly Wheels[] = [
+  "bike",
+  "car",
+  "moto",
+  "scooter",
+  "semi",
+  "truck",
+  "van",
+];
+// The rides that stand on the pavement's edge rather than in the parking lane.
+export const kerbside = (ride: Wheels): boolean =>
+  ride === "bike" || ride === "moto" || ride === "scooter";
 const paints = [
   "#e63946",
   "#2f6fb5",
@@ -69,12 +94,12 @@ const set = (
   );
 };
 
-// Where a parked ride is drawn (metres): a car by the kerb in the parking lane, a scooter or bike on the edge of the pavement, along its
-// street (a north-south street when it stands east or west of the borough's middle).
+// Where a parked ride is drawn (metres): anything with four wheels by the kerb in the parking lane, a scooter, bike or motorbike on the
+// edge of the pavement, along its street (a north-south street when it stands east or west of the borough's middle).
 const drawnAt = (spot: (typeof parked)[number]) => {
   const local = spot.x % block;
   const northSouth = Math.abs(local - block / 2) === 850;
-  const inward = spot.ride === "car" ? 1.1 : 0;
+  const inward = kerbside(spot.ride) ? 0 : spot.ride === "semi" ? 1.3 : 1.1;
   const side = northSouth
     ? Math.sign(local - block / 2)
     : Math.sign((spot.z % block) - block / 2);
@@ -88,9 +113,11 @@ const drawnAt = (spot: (typeof parked)[number]) => {
 export function buildParked(): Parked {
   const root = new Group();
   root.name = "parked";
-  const meshes = new Map<Kind, InstancedMesh>();
-  for (const kind of ["bike", "car", "scooter"] as const) {
-    const count = parked.filter((spot) => spot.ride === kind).length + leftMost;
+  const meshes = new Map<Wheels, InstancedMesh>();
+  const slots = new Map<string, number>();
+  const colours = new Map<string, string>();
+  for (const kind of kinds) {
+    const mine = parked.filter((spot) => spot.ride === kind);
     const mesh = new InstancedMesh(
       mergedKit(kits[kind]),
       new MeshToonMaterial({
@@ -98,38 +125,25 @@ export function buildParked(): Parked {
         gradientMap: toonSteps,
         vertexColors: true,
       }),
-      count,
+      mine.length + leftMost,
     );
     mesh.name = `parked-${kind}`;
     meshes.set(kind, mesh);
     root.add(mesh);
-  }
-  const slots = new Map<string, number>();
-  const counts = new Map<Kind, number>([
-    ["bike", 0],
-    ["car", 0],
-    ["scooter", 0],
-  ]);
-  const colours = new Map<string, string>();
-  for (const spot of parked) {
-    const index = counts.get(spot.ride) ?? 0;
-    counts.set(spot.ride, index + 1);
-    slots.set(spot.id, index);
-    const colour =
-      paints[Math.floor(hash(spot.x, spot.z, 5) * paints.length)] ?? "#e63946";
-    colours.set(spot.id, colour);
-    meshes.get(spot.ride)?.setColorAt(index, new Color(colour));
-  }
-  // Everything at its kerb to begin with; the rest of the instances (rides left on the street) hidden.
-  for (const spot of parked) {
-    const { turn, x, z } = drawnAt(spot);
-    const mesh = meshes.get(spot.ride);
-    const index = slots.get(spot.id);
-    if (mesh !== undefined && index !== undefined) set(mesh, index, x, z, turn);
-  }
-  for (const [kind, mesh] of meshes)
-    for (let slot = counts.get(kind) ?? 0; slot < mesh.count; slot += 1)
+    // Everything at its kerb to begin with; the rest of the instances (rides left on the street) hidden.
+    mine.forEach((spot, index) => {
+      slots.set(spot.id, index);
+      const colour =
+        paints[Math.floor(hash(spot.x, spot.z, 5) * paints.length)] ??
+        "#e63946";
+      colours.set(spot.id, colour);
+      mesh.setColorAt(index, new Color(colour));
+      const { turn, x, z } = drawnAt(spot);
+      set(mesh, index, x, z, turn);
+    });
+    for (let slot = mine.length; slot < mesh.count; slot += 1)
       set(mesh, slot, 0, 0, 0, false);
+  }
   const glass = new InstancedMesh(
     new PlaneGeometry(0.12, 0.09),
     new MeshBasicMaterial({ color: "#dff4ff", side: DoubleSide }),
@@ -138,22 +152,20 @@ export function buildParked(): Parked {
   glass.name = "glass-burst";
   glass.visible = false;
   root.add(glass);
-  // Rides left on the street, newest last, and the moment and place of the last broken window.
-  const left: {
-    kind: Kind;
-    turn: number;
-    x: number;
-    z: number;
-    colour: string;
-  }[] = [];
-  let lastRide: Ride = "foot";
-  let lastSpot = "";
+  // Where each ride left on the street is drawn, by where it was left, worked out when it first appears: the hero stood at its door.
+  const placed = new Map<string, { turn: number; x: number; z: number }>();
+  const keyOf = (ride: Left): string =>
+    `${ride.id}@${String(ride.x)},${String(ride.z)}`;
   let known = new Set<string>();
   let burst: { at: number; x: number; z: number } | null = null;
   return {
+    leftAt(id) {
+      for (const [key, at] of placed) if (key.startsWith(`${id}@`)) return at;
+      return undefined;
+    },
     paintOf: (id) => colours.get(id) ?? "#e0b341",
     root,
-    show(day, x, z, heading, seconds) {
+    show(day, x, z, heading, seconds, hidden = "") {
       const taken = new Set(day.done);
       for (const spot of parked) {
         const mesh = meshes.get(spot.ride);
@@ -161,45 +173,38 @@ export function buildParked(): Parked {
         if (mesh === undefined || index === undefined) continue;
         const { turn, x: px, z: pz } = drawnAt(spot);
         set(mesh, index, px, pz, turn, !taken.has(spot.id));
-        if (!known.has(spot.id) && taken.has(spot.id)) {
-          lastSpot = spot.id;
-          if (spot.ride === "car" && day.tick > 0)
-            burst = { at: seconds, x: px, z: pz };
-        }
+        if (!known.has(spot.id) && taken.has(spot.id) && day.tick > 0)
+          if (motors.includes(spot.ride)) burst = { at: seconds, x: px, z: pz };
       }
       known = taken;
-      // A ride stepped off stays beside the hero.
-      if (
-        lastRide !== day.ride &&
-        day.ride === "foot" &&
-        (lastRide === "car" || lastRide === "bike" || lastRide === "scooter")
-      ) {
-        left.push({
-          colour: colours.get(lastSpot) ?? "#e0b341",
-          kind: lastRide,
-          turn: Math.PI / 2 - heading,
-          x: x + Math.sin(heading) * 1.6,
-          z: z - Math.cos(heading) * 1.6,
-        });
-        if (left.length > leftMost) left.shift();
-      }
-      lastRide = day.ride;
-      const used = new Map<Kind, number>();
-      for (const kind of ["bike", "car", "scooter"] as const) {
-        const mesh = meshes.get(kind);
-        if (mesh === undefined) continue;
+      const keys = new Set(day.left.map(keyOf));
+      for (const key of placed.keys()) if (!keys.has(key)) placed.delete(key);
+      const used = new Map<Wheels, number>();
+      for (const [kind, mesh] of meshes) {
         const start = mesh.count - leftMost;
         for (let slot = 0; slot < leftMost; slot += 1)
           set(mesh, start + slot, 0, 0, 0, false);
         used.set(kind, start);
       }
-      for (const ride of left) {
-        const mesh = meshes.get(ride.kind);
-        const index = used.get(ride.kind) ?? 0;
-        if (mesh === undefined) continue;
-        set(mesh, index, ride.x, ride.z, ride.turn);
-        mesh.setColorAt(index, new Color(ride.colour));
-        used.set(ride.kind, index + 1);
+      for (const ride of day.left) {
+        const key = keyOf(ride);
+        const away = kerbside(ride.ride) ? 0.7 : 1.35;
+        const at = placed.get(key) ?? {
+          turn: Math.PI / 2 - heading,
+          x:
+            (day.x === ride.x && day.z === ride.z ? x : ride.x / 100) -
+            Math.sin(heading) * away,
+          z:
+            (day.x === ride.x && day.z === ride.z ? z : ride.z / 100) +
+            Math.cos(heading) * away,
+        };
+        placed.set(key, at);
+        const mesh = meshes.get(ride.ride);
+        const index = used.get(ride.ride) ?? 0;
+        if (mesh === undefined || ride.id === hidden) continue;
+        set(mesh, index, at.x, at.z, at.turn);
+        mesh.setColorAt(index, new Color(colours.get(ride.id) ?? "#e0b341"));
+        used.set(ride.ride, index + 1);
       }
       for (const mesh of meshes.values()) {
         mesh.instanceMatrix.needsUpdate = true;
