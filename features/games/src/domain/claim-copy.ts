@@ -8,6 +8,13 @@ import type {
   GameClaimUnavailableReason,
 } from "@frostbite/shared/games";
 
+// What is said while a claim is being made ready: the platform builds the transaction, which takes a moment. Nothing is sent or charged.
+export const claimPreparingCopy = {
+  button: "Preparing…",
+  detail: "Building the transaction. Nothing is sent and nothing is charged.",
+  title: "Preparing your claim",
+} as const;
+
 // What a person is told about a claim, in one place. It never says "minted" or "claimed" before the chain's indexed state agrees:
 // `claimed` is only "confirmed" and says it is not complete yet.
 export const claimStateCopy: Readonly<

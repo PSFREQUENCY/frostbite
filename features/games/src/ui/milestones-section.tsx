@@ -62,6 +62,7 @@ export function milestonesSection({
               : {
                   message: claimUi.message,
                   latestOf: claimUi.latestOf,
+                  preparing: claimUi.preparing,
                   review: claimUi.reopen,
                   start: (id) => void claimUi.start(id),
                 }

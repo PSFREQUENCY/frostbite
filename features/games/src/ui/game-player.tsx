@@ -270,11 +270,14 @@ export function GamePlayer({
         message={claimUi.message}
         onClose={claimUi.dismiss}
         onSign={() => void claimUi.sign()}
+        preparing={claimUi.preparing !== null}
         signerNote={claimUi.signerNote}
         title={
-          claimUi.active === null
-            ? ""
-            : (titles[claimUi.active.milestoneId] ?? claimUi.active.milestoneId)
+          claimUi.active !== null
+            ? (titles[claimUi.active.milestoneId] ?? claimUi.active.milestoneId)
+            : claimUi.preparing === null
+              ? ""
+              : (titles[claimUi.preparing] ?? claimUi.preparing)
         }
         working={claimUi.working}
       />
