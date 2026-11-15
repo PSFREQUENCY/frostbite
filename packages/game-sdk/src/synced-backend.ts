@@ -64,7 +64,6 @@ export function createSyncedBackend(options: {
   // then either, and the next change tries again. While signed out there is no other account to protect, so the sync below says so.
   async function whoseRecords(): Promise<"another" | "unknown" | "yours"> {
     const owner = local.owner();
-    if (owner === null) return "yours";
     try {
       const probe = await remote.sync(nothing);
       if (probe.kind === "failed") return "unknown";
@@ -80,7 +79,8 @@ export function createSyncedBackend(options: {
     if (signedOut) return;
     let result: AccountSyncResult;
     try {
-      if (apply === "all") {
+      // Records made while nobody was signed in belong to no one yet, and there is nothing to ask.
+      if (apply === "all" && local.owner() !== null) {
         const whose = await whoseRecords();
         if (whose === "unknown") {
           setStatus("pending");
