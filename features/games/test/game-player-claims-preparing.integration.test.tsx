@@ -8,6 +8,10 @@ import {
   harness as h,
   registerHarness,
 } from "./support/player-harness.tsx";
+import {
+  claimUnavailableCopy,
+  unreachableCopy,
+} from "../src/domain/claim-copy.ts";
 import { claimAt, earned, fakeApi, wallet } from "./support/claims-ui.tsx";
 
 registerHarness();
@@ -100,7 +104,7 @@ describe("while a claim is being made ready", () => {
     expect(h.container.querySelectorAll("dialog.arcade-modal")).toHaveLength(1);
   });
 
-  it("closes, and gives the button back, when the platform says no or cannot be reached", async () => {
+  it("says why in the dialog it opened, and gives the button back, when the platform says no", async () => {
     const refused = slowStart();
     await earned({ api: fakeApi({ start: refused.start }), wallet });
     await click("Claim ");
@@ -109,13 +113,36 @@ describe("while a claim is being made ready", () => {
       refused.answer({ reason: "claims-paused", status: "unavailable" }),
     );
     await flush();
-    expect(dialog()?.hasAttribute("open")).toBe(false);
+    // The dialog does not flash and close: the reason is what the player was waiting to see.
+    expect(dialog()?.hasAttribute("open")).toBe(true);
+    expect(
+      dialog()?.querySelector('[data-testid="claim-preparing"]'),
+    ).toBeNull();
+    expect(dialog()?.querySelector('[role="alert"]')?.textContent).toBe(
+      claimUnavailableCopy["claims-paused"],
+    );
     expect(h.container.querySelector('[aria-busy="true"]')).toBeNull();
     expect(button("Claim ")?.disabled).toBe(false);
-    expect(h.container.querySelector('[role="alert"]')).not.toBeNull();
   });
 
-  it("gives the button back when the request itself fails", async () => {
+  it("goes away with the dialog, and does not come back with the next claim", async () => {
+    const refused = slowStart();
+    await earned({ api: fakeApi({ start: refused.start }), wallet });
+    await click("Claim ");
+    await flush();
+    await act(async () =>
+      refused.answer({ reason: "claims-paused", status: "unavailable" }),
+    );
+    await flush();
+    await click("Close");
+    await flush();
+    expect(dialog()?.hasAttribute("open")).toBe(false);
+    expect(dialog()?.textContent).not.toContain(
+      claimUnavailableCopy["claims-paused"],
+    );
+  });
+
+  it("says so in the dialog when the request itself fails", async () => {
     await earned({
       api: fakeApi({
         start: vi.fn(async () => Promise.reject(new Error("down"))),
@@ -124,8 +151,10 @@ describe("while a claim is being made ready", () => {
     });
     await click("Claim ");
     await flush();
-    expect(dialog()?.hasAttribute("open")).toBe(false);
+    expect(dialog()?.hasAttribute("open")).toBe(true);
+    expect(dialog()?.querySelector('[role="alert"]')?.textContent).toBe(
+      unreachableCopy,
+    );
     expect(button("Claim ")?.disabled).toBe(false);
-    expect(h.container.querySelector('[role="alert"]')).not.toBeNull();
   });
 });
