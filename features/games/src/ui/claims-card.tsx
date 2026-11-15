@@ -1,11 +1,11 @@
 import type { GameClaim } from "@frostbite/shared/games";
-import { ArcadeActionButton, ArcadeInfoCard } from "@repo/ui/arcade";
+import { ArcadeActionButton } from "@repo/ui/arcade";
 
 import { claimCopy, showsDelayed } from "../domain/claim-copy.ts";
-import { MintedPicture } from "./minted-picture.tsx";
 
-// The player's claims for this game, with where each stands and a way back to the review of any that is not over.
-export function ClaimsCard({
+// The player's claims for this game, one short row each: what it is, where it stands, and a way back to its review. No pictures: the
+// minted picture is on the player's own shelf, and the row stays the same height whatever the claim.
+export function ClaimsList({
   claims,
   onReview,
   titles,
@@ -14,52 +14,30 @@ export function ClaimsCard({
   readonly onReview: (claimId: string) => void;
   readonly titles: Readonly<Record<string, string>>;
 }) {
-  return (
-    <ArcadeInfoCard title="Your claims">
-      {claims.length === 0 ? (
-        <p>You have not claimed anything from this game.</p>
-      ) : (
-        <ul aria-label="Claims of this game">
-          {claims.map((claim) => (
-            <li
-              data-claim-state={claim.state}
-              data-delayed={showsDelayed(claim) ? "true" : undefined}
-              key={claim.id}
-            >
-              <strong>{titles[claim.milestoneId] ?? claim.milestoneId}</strong>{" "}
-              — <span>{claimCopy(claim).label}</span>{" "}
-              {claim.state === "complete" ? (
-                <MintedPicture
-                  alt={titles[claim.milestoneId] ?? claim.milestoneId}
-                  claimId={claim.id}
-                />
-              ) : null}
-              <ArcadeActionButton
-                onClick={() => onReview(claim.id)}
-                tone="cyan"
-              >
-                Details
-              </ArcadeActionButton>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p>
-        You pay the network fee to claim. A claim is complete only when the
-        network&apos;s records show it.
-      </p>
-    </ArcadeInfoCard>
+  return claims.length === 0 ? (
+    <p>You have not claimed anything from this game.</p>
+  ) : (
+    <ul aria-label="Claims of this game" className="mints-list">
+      {claims.map((claim) => (
+        <li
+          data-claim-state={claim.state}
+          data-delayed={showsDelayed(claim) ? "true" : undefined}
+          key={claim.id}
+        >
+          <span className="mints-list__name">
+            <strong>{titles[claim.milestoneId] ?? claim.milestoneId}</strong>
+            <small>{claimCopy(claim).label}</small>
+          </span>
+          <ArcadeActionButton
+            ariaLabel={`Details of ${titles[claim.milestoneId] ?? claim.milestoneId}`}
+            onClick={() => onReview(claim.id)}
+            size="small"
+            tone="cyan"
+          >
+            Details
+          </ArcadeActionButton>
+        </li>
+      ))}
+    </ul>
   );
 }
-
-// The dock section that holds the claims, with how many there are as its badge.
-export const claimsDockSection = (
-  claims: readonly GameClaim[],
-  onReview: (claimId: string) => void,
-  titles: Readonly<Record<string, string>>,
-) => ({
-  badge: claims.length === 0 ? null : String(claims.length),
-  content: <ClaimsCard claims={claims} onReview={onReview} titles={titles} />,
-  id: "claims",
-  label: "Claims",
-});

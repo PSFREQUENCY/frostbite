@@ -24,11 +24,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ClaimsApi } from "../client/claims-api.ts";
 import { ClaimDialog } from "./claim-dialog.tsx";
 import type { ClaimFeeSettings } from "../wallet-config.ts";
-import { claimsDockSection } from "./claims-card.tsx";
 import type { ClaimSigner } from "./use-claims.ts";
 import { usePlayerClaims } from "./use-player-claims.ts";
 import { GameBar } from "./game-bar.tsx";
-import { milestonesSection } from "./milestones-section.tsx";
+import { gameDock } from "./game-dock.tsx";
 import { ScoreShare } from "./score-share.tsx";
 import type { SharesApi } from "../client/shares-api.ts";
 import type { ShareConfig } from "@frostbite/share";
@@ -39,7 +38,6 @@ import { touchScreenQuery, useMediaQuery } from "./use-media-query.ts";
 import { useTheatre } from "./use-theatre.ts";
 import { usePhoneLandscape } from "./use-phone-landscape.ts";
 import { useGameSession } from "./use-game-session.ts";
-import { walletDockSection } from "./wallet-section.tsx";
 
 // What the frame may do. Scripts only: no same-origin access, so the game has no storage, cookies or session
 // of the platform, no forms, no popups, no top navigation. The response headers for the game's files repeat
@@ -72,6 +70,8 @@ export function GamePlayer({
   claims,
   claimsFor,
   game,
+  gallery,
+  lead = [],
   meta,
   runsFor,
   sections = [],
@@ -102,11 +102,15 @@ export function GamePlayer({
     readonly wallet: WalletInfo | null;
   };
   readonly game: HostedGame & { readonly milestones: readonly GameMilestone[] };
+  // The game's public gallery of mints, for the Mints tab beside the player's own claims; absent where the game mints nothing.
+  readonly gallery?: ReactNode;
+  // Sections that come right after the milestones, where a phone's player reaches them first (the leaderboard).
+  readonly lead?: readonly DockSection[];
   // Small facts beside the title in the bar (version, network).
   readonly meta?: ReactNode;
   // How the page reaches the platform to start and settle runs; the real one unless a test supplies another.
   readonly runsFor?: (gameId: string) => RunsService;
-  // More sections for the dock under the stage, after the player's milestones.
+  // More sections for the dock under the stage, after the player's milestones, leaders and mints.
   readonly sections?: readonly DockSection[];
   // Where a link can be shared; without it nothing here can be. Sharing needs the player's account, so it is offered only to a signed-in
   // player whose progress is on it.
@@ -166,26 +170,20 @@ export function GamePlayer({
   const prompt = phoneLandscape && !theatre.on && !promptDismissed;
   // Sharing makes a link from the player's account, so it is offered once their progress is on it.
   const canShare = share !== undefined && sync === "account";
-  const dock: DockSection[] = [
-    ...(game.milestones.length === 0
-      ? []
-      : [
-          milestonesSection({
-            claimUi,
-            claims,
-            game,
-            progress,
-            share: canShare ? { api: sharesApi, config: share } : undefined,
-            title,
-            unlocked,
-          }),
-        ]),
-    ...(claims === undefined
-      ? []
-      : [claimsDockSection(claimUi.claims, claimUi.reopen, titles)]),
-    ...(wallet === undefined ? [] : [walletDockSection(wallet)]),
-    ...sections,
-  ];
+  const dock = gameDock({
+    claimUi,
+    claims,
+    gallery,
+    game,
+    lead,
+    progress,
+    sections,
+    share: canShare ? { api: sharesApi, config: share } : undefined,
+    title,
+    titles,
+    unlocked,
+    wallet,
+  });
   return (
     <>
       <ArcadeStage

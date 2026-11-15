@@ -13,7 +13,6 @@ import {
 } from "@repo/ui/arcade";
 
 import type { PublicGame } from "../domain/catalog.ts";
-import { galleryCopy } from "../domain/gallery-copy.ts";
 import type { GameWalletConfig } from "../wallet-config.ts";
 import { GamePlayer } from "./game-player.tsx";
 import { GamesFrame } from "./games-frame.tsx";
@@ -83,31 +82,22 @@ export function GameDetail({
   const sections: DockSection[] = [
     { badge: null, content: about, id: "about", label: "About" },
     { badge: null, content: asks, id: "asks", label: "What it asks for" },
-    // A game the platform replays has verified scores to rank.
-    ...(game.scored
-      ? [
-          {
-            badge: null,
-            content: <Leaderboard gameId={game.id} />,
-            id: "leaderboard",
-            label: leaderboardCopy.title,
-          },
-        ]
-      : []),
-    // Anyone may see what has been minted of a game that mints milestones.
-    ...(game.claimable
-      ? [
-          {
-            badge: null,
-            content: (
-              <MintedGallery explorerTxUrl={wallet.explorerTxUrl} game={game} />
-            ),
-            id: "minted",
-            label: galleryCopy.title,
-          },
-        ]
-      : []),
   ];
+  // A game the platform replays has verified scores to rank: the leaderboard comes right after the milestones.
+  const lead: DockSection[] = game.scored
+    ? [
+        {
+          badge: null,
+          content: <Leaderboard gameId={game.id} />,
+          id: "leaderboard",
+          label: leaderboardCopy.title,
+        },
+      ]
+    : [];
+  // Anyone may see what has been minted of a game that mints milestones.
+  const gallery = game.claimable ? (
+    <MintedGallery explorerTxUrl={wallet.explorerTxUrl} game={game} />
+  ) : undefined;
   const player = {
     ...(share === undefined ? {} : { share }),
     back: (
@@ -120,6 +110,8 @@ export function GameDetail({
       id: game.id,
       milestones: game.milestones,
     },
+    ...(gallery === undefined ? {} : { gallery }),
+    lead,
     meta: facts,
     sections,
     title: game.title,
