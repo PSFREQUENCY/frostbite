@@ -1,7 +1,8 @@
 import { refuse, tickNamed, withFields } from "@frostbite/game-sdk/run-inputs";
 import type { GameVerifier, RunInput } from "@frostbite/game-sdk/run-record";
 
-import { act, gait, lift, look, pick } from "./acts.ts";
+import { act, gait, look, pick } from "./acts.ts";
+import { lift } from "./climb.ts";
 import {
   maxInputs,
   maxLoops,
@@ -21,11 +22,12 @@ import type { DayState, Draft } from "./types.ts";
 // Settings: `hero` (0 to 9, see `heroes.ts`) and `day` (1 to 5, the story day, which fixes what the hero starts with). A trip back through
 // the Time Machine adds `loop` (1 to 9) and is always to day 1 (see `machine.ts`). A story day may carry the timeline those trips left,
 // `fate` (-9 to 9), which moves the starting pocket a hundred DUN a step, and last night's lantern wish, `boon` (1 to 4), which the seed
-// may answer (see `day.ts`).
+// may answer (see `day.ts`). Once the story has been won (a last day ended on SHA Beach) every day adds `won` (1), which wakes the
+// statues' masks (`statues.ts`).
 // Inputs, each with the `tick` it was made on: `move` `{ dir }` holds a heading (0 to 15, or -1 to stand); `gait` `{ mode }` walks (0),
 // runs (1), crouches (2) or crawls (3); `act` uses the nearest spot; `pick` `{ choice }` answers what is waiting (0 yes and 1 no to an
-// offer, or one of up to five answers to a talk); `lift` `{ by }` takes a helicopter up or down a level (1 or -1); `look` turns frost
-// vision on or off; `end` closes the day. Between inputs the day runs on by itself (`advance`). A day that is not closed counts as it
+// offer, or one of up to five answers to a talk); `lift` `{ by }` takes a helicopter up or down a level, or on foot climbs a wall a storey
+// up or down (1 or -1); `look` turns frost vision on or off; `end` closes the day. Between inputs the day runs on by itself (`advance`). A day that is not closed counts as it
 // stands at its last input.
 const fieldsFor = new Map<string, readonly string[]>([
   ["act", ["tick"]],
@@ -37,7 +39,14 @@ const fieldsFor = new Map<string, readonly string[]>([
   ["pick", ["choice", "tick"]],
 ]);
 
-const settings: readonly string[] = ["boon", "day", "fate", "hero", "loop"];
+const settings: readonly string[] = [
+  "boon",
+  "day",
+  "fate",
+  "hero",
+  "loop",
+  "won",
+];
 
 const whole = (value: unknown, low: number, high: number): number | null =>
   typeof value === "number" &&
@@ -83,13 +92,15 @@ export const degenRules: GameVerifier<DayState> = {
       keys.some((key) => !settings.includes(key))
     )
       return refuse(
-        "a day takes a day and a hero, and may add loop, fate or boon",
+        "a day takes a day and a hero, and may add loop, fate, boon or won",
       );
     const hero = whole(config.hero, 0, heroes.length - 1);
     const day = whole(config.day, 1, 5);
     const loop = keys.includes("loop") ? whole(config.loop, 1, maxLoops) : 0;
     const fate = keys.includes("fate") ? whole(config.fate, -9, 9) : 0;
     const boon = keys.includes("boon") ? whole(config.boon, 1, 4) : 0;
+    const won = keys.includes("won") ? whole(config.won, 1, 1) : 0;
+    if (won === null) return refuse("won is 1 once the story is won");
     if (hero === null || day === null)
       return refuse("hero must be 0 to 9 and day 1 to 5");
     if (fate === null) return refuse("fate must be -9 to 9");
@@ -99,7 +110,10 @@ export const degenRules: GameVerifier<DayState> = {
       return refuse("a trip back starts fresh, with no fate and no boon");
     return boon === null
       ? refuse("a boon is last night's wish, 1 to 4")
-      : { ok: true, state: startDay(seed, hero, day, loop, fate, boon) };
+      : {
+          ok: true,
+          state: startDay(seed, hero, day, loop, fate, boon, won === 1),
+        };
   },
   // What the day made, once it is over: the number the game shows and keeps as the player's best day.
   score: (state) => (state.ended ? scoreOf(state) : null),

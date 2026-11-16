@@ -51,10 +51,17 @@ describe("riding", () => {
   });
 
   it("seats the hero and crew on a ride with room, and runs the rest alongside", () => {
+    const motion = (hop: number) => ({
+      air: -1,
+      dt: 0.016,
+      hop,
+      seconds: 1,
+      way: "upright" as const,
+    });
     const cast = [6, 7, 8].map((hero) => buildActor(hero));
     const put = (ride: DayState["ride"], crew: number[]) => {
       const state = { ...riding(ride, crew), hero: 0 };
-      placeCast(cast, state, at, 1, 0.016, 0);
+      placeCast(cast, state, at, motion(0));
       return cast.map((actor) => actor.root.position.clone());
     };
     const [hero, mate] = put("bike", [1]);
@@ -68,8 +75,13 @@ describe("riding", () => {
     ).toBe(true);
     expect(put("boat", [1])[1]?.y).toBeCloseTo(0.7);
     const walking = { ...riding("foot", [1]), hero: 0 };
-    placeCast(cast, walking, at, 1, 0.016, 0.5);
+    placeCast(cast, walking, at, motion(0.5));
     expect(cast[0]?.root.position.y).toBeCloseTo(0.5);
+    // Up a wall the hero climbs alone: the crew stay on the street below.
+    placeCast(cast, walking, { ...at, y: 5.6 }, { ...motion(0), way: "hang" });
+    expect([cast[0]?.root.position.y, cast[1]?.root.position.y]).toEqual([
+      5.6, 0,
+    ]);
     expect(seatsOf.van.length).toBeGreaterThan(seatsOf.car.length);
     expect(seatsOf.scooter[0]?.seat).toBe("deck");
   });

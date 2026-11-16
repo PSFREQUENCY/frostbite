@@ -161,6 +161,7 @@ describe("the page's keys, pause and sound", () => {
       slip: false,
       sound: { effects: false, music: false, volume: 0.2 },
       wish: 0,
+      won: false,
     });
   });
 });

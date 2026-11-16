@@ -4,7 +4,6 @@ import { join } from "node:path";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { lean, steer, zoneAt } from "../src/page/controls.ts";
 import { createCredits, shotAt, titleHold } from "../src/page/credits.ts";
 import { creditTitles } from "../src/script/credits.ts";
 import { opening } from "../src/view/cine.ts";
@@ -57,24 +56,5 @@ describe("the opening credits", () => {
     expect(shotAt(0)).toBe(0);
     expect(shotAt((opening[0]?.seconds ?? 0) + 0.1)).toBe(1);
     expect(shotAt(9_999)).toBe(opening.length - 1);
-  });
-});
-
-describe("the thumb stick", () => {
-  it("steers true on a tall screen as on a wide one, and leans its knob the way it steers", () => {
-    const tall = 9 / 19.5;
-    expect(steer({ x: 0.22, y: 0.7 }, tall)).toBe(4);
-    expect(steer({ x: 0.4, y: 0.62 }, tall)).toBe(0);
-    expect(steer({ x: 0.35, y: 0.77 }, tall)).toBe(3);
-    expect(zoneAt("playing", { x: 0.22, y: 0.9 }, tall)).toBe(4);
-    const knob = document.querySelector<HTMLElement>("#stick span");
-    lean(knob, 4);
-    expect([
-      knob?.style.getPropertyValue("--east"),
-      knob?.style.getPropertyValue("--south"),
-    ]).toEqual(["0.00", "1.00"]);
-    lean(knob, -1);
-    expect(knob?.style.getPropertyValue("--south")).toBe("0");
-    lean(null, 3);
   });
 });

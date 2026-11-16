@@ -47,6 +47,8 @@ export function posters(): CanvasTexture | null {
 }
 
 // One borough's ground (120 metres a side): asphalt with lane lines, kerbs and pavements along the buildings, and zebra crossings.
+// How wide the pavement round each lot is (metres), out to the kerb.
+export const pavement = 3;
 export function streets(): CanvasTexture | null {
   const scale = 512 / 120;
   return canvasOf(512, 512, (context) => {
@@ -61,22 +63,25 @@ export function streets(): CanvasTexture | null {
       [8, 50],
       [70, 112],
     ];
+    // The pavements: three metres wide round every lot, with a light kerb at the road's edge.
     context.fillStyle = "#9097aa";
     for (const [a, b] of lots)
       for (const [c, d] of lots)
         context.fillRect(
-          m(a - 1.6),
-          m(c - 1.6),
-          m(b - a + 3.2),
-          m(d - c + 3.2),
+          m(a - pavement),
+          m(c - pavement),
+          m(b - a + 2 * pavement),
+          m(d - c + 2 * pavement),
         );
     context.fillStyle = "#b9bfcf";
     for (const [a, b] of lots)
       for (const [c, d] of lots) {
-        context.fillRect(m(a - 1.6), m(c - 1.6), m(b - a + 3.2), 2);
-        context.fillRect(m(a - 1.6), m(d + 1.6) - 2, m(b - a + 3.2), 2);
-        context.fillRect(m(a - 1.6), m(c - 1.6), 2, m(d - c + 3.2));
-        context.fillRect(m(b + 1.6) - 2, m(c - 1.6), 2, m(d - c + 3.2));
+        const [x0, z0] = [m(a - pavement), m(c - pavement)];
+        const [w, h] = [m(b - a + 2 * pavement), m(d - c + 2 * pavement)];
+        context.fillRect(x0, z0, w, 2);
+        context.fillRect(x0, z0 + h - 2, w, 2);
+        context.fillRect(x0, z0, 2, h);
+        context.fillRect(x0 + w - 2, z0, 2, h);
       }
     context.fillStyle = "#ffd166";
     for (let along = 0; along < 120; along += 6) {
@@ -84,16 +89,23 @@ export function streets(): CanvasTexture | null {
       context.fillRect(m(along), m(60) - 1, m(3), 2);
       context.fillRect(m(60) - 1, m(along), 2, m(3));
     }
-    // Zebra crossings beside every crossroads, over the middle streets and the avenues.
+    // Zebra crossings beside every crossroads, kerb to kerb over the middle streets and the avenues.
     context.fillStyle = "#e8ecf5";
     for (const at of [8.5, 46.5, 70.5, 108.5])
-      for (let stripe = 52; stripe < 68; stripe += 2) {
+      for (
+        let stripe = 50 + pavement + 0.5;
+        stripe < 70 - pavement;
+        stripe += 2
+      ) {
         context.fillRect(m(at), m(stripe), m(3), m(1));
         context.fillRect(m(stripe), m(at), m(1), m(3));
       }
     for (const at of [46.5, 70.5])
-      for (const start of [0.5, 112.5])
-        for (let stripe = start; stripe < start + 7; stripe += 2) {
+      for (const [from, to] of [
+        [0, 8 - pavement],
+        [112 + pavement, 120],
+      ] as const)
+        for (let stripe = from + 0.5; stripe < to; stripe += 2) {
           context.fillRect(m(stripe), m(at), m(1), m(3));
           context.fillRect(m(at), m(stripe), m(3), m(1));
         }

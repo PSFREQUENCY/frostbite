@@ -28,7 +28,11 @@ describe("the statues", () => {
       expect(onStreet(statue.x, statue.z), statue.label).toBe(true);
       expect(spotNamed(statueId(index))?.kind).toBe("statue");
     }
-    const day: Draft = { ...started(1, 7, 1) };
+    // The masks wait for the story to be won.
+    expect(wear({ ...started(1, 7, 1) }, 4)).toBe(
+      "the statues wake once the story is won",
+    );
+    const day: Draft = { ...started(1, 7, 1), won: true };
     const pace = paceOf(day);
     expect(wear(day, 4)).toBeNull();
     expect([day.form, masksWorn(day)]).toEqual([4, 1]);

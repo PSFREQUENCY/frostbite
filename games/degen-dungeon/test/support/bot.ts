@@ -18,6 +18,7 @@ export function createBot(
   loop = 0,
   fate = 0,
   boon = 0,
+  won = false,
 ) {
   const init = degenRules.init(seed, {
     day,
@@ -25,6 +26,7 @@ export function createBot(
     ...(loop === 0 ? {} : { loop }),
     ...(fate === 0 ? {} : { fate }),
     ...(boon === 0 ? {} : { boon }),
+    ...(won ? { won: 1 } : {}),
   });
   if (!init.ok) throw new Error(init.reason);
   let state = init.state;

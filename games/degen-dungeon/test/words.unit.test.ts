@@ -103,7 +103,7 @@ describe("the panel", () => {
     ]);
     expect(text("goal")).toBe(goalFor(day));
     expect(text("look")).toBe("Frost vision, 15s");
-    expect(document.getElementById("up")?.hidden).toBe(true);
+    expect(document.getElementById("up")?.hasAttribute("disabled")).toBe(true);
     const buttons = [
       ...document.querySelectorAll<HTMLButtonElement>("#answers button"),
     ];
@@ -120,10 +120,10 @@ describe("the panel", () => {
       { ...day, looking: true, ride: "heli", talk: null, vision: 0 },
       70,
     );
-    expect([text("look"), document.getElementById("up")?.hidden]).toEqual([
-      "Vision on, 0s",
-      false,
-    ]);
+    expect([
+      text("look"),
+      document.getElementById("up")?.hasAttribute("disabled"),
+    ]).toEqual(["Vision on, 0s", false]);
     expect(document.getElementById("talk")?.hidden).toBe(true);
     expect(panel.answers(day)).toBe(3);
     expect(panel.answers({ ...day, talk: "offer-kiki" })).toBe(2);

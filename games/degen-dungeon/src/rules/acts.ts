@@ -11,6 +11,7 @@ import {
   rebrandCool,
   witnessHeat,
 } from "./constants.ts";
+import { clinging } from "./climb.ts";
 import { cooled, heated, rankOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { actMachine, pickMachine } from "./machine.ts";
@@ -20,9 +21,9 @@ import { wear } from "./statues.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
 import { motors, type Draft, type Ride } from "./types.ts";
-import { dockLand, dockWater, onStreet } from "./world.ts";
+import { dockLand, dockWater } from "./world.ts";
 
-// The act button, the answer to a question and a helicopter's climb. Each answers null when it is done, or why it cannot be. The statue,
+// The act button and the answer to a question. Each answers null when it is done, or why it cannot be. The statue,
 // the newbie of a trip back, the watcher and the story's beat are asked first; then the nearest open place. A new kind of place is a new
 // case in `useSpot`.
 const usedUp = "that is used up for today";
@@ -196,6 +197,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
 
 export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
+  if (clinging(day)) return "climb down first";
   if (day.ride === "heli") {
     if (day.level > 0) return "land before stepping out";
     day.ride = "foot";
@@ -271,15 +273,6 @@ export function pick(day: Draft, choice: number): string | null {
   if (spot.kind !== "offer") return null;
   if (choice === 0) took(day, spot);
   else if (spot.crooked ?? day.crooked) day.spotted += 1;
-  return null;
-}
-
-export function lift(day: Draft, by: number): string | null {
-  if (day.ride !== "heli") return "only a helicopter climbs";
-  const level = day.level + by;
-  if (level < 0 || level > 3) return "no higher or lower than that";
-  if (level === 0 && !onStreet(day.x, day.z)) return "nowhere to land here";
-  day.level = level;
   return null;
 }
 

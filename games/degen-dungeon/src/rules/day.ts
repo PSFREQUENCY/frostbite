@@ -31,6 +31,7 @@ export function startDay(
   loop = 0,
   fate = 0,
   boon = 0,
+  won = false,
 ): DayState {
   const home =
     loop > 0 ? statue : (spotNamed(`home-${String(hero)}`) ?? centreOf(4));
@@ -115,6 +116,7 @@ export function startDay(
     left: [],
     weather: "clear",
     form: -1,
+    won,
     beamed: 0,
     words: 0,
     x: home.x,

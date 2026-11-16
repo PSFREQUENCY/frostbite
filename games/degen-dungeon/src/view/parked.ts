@@ -94,12 +94,12 @@ const set = (
   );
 };
 
-// Where a parked ride is drawn (metres): anything with four wheels by the kerb in the parking lane, a scooter, bike or motorbike on the
-// edge of the pavement, along its street (a north-south street when it stands east or west of the borough's middle).
+// Where a parked ride is drawn (metres): anything with four wheels in the parking lane just past the kerb, a scooter, bike or motorbike
+// on the pavement, along its street (a north-south street when it stands east or west of the borough's middle).
 const drawnAt = (spot: (typeof parked)[number]) => {
   const local = spot.x % block;
   const northSouth = Math.abs(local - block / 2) === 850;
-  const inward = kerbside(spot.ride) ? 0 : spot.ride === "semi" ? 1.3 : 1.1;
+  const inward = kerbside(spot.ride) ? 0 : spot.ride === "semi" ? 2.2 : 2;
   const side = northSouth
     ? Math.sign(local - block / 2)
     : Math.sign((spot.z % block) - block / 2);

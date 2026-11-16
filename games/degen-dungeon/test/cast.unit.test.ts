@@ -42,10 +42,17 @@ describe("the cast", () => {
     giant.wear(model);
     giant.wear(model);
     giant.move(5, 1, 0.02, false, true);
-    expect(update).toHaveBeenCalledWith(5, 0.02, true, null);
+    expect(update).toHaveBeenCalledWith(5, 0.02, true, null, "upright", -1);
     giant.seat("pedal");
     giant.move(5, 1, 0.02);
-    expect(update).toHaveBeenLastCalledWith(5, 0.02, false, "pedal");
+    expect(update).toHaveBeenLastCalledWith(
+      5,
+      0.02,
+      false,
+      "pedal",
+      "upright",
+      -1,
+    );
     expect(giant.hip()).toBe(0.8);
     expect(giant.root.children.filter((child) => child.visible)).toHaveLength(
       1,

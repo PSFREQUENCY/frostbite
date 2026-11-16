@@ -6,11 +6,11 @@ import {
   attachControls,
   enterZone,
   headingOf,
-  steer,
   zoneAt,
   type Mode,
 } from "../src/page/controls.ts";
 import { element } from "../src/page/elements.ts";
+import { wayOf } from "../src/page/stick.ts";
 import { listEarned, noteFor, starsText } from "../src/page/hud.ts";
 import { goalFor, talkOf } from "../src/page/words.ts";
 import { afterDay, freshProgress, restore } from "../src/progress.ts";
@@ -82,6 +82,7 @@ describe("what the platform is asked to remember", () => {
         slip: true,
         sound: { effects: false, music: true, volume: 0.5 },
         wish: 3,
+        won: true,
       }),
     ).toEqual({
       best: 12,
@@ -94,6 +95,7 @@ describe("what the platform is asked to remember", () => {
       slip: true,
       sound: { effects: false, music: true, volume: 0.5 },
       wish: 3,
+      won: true,
     });
     expect(
       restore({
@@ -104,6 +106,7 @@ describe("what the platform is asked to remember", () => {
         slip: 1,
         sound: 7,
         wish: 5,
+        won: "yes",
       }),
     ).toEqual({ ...freshProgress, sound: defaultSound });
   });
@@ -169,7 +172,7 @@ describe("the player's hands", () => {
   const press = (code: string, type = "keydown") =>
     window.dispatchEvent(new KeyboardEvent(type, { code }));
 
-  it("turn two held keys into one of eight headings, and a finger on the stick into one of sixteen", () => {
+  it("turn two held keys into one of eight headings, and a thumb's slide on the stick into one of sixteen", () => {
     expect([
       headingOf(0, 0),
       headingOf(1, 0),
@@ -179,14 +182,18 @@ describe("the player's hands", () => {
       headingOf(0, -1),
       headingOf(1, -1),
     ]).toEqual([-1, 0, 2, 4, 8, 12, 14]);
-    expect(steer({ x: 0.22, y: 0.62 })).toBeNull();
-    expect(steer({ x: 0.4, y: 0.62 })).toBe(0);
-    expect(steer({ x: 0.22, y: 0.9 })).toBe(4);
-    expect(steer({ x: 0.05, y: 0.62 })).toBe(8);
-    expect(steer({ x: 0.22, y: 0.2 })).toBe(12);
+    expect([
+      wayOf(0, 0),
+      wayOf(5, 6),
+      wayOf(30, 0),
+      wayOf(0, 30),
+      wayOf(-30, 0),
+      wayOf(0, -30),
+      wayOf(20, 8),
+    ]).toEqual([-1, -1, 0, 4, 8, 12, 1]);
   });
 
-  it("read the screen as the ring before a day, a stick and an act during one, and no and yes while an offer waits", () => {
+  it("read the screen as the ring before a day, the stick's half and an act during one, and no and yes while an offer waits", () => {
     expect([
       zoneAt("waiting", { x: 0.1, y: 0.5 }),
       zoneAt("waiting", { x: 0.5, y: 0.5 }),
@@ -200,11 +207,11 @@ describe("the player's hands", () => {
       zoneAt("playing", { x: 0.4, y: 0.62 }),
       zoneAt("playing", { x: 0.22, y: 0.62 }),
       zoneAt("playing", { x: 0.8, y: 0.5 }),
-    ]).toEqual([0, null, "act"]);
+    ]).toEqual([null, null, "act"]);
     const hand = hands();
-    for (const zone of [6, "prev", "next", "start", "act", "no"] as const)
+    for (const zone of ["prev", "next", "start", "act", "no"] as const)
       enterZone(hand, zone);
-    expect(hand.move).toHaveBeenCalledWith(6);
+    expect(hand.move).not.toHaveBeenCalled();
     expect(hand.turn.mock.calls).toEqual([[-1], [1]]);
     expect(
       [hand.tapStart, hand.act, hand.no].map(

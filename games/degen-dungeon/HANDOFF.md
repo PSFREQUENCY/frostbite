@@ -80,6 +80,25 @@ at the start of the very first day and can be skipped.
   nothing ticks before that. On a phone only the act button shows until a hero wakes; the rest keep their places, unseen. On a touch screen
   the 3D picture fills the frame (`stage.ts` opens the field of view on a tall screen), the game screen keeps only its map at the top,
   and every button is fixed in place.
+- **Round 7** (the stick, bodies, climbing, one hero, open ground):
+  - The stick (`page/stick.ts`) is a floating one: a thumb anywhere on the left half takes it (the screen's zones never hear of that
+    thumb), the ring is put under it, and the slide from there steers (a 9 px dead zone, the knob following out to 40 px). The old fixed
+    stick ignored a thumb within 45 px of its middle, most of the drawn ring, so it seemed not to work.
+  - Poses (`view/poses.ts`): standing, walking, running, crouching, crawling, climbing, hanging and a jump's tuck as joint angles; a built
+    body (`body.ts`) sets its hips down on its lowest leg; Frost Run's models play Duck and Hop and bend their bones by the same poses
+    (`models/bend.ts`, a four-legged model crawls low on all fours and tips nose up on a wall). The old crouch squashed the body and the
+    old crawl tipped it over.
+  - Climbing (`rules/climb.ts`, `rules/world.ts` `wallBeside`): on foot `lift` climbs a building's wall from within 150 cm of it, up to
+    three storeys; up a wall the hero cannot walk, act or ride, the cop cannot catch them, a tux at four stars can, and the saucers'
+    beams ignore them. The view (`view/climbing.ts`) eases the height at 1.6 m a second, faces the wall and closes in on it. Climb and
+    Drop are always in the bar on a desktop and show on a phone only when usable.
+  - One hero a game: the ring is offered only before a hero is chosen and once the story is won (`progress.ts` `choosing`, with a new
+    `won` field). Days carry the setting `won: 1` once the story is won, and only then do the statues' masks go on (so "masked" and
+    "nine-masks" come after the win).
+  - Open ground (`rules/venues.ts`): a lot's edge keeps a body's width clear only where a building stands, so the skate park, the green,
+    the plazas round the halls and the Old Floe's three lawns (now walkable, and part of the park) open straight from the pavement.
+    Before, a 40 cm band round each open lot shut them off. The drawn pavements are 3 m wide (they were 1.6), with the lamps and
+    hydrants at the kerb and parked cars just past it.
 
 ## What is left to polish
 

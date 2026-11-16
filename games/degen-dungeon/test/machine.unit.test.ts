@@ -37,12 +37,15 @@ const seedWhere = (reckless: boolean): number => {
 const now = (state: DayState): { tick: number } => ({ tick: state.tick });
 
 describe("the Time Machine", () => {
-  it("sleeps as a statue whose mask anyone can wear until the hero reaches the top, then takes whoever steps up to it", () => {
-    const early = createBot(1, 7, 1);
+  it("sleeps as a statue whose mask anyone can wear once the story is won, until the hero reaches the top, then takes whoever steps up to it", () => {
+    const early = createBot(1, 7, 1, 0, 0, 0, true);
     early.go(statue.x, statue.z);
     expect(risen(early.here())).toBe(false);
     early.act();
     expect([early.here().form, early.here().ended]).toEqual([2, false]);
+    const unwon = createBot(1, 7, 1);
+    unwon.go(statue.x, statue.z);
+    expect(() => unwon.act()).toThrow("the statues wake once the story is won");
     const top = machineDay();
     expect([top.state().cause, top.state().ended]).toEqual(["machine", true]);
     expect(risen(top.state())).toBe(true);

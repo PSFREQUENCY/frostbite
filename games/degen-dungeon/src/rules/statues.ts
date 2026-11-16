@@ -24,6 +24,7 @@ export const masksWorn = (day: Pick<DayState, "done">): number =>
 
 // Puts a statue's mask on (or, at the statue whose mask the hero wears, takes it off). Feet only.
 export function wear(day: Draft, index: number): string | null {
+  if (!day.won) return "the statues wake once the story is won";
   if (day.ride !== "foot") return "leave the ride you are on first";
   if (day.form === index) {
     day.form = -1;

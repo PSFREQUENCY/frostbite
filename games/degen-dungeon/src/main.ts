@@ -20,7 +20,13 @@ import { createCredits } from "./page/credits.ts";
 import { createPick } from "./page/pick.ts";
 import { listEarned, noteFor } from "./page/hud.ts";
 import { createPanel } from "./page/panel.ts";
-import { afterDay, freshProgress, nextRun, type Progress } from "./progress.ts";
+import {
+  afterDay,
+  choosing,
+  freshProgress,
+  nextRun,
+  type Progress,
+} from "./progress.ts";
 import { ticksPerSecond } from "./rules/constants.ts";
 import { heroes } from "./rules/heroes.ts";
 import { drawScreen } from "./screen/flat.ts";
@@ -32,7 +38,8 @@ import { worldOn } from "./view/world-view.ts";
 // The page of the game: it draws, it plays, and it asks the platform to remember. It saves nothing itself and asks nothing of the
 // network. The rules, the session, the picture and the words are in their own modules; this only joins them to the page and the platform.
 // The first screen is the title: one Enter or one tap starts a run, as every game on the platform must. The run opens on the cinematic
-// (the first time the page plays), then the hero ring; the chosen hero wakes and the day runs. Later days go straight to the ring.
+// (the first time the page plays), then, on a game's first day, the hero ring; the chosen hero wakes and the day runs. A game is played
+// with that one hero, so later days wake them at once; once the story is won the ring is offered every day.
 const client = createGameClient();
 const status = element("status", "p");
 const note = element("note", "p");
@@ -62,9 +69,8 @@ let runId: string | null = null;
 let titles = new Map<string, string>();
 let heldNote = "";
 let hero = freshProgress.hero;
-// The run's seed, kept from its start until a hero wakes.
+// The run's seed, kept from its start until a hero wakes; the clock, and until when the camera stays on the hands or the waking face.
 let seed = 0;
-// Until when the camera stays on the hands or the waking face.
 let seconds = 0;
 let closeUntil = 0;
 let wakeUntil = 0;
@@ -84,6 +90,8 @@ const sound = setUpSound({
 });
 const localSeed = (): number => Math.floor(Math.random() * 0x1_0000_0000);
 const locked = (): boolean => (heroes[hero]?.hidden ?? true) && !progress.slip;
+// Whether the ring is up: a game's first day, every day once the story is won, or a saved hero that cannot be played.
+const ringUp = (): boolean => choosing(progress) || locked();
 
 function show(dt = 0): void {
   const day = session?.state() ?? null;
@@ -103,7 +111,9 @@ function show(dt = 0): void {
     credits.frame(dt, (at) => world?.opening(at) ?? null);
   else if (waking) world?.turntable(hero, locked(), seconds, dt);
   else world?.opening(0.5);
-  pick.show(waking && !credits.on() ? guideFor(hero, progress) : null);
+  pick.show(
+    waking && !credits.on() && ringUp() ? guideFor(hero, progress) : null,
+  );
   if (context !== null)
     drawScreen(context, view.phase === "ready" ? null : day, world !== null);
   guideLayer.show(
@@ -147,6 +157,8 @@ const loop = createRunLoop({
     seconds += dt;
     const running = session;
     if (running === null) {
+      // A game's own hero wakes as soon as the cinematic is done.
+      if (!credits.on() && !ringUp()) wake();
       show(dt);
       return true;
     }
@@ -232,7 +244,8 @@ function start(): void {
 // Left and right on the ring (which also ends the cinematic).
 function turn(by: number): void {
   if (!loop.running() || session !== null) return;
-  if (!credits.on()) hero = (hero + by + heroes.length) % heroes.length;
+  if (!credits.on() && ringUp())
+    hero = (hero + by + heroes.length) % heroes.length;
   credits.stop();
   show();
 }

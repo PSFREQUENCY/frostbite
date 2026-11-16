@@ -10,7 +10,7 @@ import {
   tunnel,
 } from "./constants.ts";
 import { inRoom } from "./rooms.ts";
-import { inVenue, outdoors } from "./venues.ts";
+import { inVenue, lawns, outdoors } from "./venues.ts";
 import type { Point } from "./types.ts";
 
 // The island: nine boroughs in a grid, a street through the middle of each both ways, avenues between them, buildings in the corners,
@@ -77,9 +77,49 @@ export const slotOf = (borough: number, lane: number): Point =>
     at(borough, -4_000, -700),
     at(borough, 4_000, 700),
   ][lane] ?? centreOf(borough);
-// The Old Floe's park, where sitting still cools FOMO; the riot across The Exchange on the first morning.
+// A building's wall beside a point on the street, within a climber's reach: the way to it (a unit step east, south, west or north) and
+// how far it is (centimetres, in steps of ten), the nearest if there are more. Null where there is none: away from the buildings, at the
+// island's edge, and anywhere off the street (in a shop, a landmark, the tunnel or on the moon).
+export const wallReach = 150;
+export interface Wall {
+  readonly east: number;
+  readonly gap: number;
+  readonly south: number;
+}
+const compass = [
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+  [0, -1],
+] as const;
+export function wallBeside(x: number, z: number): Wall | null {
+  if (!onStreet(x, z)) return null;
+  let found: Wall | null = null;
+  for (const [east, south] of compass)
+    for (let gap = 10; gap <= wallReach; gap += 10) {
+      if (found !== null && gap >= found.gap) break;
+      const across = x + east * gap;
+      const along = z + south * gap;
+      // The island's edge is the shore, not a wall.
+      const edge = island - bodyRadius;
+      if (
+        Math.min(across, along) < bodyRadius ||
+        Math.max(across, along) > edge
+      )
+        break;
+      if (onLand(across, along)) continue;
+      found = { east, gap, south };
+      break;
+    }
+  return found;
+}
+
+// The Old Floe's park (its middle and its lawns), where sitting still cools FOMO; the riot across The Exchange on the first morning.
 export const inPark = (x: number, z: number): boolean =>
-  Math.abs(x - 30_000) <= 3_000 && Math.abs(z - 6_000) <= 3_000;
+  (Math.abs(x - 30_000) <= 3_000 && Math.abs(z - 6_000) <= 3_000) ||
+  lawns.some(
+    (lawn) => x >= lawn.x0 && x <= lawn.x1 && z >= lawn.z0 && z <= lawn.z1,
+  );
 export const inRiot = (x: number, z: number): boolean =>
   Math.abs(x - 18_000) <= 4_000 && Math.abs(z - 18_000) <= 4_000;
 // The oldest tunnel and SHA Beach, open only once the Genesis Room is.

@@ -15,7 +15,8 @@ describe("starting a day", () => {
     for (const config of short)
       expect(degenRules.init(1, config)).toEqual({
         ok: false,
-        reason: "a day takes a day and a hero, and may add loop, fate or boon",
+        reason:
+          "a day takes a day and a hero, and may add loop, fate, boon or won",
       });
     const wrong: Readonly<Record<string, number | string>>[] = [
       { day: 0, hero: 1 },
@@ -27,6 +28,17 @@ describe("starting a day", () => {
     for (const config of wrong)
       expect(degenRules.init(1, config).ok).toBe(false);
     expect(degenRules.init(1, { day: 5, hero: 9 }).ok).toBe(true);
+    // A story once won says so with `won: 1`, and only that.
+    expect(degenRules.init(1, { day: 1, hero: 1, won: 2 })).toEqual({
+      ok: false,
+      reason: "won is 1 once the story is won",
+    });
+    const won = degenRules.init(1, { day: 1, hero: 1, won: 1 });
+    const fresh = degenRules.init(1, { day: 1, hero: 1 });
+    expect([won.ok && won.state.won, fresh.ok && fresh.state.won]).toEqual([
+      true,
+      false,
+    ]);
   });
 
   it("is the same for the same seed, wakes the hero at home with that day's pocket, and lets the seed decide today's scam", () => {
@@ -73,6 +85,9 @@ describe("an input", () => {
     expect(refusal(day, "lift", { by: 0, tick: 0 })).toBe("by must be 1 or -1");
     expect(refusal(day, "lift", { by: 2, tick: 0 })).toBe("by must be 1 or -1");
     expect(refusal(day, "lift", { by: 1, tick: 0 })).toBe(
+      "nothing to climb here",
+    );
+    expect(refusal({ ...day, ride: "bike" }, "lift", { by: 1, tick: 0 })).toBe(
       "only a helicopter climbs",
     );
     expect(refusal(day, "act", { tick: 0 })).toBeNull();

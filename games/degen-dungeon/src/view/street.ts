@@ -19,6 +19,7 @@ import { box } from "./hash.ts";
 import { kerbs, turnedBox } from "./kerbs.ts";
 import { buildNotices } from "./notices.ts";
 import { toonSteps } from "./textures.ts";
+import { pavement } from "./prints.ts";
 
 // The street furniture of every block, on the pavements round each lot: lamps (lit at night, with a pool of light under each), fire
 // hydrants, benches and bins, newspaper boxes, traffic lights at the crossroads cycling red, amber and green, posters pasted on the walls,
@@ -57,7 +58,8 @@ export function buildStreet(): Street {
     color: "#ffffff",
     gradientMap: toonSteps,
   });
-  const lamps = kerbs(18, 1.3, 1);
+  // Lamps and hydrants stand by the kerb, benches and papers by the walls.
+  const lamps = kerbs(18, pavement - 0.4, 1);
   const lampPosts = lamps.map(({ x, z }): Piece => [
     box(x, 2.6, z, 0.16, 5.2, 0.16),
     "#2a2f45",
@@ -89,7 +91,7 @@ export function buildStreet(): Street {
       new Matrix4().makeRotationX(-Math.PI / 2).setPosition(x, 0.05, z),
     ),
   );
-  const hydrants = kerbs(31, 1.1, 2).map(({ x, z }): Piece => [
+  const hydrants = kerbs(31, pavement - 0.6, 2).map(({ x, z }): Piece => [
     box(x + 2.2, 0.4, z, 0.36, 0.8, 0.36),
     "#e63946",
   ]);

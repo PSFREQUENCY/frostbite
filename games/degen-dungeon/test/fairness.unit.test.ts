@@ -89,6 +89,10 @@ describe("the milestones", () => {
     expect(earned(saucerDay([], true, 1))).toEqual(["intergalactic-otc"]);
     expect(earned(saucerDay([]))).toEqual(["taken-up"]);
     expect(earned(masksDay())).toEqual(["nine-masks", "masked"]);
+    // Before the story is won the statues stay stone, and a mask will not go on.
+    expect(() => masksDay(false)).toThrow(
+      "the statues wake once the story is won",
+    );
     expect(earned(roadTripDay())).toEqual(["road-trip"]);
     expect(earned(bigRigDay())).toEqual(["big-rig"]);
   });

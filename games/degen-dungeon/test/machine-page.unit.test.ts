@@ -5,7 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 import { guideFor } from "../src/guide.ts";
 import { noteFor } from "../src/page/hud.ts";
 import { goalFor, talkOf } from "../src/page/words.ts";
-import { afterDay, freshProgress, nextRun, restore } from "../src/progress.ts";
+import {
+  afterDay,
+  choosing,
+  freshProgress,
+  nextRun,
+  restore,
+} from "../src/progress.ts";
 import { fateDun } from "../src/rules/constants.ts";
 import { startDay } from "../src/rules/day.ts";
 import { echoAt, recklessOn, statue } from "../src/rules/machine.ts";
@@ -31,11 +37,22 @@ describe("the Time Machine on the page", () => {
       day: 1,
       fate: 0,
       loop: 1,
+      won: false,
     });
+    // The last day ending on SHA Beach wins the story: the Time Machine opens, the statues' masks wake, and the ring is offered again.
     const last = { ...day, cause: "beach", day: 5 } as const;
-    expect(afterDay({ ...freshProgress, day: 5 }, last).progress.machine).toBe(
+    const won = afterDay(
+      { ...freshProgress, day: 5, seen: true },
+      last,
+    ).progress;
+    expect([won.machine, won.won, nextRun(won).won, choosing(won)]).toEqual([
       true,
-    );
+      true,
+      true,
+      true,
+    ]);
+    expect(choosing({ ...freshProgress, seen: true })).toBe(false);
+    expect(choosing(freshProgress)).toBe(true);
     expect(
       afterDay(freshProgress, { ...day, cause: "home" }).progress.machine,
     ).toBe(false);
@@ -55,10 +72,11 @@ describe("the Time Machine on the page", () => {
       day: 1,
       fate: 3,
       loop: 0,
+      won: false,
     });
     expect(
       nextRun({ ...freshProgress, loops: 40, machine: true, wish: 2 }),
-    ).toEqual({ boon: 0, day: 1, fate: 0, loop: 9 });
+    ).toEqual({ boon: 0, day: 1, fate: 0, loop: 9, won: false });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({
       fate: -3,
       loops: 2,

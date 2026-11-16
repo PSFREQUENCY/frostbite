@@ -1,3 +1,4 @@
+import { canClimb, clinging } from "../rules/climb.ts";
 import { rankOf } from "../rules/heat.ts";
 import type { DayState } from "../rules/types.ts";
 import { ticksPerSecond } from "../rules/constants.ts";
@@ -8,7 +9,7 @@ import { createReceipts } from "./receipts.ts";
 import { goalFor, rankNames, talkOf, weatherNames } from "./words.ts";
 
 // Everything beside the picture that follows the day: the readouts, Pip's line, the talk with its answer buttons, frost vision's button
-// with the seconds left, and the helicopter's climb and drop, shown only in a helicopter.
+// with the seconds left, and the climb and drop buttons, live in a helicopter and beside or up a building's wall.
 export function createPanel(hands: {
   readonly answer: (choice: number) => void;
   // A chime as money comes in or goes out.
@@ -32,6 +33,7 @@ export function createPanel(hands: {
   const up = element("up", "button");
   const down = element("down", "button");
   let shown = "";
+  let placed = "-";
   const receipts = createReceipts(
     outs.score.closest("p") ?? outs.score,
     element("receipt", "aside"),
@@ -55,8 +57,18 @@ export function createPanel(hands: {
       look.disabled = day === null || (left === 0 && !day.looking);
       look.textContent = `${day?.looking === true ? "Vision on" : "Frost vision"}, ${String(left)}s`;
       look.dataset.left = String(left);
-      up.hidden = day?.ride !== "heli";
-      down.hidden = up.hidden;
+      // Climb and drop: always in a helicopter; on foot, up a wall or beside one, as far as the storeys go (looked at only as the hero
+      // moves, since finding a wall takes a few dozen looks round).
+      const where =
+        day === null
+          ? ""
+          : `${day.ride} ${String(day.x)} ${String(day.z)} ${String(day.level)} ${String(day.talk)}`;
+      if (where !== placed) {
+        placed = where;
+        const flying = day?.ride === "heli";
+        up.disabled = !flying && (day === null || !canClimb(day));
+        down.disabled = !flying && (day === null || !clinging(day));
+      }
       const talk = day === null ? null : talkOf(day);
       box.hidden = talk === null;
       wish.hidden = day?.talk !== "lantern";

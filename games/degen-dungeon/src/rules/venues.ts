@@ -1,4 +1,4 @@
-import { block, lots, visionTicks } from "./constants.ts";
+import { block, bodyRadius, lots, visionTicks } from "./constants.ts";
 import { cooled } from "./heat.ts";
 import type { Box } from "./rooms.ts";
 import type { Draft } from "./types.ts";
@@ -57,18 +57,22 @@ const half = 1_300;
 export const floorRadius = 1_780;
 export const plazaRadius = 1_880;
 
+// A borough's lot by its corner (0 north-west, 1 north-east, 2 south-west, 3 south-east), in centimetres.
+export function lotOf(borough: number, corner: number): Box {
+  const [west, east] = lots[corner % 2] ?? [0, 0];
+  const [north, south] = lots[Math.floor(corner / 2)] ?? [0, 0];
+  const left = block * (borough % 3);
+  const top = block * Math.floor(borough / 3);
+  return { x0: left + west, x1: left + east, z0: top + north, z1: top + south };
+}
+// The Old Floe's lawns: three of its four lots are grass, open to walk, sit and ride on.
+export const lawns: readonly Box[] = [0, 1, 2].map((corner) =>
+  lotOf(2, corner),
+);
+
 export const venues: readonly Venue[] = table.map(
   ([borough, corner, kind, label]) => {
-    const [west, east] = lots[corner % 2] ?? [0, 0];
-    const [north, south] = lots[Math.floor(corner / 2)] ?? [0, 0];
-    const left = block * (borough % 3);
-    const top = block * Math.floor(borough / 3);
-    const lot = {
-      x0: left + west,
-      x1: left + east,
-      z0: top + north,
-      z1: top + south,
-    };
+    const lot = lotOf(borough, corner);
     const x = (lot.x0 + lot.x1) / 2;
     const z = (lot.z0 + lot.z1) / 2;
     const out = corner === 1 ? 1 : -1;
@@ -118,12 +122,21 @@ export const inVenue = (x: number, z: number): boolean =>
     (venue) =>
       onFloor(venue, x, z) || (venue.door !== null && inside(venue.door, x, z)),
   );
-// Out of doors on a landmark's lot, where wheels go as well as feet: the plaza round a hall (clear of its wall), and the open lots.
+// Out of doors, where wheels go as well as feet: the plaza round a hall (clear of its wall), the open landmarks (the skate park and the
+// green) and the lawns, each right up to the pavement (a lot's edge is kept a body's width clear only where a building stands on it).
+const reaching = (box: Box): Box => ({
+  x0: box.x0 - bodyRadius,
+  x1: box.x1 + bodyRadius,
+  z0: box.z0 - bodyRadius,
+  z1: box.z1 + bodyRadius,
+});
 export const outdoors = (x: number, z: number): boolean =>
+  lawns.some((lawn) => inside(reaching(lawn), x, z)) ||
   venues.some((venue) =>
     venue.open
-      ? inside(venue.lot, x, z)
-      : inside(venue.lot, x, z) && away(venue, x, z) >= plazaRadius ** 2,
+      ? inside(reaching(venue.lot), x, z)
+      : inside(reaching(venue.lot), x, z) &&
+        away(venue, x, z) >= plazaRadius ** 2,
   );
 // The landmark whose floor a point is on, if any.
 export const venueAt = (x: number, z: number): Venue | null =>

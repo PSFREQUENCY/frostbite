@@ -1,3 +1,4 @@
+import { clinging } from "./climb.ts";
 import { fogLine, gaitTenths } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
@@ -75,12 +76,12 @@ function free(day: Draft): (x: number, z: number) => boolean {
 }
 
 // One tick of travel on the heading held. Each axis moves on its own, so a body slides along a wall instead of sticking to it. Nobody
-// moves while an offer waits for an answer, and a helicopter on the ground stays there. A boat or a helicopter that crosses the fog line
+// moves while an offer waits for an answer or while up a wall, and a helicopter on the ground stays there. A boat or a helicopter that crosses the fog line
 // toward SHA Beach is back where it set out from.
 export function moved(day: Draft): void {
   const unit = units[day.dir];
   if (unit === undefined || day.talk !== null) return;
-  if (day.ride === "heli" && day.level === 0) return;
+  if (day.ride === "heli" ? day.level === 0 : clinging(day)) return;
   const pace = paceOf(day);
   const open = free(day);
   const x = day.x + Math.trunc((unit[0] * pace) / 1_024);

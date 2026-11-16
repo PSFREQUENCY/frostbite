@@ -21,10 +21,13 @@ import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
-import { castFor, hopAt, placeCast } from "./lead.ts";
+import { createClimber } from "./climbing.ts";
+import { airAt, hopAt } from "./hop.ts";
+import { castFor, placeCast } from "./lead.ts";
+import { wayOf } from "./poses.ts";
 import { buildLine } from "./line.ts";
 import { buildMoon } from "./moon.ts";
-import { loadModels, modelOf, rigged, type Model } from "./models/load.ts";
+import { dress, loadModels, type Model } from "./models/load.ts";
 import type { ModelName } from "./models/packed.ts";
 import { shaderTime, visionDepth } from "./models/shaders.ts";
 import { createNewbie } from "./newbie.ts";
@@ -61,8 +64,6 @@ export interface WorldView {
   // The way the camera looks (radians from east toward south), which the stick's "up" means.
   yaw(): number;
 }
-
-const levelHeight = 12;
 
 export function createWorldView(
   stage: Stage,
@@ -117,20 +118,13 @@ export function createWorldView(
   const past = createNewbie(scene, loaded);
   const people = createPeople(scene, cast);
   const spinRing = createRing(cast, shadow);
-  void models?.then((all) => {
-    for (const [name, model] of all) loaded.set(name, model);
-    cast.forEach((actor, hero) => {
-      const name = modelOf[hero];
-      const model =
-        name === undefined || name === null ? undefined : all.get(name);
-      if (model !== undefined) actor.wear(rigged(model, heightOf(hero)));
-    });
-  });
+  void models?.then((all) => dress(cast, all, loaded));
   // Inside a building: on the island and not on its streets or avenues (the rules' own map, in centimetres).
   const rig = createRig(
     (x, z) => x > 0 && z > 0 && x < 360 && z < 360 && !onLand(x * 100, z * 100),
   );
   const towers = city.root.getObjectByName("towers");
+  const climber = createClimber();
   let heading = Math.PI / 2;
   let era = 0;
   let clock = 0;
@@ -171,12 +165,14 @@ export function createWorldView(
       grown(1);
       setEra(state.day);
       if (state.dir >= 0) heading = (state.dir * Math.PI) / 8;
-      const at = {
+      // Up a wall the hero faces it and the height eases a storey at a time (`climbing.ts`).
+      const at = climber.follow(
+        state,
+        metres(state.x),
+        metres(state.z),
         heading,
-        x: metres(state.x),
-        y: state.level * levelHeight,
-        z: metres(state.z),
-      };
+        dt,
+      );
       const { along, dark } = timeOf(state.tick);
       clock = seconds;
       light.set(
@@ -217,14 +213,14 @@ export function createWorldView(
       const face = past.show(state, at, seconds, dt);
       // On the moon: a helmet, a black sky, and jumps that hang in the air.
       const up = moon.on(at.x, at.z);
-      const lead = placeCast(
-        castFor(cast, forms, state),
-        state,
-        at,
-        seconds,
+      const since = up ? (seconds - jumped) / 1.8 : seconds - jumped;
+      const lead = placeCast(castFor(cast, forms, state), state, at, {
+        air: at.hold === null ? airAt(since) : -1,
         dt,
-        up ? hopAt((seconds - jumped) / 1.8) * 2.4 : hopAt(seconds - jumped),
-      );
+        hop: at.hold === null ? hopAt(since) * (up ? 2.4 : 1) : 0,
+        seconds,
+        way: wayOf(state.gait, at.hold),
+      });
       moon.wear(up ? (lead ?? null) : null, heightOf(state.hero));
       city.root.visible = !up;
       town.root.visible = !up;

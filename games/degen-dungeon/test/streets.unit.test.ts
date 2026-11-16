@@ -129,7 +129,14 @@ describe("the world view's extras", () => {
       true,
       false,
     ]);
+    // Crawling is the body's own joints, not a body tipped over: the root stays upright and the spine leans flat.
     view.day({ ...day, gait: 3, dir: -1 }, 6, 0.016, false);
-    expect(part("hero-7")?.rotation.x).toBeGreaterThan(1);
+    const turns: number[] = [];
+    part("hero-7")?.traverse((one) => turns.push(one.rotation.x));
+    expect([part("hero-7")?.rotation.x, Math.max(...turns)]).toEqual([
+      0,
+      expect.any(Number),
+    ]);
+    expect(Math.max(...turns)).toBeGreaterThan(1.2);
   });
 });

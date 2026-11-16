@@ -55,9 +55,10 @@ export function saucerDay(
   return bot;
 }
 
-// Every statue's mask, one after another, at a run (a masked hero is quicker still).
-export function masksDay(): Bot {
-  const bot = createBot(2, 7, 1);
+// Every statue's mask, one after another, at a run (a masked hero is quicker still), once the story has been won (before then the
+// statues stay stone).
+export function masksDay(won = true): Bot {
+  const bot = createBot(2, 7, 1, 0, 0, 0, won);
   bot.gait(1);
   for (const index of [0, 1, 2, 5, 4, 3, 6, 7, 8])
     if (statues[index] !== undefined) bot.use(statueId(index));

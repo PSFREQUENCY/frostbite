@@ -4,7 +4,6 @@ import {
   Group,
   LoopOnce,
   Mesh,
-  Quaternion,
   Vector3,
   type AnimationAction,
   type AnimationClip,
@@ -14,12 +13,17 @@ import {
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
-import { seatAngles, type Seat } from "../body.ts";
+import { heightOf, type Actor } from "../actor.ts";
+import type { Seat } from "../body.ts";
+import { jumpLength } from "../hop.ts";
+import { legReach, poseFor, type Way } from "../poses.ts";
+import { bendPose, bendSeat, bonesOf } from "./bend.ts";
 import { modelNames, packed, type ModelName } from "./packed.ts";
 import { holo, pulse, spirit, standard } from "./shaders.ts";
 
 // Frost Run's heroes as Blender made them, read from the text they were packed into (the frame may load no files), finished with the same
-// shader looks, and played with their own clips: Idle standing, Run on the move, Select on the hero ring, Win at a good end.
+// shader looks, and played with their own clips: Idle standing, Run on the move, Duck crouching, Hop in a jump, Select on the hero ring,
+// Win at a good end. Crawling, climbing and hanging bend their bones by the same poses as the bodies built in code (`bend.ts`).
 export interface Model {
   readonly clips: readonly AnimationClip[];
   readonly scene: Object3D;
@@ -32,6 +36,20 @@ export const modelOf: readonly (ModelName | null)[] = [
   "hero-lumen",
   "hero-hrimm",
 ];
+
+// Puts each hero's model on once the models have arrived, and keeps them (by name) for whoever else wears one, such as a newbie self.
+export function dress(
+  cast: readonly Actor[],
+  all: ReadonlyMap<ModelName, Model>,
+  loaded: Map<ModelName, Model>,
+): void {
+  for (const [name, model] of all) loaded.set(name, model);
+  cast.forEach((actor, hero) => {
+    const name = modelOf[hero];
+    const model = name == null ? undefined : all.get(name);
+    if (model !== undefined) actor.wear(rigged(model, heightOf(hero)));
+  });
+}
 
 function bytesOf(text: string): ArrayBuffer {
   const binary = atob(text);
@@ -89,28 +107,34 @@ export interface Rigged {
   // How high the hips stand above the feet (metres).
   readonly hip: number;
   readonly root: Group;
-  update(pace: number, dt: number, cheering: boolean, seat?: Seat): void;
+  update(
+    pace: number,
+    dt: number,
+    cheering: boolean,
+    seat?: Seat,
+    way?: Way,
+    air?: number,
+  ): void;
 }
 
-// The bones a seat bends, by the names the models give them (a loader drops the dots), and which of the seat's angles each takes.
-const bent: readonly (readonly [
-  string,
-  "elbow" | "hip" | "knee" | "shoulder",
-  number,
-])[] = [
-  ["legL", "hip", 0],
-  ["legR", "hip", 1],
-  ["shinL", "knee", 0],
-  ["shinR", "knee", 1],
-  ["footL", "knee", 0],
-  ["footR", "knee", 1],
-  ["armL", "shoulder", 0],
-  ["armR", "shoulder", 1],
-  ["foreL", "elbow", 0],
-  ["foreR", "elbow", 1],
-];
-const turn = new Quaternion();
-const across = new Vector3(1, 0, 0);
+// A code-built body's straight leg (hip to sole, in its own units), against which a bent pose's drop is measured.
+const straight = 0.86;
+// The clip for what a model is doing on foot, by its way, its pace and whether it is in the air.
+export const clipFor = (
+  way: Way,
+  pace: number,
+  air: number,
+  quadruped: boolean,
+): string =>
+  way === "climb" || way === "hang"
+    ? "Idle"
+    : air >= 0
+      ? "Hop"
+      : way === "crouch" || (way === "crawl" && !quadruped)
+        ? "Duck"
+        : pace > 0
+          ? "Run"
+          : "Idle";
 
 // One copy of a model, stood up to a height in metres and facing along its root's +z, with its clips blended by what it is doing.
 export function rigged(model: Model, height: number): Rigged {
@@ -137,33 +161,56 @@ export function rigged(model: Model, height: number): Rigged {
     current = next;
   };
   play("Idle");
-  // Each bone a seat bends, with its resting turn, found once.
-  const bones = bent.flatMap(([name, angle, side]) => {
-    const bone =
-      body.getObjectByName(name) ??
-      body.getObjectByName(name.replace(/([LR])$/, ".$1"));
-    return bone === undefined
-      ? []
-      : [{ angle, bone, rest: bone.quaternion.clone(), side }];
-  });
+  // The bones a seat or a pose bends, each with its resting turn, found once; how long the jump's clip is, to fit it to a jump.
+  const bones = bonesOf(body);
+  const hop = actions.get("Hop")?.getClip().duration ?? jumpLength;
+  const resting = body.position.y;
+  const hip = height * 0.48;
   let clock = 0;
   return {
-    hip: height * 0.48,
+    hip,
     root,
-    update(pace, dt, cheering, seat = null) {
-      play(cheering ? "Win" : pace > 0 && seat === null ? "Run" : "Idle");
+    update(pace, dt, cheering, seat = null, way = "upright", air = -1) {
+      const clip = cheering
+        ? "Win"
+        : seat === null
+          ? clipFor(way, pace, air, bones.quadruped)
+          : "Idle";
+      play(clip);
       if (current !== null)
-        current.timeScale = pace > 0 ? Math.max(0.6, pace / 14) : 1;
+        current.timeScale =
+          clip === "Hop"
+            ? hop / jumpLength
+            : pace > 0 && clip === "Run"
+              ? Math.max(0.4, pace / 14)
+              : 1;
       mixer.update(dt);
       clock += dt;
-      if (seat === null) return;
-      const crank = clock * (pace > 0 ? 3 + pace * 0.25 : 0.4);
-      for (const { angle, bone, rest, side } of bones)
-        bone.quaternion
-          .copy(rest)
-          .multiply(
-            turn.setFromAxisAngle(across, seatAngles(seat, side, crank)[angle]),
-          );
+      body.position.y = resting;
+      if (seat !== null) {
+        const crank = clock * (pace > 0 ? 3 + pace * 0.25 : 0.4);
+        if (!bones.quadruped) bendSeat(bones, seat, crank);
+        return;
+      }
+      if (way !== "climb" && way !== "hang" && way !== "crawl") return;
+      // A four-legged model crawls as a built body crouches, on all four legs.
+      const pose = poseFor(
+        way === "crawl" && bones.quadruped ? "crouch" : way,
+        pace,
+        clock,
+        air,
+      );
+      bendPose(bones, pose, way !== "crawl");
+      // On hands and knees the hips come down as far as a built body's would, for the model's own hip height.
+      if (pose.planted)
+        body.position.y =
+          resting -
+          hip *
+            (1 -
+              Math.max(
+                ...pose.legs.map((leg) => legReach(leg, 0.435, 0.424, 0.064)),
+              ) /
+                straight);
     },
   };
 }

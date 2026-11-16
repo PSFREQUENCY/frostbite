@@ -10,10 +10,10 @@ import { chapterDone, dayOneGoal } from "./rules/story.ts";
 import { heroes } from "./rules/heroes.ts";
 import type { DayState } from "./rules/types.ts";
 
-// What the platform is asked to remember: the best day, the story day the player is on, the hero last chosen, whether the opening has
-// been seen, whether Slip is unlocked, the Time Machine (whether it is open, how many trips back there have been, and how they have bent
-// the timeline), the lantern wish sent up on the last story day, and the sound settings. Anything handed back is untrusted and is checked
-// field by field.
+// What the platform is asked to remember: the best day, the story day the player is on, the hero the game is played with, whether that
+// hero has been chosen, whether Slip is unlocked, whether the story has been won (a last day ended on SHA Beach), the Time Machine
+// (whether it is open, how many trips back there have been, and how they have bent the timeline), the lantern wish sent up on the last
+// story day, and the sound settings. Anything handed back is untrusted and is checked field by field.
 export interface Progress {
   readonly best: number;
   readonly day: number;
@@ -27,6 +27,7 @@ export interface Progress {
   readonly sound: SoundSettings;
   // The lantern wish (1 to 4) the last story day sent up, which the next one carries; 0 for none.
   readonly wish: number;
+  readonly won: boolean;
 }
 
 export const freshProgress: Progress = {
@@ -40,6 +41,7 @@ export const freshProgress: Progress = {
   slip: false,
   sound: defaultSound,
   wish: 0,
+  won: false,
 };
 
 const whole = (
@@ -69,6 +71,7 @@ export function restore(saved: unknown): Progress {
     slip: fields.slip === true,
     sound: parseSound(fields.sound),
     wish: whole(fields.wish, 0, 4, 0),
+    won: fields.won === true,
   };
 }
 
@@ -105,9 +108,15 @@ export function afterDay(
       machine: !trip && (progress.machine || won || day.cause === "machine"),
       slip: progress.slip || (day.day === stormDay && day.storm > 0),
       wish: trip || day.cause === "abducted" ? 0 : day.wish,
+      won: progress.won || won,
     },
   };
 }
+
+// Whether the next run offers the hero ring: the first day of a game, before a hero is chosen, and every day once the story is won.
+// Until then the game is played with the one hero chosen at its start.
+export const choosing = (progress: Progress): boolean =>
+  !progress.seen || progress.won;
 
 // The day the first screen begins: a trip back to day one while the Time Machine is open, or the story day the player is on.
 // A story day carries the timeline the trips back have left, as far as the rules take it, and last night's lantern wish.
@@ -118,6 +127,7 @@ export const nextRun = (
   readonly day: number;
   readonly fate: number;
   readonly loop: number;
+  readonly won: boolean;
 } =>
   progress.machine
     ? {
@@ -125,10 +135,12 @@ export const nextRun = (
         day: 1,
         fate: 0,
         loop: Math.min(maxLoops, progress.loops + 1),
+        won: progress.won,
       }
     : {
         boon: progress.wish,
         day: progress.day,
         fate: Math.max(-9, Math.min(9, progress.fate)),
         loop: 0,
+        won: progress.won,
       };

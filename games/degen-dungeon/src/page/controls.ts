@@ -1,12 +1,14 @@
 import { attachKeys, standardKeys } from "@frostbite/game-sdk/controls";
 import { attachZones, type Where } from "@frostbite/game-sdk/touch-zones";
 
+import { attachStick } from "./stick.ts";
+
 // What the player's hands can do. Keys: arrows or WASD walk (eight ways, by the screen: up is the way the camera looks), Shift held runs,
 // C crouches and Z crawls (each again to stand), Space jumps (or gives the first answer while one waits), E acts and says yes, X or Escape
 // says no, 1 to 5 pick an answer, B or I opens the backpack, V is frost vision, R and F take a helicopter up and down, Enter starts, P
 // pauses; before a day, left and right turn the hero ring. Fingers: before a day a tap on either side turns the ring and a tap in the
-// middle starts; during one the left of the screen is a stick (sixteen ways) and a tap on the right acts, or answers yes on the right and
-// no on the left while an offer waits. The buttons under the screen do the rest.
+// middle starts; during one a thumb anywhere on the left of the screen is a stick (`stick.ts`, sixteen ways) and a tap on the right acts,
+// or answers yes on the right and no on the left while an offer waits. The buttons under the screen do the rest.
 export interface Hands {
   readonly act: () => void;
   readonly answer: (choice: number) => void;
@@ -27,7 +29,7 @@ export interface Hands {
 }
 // Whether a day is being played, and whether an offer is waiting in it.
 export type Mode = "asked" | "playing" | "waiting";
-export type Zone = number | "act" | "next" | "no" | "prev" | "start";
+export type Zone = "act" | "next" | "no" | "prev" | "start";
 
 const keys = {
   ...standardKeys,
@@ -65,40 +67,18 @@ export const headingOf = (east: number, south: number): number =>
     ? -1
     : (Math.round(Math.atan2(south, east) / (Math.PI / 8)) + 16) % 16;
 
-// The stick sits in the lower left of the screen. A finger away from its middle steers that way; on its middle it steers nowhere. The
-// screen's shape (width over height) keeps the ways true on a tall phone screen as on a wide one.
-const stick = { x: 0.22, y: 0.62 };
-export function steer(where: Where, shape = 16 / 9): number | null {
-  const east = (where.x - stick.x) * shape * 9;
-  const south = (where.y - stick.y) * 9;
-  if (Math.hypot(east, south) < 0.5) return null;
-  return (Math.round(Math.atan2(south, east) / (Math.PI / 8)) + 16) % 16;
-}
-
-export function zoneAt(mode: Mode, where: Where, shape = 16 / 9): Zone | null {
+// The screen's zones: the ring's sides and middle before a day, no and yes while an offer waits, and during a day an act on the right
+// (the left is the stick's, which takes its thumb before the zones see it, so a second finger there does nothing).
+export function zoneAt(mode: Mode, where: Where): Zone | null {
   if (mode === "waiting")
     return where.x < 0.25 ? "prev" : where.x > 0.75 ? "next" : "start";
   if (mode === "asked") return where.x < 0.5 ? "no" : "act";
-  return where.x < 0.5 ? steer(where, shape) : "act";
+  return where.x < 0.5 ? null : "act";
 }
 
-// The drawn stick's knob leans the way a heading points (or rests in the middle for none).
-export function lean(knob: HTMLElement | null, heading: number): void {
-  const angle = (heading * Math.PI) / 8;
-  knob?.style.setProperty(
-    "--east",
-    heading < 0 ? "0" : Math.cos(angle).toFixed(2),
-  );
-  knob?.style.setProperty(
-    "--south",
-    heading < 0 ? "0" : Math.sin(angle).toFixed(2),
-  );
-}
-
-// What a finger does on entering a zone: a heading is held, a side turns the ring, and the rest are the hands' own names.
+// What a finger does on entering a zone: a side turns the ring, and the rest are the hands' own names.
 export function enterZone(hands: Hands, zone: Zone): void {
-  if (typeof zone === "number") hands.move(zone);
-  else if (zone === "prev") hands.turn(-1);
+  if (zone === "prev") hands.turn(-1);
   else if (zone === "next") hands.turn(1);
   else if (zone === "start") hands.tapStart();
   else hands[zone]();
@@ -150,30 +130,22 @@ export function attachControls(
     )
       hands[action]();
   });
-  const knob = document.querySelector<HTMLElement>("#stick span");
+  // The stick listens first, so the thumb it takes never reaches the zones.
+  const stopStick = attachStick(screen, {
+    move: hands.move,
+    ring: document.querySelector<HTMLElement>("#stick"),
+    steering: () => mode() === "playing",
+  });
   const stopZones = attachZones<Zone>(screen, {
-    enter: (zone) => {
-      if (typeof zone === "number") lean(knob, zone);
-      enterZone(hands, zone);
-    },
+    enter: (zone) => enterZone(hands, zone),
     fingersOnly: true,
-    leave: (zone) => {
-      if (typeof zone !== "number") return;
-      lean(knob, -1);
-      hands.move(-1);
-    },
+    leave: () => undefined,
     slide: true,
-    zoneAt: (where) =>
-      zoneAt(
-        mode(),
-        where,
-        screen.clientHeight > 0
-          ? screen.clientWidth / screen.clientHeight
-          : 16 / 9,
-      ),
+    zoneAt: (where) => zoneAt(mode(), where),
   });
   return () => {
     stopKeys();
+    stopStick();
     stopZones();
   };
 }

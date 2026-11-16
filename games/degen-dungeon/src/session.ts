@@ -47,6 +47,8 @@ export interface RunSessionOptions {
   // Called once for each milestone the day earns, as soon as it is earned.
   readonly onEarned?: (milestone: string) => void;
   readonly seed: number;
+  // Whether the story has been won, which wakes the statues' masks.
+  readonly won?: boolean;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -57,13 +59,16 @@ export function createRunSession(options: RunSessionOptions): RunSession {
   const fate = options.fate ?? 0;
   const boon = options.boon ?? 0;
   // Only the settings that change the day are written, so a plain day's record stays as small as it was.
+  const won: Readonly<Record<string, number>> =
+    options.won === true ? { won: 1 } : {};
   const config =
     loop > 0
-      ? { ...story, loop }
+      ? { ...story, loop, ...won }
       : {
           ...story,
           ...(fate === 0 ? {} : { fate }),
           ...(boon === 0 ? {} : { boon }),
+          ...won,
         };
   const init = degenRules.init(options.seed, config);
   if (!init.ok) throw new Error(init.reason);

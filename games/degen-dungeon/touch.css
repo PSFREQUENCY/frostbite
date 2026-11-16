@@ -83,7 +83,7 @@
     pointer-events: auto;
     touch-action: none;
   }
-  :root:root body main .actions :is(#up, #down)[hidden] {
+  :root:root body main .actions :is(#up, #down):disabled {
     display: none;
   }
   :root:root

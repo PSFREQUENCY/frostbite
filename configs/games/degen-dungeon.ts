@@ -27,7 +27,7 @@ const once = (
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. On day two, flying saucers come for the city: bring glow sticks and pizza to make peace, or meme coins to trade, or wake up back at the start. Weather turns from fog to blizzards to thunderstorms. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Nine masked statues stand one in each borough: wear a mask and play as that statue come to life. Reach the top and the Ice Runner rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, out across the lawns and the skate park: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. On day two, flying saucers come for the city: bring glow sticks and pizza to make peace, or meme coins to trade, or wake up back at the start. Weather turns from fog to blizzards to thunderstorms. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Nine masked statues stand one in each borough: win the story and their masks wake, so you can play as each statue come to life. Reach the top and the Ice Runner rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -100,7 +100,7 @@ export const degenDungeonGame = defineGame({
     once(
       "nine-masks",
       "Nine masks",
-      "Wear the masks of all nine statues in one day.",
+      "Once the story is won, wear the masks of all nine statues in one day.",
       "Every borough's runner, one after another, before the day was out.",
     ),
     once(
@@ -142,7 +142,7 @@ export const degenDungeonGame = defineGame({
     once(
       "masked",
       "Masked",
-      "Put on a statue's mask and play as it.",
+      "Once the story is won, put on a statue's mask and play as it.",
       "A runner in stone stepped down, and it was you.",
     ),
     once(
@@ -283,7 +283,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "f3248ef20650d696e025f1a6f1cd5df2f2bdf6876d64ec5b295d5e2c8e954b5c",
+        "8633c272f9b10ab090548b773af466679b1f1441071c9682ca59d9dece384763",
       version: 1,
     },
   },

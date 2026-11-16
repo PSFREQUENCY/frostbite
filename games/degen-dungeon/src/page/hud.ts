@@ -1,3 +1,4 @@
+import { clinging } from "../rules/climb.ts";
 import { byInput } from "@frostbite/game-sdk/touch";
 
 import { starsOf } from "../rules/heat.ts";
@@ -16,6 +17,11 @@ export const starsText = (heat: number): string =>
 export function noteFor(day: DayState): string {
   if (day.talk !== null)
     return byInput("E or 1 to 5 answers, X walks away.", "Tap an answer.");
+  if (clinging(day))
+    return byInput(
+      "Up the wall. R climbs higher, F climbs down.",
+      "Up the wall. Climb goes higher, Drop comes down.",
+    );
   const here = (what: string): string =>
     byInput(`E: ${what}`, `Tap right: ${what}`);
   if (inReach(day, statue)) {
@@ -37,6 +43,8 @@ export function noteFor(day: DayState): string {
   const beat = beatOf(day);
   if (beat !== null && inReach(day, beat.at)) return here(goalFor(day));
   const spot = nearest(day);
+  if (spot?.kind === "statue" && !day.won)
+    return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
   if (day.parcel !== null)
     return `Carry the parcel to: ${spotNamed(day.parcel)?.label ?? "its door"}`;

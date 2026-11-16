@@ -9,14 +9,24 @@ import {
 
 import { addFeatures } from "./features.ts";
 import type { Look } from "./looks.ts";
+import { legReach, poseFor, type Way } from "./poses.ts";
 
 // A body built in code, joint by joint, so every part can move: hips, two legs with knees, a spine and chest, a neck and head, two arms
 // with elbows, and a tail for those who have one. The look (`looks.ts`) sets the size, the colours and what is on the head. Motion comes
-// in layers each frame: a walk or run from the pace (stride, knee bend, arm swing, a bob and a sway), breathing and a slow weight shift
-// while still, a blink every few seconds, and a nod while talking.
+// in layers each frame: the pose for what the body is doing (`poses.ts`: standing, walking, running, crouching, crawling, climbing,
+// hanging, a jump's tuck), with the hips set down on whichever leg reaches lowest so the feet or knees stay on the ground; breathing and
+// a slow look round while still, a blink every few seconds, and a nod while talking.
 export interface Body {
-  // Moves every joint for a pace (centimetres a tick, 0 standing), the clock, whether the body is in a conversation, and how it rides.
-  pose(pace: number, seconds: number, talking: boolean, seat?: Seat): void;
+  // Moves every joint for a pace (centimetres a tick, 0 standing), the clock, whether the body is in a conversation, how it rides, what
+  // it is doing on foot, and how far through a jump it is (-1 on the ground).
+  pose(
+    pace: number,
+    seconds: number,
+    talking: boolean,
+    seat?: Seat,
+    way?: Way,
+    air?: number,
+  ): void;
   // How high the hips stand above the feet (metres), to sit a body on a seat.
   readonly hip: number;
   readonly root: Group;
@@ -133,12 +143,19 @@ export function buildBody(look: Look): Body {
   frame.scale.setScalar(size);
   const leg = 0.72;
   const hips = joint(frame, leg + 0.1);
+  const radius = 0.075 * look.bulk;
   const legs = [-1, 1].map((side) =>
-    limb(hips, [side * 0.12 * look.bulk, 0, 0], 0.075 * look.bulk, leg, [
+    limb(hips, [side * 0.12 * look.bulk, 0, 0], radius, leg, [
       look.legs,
       look.legs,
     ]),
   );
+  // The leg's measures for setting the hips down: hip to knee, knee to sole, the shin's thickness, and how far a straight leg reaches
+  // past the hips' standing height (the sole sits that little into the ground).
+  const thigh = leg / 2 + radius;
+  const shin = leg / 2 + radius * 0.85;
+  const thickness = radius * 0.85;
+  const sink = thigh + shin - (leg + 0.1);
   const spine = joint(hips, 0.02);
   const torso = new Mesh(
     new CapsuleGeometry(0.2 * look.bulk, 0.34, 4, 10),
@@ -208,38 +225,39 @@ export function buildBody(look: Look): Body {
 
   return {
     hip: (leg + 0.1) * size,
-    pose(pace, seconds, talking, seat = null) {
+    pose(pace, seconds, talking, seat = null, way = "upright", air = -1) {
       if (seat !== null) {
         ride(seat, pace, seconds, talking);
         return;
       }
-      const moving = Math.min(1, pace / 14);
-      const step = seconds * (4 + pace * 0.35);
-      const swing = Math.sin(step) * 0.7 * moving;
+      const pose = poseFor(way, pace, seconds, air);
       legs.forEach((one, side) => {
-        const phase = side === 0 ? swing : -swing;
-        one.upper.rotation.x = phase;
-        one.upper.rotation.z = 0;
-        one.lower.rotation.x =
-          Math.max(0, -Math.sin(step + (side === 0 ? 0 : Math.PI))) *
-          0.9 *
-          moving;
+        const angles = pose.legs[side] ?? pose.legs[0];
+        one.upper.rotation.x = angles.hip;
+        one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.spread;
+        one.lower.rotation.x = angles.knee;
       });
       arms.forEach((one, side) => {
-        const phase = side === 0 ? -swing : swing;
-        one.upper.rotation.x = phase * 0.8;
-        one.upper.rotation.z =
-          (side === 0 ? -1 : 1) * (0.08 + 0.03 * Math.sin(seconds * 1.3));
-        one.lower.rotation.x = -0.25 - 0.35 * moving;
+        const angles = pose.arms[side] ?? pose.arms[0];
+        one.upper.rotation.x = angles.shoulder;
+        one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.out;
+        one.lower.rotation.x = angles.elbow;
       });
+      // Standing straight the hips are where they always were; on bent legs they come down to the lowest foot or knee.
+      hips.position.y = pose.planted
+        ? Math.max(
+            ...pose.legs.map((one) => legReach(one, thigh, shin, thickness)),
+          ) - sink
+        : leg + 0.1;
+      spine.rotation.set(pose.lean, pose.twist, 0);
       const breath = Math.sin(seconds * 2.1) * 0.015;
-      hips.position.y = leg + 0.1 + Math.abs(Math.cos(step)) * 0.05 * moving;
-      spine.rotation.y = swing * 0.2;
-      spine.rotation.x = 0.08 * moving;
       torso.scale.set(1 + breath, 1 + breath, 0.75 + breath);
-      neck.rotation.y =
-        -swing * 0.15 + (moving === 0 ? Math.sin(seconds * 0.4) * 0.25 : 0);
-      neck.rotation.x = talking ? Math.sin(seconds * 6) * 0.08 : 0;
+      const still = pace === 0 && way === "upright";
+      neck.rotation.set(
+        pose.neck + (talking ? Math.sin(seconds * 6) * 0.08 : 0),
+        -pose.twist * 0.75 + (still ? Math.sin(seconds * 0.4) * 0.25 : 0),
+        0,
+      );
       const blink = seconds % 4.3 < 0.12 ? 0.1 : 1;
       for (const { eye, open } of eyes) eye.scale.y = open * blink;
       if (tail !== null) tail.rotation.y = Math.sin(seconds * 3) * 0.4;

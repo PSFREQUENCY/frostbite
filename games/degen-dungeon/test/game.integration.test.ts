@@ -22,6 +22,35 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
     expect(byId(window, "pause")?.hasAttribute("disabled")).toBe(false);
   });
 
+  it("keeps a game's hero: a later day wakes them at once, and the ring comes back only once the story is won", async () => {
+    const recorded = recordingRuns();
+    const { window } = await play(
+      { best: 0, day: 2, hero: 0, seen: true },
+      {},
+      { runs: recorded.runs },
+    );
+    await settle();
+    byId(window, "start")?.dispatchEvent(new window.MouseEvent("click"));
+    await settle(100);
+    expect(byId(window, "pick")?.hasAttribute("hidden")).toBe(true);
+    expect(window.document.body.dataset.awake).toBe("yes");
+    closeGame();
+    const after = await play({
+      best: 0,
+      day: 5,
+      hero: 0,
+      seen: true,
+      won: true,
+    });
+    await settle();
+    byId(after.window, "start")?.dispatchEvent(
+      new after.window.MouseEvent("click"),
+    );
+    await settle(100);
+    expect(byId(after.window, "pick")?.hasAttribute("hidden")).toBe(false);
+    expect(after.window.document.body.dataset.awake).toBe("no");
+  }, 40_000);
+
   it("carries on from the best the platform hands back", async () => {
     const { window } = await play({ best: 41, day: 2, hero: 0 });
     await settle();

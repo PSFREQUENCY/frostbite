@@ -53,6 +53,7 @@ export function invade(day: Draft): void {
     day.ended ||
     day.talk !== null ||
     day.ride !== "foot" ||
+    day.level > 0 ||
     day.dir >= 0 ||
     beamAt(day) === undefined
   ) {

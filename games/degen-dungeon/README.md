@@ -7,8 +7,10 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
 
 - **Tap or Enter to play** on the title (or the act button on a phone). That starts the run: the cinematic rolls over the city (the
   block of ice, the island growing, the signs, the name of the place; a tap, Enter or an arrow skips it, and it plays once a visit),
-  then the hero ring. Choose with the arrows or a tap on either side, and wake the hero with Enter or a tap in the middle; the day
-  starts then. The hero chosen goes into the day's record, as before.
+  then, on a game's first day, the hero ring. Choose with the arrows or a tap on either side, and wake the hero with Enter or a tap
+  in the middle; the day starts then. **The whole game is played with that hero:** later days skip the ring and wake them straight
+  after the cinematic (or at once). Once the story is won the ring is offered at the start of every day. The hero goes into each day's
+  record, as before.
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
 - **The five days.** The FREE FROST riot morning, the mania, the winter (it opens on the morning of the drain and ends in the Great
@@ -70,18 +72,28 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
 - **Nine statues**, one on the middle street of each borough: athletes carved at full sprint (chest, shoulders, arms, flat hands, thighs,
   knees, calves, feet on their toes), each in its own stone and its own mask: the Harbor Sprinter's gold visor, the Tide Leaper's fin,
   the Ice Runner's blank white mask, the Neon Ghost's mirror visor, the Golden Bull's horns, the Grinner's grin, the Weaver's stripes,
-  the Digger's lamp and the Sunburst's rays. Act at one to put its mask on and play the day on as that statue come to life, a stride
-  quicker on foot; act at it again to take it off. Nobody real is carved: every figure is an original.
-- **Walk and drive anywhere outdoors:** the streets and their pavements, the plazas round every landmark's hall, the skate park and the
-  green; inside a hall the floor runs right out to its round wall.
+  the Digger's lamp and the Sunburst's rays. **They wake once the story is won** (a last day ended on SHA Beach): from then on act at
+  one to put its mask on and play the day on as that statue come to life, a stride quicker on foot, and act at it again to take it
+  off. Before that the note says the mask is waiting. Nobody real is carved: every figure is an original.
+- **Walk and drive anywhere outdoors:** the streets and their three-metre pavements, the plazas round every landmark's hall right up to
+  its curved wall, the skate park, the green and the Old Floe's three lawns (all open straight from the pavement; sitting still on the
+  lawns cools FOMO like the park's middle); inside a hall the floor runs right out to its round wall.
+- **Climb any building's wall:** from the pavement beside one (Climb on a phone, R on a keyboard), a storey at a time up to three, and
+  back down with Drop or F. Up a wall nobody walks, uses anything or gets on a ride; the beat cop waits underneath (he only catches feet
+  on the ground), but a tux at four stars still reaches. The hero turns to the wall, climbs hand over hand and hangs there.
+- **Bodies that move:** every hero and every person built in code bends at the hips, knees, spine, shoulders and elbows: they stride and
+  swing their arms, run leaning in with bent elbows, duck on bent knees, crawl on hands and knees, climb, hang and tuck their legs in a
+  jump. Frost Run's models play their own Duck and Hop clips and bend their bones the same way to crawl, climb and hang.
 - **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner lifts off its plinth on a
   column of light. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
   timeline for better or worse, and the timeline carries into the next playthrough.
 
 Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
-answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F fly a helicopter, Enter starts, P
-pauses. On a phone or tablet the picture fills the screen: the left thumb steers on a drawn stick, a tap on the right acts, and round
-buttons under the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds) and open the bag; the goal and the
+answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F climb a wall or fly a helicopter up
+and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: a thumb anywhere on the left half takes the stick
+(the ring jumps under it and the way the thumb slides from there steers, sixteen ways), a tap on the right acts, and round buttons under
+the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds), open the bag, and climb and drop where there is a wall;
+the goal and the
 talks float over the picture. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
 over a square or on a ride, and cuts in close when you use something. The next place to go glows on the corner map and stands in the
 city as a column of light.
