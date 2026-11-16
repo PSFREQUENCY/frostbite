@@ -29,7 +29,7 @@ const once = (
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, in at the windows and over the roofs, out across the lawns and the skate park: step into the corner shops and run their washers, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch a film at the cinema, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam, and S's letters lie among the flyers, three a day. In the mania, flying saucers come for the city: bring glow sticks and pizza to make peace, or wake up back at the start. Weather turns from fog to blizzards to storms. On Moon Night, send a lantern up to the crypto gods; on the last morning, your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up. Nine masked statues stand one in each borough, and their masks wake once the story is won. Reach the top and the Ice Runner rises. A milestone for every story quest, ten top skills and hidden achievements to find. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, in at the windows and over the roofs, out across the lawns and the skate park: step into the corner shops and run their washers, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch a film at the cinema, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam, and S's letters lie among the flyers, three a day. In the mania, flying saucers come for the city: bring glow sticks and pizza to make peace, or wake up back at the start; after that they visit as friends, and thirteen beam-ups leave you a saucer to fly. Weather turns from fog to blizzards to storms. On Moon Night, send a lantern up to the crypto gods; on the last morning, your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Nine masked statues stand one in each borough, and their masks wake once the story is won. Reach the top and the Ice Runner rises. A milestone for every story quest, ten top skills and hidden achievements to find. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -270,6 +270,13 @@ export const degenDungeonGame = defineGame({
       "Hidden: when the saucers come, not everyone aboard wants pizza.",
       "They paid three times what the market would.",
     ),
+    // A top achievement, counted over the days: the visitors' own saucer.
+    once(
+      "saucer-pilot",
+      "Saucer pilot",
+      "Make peace or trade aboard the visitors' saucers thirteen times over the days, then fly the saucer they leave you.",
+      "A soft hum, a warm light, and the whole island under you.",
+    ),
   ],
   network: betaTarget.chainId,
   rewards: { templateId: "game-rewards", templateVersion: "1.0.0" },
@@ -282,7 +289,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "b6d1ba323d18572353613a1c0a1a4e1fcb1090b16511035230ac0dae77961902",
+        "bb0dce229687f0b8d3e4515079c9326185fcef82035f1c87fb7a655f1883867b",
       version: 1,
     },
   },

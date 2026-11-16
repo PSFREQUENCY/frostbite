@@ -124,6 +124,8 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
     ["wheel", "#11131c", [0.2, 0.12, 0.2], [0, 0.2, 0.62]],
     ["wheel", "#11131c", [0.2, 0.12, 0.2], [0, 0.2, -0.62]],
   ],
+  // The visitors' saucer is their own model (`saucers.ts`), not a kit.
+  saucer: [],
 };
 
 // Pillars holding a cabin's roof over its glass, on both sides at each place along it.

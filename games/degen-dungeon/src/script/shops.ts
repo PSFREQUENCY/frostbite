@@ -99,6 +99,14 @@ export const shopTalks: Readonly<
     ],
     say: "A hum, a light, and the street drops away. You are aboard a saucer. Small silver visitors blink at you, very politely, and wait.",
   },
+  visit: {
+    answers: [
+      "Share the glow sticks and pizza",
+      "Trade them your meme coins",
+      "Ask to be set down",
+    ],
+    say: "The visitors know you now. A soft hum, a warm light, and you are aboard again among small silver friends, who blink hello.",
+  },
   colony: {
     answers: ["Say hello", "Leave"],
     say: "The airlock hisses. A colonist in a patched suit waves you in: they grow beans under the domes and mine nothing at all.",

@@ -198,3 +198,15 @@
     animation: none;
   }
 }
+/* On a phone the cheer sits between Pip's lines and the stick, smaller, clear of the readouts and every button. */
+@media (pointer: coarse) {
+  .toast {
+    top: 38%;
+    max-inline-size: min(19rem, calc(100% - 3rem));
+    padding: 0.4rem 0.7rem;
+    font-size: 0.82rem;
+  }
+  .toast .head {
+    font-size: 0.66rem;
+  }
+}

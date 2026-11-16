@@ -61,11 +61,18 @@ of one hero. DUN is in-game credit only.
   stands on a scooter's deck, and climbs in through a swinging driver's door to sit inside the rest, behind tinted glass. The crew take
   the other seats; whoever has no seat runs alongside. Step off anywhere (act again) and the ride stays where you left it, the last six
   of them, to be taken again.
-- **The saucers:** on the second story day, a quarter of the way in, flying saucers come down over four street crossings with their
-  beams on the ground, and more circle the sky. Stand still in a beam and you are taken up. Glow sticks from the hardware store and a
-  pizza make peace (standing, and frost vision); a bag of the Exchange's meme coin can be traded for three times what the market pays.
-  Go up with nothing to offer, or go quietly, and you pass out, see the moon go by, and wake in your own bed on the first morning of the
-  story again.
+- **The saucers:** in the mania (day 3), a quarter of the way in, flying saucers come down over four street crossings with their beams
+  on the ground, and more circle the sky. Stand still in a beam and you are taken up. Glow sticks from the hardware store and a pizza
+  make peace (standing, and frost vision); a bag of the Exchange's meme coin can be traded for three times what the market pays. Go up
+  with nothing to offer, or go quietly, and you pass out, see the moon go by, and wake in your own bed on the first morning of the story
+  again. The first peace or trade ends the alarm and that saucer flies home; the other three stay, and on every day after the mania
+  they come back as friends at the same hour (they never take you with nothing to offer, and you can ask to be set down). Each peace
+  or trade is a beam-up, one a saucer a day, counted in your save: at thirteen the visitors leave you a saucer of your own on a lawn
+  of the Old Floe. Fly it like the helicopter, only faster (R and F, or Climb and Drop, take it up and down). The backpack keeps the
+  count, and each beam-up gets a cheer.
+- **Bumping into people:** walk into someone on the street (or in the riot or the party) and they stagger aside; run into them and they
+  go down, sit a moment and get back up. In front of a ride most hop clear, and the rest are knocked over, roll and get up. Nobody is
+  hurt, and the street's people are only drawn, so a bump never changes the day.
 - **Weather:** three times a day the sky may turn harsh for three minutes: a blizzard, thick fog, a thunderstorm with lightning, a gale,
   snow or a heatwave. Fog, snow and blizzards hide you (heat fades twice as fast), a heatwave keeps it on you longer, and storms and gales
   make FOMO climb twice as fast. A player of good standing sees calmer skies.
@@ -105,8 +112,9 @@ of one hero. DUN is in-game credit only.
 
 Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
 answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F climb a wall or fly a helicopter up
-and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: a thumb anywhere on the left half takes the stick
-(the ring jumps under it and the way the thumb slides from there steers, sixteen ways), a tap on the right acts, and round buttons under
+and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: press and hold the drawn stick's edge to walk that
+way (no slide needed), or put a thumb anywhere else on the left half and slide (the ring jumps under it and the way it slides steers,
+sixteen ways); a tap on the right acts, and round buttons under
 the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds), open the bag, and climb and drop where there is a wall;
 the goal and the
 talks float over the picture. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
@@ -120,12 +128,13 @@ the status line says so. Headless test browsers are such a case, so the platform
 ## How a day is checked
 
 `src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }` (day 1 to 7), with `loop` on a
-trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish and, on the last day, `dream` for
-the dream chosen on Moon Night. Inputs are `move`, `gait`, `act`,
+trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish, `beamups` for the beam-ups of
+earlier days and, on the last day, `dream` for the dream chosen on Moon Night. Inputs are `move`, `gait`, `act`,
 `pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
 replays the record to the same end and decides the milestones from it: one for each of the twenty story quests, ten top skills, and the
-hidden ones (`src/rules/milestones.ts`). `src/replay.ts` publishes the rules; `src/sample-run.ts` is
-a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon` and `dream` are the page's word, as before.
+top achievements: nine hidden ones and the saucer pilot (`src/rules/milestones.ts`). `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon`, `beamups` and `dream` are the page's word, as
+before.
 
 ## Tests
 

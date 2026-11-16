@@ -22,7 +22,7 @@ import { inReach, nearest, spotNamed, spots, type Spot } from "./places.ts";
 import { wear } from "./statues.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
-import { motors, type Draft, type Ride } from "./types.ts";
+import { flies, motors, type Draft, type Ride } from "./types.ts";
 import { dockLand, dockWater } from "./world.ts";
 
 // The act button and the answer to a question. Each answers null when it is done, or why it cannot be. The statue,
@@ -86,6 +86,7 @@ function board(day: Draft, ride: Ride, rank: number): string | null {
   day.ride = ride;
   day.rideId = "";
   day.level = 0;
+  if (ride === "saucer") day.done = [...new Set([...day.done, "saucer"])];
   if (ride === "boat") Object.assign(day, dockWater);
   return null;
 }
@@ -201,7 +202,7 @@ export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
   if (clinging(day)) return enterWindow(day);
   if (onTheRoof(day)) return "climb down first";
-  if (day.ride === "heli") {
+  if (flies(day.ride)) {
     if (day.level > 0) return "land before stepping out";
     day.ride = "foot";
     return null;
@@ -234,7 +235,7 @@ function stepOff(day: Draft): null {
     day.rideId !== "" &&
     day.ride !== "foot" &&
     day.ride !== "boat" &&
-    day.ride !== "heli"
+    !flies(day.ride)
   )
     day.left = [
       ...day.left,

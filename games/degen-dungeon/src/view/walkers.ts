@@ -13,15 +13,17 @@ import {
 } from "three";
 
 import { block, lots } from "../rules/constants.ts";
+import { createBumps, type Mover } from "./bumps.ts";
 import { hash } from "./hash.ts";
 import { toonSteps } from "./textures.ts";
 
 // The people of Nakasato going about their day: walkers strolling round the pavements of every block (slowly, arms swinging, each in
-// their own clothes), and pairs stopped on the corner talking, one waving their hands about while the other nods. They are cartoon
-// figures, drawn many at a time; nobody here is anyone in particular, and nothing they do touches the rules.
+// their own clothes), and pairs stopped on the corner talking, one waving their hands about while the other nods. Bumped into by the
+// hero they stagger, fall and get up, or hop clear of a ride (`bumps.ts`). They are cartoon figures, drawn many at a time; nobody here
+// is anyone in particular, and nothing they do touches the rules.
 export interface Walkers {
   readonly root: Group;
-  show(seconds: number, busy: number): void;
+  show(seconds: number, busy: number, hero?: Mover | null): void;
 }
 
 const skins = [
@@ -118,6 +120,8 @@ const where = new Vector3();
 const offset = new Vector3();
 const one = new Vector3(1, 1, 1);
 const up = new Vector3(0, 1, 0);
+const tipAxis = new Vector3();
+const tipQ = new Quaternion();
 
 export function buildWalkers(): Walkers {
   const root = new Group();
@@ -205,8 +209,18 @@ export function buildWalkers(): Walkers {
     wave: number,
     nod: number,
     bob: number,
+    tip: { lean: number; x: number; z: number } | null = null,
   ): void => {
-    body.compose(where.set(x, bob, z), turnQ.setFromAxisAngle(up, turn), one);
+    turnQ.setFromAxisAngle(up, turn);
+    // Leaning over the way they were pushed, about their feet.
+    if (tip !== null && tip.lean !== 0)
+      turnQ.premultiply(
+        tipQ.setFromAxisAngle(
+          tipAxis.set(tip.z, 0, -tip.x).normalize(),
+          tip.lean,
+        ),
+      );
+    body.compose(where.set(x, bob, z), turnQ, one);
     put(torsos, index, 0, 1.15, 0, 0.06 * Math.abs(stride));
     put(heads, index, 0, 1.68, 0, nod);
     put(hair, index, 0, 1.72, -0.01, nod);
@@ -215,9 +229,10 @@ export function buildWalkers(): Walkers {
     put(arms, index * 2, 0.3, 1.42, 0, -stride * 0.8 - wave, -0.1);
     put(arms, index * 2 + 1, -0.3, 1.42, 0, stride * 0.8, 0.1);
   };
+  const placed = createBumps(people);
   return {
     root,
-    show(seconds, busy) {
+    show(seconds, busy, hero = null) {
       root.visible = busy > 0;
       if (!root.visible) return;
       walkers.forEach((walker, index) => {
@@ -229,30 +244,46 @@ export function buildWalkers(): Walkers {
         const step = Math.sin(
           seconds * 4.2 * Math.abs(walker.speed) + walker.phase,
         );
-        figure(index, x, z, turn, step * 0.45, 0, 0, Math.abs(step) * 0.04);
+        const at = placed(index, x, z, seconds, hero);
+        const walking = at.tip === null ? step : 0;
+        figure(
+          index,
+          at.x,
+          at.z,
+          turn,
+          walking * 0.45,
+          0,
+          0,
+          Math.abs(walking) * 0.04 + at.lift,
+          at.tip,
+        );
       });
       pairs.forEach((pair, index) => {
         const talker = walkers.length + index * 2;
         const talk = Math.sin(seconds * 3 + index);
+        const left = placed(talker, pair.x - 0.45, pair.z, seconds, hero);
+        const right = placed(talker + 1, pair.x + 0.45, pair.z, seconds, hero);
         figure(
           talker,
-          pair.x - 0.45,
-          pair.z,
+          left.x,
+          left.z,
           Math.PI / 2,
           0,
           0.9 + talk * 0.6,
           0,
-          0,
+          left.lift,
+          left.tip,
         );
         figure(
           talker + 1,
-          pair.x + 0.45,
-          pair.z,
+          right.x,
+          right.z,
           -Math.PI / 2,
           0,
           0,
           Math.max(0, Math.sin(seconds * 2.2 + index)) * 0.25,
-          0,
+          right.lift,
+          right.tip,
         );
       });
       for (const mesh of [torsos, heads, hair, legs, arms])

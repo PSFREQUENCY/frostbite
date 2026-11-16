@@ -33,6 +33,7 @@ describe("the Time Machine on the page", () => {
     ).progress;
     expect([entered.machine, entered.day]).toEqual([true, 3]);
     expect(nextRun(entered)).toEqual({
+      beamups: 0,
       boon: 0,
       day: 1,
       dream: 0,
@@ -72,6 +73,7 @@ describe("the Time Machine on the page", () => {
       machine: false,
     });
     expect(nextRun(back.progress)).toEqual({
+      beamups: 0,
       boon: 0,
       day: 1,
       dream: 0,
@@ -81,7 +83,15 @@ describe("the Time Machine on the page", () => {
     });
     expect(
       nextRun({ ...freshProgress, loops: 40, machine: true, wish: 2 }),
-    ).toEqual({ boon: 0, day: 1, dream: 0, fate: 0, loop: 9, won: false });
+    ).toEqual({
+      beamups: 0,
+      boon: 0,
+      day: 1,
+      dream: 0,
+      fate: 0,
+      loop: 9,
+      won: false,
+    });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({
       fate: -3,
       loops: 2,

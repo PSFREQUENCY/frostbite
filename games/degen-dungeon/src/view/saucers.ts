@@ -11,14 +11,21 @@ import {
   TorusGeometry,
 } from "three";
 
-import { eraOf, invasionEra } from "../rules/calendar.ts";
-import { beams, invading, invasionTick } from "../rules/invasion.ts";
+import {
+  beamupOf,
+  beams,
+  invading,
+  saucerOpen,
+  visiting,
+} from "../rules/invasion.ts";
 import type { DayState } from "../rules/types.ts";
+import { saucerPad } from "../rules/world.ts";
 import { toonSteps } from "./textures.ts";
 
-// The saucers over the island on the invasion day: four come down to hang over their street crossings, each with a beam of light to a
-// glowing ring on the ground (where to stand), and eight more circle high above. Once peace is made or a trade done they lift and fly
-// off together.
+// The saucers over the island from the mania on: four come down to hang over their street crossings, each with a beam of light to a
+// glowing ring on the ground (where to stand); in the mania's alarm eight more circle high above, and lift away when it is over. Each
+// hovering saucer flies home once the hero has been aboard it today. Once the visitors leave the hero a saucer of their own, it stands
+// on its lawn in the Old Floe until it is flown.
 export interface Saucers {
   readonly root: Group;
   show(state: DayState, seconds: number, away: boolean): void;
@@ -94,27 +101,46 @@ export function buildSaucers(): Saucers {
     return ray;
   });
   const flying = Array.from({ length: flyers }, () => buildSaucer());
-  root.add(...hovering, ...rays, ...flying);
+  // The saucer the visitors leave the hero, parked on its lawn until it is flown.
+  const parked = buildSaucer();
+  parked.scale.setScalar(0.42);
+  root.add(...hovering, ...rays, ...flying, parked);
   let came = -1;
   let went = -1;
+  // When each hovering saucer was first seen visited, to lift it away.
+  const gone = hovering.map(() => -1);
   return {
     root,
     show(state, seconds, away) {
-      const today =
-        eraOf(state.day) === invasionEra && state.tick >= invasionTick;
+      const today = visiting(state);
       const on = invading(state);
+      parked.visible = !away && saucerOpen(state) && state.ride !== "saucer";
+      parked.position.set(
+        saucerPad.x / 100,
+        0.32 + Math.sin(seconds * 1.6) * 0.06,
+        saucerPad.z / 100,
+      );
+      parked.rotation.y = seconds * 0.8;
       if (!today) {
         came = -1;
         went = -1;
-      } else if (on && came < 0) came = seconds;
-      else if (!on && went < 0) went = seconds;
+        gone.fill(-1);
+      } else if (came < 0) came = seconds;
+      if (today && !on && went < 0) went = seconds;
       const leaving = went < 0 ? 0 : seconds - went;
-      root.visible = today && !away && (on || leaving < 8);
-      if (!root.visible) return;
+      root.visible = !away;
+      for (const saucer of [...hovering, ...rays, ...flying])
+        saucer.visible = today;
+      if (!today || away) return;
       const drop = Math.max(0, 1 - (seconds - Math.max(0, came)) / arrive);
-      const lift = leaving * leaving * 5 + drop * drop * 90;
       hovering.forEach((saucer, index) => {
         const beam = beams[index] ?? { x: 0, z: 0 };
+        const visited = state.done.includes(beamupOf(index));
+        if (!visited) gone[index] = -1;
+        else if ((gone[index] ?? -1) < 0) gone[index] = seconds;
+        const off = visited ? seconds - (gone[index] ?? seconds) : 0;
+        const lift = off * off * 5 + drop * drop * 90;
+        saucer.visible = off < 8;
         saucer.position.set(
           beam.x / 100,
           hover + lift + Math.sin(seconds * 1.4 + index) * 0.5,
@@ -123,10 +149,14 @@ export function buildSaucers(): Saucers {
         saucer.rotation.y = seconds * 0.9;
         const ray = rays[index];
         if (ray === undefined) return;
-        ray.visible = on && drop === 0;
+        ray.visible = !visited && drop === 0;
         ray.position.set(beam.x / 100, hover / 2, beam.z / 100);
         ray.material.opacity = 0.22 + Math.sin(seconds * 7 + index) * 0.06;
       });
+      // The fleet circling overhead is the alarm's: it lifts away once the alarm is over, and visitors come without it.
+      const fleet = leaving * leaving * 5 + drop * drop * 90;
+      for (const saucer of flying)
+        saucer.visible = on || (went >= 0 && leaving < 8 && came < went);
       flying.forEach((saucer, index) => {
         const angle =
           seconds * 0.07 * (index % 2 === 0 ? 1 : -1) +
@@ -134,7 +164,7 @@ export function buildSaucers(): Saucers {
         const radius = 70 + (index % 3) * 35;
         saucer.position.set(
           centre + Math.cos(angle) * radius,
-          48 + (index % 4) * 8 + lift,
+          48 + (index % 4) * 8 + fleet,
           centre + Math.sin(angle) * radius,
         );
         saucer.rotation.set(Math.sin(seconds + index) * 0.12, seconds * 1.2, 0);

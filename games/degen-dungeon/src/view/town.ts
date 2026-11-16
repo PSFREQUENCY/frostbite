@@ -4,6 +4,7 @@ import { nightTick } from "../rules/constants.ts";
 import type { DayState } from "../rules/types.ts";
 import { questAt } from "../quest.ts";
 import { buildBeacon } from "./beacon.ts";
+import { moverOf } from "./bumps.ts";
 import { buildLanterns } from "./lanterns.ts";
 import { buildParked, type Parked } from "./parked.ts";
 import { buildShopMotion } from "./shop-motion.ts";
@@ -103,7 +104,7 @@ export function buildTown(): Town {
       shops.show(x, z, dt);
       working.show(x, z, seconds, day.done);
       parked.show(day, x, z, heading, seconds, hidden);
-      walkers.show(seconds, 1 - dark * 0.6);
+      walkers.show(seconds, 1 - dark * 0.6, moverOf(day, x, z, heading));
       traffic.show(seconds, along, dark, x, z);
       venues.show(seconds, dark, x, z);
       lanterns.show(dark, seconds, sent);

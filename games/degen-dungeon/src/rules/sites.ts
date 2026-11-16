@@ -1,7 +1,7 @@
 import { eras } from "./calendar.ts";
 import type { Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
-import { at, dockWater, helipad } from "./world.ts";
+import { at, dockWater, helipad, saucerPad } from "./world.ts";
 
 // The island's fixed places: the Faucet, gigs and their drops, offers and scams, loot, the fence and the freezer, tools, street words,
 // talks (Frost, the Exchange floor, MAXX and the shops) and rides.
@@ -202,5 +202,14 @@ export const sites: readonly Spot[] = [
     label: "Helipad",
     rank: 4,
     ride: "heli",
+  },
+  {
+    ...saucerPad,
+    id: "ride-saucer",
+    kind: "ride",
+    label: "The visitors' saucer",
+    rank: 0,
+    ride: "saucer",
+    saucer: true,
   },
 ];

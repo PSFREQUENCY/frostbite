@@ -79,6 +79,7 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   colony: [{ does: "colony" }, leave],
   // Aboard a saucer there is no walking away: the page's "no" is going quietly.
   abduction: [{ does: "peace" }, { does: "trade" }, { does: "quietly" }],
+  visit: [{ does: "peace" }, { does: "trade" }, leave],
   // What a washing machine turned up (`laundry.ts`, run from the laundromat's counter): read it and walk on.
   "wash-change": [leave],
   "wash-clothes": [leave],

@@ -16,7 +16,7 @@ describe("starting a day", () => {
       expect(degenRules.init(1, config)).toEqual({
         ok: false,
         reason:
-          "a day takes a day and a hero, and may add loop, fate, boon, dream or won",
+          "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups or won",
       });
     const wrong: Readonly<Record<string, number | string>>[] = [
       { day: 0, hero: 1 },

@@ -2,7 +2,7 @@ import { clinging, onTheRoof } from "./climb.ts";
 import { fogLine, gaitTenths } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
-import type { DayState, Draft, Ride } from "./types.ts";
+import { flies, type DayState, type Draft, type Ride } from "./types.ts";
 import {
   dockWater,
   helipad,
@@ -14,6 +14,7 @@ import {
   onRoof,
   onStreet,
   onWater,
+  saucerPad,
 } from "./world.ts";
 
 // The sixteen headings as whole-number steps (a unit is 1,024), so the rules never take a sine: 0 is east, 4 south, 8 west, 12 north.
@@ -44,6 +45,7 @@ const ridePace: Readonly<Record<Ride, number>> = {
   foot: 10,
   heli: 36,
   moto: 30,
+  saucer: 54,
   scooter: 22,
   semi: 20,
   truck: 24,
@@ -71,7 +73,7 @@ function free(day: Draft): (x: number, z: number) => boolean {
   if (onMoon(day.x, day.z)) return onMoon;
   if (onTheRoof(day)) return onRoof;
   if (day.ride === "boat") return onWater;
-  if (day.ride === "heli") return inSky;
+  if (flies(day.ride)) return inSky;
   if (day.ride !== "foot") return onStreet;
   if (day.gate === 0) return onLand;
   return (x, z) => onLand(x, z) || inTunnel(x, z) || onBeach(x, z);
@@ -83,7 +85,7 @@ function free(day: Draft): (x: number, z: number) => boolean {
 export function moved(day: Draft): void {
   const unit = units[day.dir];
   if (unit === undefined || day.talk !== null) return;
-  if (day.ride === "heli" ? day.level === 0 : clinging(day)) return;
+  if (flies(day.ride) ? day.level === 0 : clinging(day)) return;
   const pace = paceOf(day);
   const open = free(day);
   const x = day.x + Math.trunc((unit[0] * pace) / 1_024);
@@ -91,7 +93,12 @@ export function moved(day: Draft): void {
   const z = day.z + Math.trunc((unit[1] * pace) / 1_024);
   if (open(day.x, z)) day.z = z;
   if (day.z >= fogLine || day.ride === "foot") return;
-  const back = day.ride === "heli" ? helipad : dockWater;
+  const back =
+    day.ride === "heli"
+      ? helipad
+      : day.ride === "saucer"
+        ? saucerPad
+        : dockWater;
   day.x = back.x;
   day.z = back.z;
   day.level = 0;

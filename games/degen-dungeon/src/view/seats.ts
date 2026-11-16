@@ -2,8 +2,8 @@ import type { Ride } from "../rules/types.ts";
 import type { Seat } from "./body.ts";
 
 // Where people ride on each ride, in the ride's own frame (metres: x across, with the driver's door on +x; y the height of the hips, or
-// of the feet on a deck; z forward), and how they sit. A ride with fewer seats than people leaves the rest running alongside; a boat
-// and a helicopter carry everyone standing on board.
+// of the feet on a deck; z forward), and how they sit. A ride with fewer seats than people leaves the rest running alongside; a boat,
+// a helicopter and a saucer carry everyone standing on board.
 export interface Place {
   readonly seat: Seat;
   readonly x: number;
@@ -29,6 +29,7 @@ export const seatsOf: Readonly<
   boat: [],
   car: [...pair(0.56, 0.15), ...pair(0.56, -0.8)],
   heli: [],
+  saucer: [],
   moto: [sit(0, 1.05, -0.22, "saddle"), sit(0, 1.08, -0.62, "saddle")],
   scooter: [sit(0, 0.33, -0.08, "deck")],
   semi: pair(1.9, 1, 0.55),

@@ -7,6 +7,8 @@ interface Base extends Point {
   readonly label: string;
   readonly on?: number;
   readonly only?: number;
+  // Only once the visitors have left the hero a saucer of their own (`invasion.ts`).
+  readonly saucer?: boolean;
 }
 export type Spot = Base &
   (

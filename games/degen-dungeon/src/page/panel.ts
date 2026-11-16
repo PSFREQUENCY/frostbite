@@ -1,6 +1,6 @@
 import { canClimb, clinging, onTheRoof } from "../rules/climb.ts";
 import { rankOf } from "../rules/heat.ts";
-import type { DayState } from "../rules/types.ts";
+import { flies, type DayState } from "../rules/types.ts";
 import { ticksPerSecond } from "../rules/constants.ts";
 import { statusOf } from "../rules/status.ts";
 import { element } from "./elements.ts";
@@ -68,7 +68,7 @@ export function createPanel(hands: {
           : `${day.ride} ${String(day.x)} ${String(day.z)} ${String(day.level)} ${String(day.talk)}`;
       if (where !== placed) {
         placed = where;
-        const flying = day?.ride === "heli";
+        const flying = day !== null && flies(day.ride);
         up.disabled = !flying && (day === null || !canClimb(day));
         down.disabled =
           !flying && (day === null || !(clinging(day) || onTheRoof(day)));

@@ -51,6 +51,8 @@ export interface RunSessionOptions {
   readonly won?: boolean;
   // Moon Night's dream (1 or 2), carried into the last day; 0 or left out otherwise.
   readonly dream?: number;
+  // Beam-ups with the visitors on earlier days; 0 or left out for none.
+  readonly beamups?: number;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -61,6 +63,7 @@ export function createRunSession(options: RunSessionOptions): RunSession {
   const fate = options.fate ?? 0;
   const boon = options.boon ?? 0;
   const dream = options.dream ?? 0;
+  const beamups = Math.min(99, options.beamups ?? 0);
   // Only the settings that change the day are written, so a plain day's record stays as small as it was.
   const won: Readonly<Record<string, number>> =
     options.won === true ? { won: 1 } : {};
@@ -72,6 +75,7 @@ export function createRunSession(options: RunSessionOptions): RunSession {
           ...(fate === 0 ? {} : { fate }),
           ...(boon === 0 ? {} : { boon }),
           ...(dream === 0 ? {} : { dream }),
+          ...(beamups === 0 ? {} : { beamups }),
           ...won,
         };
   const init = degenRules.init(options.seed, config);

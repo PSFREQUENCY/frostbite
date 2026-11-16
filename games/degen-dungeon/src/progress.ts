@@ -6,6 +6,7 @@ import {
 
 import { eraOf, lastDay, moonNight, stormEra } from "./rules/calendar.ts";
 import { maxLoops } from "./rules/constants.ts";
+import { beamupsToday } from "./rules/invasion.ts";
 import { scoreOf } from "./rules/heat.ts";
 import { storyTold } from "./rules/story.ts";
 import { heroes } from "./rules/heroes.ts";
@@ -16,6 +17,8 @@ import type { DayState } from "./rules/types.ts";
 // (whether it is open, how many trips back there have been, and how they have bent the timeline), the lantern wish sent up on the last
 // story day, and the sound settings. Anything handed back is untrusted and is checked field by field.
 export interface Progress {
+  // Beam-ups with the visitors over all the days played (`invasion.ts`); thirteen leave the hero a saucer.
+  readonly beamups: number;
   readonly best: number;
   readonly day: number;
   // Moon Night's dream (1 or 2), which the last day's beach ending tells; 0 before it is dreamt.
@@ -34,6 +37,7 @@ export interface Progress {
 }
 
 export const freshProgress: Progress = {
+  beamups: 0,
   best: 0,
   day: 1,
   dream: 0,
@@ -66,6 +70,7 @@ export function restore(saved: unknown): Progress {
   const fields: Readonly<Record<string, unknown>> = { ...saved };
   return {
     best: whole(fields.best, 0, Number.MAX_SAFE_INTEGER, 0),
+    beamups: whole(fields.beamups, 0, 99, 0),
     day: whole(fields.day, 1, lastDay, 1),
     dream: whole(fields.dream, 0, 2, 0),
     fate: whole(fields.fate, -99, 99, 0),
@@ -104,6 +109,7 @@ export function afterDay(
           : told && day.day === progress.day
             ? Math.min(lastDay, progress.day + 1)
             : progress.day,
+      beamups: Math.min(99, progress.beamups + beamupsToday(day)),
       dream:
         trip || day.cause === "abducted"
           ? 0
@@ -132,6 +138,7 @@ export const choosing = (progress: Progress): boolean =>
 export const nextRun = (
   progress: Progress,
 ): {
+  readonly beamups: number;
   readonly boon: number;
   readonly day: number;
   readonly dream: number;
@@ -141,6 +148,7 @@ export const nextRun = (
 } =>
   progress.machine
     ? {
+        beamups: progress.beamups,
         boon: 0,
         day: 1,
         dream: 0,
@@ -149,6 +157,7 @@ export const nextRun = (
         won: progress.won,
       }
     : {
+        beamups: progress.beamups,
         boon: progress.wish,
         day: progress.day,
         dream: progress.day === lastDay ? progress.dream : 0,

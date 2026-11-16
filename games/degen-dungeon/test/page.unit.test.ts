@@ -85,6 +85,7 @@ describe("what the platform is asked to remember", () => {
         won: true,
       }),
     ).toEqual({
+      beamups: 0,
       best: 12,
       day: 3,
       dream: 0,

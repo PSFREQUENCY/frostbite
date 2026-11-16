@@ -18,6 +18,7 @@ import { buildChasers } from "./chasers.ts";
 import { clipPose } from "./clips.ts";
 import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
+import { moverOf } from "./bumps.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
 import { buildingAt, createClimber } from "./climbing.ts";
@@ -198,7 +199,11 @@ export function createWorldView(
       );
       city.mark(state, seconds);
       north.show(state.gate > 0, seconds);
-      crowd.show(gatheringOf(state), seconds);
+      crowd.show(
+        gatheringOf(state),
+        seconds,
+        moverOf(state, at.x, at.z, heading),
+      );
       airdrop.fall(
         storming(state),
         seconds,

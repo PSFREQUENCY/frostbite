@@ -26,7 +26,7 @@ describe("the island", () => {
         true,
       );
     expect(new Set(spots.map(({ id }) => id)).size).toBe(spots.length);
-    const open = { day: 1, hero: 7, looking: false };
+    const open = { beamups: 0, day: 1, done: [], hero: 7, looking: false };
     expect(nearest({ ...open, x: 18_000, z: 18_000 })).toBeNull();
     expect(nearest({ ...open, x: 17_100, z: 18_050 })?.id).toBe("faucet");
     expect(nearest({ ...open, x: 18_900, z: 15_500 })).toBeNull();
@@ -36,9 +36,10 @@ describe("the island", () => {
   });
 
   it("never puts two places that can be open on the same day within reach of each other", () => {
-    for (const day of [1, 2, 3, 4, 5])
+    // Every story day, with the visitors' saucer parked on its lawn.
+    for (const day of [1, 2, 3, 4, 5, 6, 7])
       for (const hero of [0, 7, 9]) {
-        const seen = { day, hero, looking: true };
+        const seen = { beamups: 13, day, done: [], hero, looking: true };
         const open = spots.filter((spot) => openTo(spot, seen));
         // Every pair is checked in plain code and any too close are listed together, which keeps the test quick on a busy machine.
         const crowded = open.flatMap((one, index) =>

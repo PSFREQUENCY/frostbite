@@ -133,6 +133,17 @@ at the start of the very first day and can be skipped.
   - Milestones: one per story quest (twenty), ten top skills, nine hidden ones with riddles for words; thirteen of the old ones are side
     quests now. The verifier was re-pinned and the sample day claims the first morning's two quests.
 
+- **Round 10** (walking on phones, the visitors' saucer, bumping into people):
+  - Phones: a press on the drawn stick (`page/stick.ts`) steers at once from the ring's middle, so holding its edge walks without a
+    slide (a sliding finger can be taken for a scroll and cancelled by some phones and app frames); a touch on the stick's half is kept
+    from the page from `touchstart`, and a pen steers like a finger. The preview's own page no longer scrolls on a phone.
+  - The visitors (`rules/invasion.ts`): each saucer is a visit of its own (`beamup-N`); the first peace or trade ends the mania's
+    alarm; from day 4 on the saucers come back as friends (the `visit` talk, whose third answer sets the hero down). Beam-ups are
+    counted in the save (`progress.beamups`) and handed to each run as the `beamups` setting; thirteen open `ride-saucer` on the Old
+    Floe lawn (`saucerPad`), a flying ride like the helicopter (`flies`, pace 54). The Saucer pilot badge is the fortieth milestone.
+  - Bumps (`view/bumps.ts`): the street's walkers and talking pairs (`view/walkers.ts`) and the riot and party crowds (`view/crowd.ts`)
+    stagger, fall and get up, or hop clear of a ride. View only: the street's people are not in the rules.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

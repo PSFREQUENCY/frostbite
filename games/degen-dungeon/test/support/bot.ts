@@ -19,8 +19,10 @@ export function createBot(
   fate = 0,
   boon = 0,
   won = false,
+  beamups = 0,
 ) {
   const init = degenRules.init(seed, {
+    ...(beamups === 0 ? {} : { beamups }),
     day,
     hero,
     ...(loop === 0 ? {} : { loop }),

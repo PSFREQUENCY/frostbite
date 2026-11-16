@@ -131,6 +131,48 @@ describe("the thumb stick", () => {
     ).toBe(false);
   });
 
+  it("walks at once from the ring's middle when a thumb presses on the drawn ring itself, with no slide needed", () => {
+    const { after, leaning, move, ring, screen } = setup();
+    if (ring === null) throw new Error("no stick drawn");
+    ring.getBoundingClientRect = () =>
+      ({ height: 120, left: 40, top: 440, width: 120 }) as DOMRect;
+    // Pressed on the ring's upper edge: north, and the ring stays where it is drawn.
+    send(screen, "pointerdown", { x: 100, y: 450 });
+    expect(after).not.toHaveBeenCalled();
+    expect([ring.style.left, move.mock.calls]).toEqual(["", [[12]]]);
+    expect(leaning()).toEqual(["0.00", "-1.00"]);
+    send(window, "pointermove", { x: 150, y: 500 });
+    send(window, "pointerup", { x: 150, y: 500 });
+    // Pressed on its middle it waits for a slide, as anywhere else on the left does.
+    send(screen, "pointerdown", { x: 101, y: 499 });
+    expect(move.mock.calls).toEqual([[12], [0], [-1]]);
+  });
+
+  it("keeps a touch on the stick's half from the page from its first moment, and only while a day is played", () => {
+    let playing = true;
+    const { screen } = setup(() => playing);
+    const touch = (x: number) => {
+      const event = new Event("touchstart", { cancelable: true });
+      Object.assign(event, { changedTouches: [{ clientX: x, clientY: 500 }] });
+      screen.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect([touch(100), touch(300)]).toEqual([true, false]);
+    playing = false;
+    expect(touch(100)).toBe(false);
+    const none = new Event("touchstart", { cancelable: true });
+    Object.assign(none, { changedTouches: [] });
+    screen.dispatchEvent(none);
+    expect(none.defaultPrevented).toBe(false);
+  });
+
+  it("takes a pen the same as a finger", () => {
+    const { move, screen } = setup();
+    send(screen, "pointerdown", { kind: "pen", x: 100, y: 500 });
+    send(window, "pointermove", { kind: "pen", x: 100, y: 540 });
+    expect(move.mock.calls).toEqual([[4]]);
+  });
+
   it("steers just the same on a page that draws no stick", () => {
     const { move, screen } = setup(() => true, false);
     send(screen, "pointerdown", { x: 100, y: 500 });

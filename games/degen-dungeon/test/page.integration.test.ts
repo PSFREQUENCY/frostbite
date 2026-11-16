@@ -151,6 +151,7 @@ describe("the page's keys, pause and sound", () => {
     music?.dispatchEvent(new window.MouseEvent("click"));
     await settle();
     expect(stored.progress).toEqual({
+      beamups: 0,
       best: 7,
       day: 1,
       dream: 0,

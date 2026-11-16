@@ -4,12 +4,16 @@ import {
   Color,
   Group,
   InstancedMesh,
+  Matrix4,
   MeshStandardMaterial,
   PlaneGeometry,
+  Quaternion,
   SphereGeometry,
+  Vector3,
 } from "three";
 
 import { eraOf, moonNight } from "../rules/calendar.ts";
+import { createBumps, type Mover } from "./bumps.ts";
 import type { DayState } from "../rules/types.ts";
 import { box, hash } from "./hash.ts";
 import { painted } from "./boards.ts";
@@ -19,6 +23,11 @@ import { painted } from "./boards.ts";
 // instanced meshes; nobody in it is anyone in particular.
 export type Gathering = "party" | "riot" | "robots";
 const count = 160;
+const matrix = new Matrix4();
+const tilt = new Quaternion();
+const axis = new Vector3();
+const where = new Vector3();
+const unit = new Vector3(1, 1, 1);
 const jackets = [
   "#ff5d5d",
   "#5beac6",
@@ -43,7 +52,8 @@ function spot(
 
 export interface Crowd {
   readonly root: Group;
-  show(gathering: Gathering | null, seconds: number): void;
+  // `hero` bumps into the people of a riot or a party as into anyone on the street (`bumps.ts`).
+  show(gathering: Gathering | null, seconds: number, hero?: Mover | null): void;
 }
 
 export function buildCrowd(): Crowd {
@@ -80,10 +90,11 @@ export function buildCrowd(): Crowd {
     root.add(mesh);
   }
   const skin = new Color("#e0b08a");
+  const placed = createBumps(count);
   let last: Gathering | null = null;
   return {
     root,
-    show(gathering, seconds) {
+    show(gathering, seconds, hero = null) {
       root.visible = gathering !== null;
       if (gathering === null) return;
       const robotic = gathering === "robots";
@@ -115,13 +126,35 @@ export function buildCrowd(): Crowd {
           );
           continue;
         }
+        const at = placed(index, x, z, seconds, hero);
         const hop =
-          gathering === "riot"
+          at.lift +
+          (gathering === "riot"
             ? Math.abs(Math.sin(seconds * 5 + index)) * 0.25
-            : Math.abs(Math.sin(seconds * 3 + index)) * 0.1;
-        bodies.setMatrixAt(index, box(x, 0.75 + hop, z, 1, 1, 1));
-        heads.setMatrixAt(index, box(x, 1.5 + hop, z, 1, 1, 1));
-        signs.setMatrixAt(index, box(x, 2.4 + hop, z, 1, 1, 1));
+            : Math.abs(Math.sin(seconds * 3 + index)) * 0.1);
+        // Knocked over, a body tips about its feet the way it went, head and sign with it.
+        const lean = at.tip?.lean ?? 0;
+        tilt.setFromAxisAngle(
+          axis.set(at.tip?.z ?? 0, 0, -(at.tip?.x ?? 0)).normalize(),
+          lean,
+        );
+        for (const [mesh, height] of [
+          [bodies, 0.75],
+          [heads, 1.5],
+          [signs, 2.4],
+        ] as const)
+          mesh.setMatrixAt(
+            index,
+            matrix.compose(
+              where.set(
+                at.x + (at.tip?.x ?? 0) * height * Math.sin(lean),
+                height * Math.cos(lean) + hop,
+                at.z + (at.tip?.z ?? 0) * height * Math.sin(lean),
+              ),
+              tilt,
+              unit,
+            ),
+          );
         if (gathering !== last) {
           const coat =
             gathering === "party"

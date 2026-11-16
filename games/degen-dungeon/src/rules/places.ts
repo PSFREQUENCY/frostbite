@@ -1,6 +1,7 @@
 import { eras } from "./calendar.ts";
 import { launchpad, moonPad, reach, shuttleBooth } from "./constants.ts";
 import { heroes } from "./heroes.ts";
+import { saucerOpen } from "./invasion.ts";
 import { parkedRides } from "./parked.ts";
 import { statueId, statues } from "./statues.ts";
 import { rooms } from "./rooms.ts";
@@ -191,15 +192,19 @@ export const spotNamed = (id: string): Spot | undefined => named.get(id);
 // Whether a place is there for this hero today (a hidden one only while frost vision is on).
 export const openTo = (
   spot: Spot,
-  day: Pick<DayState, "day" | "hero" | "looking">,
+  day: Pick<DayState, "beamups" | "day" | "done" | "hero" | "looking">,
 ): boolean =>
   (spot.on === undefined || (spot.on & (1 << day.day)) !== 0) &&
   (spot.only === undefined || spot.only === day.hero) &&
-  (spot.hidden !== true || day.looking);
+  (spot.hidden !== true || day.looking) &&
+  (spot.saucer !== true || saucerOpen(day));
 
 // The open place within reach, the nearest if there are several.
 export function nearest(
-  day: Pick<DayState, "day" | "hero" | "looking" | "x" | "z">,
+  day: Pick<
+    DayState,
+    "beamups" | "day" | "done" | "hero" | "looking" | "x" | "z"
+  >,
 ): Spot | null {
   let best: Spot | null = null;
   let gap = reach + 1;

@@ -54,7 +54,8 @@ const skills: readonly (readonly [string, (day: DayState) => boolean])[] = [
   ["road-trip", (day) => kindsTaken(day) >= 5],
   ["rooftop-runner", (day) => has(day, "roof")],
 ];
-// The hidden ones: the Time Machine and the timeline, the masks, the moon, and the city's secrets.
+// The top achievements, most of them hidden: the Time Machine and the timeline, the masks, the moon, the city's secrets, and flying the
+// visitors' saucer.
 const hidden: readonly (readonly [string, (day: DayState) => boolean])[] = [
   ["time-machine", (day) => day.cause === "machine"],
   ["met-yourself", (day) => has(day, ...moments)],
@@ -68,6 +69,7 @@ const hidden: readonly (readonly [string, (day: DayState) => boolean])[] = [
   ["pulled-the-plug", (day) => has(day, "plug")],
   ["dead-locker", (day) => has(day, "locker")],
   ["intergalactic-otc", (day) => has(day, "traded")],
+  ["saucer-pilot", (day) => has(day, "saucer")],
 ];
 
 export const milestones: readonly {

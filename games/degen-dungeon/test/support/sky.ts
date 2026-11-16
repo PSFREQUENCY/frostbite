@@ -2,6 +2,7 @@ import { invasionTick, beamWait, beams } from "../../src/rules/invasion.ts";
 import { spots, type Spot } from "../../src/rules/places.ts";
 import { statueId, statues } from "../../src/rules/statues.ts";
 import type { Wheels } from "../../src/rules/types.ts";
+import { saucerPad } from "../../src/rules/world.ts";
 import { createBot } from "./bot.ts";
 
 type Bot = ReturnType<typeof createBot>;
@@ -84,5 +85,22 @@ export function bigRigDay(): Bot {
   const bot = createBot(8, 7, 1);
   const home = bot.here();
   bot.use(kerbNear("semi", home.x, home.z).id);
+  return bot;
+}
+
+// A second day with thirteen beam-ups behind it: up into the visitors' saucer on its lawn, a lap over the Old Floe, down onto a street,
+// and out.
+export function saucerPilotDay(): Bot {
+  const bot = createBot(6, 7, 2, 0, 0, 0, false, 13);
+  bot.go(saucerPad.x, saucerPad.z);
+  bot.act();
+  bot.lift(1);
+  bot.head(0);
+  bot.wait(90);
+  bot.head(8);
+  bot.wait(90);
+  bot.lift(-1);
+  bot.act();
+  bot.end();
   return bot;
 }

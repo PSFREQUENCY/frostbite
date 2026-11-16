@@ -42,6 +42,8 @@ export const loop = [0, 1, 2, 5, 8, 7, 6, 3] as const;
 export const dockWater: Point = { x: 18_000, z: -400 };
 export const dockLand: Point = { x: 18_000, z: 100 };
 export const helipad: Point = at(4, 3_000, 0);
+// Where the visitors leave a saucer of their own, on a lawn of the Old Floe.
+export const saucerPad: Point = { x: 27_000, z: 3_000 };
 
 const inLot = (value: number): boolean => {
   const local = value % block;

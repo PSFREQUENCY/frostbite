@@ -6,10 +6,14 @@ export type Ride =
   | "foot"
   | "heli"
   | "moto"
+  | "saucer"
   | "scooter"
   | "semi"
   | "truck"
   | "van";
+// The rides that fly: the helicopter, and the saucer that is the hero's once the visitors know them well (`invasion.ts`).
+export const flies = (ride: Ride): ride is "heli" | "saucer" =>
+  ride === "heli" || ride === "saucer";
 // The rides that stand on the street: some pedalled or kicked, the rest with engines (`motors`).
 export type Wheels =
   "bike" | "car" | "moto" | "scooter" | "semi" | "truck" | "van";
@@ -165,6 +169,8 @@ export interface DayState {
   // The weather now, and how long the hero has stood in a saucer's beam (ticks).
   readonly weather: Weather;
   readonly beamed: number;
+  // Beam-ups on earlier days (`invasion.ts`): the page's word, as `fate` is, carried from its save.
+  readonly beamups: number;
   readonly words: number;
   readonly x: number;
   readonly z: number;

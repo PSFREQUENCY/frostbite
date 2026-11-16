@@ -1,4 +1,4 @@
-import type { DayState, Draft } from "./types.ts";
+import { flies, type DayState, type Draft } from "./types.ts";
 import { onRoof, onStreet, wallBeside } from "./world.ts";
 
 // Going up and down: a helicopter climbs and drops a level at a time (three at most, and it lands only on the street), and on foot the
@@ -58,7 +58,7 @@ export const canClimb = (
 
 export function lift(day: Draft, by: number): string | null {
   if (day.ride === "foot") return climb(day, by);
-  if (day.ride !== "heli") return "only a helicopter climbs";
+  if (!flies(day.ride)) return "only a helicopter climbs";
   const level = day.level + by;
   if (level < 0 || level > storeys) return "no higher or lower than that";
   if (level === 0 && !onStreet(day.x, day.z)) return "nowhere to land here";

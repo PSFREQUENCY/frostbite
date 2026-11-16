@@ -118,6 +118,7 @@ export function startDay(
     form: -1,
     won,
     beamed: 0,
+    beamups: 0,
     words: 0,
     x: home.x,
     z: home.z,

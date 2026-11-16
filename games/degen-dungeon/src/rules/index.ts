@@ -41,6 +41,7 @@ const fieldsFor = new Map<string, readonly string[]>([
 ]);
 
 const settings: readonly string[] = [
+  "beamups",
   "boon",
   "day",
   "dream",
@@ -94,7 +95,7 @@ export const degenRules: GameVerifier<DayState> = {
       keys.some((key) => !settings.includes(key))
     )
       return refuse(
-        "a day takes a day and a hero, and may add loop, fate, boon, dream or won",
+        "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups or won",
       );
     const hero = whole(config.hero, 0, heroes.length - 1);
     const day = whole(config.day, 1, lastDay);
@@ -104,6 +105,9 @@ export const degenRules: GameVerifier<DayState> = {
     const won = keys.includes("won") ? whole(config.won, 1, 1) : 0;
     // Moon Night's dream (1 or 2) is carried into the last day, where the beach's ending tells it.
     const dream = keys.includes("dream") ? whole(config.dream, 1, 2) : 0;
+    // Beam-ups on earlier days, for the visitors' saucer (`invasion.ts`).
+    const beamups = keys.includes("beamups") ? whole(config.beamups, 1, 99) : 0;
+    if (beamups === null) return refuse("beamups are 1 to 99");
     if (won === null) return refuse("won is 1 once the story is won");
     if (hero === null || day === null)
       return refuse("hero must be 0 to 9 and day 1 to 7");
@@ -120,6 +124,7 @@ export const degenRules: GameVerifier<DayState> = {
           ok: true,
           state: {
             ...startDay(seed, hero, day, loop, fate, boon, won === 1),
+            beamups,
             dream,
           },
         };

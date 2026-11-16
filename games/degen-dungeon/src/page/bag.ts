@@ -1,5 +1,11 @@
 import { lastDay } from "../rules/calendar.ts";
 import { heroes } from "../rules/heroes.ts";
+import {
+  beamupsToday,
+  saucerBeamups,
+  saucerOpen,
+  visiting,
+} from "../rules/invasion.ts";
 import { questDone, questOf, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { letters } from "../script/letters.ts";
@@ -30,6 +36,24 @@ const fits = [
   ["fit-parka", "Storm parka"],
 ] as const;
 
+// How far the hero is with the visitors: beam-ups toward a saucer of their own, or where it waits once it is theirs.
+function visitorsLog(
+  day: DayState,
+): readonly (readonly [string, readonly string[]])[] {
+  const total = day.beamups + beamupsToday(day);
+  if (total === 0 && !visiting(day)) return [];
+  return [
+    [
+      "The visitors",
+      [
+        saucerOpen(day)
+          ? "Your saucer waits on the Old Floe lawn: act on it to fly."
+          : `Beam-ups: ${String(total)} of ${String(saucerBeamups)} (peace or a trade aboard a saucer, once a saucer a day)`,
+      ],
+    ],
+  ];
+}
+
 // Today's three quests, ticked off, with the one the hero is on marked; then the side quests, with how far along the counted ones are.
 // On a trip back to day one there is only the trip's line.
 function questLog(
@@ -47,6 +71,7 @@ function questLog(
           `${questDone(day, quest) ? "✓" : quest === on ? "→" : "○"} ${questLineOf(day, quest)}`,
       ),
     ],
+    ...visitorsLog(day),
     [
       `Side quests: ${String(sidesDone)} of ${String(sides.length)}`,
       sides.map(

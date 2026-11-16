@@ -1,9 +1,11 @@
-// The thumb stick on a touch screen. During a day a thumb that lands anywhere on the left half of the picture takes the stick: the drawn
-// ring jumps under it, and the way the thumb then slides from where it landed is the hero's heading, one of sixteen. A thumb that has
-// hardly moved stands still, and so does one that lifts, which also sends the ring back to its corner. The knob follows the thumb out
-// to the ring's edge. A new thumb on the left takes the stick over (so a thumb whose lifting the phone never reported cannot leave it
-// stuck), and no drag on the screen ever scrolls or zooms the page. While an offer waits, the left half is the screen's "no" again, so
-// the stick lets the thumb go by.
+// The thumb stick on a touch screen. During a day a thumb that lands anywhere on the left half of the picture takes the stick. Landing on
+// the drawn ring itself, it steers at once, from the ring's middle toward the thumb, so pressing and holding the ring's edge walks
+// that way without sliding at all (some phones and app frames take a sliding finger for a scroll and cancel it). Landing elsewhere on
+// the left, the ring jumps under the thumb and the way the thumb then slides is the heading, one of sixteen. A thumb that has hardly
+// moved stands still, and so does one that lifts, which also sends the ring back to its corner. The knob follows the thumb out to the
+// ring's edge. A new thumb on the left takes the stick over (so a thumb whose lifting the phone never reported cannot leave it stuck),
+// and no touch on the left of the screen ever scrolls or zooms the page round it. While an offer waits, the left half is the screen's
+// "no" again, so the stick lets the thumb go by.
 export const stickReach = 40;
 export const stickDead = 9;
 
@@ -63,23 +65,6 @@ export function attachStick(
     lean(0, 0);
     if (held.dir >= 0) move(-1);
   };
-  const onDown = (event: PointerEvent): void => {
-    if (event.pointerType !== "touch" || !steering()) return;
-    const box = screen.getBoundingClientRect();
-    if (event.clientX - box.left >= box.width / 2) return;
-    letGo();
-    // The thumb is the stick's alone: the screen's other zones never hear of it, so it cannot act by sliding right.
-    event.stopImmediatePropagation();
-    event.preventDefault();
-    thumb = {
-      dir: -1,
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-    };
-    place(event.clientX, event.clientY);
-    lean(0, 0);
-  };
   const onMove = (event: PointerEvent): void => {
     const held = thumb;
     if (held === null || event.pointerId !== held.id) return;
@@ -91,14 +76,55 @@ export function attachStick(
     held.dir = dir;
     move(dir);
   };
+  // Whether a point of the page is on the left half of the screen.
+  const onLeft = (x: number): boolean => {
+    const box = screen.getBoundingClientRect();
+    return x - box.left < box.width / 2;
+  };
+  // The middle of the drawn ring where it rests, when a point lands on it.
+  const onRing = (x: number, y: number): { x: number; y: number } | null => {
+    const box = ring?.getBoundingClientRect();
+    if (box === undefined || box.width === 0) return null;
+    const middle = { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    return Math.hypot(x - middle.x, y - middle.y) <= box.width / 2
+      ? middle
+      : null;
+  };
+  const onDown = (event: PointerEvent): void => {
+    // A finger or a pen (a mouse is the keys' and buttons' business).
+    if (event.pointerType === "mouse" || !steering()) return;
+    if (!onLeft(event.clientX)) return;
+    letGo();
+    // The thumb is the stick's alone: the screen's other zones never hear of it, so it cannot act by sliding right.
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    const middle = onRing(event.clientX, event.clientY);
+    thumb = {
+      dir: -1,
+      id: event.pointerId,
+      x: middle?.x ?? event.clientX,
+      y: middle?.y ?? event.clientY,
+    };
+    if (middle === null) {
+      place(event.clientX, event.clientY);
+      lean(0, 0);
+    } else onMove(event);
+  };
   const onUp = (event: PointerEvent): void => {
     if (thumb !== null && event.pointerId === thumb.id) letGo();
   };
-  // A drag on the screen would otherwise scroll or zoom the page round it on some phones.
+  // A drag on the screen would otherwise scroll or zoom the page round it on some phones; and a touch that starts on the stick's half is
+  // kept from the page from its first moment, before a slide could be taken for a scroll and the thumb cancelled.
   const still = (event: Event): void => {
     event.preventDefault();
   };
+  const hold = (event: TouchEvent): void => {
+    const touch = event.changedTouches[0];
+    if (touch !== undefined && steering() && onLeft(touch.clientX))
+      event.preventDefault();
+  };
   screen.addEventListener("pointerdown", onDown, { capture: true });
+  screen.addEventListener("touchstart", hold, { passive: false });
   screen.addEventListener("touchmove", still, { passive: false });
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
@@ -107,6 +133,7 @@ export function attachStick(
   return () => {
     letGo();
     screen.removeEventListener("pointerdown", onDown, { capture: true });
+    screen.removeEventListener("touchstart", hold);
     screen.removeEventListener("touchmove", still);
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerup", onUp);

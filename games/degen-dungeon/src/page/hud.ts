@@ -5,7 +5,7 @@ import { starsOf } from "../rules/heat.ts";
 import { echoAt, inReach, risen, statue } from "../rules/machine.ts";
 import { sighted, watcherAt } from "../rules/mystery.ts";
 import { beatOf } from "../rules/story.ts";
-import type { DayState } from "../rules/types.ts";
+import { flies, type DayState } from "../rules/types.ts";
 import { nearest, spotNamed } from "../rules/places.ts";
 import { machineLines } from "../script/cast.ts";
 import { questLine } from "./words.ts";
@@ -21,6 +21,11 @@ export function noteFor(day: DayState): string {
     return byInput(
       "Up the wall. E climbs in the window, R goes higher (and onto the roof from the top), F climbs down.",
       "Up the wall. Act climbs in the window, Climb goes higher (and onto the roof from the top), Drop climbs down.",
+    );
+  if (flies(day.ride))
+    return byInput(
+      "Flying. R rises, F comes down; land on a street, then E steps out.",
+      "Flying. Climb rises, Drop comes down; land on a street, then Act steps out.",
     );
   if (onTheRoof(day))
     return byInput(

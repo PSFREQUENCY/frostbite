@@ -1,3 +1,4 @@
+import { saucerBeamups } from "../rules/invasion.ts";
 import { questDone, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { sidesOf } from "../sides.ts";
@@ -6,6 +7,7 @@ import { questLineOf } from "./words.ts";
 // A cheer over the picture when a quest or a side quest is done: which one, and how many of today's are done, for a few seconds. The
 // first look at a day only notes what is already done, so waking up cheers nothing, and a new day starts the count again.
 const shown = 3_500;
+const saucerWords = "A saucer of your own waits on the Old Floe lawn.";
 
 // Today's finished quests and side quests by key, with what the cheer says for each.
 type Cheer = readonly [key: string, words: readonly [string, string]];
@@ -40,6 +42,21 @@ function finished(
         : [],
     ),
   ];
+  // Each beam-up today, counted with the earlier days'; the thirteenth leaves the hero a saucer.
+  day.done
+    .filter((id) => id.startsWith("beamup-"))
+    .forEach((id, index) => {
+      const total = day.beamups + index + 1;
+      cheers.push([
+        id,
+        total === saucerBeamups
+          ? ["SAUCER UNLOCKED", saucerWords]
+          : [
+              `BEAM-UP ${String(total)} OF ${String(saucerBeamups)}`,
+              "The visitors wave you off.",
+            ],
+      ]);
+    });
   return new Map(cheers);
 }
 

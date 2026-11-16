@@ -2,10 +2,12 @@ import { BoxGeometry, Group, Mesh, MeshToonMaterial } from "three";
 
 import type { Ride } from "../rules/types.ts";
 import { buildKit, kits } from "./kits.ts";
+import { buildSaucer } from "./saucers.ts";
 import { toonSteps } from "./textures.ts";
 
 // The ride under the hero (`kits.ts` builds each): only one shows at a time. A ride taken from the kerb keeps its own colour, a car its
-// broken side window; the driver's door swings open and shut as the hero gets in; the helicopter's rotor turns.
+// broken side window; the driver's door swings open and shut as the hero gets in; the helicopter's rotor turns, and the visitors' saucer
+// spins under the hero's feet.
 export interface Rides {
   readonly root: Group;
   show(
@@ -28,6 +30,7 @@ const kinds: readonly Exclude<Ride, "foot">[] = [
   "car",
   "heli",
   "moto",
+  "saucer",
   "scooter",
   "semi",
   "truck",
@@ -67,9 +70,17 @@ export function buildRides(): Rides {
     new MeshToonMaterial({ color: "#f4f8ff", gradientMap: toonSteps }),
   );
   crack.name = "broken-window";
+  let spinner: Group | null = null;
   for (const ride of kinds) {
     const group = buildKit(kits[ride], paint);
     group.name = ride;
+    // The visitors' saucer, small enough to stand on, turning under the hero's feet.
+    if (ride === "saucer") {
+      spinner = buildSaucer();
+      spinner.scale.setScalar(0.42);
+      spinner.position.y = 0.32;
+      group.add(spinner);
+    }
     if (ride === "heli") {
       rotor = new Mesh(
         new BoxGeometry(7, 0.08, 0.35),
@@ -110,6 +121,7 @@ export function buildRides(): Rides {
       paint.color.set(colour ?? standard[ride] ?? "#e0b341");
       crack.visible = broken;
       if (rotor !== null) rotor.rotation.y = seconds * 18;
+      if (spinner !== null) spinner.rotation.y = seconds * 2.4;
     },
   };
 }
