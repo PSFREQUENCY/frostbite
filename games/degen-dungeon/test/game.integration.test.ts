@@ -14,7 +14,12 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
       "Connected. No 3D here, so the island is drawn flat.",
     );
     expect(byId(window, "start")?.hasAttribute("disabled")).toBe(false);
-    expect(byId(window, "act")?.hasAttribute("disabled")).toBe(true);
+    // Before a run only the act button is on, as the way to play; the rest wait for a day.
+    expect(byId(window, "act")?.hasAttribute("disabled")).toBe(false);
+    expect(byId(window, "jump")?.hasAttribute("disabled")).toBe(true);
+    byId(window, "act")?.dispatchEvent(new window.MouseEvent("click"));
+    await settle(100);
+    expect(byId(window, "pause")?.hasAttribute("disabled")).toBe(false);
   });
 
   it("carries on from the best the platform hands back", async () => {
@@ -33,6 +38,14 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
     await settle();
     byId(window, "start")?.dispatchEvent(new window.MouseEvent("click"));
     await settle(100);
+    // The run waits on the hero's card; acting wakes the hero.
+    expect(byId(window, "pick")?.hasAttribute("hidden")).toBe(false);
+    expect(byId(window, "pick-start")?.textContent).toBe(
+      "ENTER TO WAKE UP - DAY 1",
+    );
+    byId(window, "act")?.dispatchEvent(new window.MouseEvent("click"));
+    await settle(100);
+    expect(byId(window, "pick")?.hasAttribute("hidden")).toBe(true);
     expect(byId(window, "note")?.textContent).toBe(
       "You were liquidated overnight, and the movers are already here.",
     );

@@ -5,8 +5,10 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
 
 ## Play
 
-- **The opening credits** roll over the city first (the block of ice, the island growing, the signs, the name of the place), then the
-  hero ring. Enter or a tap in the middle starts a day at any moment; the arrows or a tap on a side go straight to the ring.
+- **Tap or Enter to play** on the title (or the act button on a phone). That starts the run: the cinematic rolls over the city (the
+  block of ice, the island growing, the signs, the name of the place; a tap, Enter or an arrow skips it, and it plays once a visit),
+  then the hero ring. Choose with the arrows or a tap on either side, and wake the hero with Enter or a tap in the middle; the day
+  starts then. The hero chosen goes into the day's record, as before.
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
 - **The five days.** The FREE FROST riot morning, the mania, the winter (it opens on the morning of the drain and ends in the Great

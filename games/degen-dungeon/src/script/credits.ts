@@ -6,5 +6,4 @@ export const creditTitles: readonly string[] = [
   "AND ONE ISLAND CITY",
   "NAKASATO",
 ];
-export const creditsSkip =
-  "Enter or a tap in the middle to play. Arrows or a side tap to choose a hero.";
+export const creditsSkip = "Tap or press Enter to skip to the heroes.";

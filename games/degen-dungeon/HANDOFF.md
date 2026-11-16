@@ -74,8 +74,10 @@ at the start of the very first day and can be skipped.
   "first-gig", "first-crew", "the-speech", "storm-catch", "payday" and "joyride" became "first-contact", "intergalactic-otc",
   "taken-up", "masked", "nine-masks", "road-trip" and "big-rig" (the road trip does not count a semi's cab, so it never shares an event
   with the big rig). The sample day claims "home-safe" and "seed-paper".
-- **The page** (`page/credits.ts`, `touch.css`): the credits hold the first-screen card for two and a half seconds, then put it away
-  while the opening plays; Enter and a tap in the middle still start a day at once, as the platform's contract asks. On a touch screen
+- **The page** (`page/credits.ts`, `page/pick.ts`, `touch.css`): the first screen is the title card; one tap or Enter starts the
+  platform run at once, as the contract asks, and the run opens on the cinematic and then the hero ring (`#pick`, page words over the
+  picture). The day's session is made only when the hero wakes, with the run's seed, so the record's config names the hero played;
+  nothing ticks before that. On a phone only the act button shows until a hero wakes; the rest keep their places, unseen. On a touch screen
   the 3D picture fills the frame (`stage.ts` opens the field of view on a tall screen), the game screen keeps only its map at the top,
   and every button is fixed in place.
 

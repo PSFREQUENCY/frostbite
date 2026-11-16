@@ -18,7 +18,7 @@ beforeAll(() => {
 });
 
 describe("the opening credits", () => {
-  it("hold the title on the card, then roll the credits over the city, and stop for the ring or a day", () => {
+  it("roll over the city once a run has started, and stop for the ring", () => {
     const credits = createCredits(true);
     const box = document.getElementById("clip");
     const title = document.getElementById("clip-title");
@@ -29,10 +29,14 @@ describe("the opening credits", () => {
       drawn.push(at);
       return at > 20 ? null : `line ${String(at)}`;
     };
-    expect([credits.on(), credits.flying()]).toEqual([true, false]);
+    expect([credits.on(), credits.flying(), titleHold]).toEqual([
+      true,
+      true,
+      0,
+    ]);
+    credits.frame(0, draw);
+    expect([box?.hidden, drawn]).toEqual([false, [0]]);
     credits.frame(1, draw);
-    expect([box?.hidden, drawn]).toEqual([true, [0]]);
-    credits.frame(titleHold, draw);
     expect([credits.flying(), box?.hidden]).toEqual([true, false]);
     expect(box?.classList.contains("credits")).toBe(true);
     expect(title?.textContent).toBe(creditTitles[0]);

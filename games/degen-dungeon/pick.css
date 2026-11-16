@@ -1,0 +1,47 @@
+/* The hero ring's card while a run waits for its hero: low in the middle of the picture, taking no touches. */
+.stage {
+  position: relative;
+}
+.pick {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  z-index: 3;
+  box-sizing: border-box;
+  max-inline-size: min(36rem, 92%);
+  padding: 0.6rem 1rem;
+  border: 1px solid #38e8ff;
+  border-radius: 0.8rem;
+  background: rgb(10 8 30 / 80%);
+  color: #e8e2ff;
+  font:
+    700 0.85rem/1.4 ui-monospace,
+    monospace;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.pick[hidden] {
+  display: none;
+}
+.pick p {
+  margin: 0.15rem 0;
+}
+#pick-name {
+  color: #38e8ff;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+}
+#pick-lines {
+  white-space: pre-line;
+}
+#pick-start {
+  color: #ffd166;
+}
+@media (pointer: coarse) {
+  .pick {
+    top: calc(max(0.25rem, env(safe-area-inset-top)) + 6.4rem);
+    bottom: auto;
+    inline-size: min(26rem, calc(100% - 2rem));
+  }
+}

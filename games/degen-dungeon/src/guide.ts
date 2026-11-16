@@ -6,6 +6,14 @@ import { heroes } from "./rules/heroes.ts";
 // The first-screen card is the hero select: the hero the ring has brought to the front, their five stats, and how to turn the ring and
 // begin. The SDK draws it over the screen at the pixels of the display, so it stays sharp. A hero still locked shows as a question. While
 // the Time Machine is open, the day it begins is the trip back.
+// The first screen: the title, and one tap or Enter to play (which starts the run; the cinematic and the hero ring come next).
+export const titleGuide: Guide = {
+  lines: ["A FROSTBITE ARCADE GAME", "TEN HEROES - FIVE DAYS - ONE ISLAND"],
+  start: "ENTER TO PLAY",
+  title: "DEGEN DUNGEON",
+  touchStart: "TAP TO PLAY",
+};
+
 export function guideFor(
   hero: number,
   save: Pick<Progress, "day" | "machine" | "slip">,

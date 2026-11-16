@@ -22,7 +22,7 @@
   .stage {
     position: relative;
   }
-  :root body[data-running="yes"] main .stick {
+  :root body[data-awake="yes"] main .stick {
     position: absolute;
     left: 22%;
     top: 62%;
@@ -169,6 +169,29 @@
   :root:root body main .actions button:disabled {
     opacity: 0.45;
   }
+  /* Until a hero wakes (the title, the cinematic and the ring) only the act button shows, as the way to play, skip and wake; the rest keep
+     their places, unseen, so nothing moves when they appear. The readouts wait for the day too. */
+  :root:root
+    body:not([data-awake="yes"])
+    main
+    .actions
+    :is(#jump, #run, #duck, #crawl, #look, #pack, #up, #down) {
+    visibility: hidden;
+  }
+  :root body:not([data-awake="yes"]) main .bar {
+    visibility: hidden;
+  }
+  /* A clip's words sit above the thumb's buttons, and how to skip it in the black bar on top. */
+  .clip {
+    padding-bottom: 14.5rem;
+  }
+  .clip-skip {
+    top: -2rem;
+    right: auto;
+    bottom: auto;
+    left: 1rem;
+    max-inline-size: 70%;
+  }
   /* The goal under the readouts, and the note under the goal, both small and clear of every button. */
   :root body main #goal,
   :root body main #note {
@@ -221,6 +244,9 @@
   @media (orientation: landscape) {
     #world:not([hidden]) ~ #screen {
       object-position: 50% 3.25rem;
+    }
+    .clip {
+      padding: 0 14rem 1.6rem 1rem;
     }
     :root body main #goal {
       margin-block-start: calc(max(0.25rem, env(safe-area-inset-top)) + 2.4rem);

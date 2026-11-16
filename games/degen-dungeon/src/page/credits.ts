@@ -2,9 +2,8 @@ import { creditTitles, creditsSkip } from "../script/credits.ts";
 import { opening } from "../view/cine.ts";
 import { element } from "./elements.ts";
 
-// The opening credits, before the hero ring: the first-screen card over the block of ice for a moment, then the opening's camera moves
-// over the city with the credits letterboxed across the picture (the card put away so it shows), and then the ring. Enter or a tap in
-// the middle starts a day at any point; the arrows or a tap on a side go straight to the ring. A page with no 3D has no credits.
+// The cinematic, once a run has started and before the hero ring: the opening's camera moves over the city with the credits letterboxed
+// across the picture, and then the ring. Enter, a tap or an arrow skips it. A page with no 3D has no cinematic.
 export interface Credits {
   // Whether the credits are on, and whether they are past the title (so the card is put away).
   on(): boolean;
@@ -14,7 +13,7 @@ export interface Credits {
   stop(): void;
 }
 
-export const titleHold = 2.5;
+export const titleHold = 0;
 // Which of the opening's shots a time into it falls in.
 export const shotAt = (seconds: number): number => {
   let start = 0;

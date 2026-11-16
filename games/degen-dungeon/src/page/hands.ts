@@ -38,8 +38,9 @@ export function handsFor(page: Page): Hands {
     page.choose({ dir, type: "move" }),
   );
   return {
+    // Before a run, acting is playing: on a phone the big act button under the thumb starts the game like a tap on the picture.
     act: () => {
-      if (!page.running()) return;
+      if (!page.running()) return page.start();
       if (asked()) answer(0);
       else page.choose({ type: "act" });
     },
