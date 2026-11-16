@@ -115,7 +115,12 @@ In this sandbox `pnpm repository:check` stops at its licence step (the pnpm stor
 When the rules change, re-pin the verifier from the game folder (`bundleVerifier` from `@frostbite/game-sdk/build`, then the new
 `sha256` into `configs/games/degen-dungeon.ts`) and, if the sample day no longer replays to its claims, regenerate it from a bot run.
 
+`src/view/stage.ts` refuses a software renderer (the browser's own `failIfMajorPerformanceCaveat`, then the renderer's name), so
+headless Chromium gets the flat page, as CI's e2e browsers do. To screenshot the 3D picture there, hide the name from the page first:
+`context.addInitScript(() => { const get = WebGL2RenderingContext.prototype.getExtension; WebGL2RenderingContext.prototype.getExtension = function (name) { return name === "WEBGL_debug_renderer_info" ? null : get.call(this, name); }; })`.
+
 ## Not verified
 
-Nobody has played it with hands. No phone, no second browser, no sound check, no frame-rate measurement; the browser contract in
-`tests/e2e` was not run here; screenshots were taken in headless Chromium with a software renderer.
+Nobody has played it with hands. No phone, no second browser, no sound check, no frame-rate measurement; the `tests/e2e` suite itself
+needs PostgreSQL, SeaweedFS and Inngest and was not run here (its game contract and keyboard checks were repeated against the preview at
+its four device sizes, and pass); screenshots were taken in headless Chromium with a software renderer.

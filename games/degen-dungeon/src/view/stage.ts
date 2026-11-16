@@ -29,13 +29,30 @@ export const fovFor = (fov: number, shape: number): number =>
           Math.PI,
       );
 
+// A browser drawing without a graphics card (a software rasteriser) draws the city a frame or two a second and has no time left for the
+// page itself, so there the island is drawn flat, as it is with no WebGL 2 at all. The browser is asked to say so itself, and the
+// renderer it names is checked as well, since not every software one is owned up to.
+const software =
+  /swiftshader|llvmpipe|lavapipe|softpipe|software|basic render/iu;
+export const drawsInSoftware = (context: WebGL2RenderingContext): boolean => {
+  const info = context.getExtension("WEBGL_debug_renderer_info");
+  if (info === null) return false;
+  const name: unknown = context.getParameter(info.UNMASKED_RENDERER_WEBGL);
+  return typeof name === "string" && software.test(name);
+};
+
 export function createStage(canvas: HTMLCanvasElement): Stage | null {
   if (typeof WebGL2RenderingContext === "undefined") return null;
   const context = canvas.getContext("webgl2", {
     antialias: true,
+    failIfMajorPerformanceCaveat: true,
     powerPreference: "high-performance",
   });
   if (!(context instanceof WebGL2RenderingContext)) return null;
+  if (drawsInSoftware(context)) {
+    context.getExtension("WEBGL_lose_context")?.loseContext();
+    return null;
+  }
   let renderer: WebGLRenderer;
   try {
     renderer = new WebGLRenderer({ antialias: true, canvas, context });

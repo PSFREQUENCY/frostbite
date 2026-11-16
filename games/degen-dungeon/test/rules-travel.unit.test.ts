@@ -40,13 +40,21 @@ describe("the island", () => {
       for (const hero of [0, 7, 9]) {
         const seen = { day, hero, looking: true };
         const open = spots.filter((spot) => openTo(spot, seen));
-        for (const one of open)
-          for (const other of open)
-            if (one !== other)
-              expect(
-                Math.max(Math.abs(one.x - other.x), Math.abs(one.z - other.z)),
-                `${one.id} and ${other.id} on day ${String(day)}`,
-              ).toBeGreaterThan(2 * reach);
+        // Every pair is checked in plain code and any too close are listed together, which keeps the test quick on a busy machine.
+        const crowded = open.flatMap((one, index) =>
+          open
+            .slice(index + 1)
+            .filter(
+              (other) =>
+                Math.max(
+                  Math.abs(one.x - other.x),
+                  Math.abs(one.z - other.z),
+                ) <=
+                2 * reach,
+            )
+            .map((other) => `${one.id} and ${other.id}`),
+        );
+        expect(crowded, `day ${String(day)}, hero ${String(hero)}`).toEqual([]);
       }
   });
 

@@ -86,6 +86,10 @@ talks float over the picture. The camera rides behind your shoulder and swings r
 over a square or on a ride, and cuts in close when you use something. The next place to go glows on the corner map and stands in the
 city as a column of light.
 
+Where the browser has no WebGL 2, or draws without a graphics card (a software rasteriser such as SwiftShader or llvmpipe manages a frame
+or two a second and leaves the page no time to answer a key), the island is drawn flat on the screen instead and the day plays the same;
+the status line says so. Headless test browsers are such a case, so the platform's browser contract runs against the flat page.
+
 ## How a day is checked
 
 `src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }`, with `loop` on a trip back,
