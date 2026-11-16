@@ -42,7 +42,7 @@ describe("the words beside the picture", () => {
     );
     expect(talkOf({ ...day, talk: "home" })?.answers).toHaveLength(3);
     expect(talkOf(day)).toBeNull();
-    expect(goalFor(day)).toBe("Cross the FREE FROST riot in The Exchange.");
+    expect(goalFor(day)).toBe("1/2 · Hear Frost's speech in Ticker Square.");
     expect(goalFor({ ...day, drain: 4 })).toContain("draining");
     expect(noteFor(day)).toBe("E: Rally's place");
     const street = { ...day, x: 18_000, z: 18_000 };
@@ -87,6 +87,7 @@ describe("what the platform is asked to remember", () => {
     ).toEqual({
       best: 12,
       day: 3,
+      dream: 0,
       fate: 0,
       hero: 2,
       loops: 0,
@@ -118,7 +119,6 @@ describe("what the platform is asked to remember", () => {
       ...day,
       cause: "home",
       done: ["riot", "speech"],
-      gigs: 1,
       made: 300,
       paper: 4,
     });
@@ -139,16 +139,17 @@ describe("what the platform is asked to remember", () => {
       frozen.progress.day,
       frozen.progress.slip,
     ]).toEqual([false, 300, 2, false]);
+    // The last day is never slept on to a next one: it ends on SHA Beach.
     expect(
-      afterDay({ ...freshProgress, day: 5 }, { ...day, cause: "home", day: 5 })
+      afterDay({ ...freshProgress, day: 7 }, { ...day, cause: "home", day: 7 })
         .progress.day,
-    ).toBe(5);
+    ).toBe(7);
     expect(
       afterDay({ ...freshProgress, day: 3 }, { ...day, cause: "home" }).progress
         .day,
     ).toBe(3);
     expect(
-      afterDay(freshProgress, { ...day, day: 3, storm: 40 }).progress.slip,
+      afterDay(freshProgress, { ...day, day: 4, storm: 40 }).progress.slip,
     ).toBe(true);
   });
 });

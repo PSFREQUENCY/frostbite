@@ -29,14 +29,14 @@ export const kerbNear = (ride: Wheels, x: number, z: number): Spot => {
   return near;
 };
 
-// A second story day that stands in the first beam once the saucers are down, carrying what it was given, and gives the answer aboard
+// A day of the mania (story day three) that stands in the first beam once the saucers are down, carrying what it was given, and gives the answer aboard
 // (if one is asked and given).
 export function saucerDay(
   gifts: readonly ("hardware" | "pizza")[],
   bag = false,
   answer?: number,
 ): Bot {
-  const bot = createBot(3, 7, 2);
+  const bot = createBot(3, 7, 3);
   for (const kind of gifts) {
     bot.use(counterOf(`shop-${kind}`).id);
     bot.pick(0);

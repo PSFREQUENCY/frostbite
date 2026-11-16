@@ -104,7 +104,7 @@ describe("the cards", () => {
       colour.tux,
     ]);
     expect(resultOf(day, over)?.rows[0]?.text).toBe("YOU CALLED IT A DAY");
-    const beach = resultOf({ ...day, cause: "beach", day: 5, dream: 2 }, over);
+    const beach = resultOf({ ...day, cause: "beach", day: 7, dream: 2 }, over);
     expect(beach?.rows.map(({ text }) => text).slice(0, 3)).toEqual([
       "SUNRISE ON SHA BEACH",
       "MADE 0 DUN   DOWN BAD",
@@ -120,8 +120,8 @@ describe("the cards", () => {
     ]);
     expect([rally.title, rally.start, rally.touchStart]).toEqual([
       "DEGEN DUNGEON",
-      "ENTER TO WAKE UP - DAY 2",
-      "TAP TO WAKE UP - DAY 2",
+      "ENTER TO WAKE UP - DAY 2 OF 7",
+      "TAP TO WAKE UP - DAY 2 OF 7",
     ]);
     expect(
       guideFor(9, { day: 1, machine: false, slip: false }).lines?.[0],

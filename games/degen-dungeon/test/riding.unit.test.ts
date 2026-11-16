@@ -20,7 +20,7 @@ import { started } from "./support/replay.ts";
 
 const at = { heading: 0, x: 10, y: 0, z: 20 };
 const riding = (ride: DayState["ride"], crew: number[] = []): DayState => ({
-  ...started(1, 6, 2),
+  ...started(1, 6, 3),
   crew,
   dir: 0,
   ride,
@@ -174,7 +174,7 @@ describe("riding", () => {
 describe("the sky", () => {
   it("brings the saucers down over their beams, and sends them home once peace is made", () => {
     const saucers = buildSaucers();
-    const day = started(1, 7, 2);
+    const day = started(1, 7, 3);
     saucers.show(day, 0, false);
     expect(saucers.root.visible).toBe(false);
     const down = { ...day, tick: invasionTick };

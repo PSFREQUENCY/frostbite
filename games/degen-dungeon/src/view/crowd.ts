@@ -9,6 +9,7 @@ import {
   SphereGeometry,
 } from "three";
 
+import { eraOf, moonNight } from "../rules/calendar.ts";
 import type { DayState } from "../rules/types.ts";
 import { box, hash } from "./hash.ts";
 import { painted } from "./boards.ts";
@@ -146,10 +147,11 @@ export function buildCrowd(): Crowd {
   };
 }
 
-// Which crowd a day has: the riot before the speech on the first morning, the robots on day four, the party once Moon Night begins.
+// Which crowd a day has: the riot before the speech on the first morning, the robots on Launch Day, the party once Moon Night's dream is
+// dreamt.
 export const gatheringOf = (state: DayState): Gathering | null => {
   if (state.gate > 0) return null;
   if (state.day === 1 && !state.done.includes("speech")) return "riot";
-  if (state.day === 4) return "robots";
-  return state.day === 5 && state.beat >= 1 ? "party" : null;
+  if (eraOf(state.day) === 4) return "robots";
+  return state.day === moonNight && state.beat >= 1 ? "party" : null;
 };

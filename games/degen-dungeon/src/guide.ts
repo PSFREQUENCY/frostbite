@@ -1,6 +1,7 @@
 import type { Guide } from "@frostbite/game-sdk/guide";
 
 import type { Progress } from "./progress.ts";
+import { lastDay } from "./rules/calendar.ts";
 import { heroes } from "./rules/heroes.ts";
 
 // The first-screen card is the hero select: the hero the ring has brought to the front, their five stats, and how to turn the ring and
@@ -38,7 +39,7 @@ export function guideFor(
     ],
     start: save.machine
       ? "ENTER: TIME MACHINE TO DAY 1"
-      : `ENTER TO WAKE UP - DAY ${String(save.day)}`,
+      : `ENTER TO WAKE UP - DAY ${String(save.day)} OF ${String(lastDay)}`,
     title,
     touchLines: [
       name,
@@ -48,6 +49,6 @@ export function guideFor(
     ],
     touchStart: save.machine
       ? "TAP: TIME MACHINE TO DAY 1"
-      : `TAP TO WAKE UP - DAY ${String(save.day)}`,
+      : `TAP TO WAKE UP - DAY ${String(save.day)} OF ${String(lastDay)}`,
   };
 }

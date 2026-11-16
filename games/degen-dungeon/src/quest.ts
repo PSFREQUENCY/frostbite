@@ -1,14 +1,13 @@
 import { waterline } from "./rules/constants.ts";
 import { beams, invading, peaceable } from "./rules/invasion.ts";
 import { echoAt } from "./rules/machine.ts";
-import { openTo, spotNamed, spots } from "./rules/places.ts";
-import { beatOf, dayOneGoal, tunnelMouth } from "./rules/story.ts";
+import { openTo, spotNamed, spots, type Spot } from "./rules/places.ts";
+import { beatOf, questOf, tunnelMouth, type Quest } from "./rules/story.ts";
 import type { DayState, Point } from "./rules/types.ts";
-import { centreOf } from "./rules/world.ts";
 
 // Where the next thing to do is, for the glow on the map and the beacon in the city: home while the balance drains (the terminal is
-// there), the beach once the oldest tunnel is open, the newbie on a trip back, the first morning's goal, or the story's beat; and home to
-// sleep once the day's story is told. It reads the day and decides nothing.
+// there), the beach once the oldest tunnel is open, the newbie on a trip back, or where today's quest is done; and home to sleep once
+// the day's three quests are done. It reads the day and decides nothing.
 // While the saucers are over the island: the hardware store for glow sticks, the pizza counter, then the nearest beam (straight to a beam
 // with a bag of meme coins to show).
 function saucerGoal(day: DayState): Point | null {
@@ -28,6 +27,55 @@ function saucerGoal(day: DayState): Point | null {
   );
 }
 
+// The nearest open place of a kind the quest needs, or home when there is none.
+function nearestWhere(
+  day: DayState,
+  fits: (spot: Spot) => boolean,
+): Point | null {
+  let best: Point | null = null;
+  let gap = Infinity;
+  for (const spot of spots) {
+    const away = Math.abs(spot.x - day.x) + Math.abs(spot.z - day.z);
+    if (fits(spot) && openTo(spot, day) && away < gap) {
+      best = spot;
+      gap = away;
+    }
+  }
+  return best;
+}
+
+// Where today's quest is done, by the quest.
+function questPlace(day: DayState, quest: Quest): Point | null {
+  switch (quest) {
+    case "speech":
+      return spotNamed("frost") ?? null;
+    case "paper":
+      return spotNamed("faucet") ?? null;
+    case "gig":
+      return day.parcel === null
+        ? nearestWhere(day, (spot) => spot.kind === "gig")
+        : (spotNamed(day.parcel) ?? null);
+    case "ride":
+      return nearestWhere(day, (spot) => spot.kind === "stop");
+    case "trade":
+      return spotNamed("chart") ?? null;
+    case "lantern":
+      return spotNamed("lanterns") ?? null;
+    case "crew":
+      return nearestWhere(
+        day,
+        (spot) =>
+          spot.kind === "recruit" &&
+          spot.hero !== day.hero &&
+          !day.done.includes(spot.id),
+      );
+    case "beach":
+      return { x: tunnelMouth.x, z: waterline };
+    default:
+      return beatOf(day)?.at ?? null;
+  }
+}
+
 export function questAt(day: DayState): Point | null {
   if (day.ended) return null;
   const home = spotNamed(`home-${String(day.hero)}`) ?? null;
@@ -38,21 +86,6 @@ export function questAt(day: DayState): Point | null {
     const echo = echoAt(day);
     return echo !== null && !day.done.includes(echo.id) ? echo : home;
   }
-  if (day.day > 1) return beatOf(day)?.at ?? home;
-  const goal = dayOneGoal(day);
-  if (goal === "riot") return centreOf(4);
-  if (goal === "speech") return spotNamed("frost") ?? home;
-  if (goal === "paper") return spotNamed("faucet") ?? home;
-  if (goal !== "gig") return goal === null ? null : home;
-  if (day.parcel !== null) return spotNamed(day.parcel) ?? home;
-  let best: Point | null = null;
-  let gap = Infinity;
-  for (const spot of spots) {
-    const away = Math.abs(spot.x - day.x) + Math.abs(spot.z - day.z);
-    if (spot.kind === "gig" && openTo(spot, day) && away < gap) {
-      best = spot;
-      gap = away;
-    }
-  }
-  return best ?? home;
+  const quest = questOf(day);
+  return quest === null ? home : (questPlace(day, quest) ?? home);
 }

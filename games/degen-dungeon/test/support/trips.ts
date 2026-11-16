@@ -8,7 +8,7 @@ import { createBot } from "./bot.ts";
 
 // A day that reaches the top (both tools, and the Swap Meet through the Great Airdrop), then walks up to the risen statue.
 export function machineDay() {
-  const bot = createBot(5, 0, 3);
+  const bot = createBot(5, 0, 4);
   bot.use("tool-magnet");
   bot.use("tool-vacuum");
   bot.go(32_500, 18_000);

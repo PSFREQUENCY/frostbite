@@ -47,7 +47,7 @@ export function busyDay(): Bot {
 // Loot, then a helicopter borrowed twice over: four stars. The tux comes from the west, so the bot walks east to the Rebrand booth, pays
 // for a new look, waits for the rest of the heat to fade, and sells the loot.
 export function hotDay(): Bot {
-  const bot = createBot(1, 7, 2);
+  const bot = createBot(1, 7, 3);
   bot.use("loot-vault");
   bot.use("ride-heli");
   bot.act();
@@ -61,7 +61,7 @@ export function hotDay(): Bot {
 }
 
 export function stormDay(tools: boolean): Bot {
-  const bot = createBot(5, 0, 3);
+  const bot = createBot(5, 0, 4);
   if (tools) {
     bot.use("tool-magnet");
     bot.use("tool-vacuum");
@@ -91,7 +91,7 @@ export function drainDay(): Bot {
 // A day of the city's other corners: a scam walked away from and reported to Frost, a fit and a home bought, the bot farm unplugged,
 // the watcher's footprints, a bag bought before the storm and held through it, and FOMO walked off in the park.
 export function cornersDay(): Bot {
-  const bot = createBot(2, 7, 4);
+  const bot = createBot(2, 7, 5);
   bot.use("offer-kiki");
   bot.pick(false);
   bot.use("frost");
@@ -103,7 +103,7 @@ export function cornersDay(): Bot {
   bot.pick(0);
   bot.pick(3);
   lookAt(bot, "plug");
-  const watcher = watcherAt(2, 4);
+  const watcher = watcherAt(2, 5);
   bot.go(watcher.x, watcher.z);
   bot.look();
   bot.act();
@@ -112,7 +112,7 @@ export function cornersDay(): Bot {
 }
 
 export function diamondDay(): Bot {
-  const bot = createBot(2, 0, 3);
+  const bot = createBot(2, 0, 4);
   bot.use("faucet");
   bot.use("chart");
   bot.pick(0);
@@ -124,10 +124,19 @@ export function diamondDay(): Bot {
 
 // FOMO climbs through the mania, then the bot sits in the Old Floe park until it is gone.
 export function grassDay(): Bot {
-  const bot = createBot(3, 0, 2);
+  const bot = createBot(3, 0, 3);
   bot.skipTo(4_600);
   bot.go(30_000, 6_000);
   bot.wait(1_000);
+  bot.end();
+  return bot;
+}
+
+// Up a wall from the pavement, a storey at a time, and out onto the roof.
+export function roofDay(): Bot {
+  const bot = createBot(4, 7, 1);
+  bot.go(15_000, 17_100);
+  for (let level = 0; level < 4; level += 1) bot.lift(1);
   bot.end();
   return bot;
 }

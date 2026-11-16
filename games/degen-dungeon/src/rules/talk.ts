@@ -1,3 +1,4 @@
+import { eraOf } from "./calendar.ts";
 import { heatPerStar } from "./constants.ts";
 import { counter, counters, games, lunar, play } from "./counters.ts";
 import { aboard } from "./invasion.ts";
@@ -160,13 +161,13 @@ export function stash(day: Draft): string | null {
 
 function maxx(day: Draft, deposit: boolean): string | null {
   if (deposit) {
-    if (day.day !== 2) return "MAXX takes no deposits today";
+    if (eraOf(day.day) !== 2) return "MAXX takes no deposits today";
     if (day.pocket === 0) return "nothing to deposit";
     day.maxx += day.pocket;
     day.pocket = 0;
     return null;
   }
-  if (day.day !== 2) return "withdrawals are paused for maintenance";
+  if (eraOf(day.day) !== 2) return "withdrawals are paused for maintenance";
   if (day.maxx === 0) return "nothing to withdraw";
   day.pocket += day.maxx;
   day.maxx = 0;

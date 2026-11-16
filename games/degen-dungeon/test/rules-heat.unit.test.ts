@@ -16,7 +16,7 @@ import { statusOf } from "../src/rules/status.ts";
 import { started } from "./support/replay.ts";
 
 // Day two, so the first morning's riot plays no part.
-const day = started(1, 7, 2);
+const day = started(1, 7, 3);
 const worth = { fake: false, freezer: 0, maxx: 0 };
 
 describe("heat", () => {
@@ -92,7 +92,7 @@ describe("heat", () => {
 });
 
 describe("the Great Airdrop", () => {
-  const stormy = { ...started(5, 0, 3), dir: 4, x: 32_500, z: 18_000 };
+  const stormy = { ...started(5, 0, 4), dir: 4, x: 32_500, z: 18_000 };
 
   it("falls only on its day and in its minute, the same for a seed, thickest in the Swap Meet and wider with the tools", () => {
     expect(gust(5, 100, 100, 0)).toBe(gust(5, 900, 900, 149));

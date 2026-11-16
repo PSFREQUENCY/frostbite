@@ -11,12 +11,8 @@ import {
   TorusGeometry,
 } from "three";
 
-import {
-  beams,
-  invading,
-  invasionDay,
-  invasionTick,
-} from "../rules/invasion.ts";
+import { eraOf, invasionEra } from "../rules/calendar.ts";
+import { beams, invading, invasionTick } from "../rules/invasion.ts";
 import type { DayState } from "../rules/types.ts";
 import { toonSteps } from "./textures.ts";
 
@@ -104,7 +100,8 @@ export function buildSaucers(): Saucers {
   return {
     root,
     show(state, seconds, away) {
-      const today = state.day === invasionDay && state.tick >= invasionTick;
+      const today =
+        eraOf(state.day) === invasionEra && state.tick >= invasionTick;
       const on = invading(state);
       if (!today) {
         came = -1;

@@ -11,6 +11,7 @@ import {
   drainDay,
   grassDay,
   hotDay,
+  roofDay,
   stormDay,
 } from "./support/days.ts";
 import { moonDay, nightDay } from "./support/night.ts";
@@ -44,61 +45,68 @@ describe("the milestones", () => {
       masksDay(),
       roadTripDay(),
       bigRigDay(),
-      tellStory(createBot(11, 5, 2)),
-      tellStory(createBot(12, 0, 3)),
-      tellStory(createBot(13, 7, 4)),
-      tellStory(createBot(14, 8, 5)),
+      roofDay(),
+      ...[1, 2, 3, 4, 5, 6, 7].map((day) =>
+        tellStory(createBot(10 + day, day % 9, day)),
+      ),
     ];
     for (const bot of bots) expect(bot.here().tick).toBeLessThan(maxTicks);
     const reached = new Set(bots.flatMap(earned));
     expect([...reached].sort()).toEqual([...milestoneIds].sort());
     expect(new Set(milestoneIds).size).toBe(milestoneIds.length);
-    expect(milestoneIds.length).toBeLessThanOrEqual(40);
+    expect(milestoneIds.length).toBe(39);
   });
 
   it("are each earned for what the day did, and only that", () => {
     expect(earned(busyDay())).toEqual([
-      "grinder",
-      "full-crew",
-      "full-loop",
-      "cold-storage",
-      "home-safe",
-      "three-words",
+      "heard-frost",
       "seed-paper",
-      "your-word",
-      "dear-newbie",
+      "grinder",
       "dead-locker",
     ]);
-    expect(earned(hotDay())).toEqual(["fenced", "shook-the-tuxes"]);
+    expect(earned(hotDay())).toEqual(["shook-the-tuxes"]);
     expect(earned(stormDay(false))).toEqual([]);
     expect(earned(drainDay())).toEqual(["seed-paper", "saved-the-rest"]);
     expect(earned(cornersDay())).toEqual([
       "scam-spotted",
+      "based",
       "the-watcher",
       "pulled-the-plug",
-      "based",
-      "moved-up",
-      "fresh-fit",
     ]);
     expect(earned(grassDay())).toEqual(["touching-grass"]);
-    expect(earned(nightDay())).toEqual(["home-safe", "lantern"]);
+    expect(earned(nightDay())).toEqual([]);
     expect(earned(moonDay())).toContain("to-the-moon");
-    expect(earned(saucerDay(["hardware", "pizza"], false, 0))).toEqual([
-      "first-contact",
-    ]);
+    expect(earned(saucerDay(["hardware", "pizza"], false, 0))).toEqual([]);
     expect(earned(saucerDay([], true, 1))).toEqual(["intergalactic-otc"]);
-    expect(earned(saucerDay([]))).toEqual(["taken-up"]);
-    expect(earned(masksDay())).toEqual(["nine-masks", "masked"]);
+    expect(earned(saucerDay([]))).toEqual([]);
+    expect(earned(masksDay())).toEqual(["nine-masks"]);
     // Before the story is won the statues stay stone, and a mask will not go on.
     expect(() => masksDay(false)).toThrow(
       "the statues wake once the story is won",
     );
     expect(earned(roadTripDay())).toEqual(["road-trip"]);
-    expect(earned(bigRigDay())).toEqual(["big-rig"]);
+    expect(earned(bigRigDay())).toEqual([]);
+    expect(earned(roofDay())).toEqual(["rooftop-runner"]);
+    // Each story day earns its own quests' milestones, in order.
+    const quests = [1, 2, 3, 4, 5, 6, 7].map((day) =>
+      earned(tellStory(createBot(10 + day, day % 9, day))).slice(
+        0,
+        day === 1 ? 2 : 3,
+      ),
+    );
+    expect(quests).toEqual([
+      ["heard-frost", "seed-paper"],
+      ["first-gig", "green-line", "first-trade"],
+      ["caught-the-mania", "riding-the-pump", "hustle"],
+      ["cold-open", "thin-ice", "crew-up"],
+      ["countdown", "liftoff", "big-play"],
+      ["dream", "moon-party", "lantern"],
+      ["full-crew", "genesis-room", "sha-beach"],
+    ]);
   });
 
   it("are not earned by a day in which nothing is done, and a bot's day replays to the same end", () => {
-    for (const day of [1, 2, 3, 4, 5]) {
+    for (const day of [1, 2, 3, 4, 5, 6, 7]) {
       const idle = createBot(1, 7, day);
       idle.skipTo(maxTicks);
       idle.end();
@@ -108,9 +116,9 @@ describe("the milestones", () => {
     expect(
       replay({ config: { day: 1, hero: 0 }, inputs: busy.inputs, seed: 1 }),
     ).toEqual(busy.state());
-    const beach = tellStory(createBot(14, 8, 5));
+    const beach = tellStory(createBot(14, 8, 7));
     expect(
-      replay({ config: { day: 5, hero: 8 }, inputs: beach.inputs, seed: 14 }),
+      replay({ config: { day: 7, hero: 8 }, inputs: beach.inputs, seed: 14 }),
     ).toEqual(beach.state());
   });
 });

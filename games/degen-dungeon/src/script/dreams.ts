@@ -1,4 +1,4 @@
-// Each hero's dream on the last day, with its two answers and the two endings they lead to, in the order of the rules' `dreams`, and the
+// Each hero's dream on Moon Night, with its two answers and the two endings they lead to, in the order of the rules' `dreams`, and the
 // finale's lines. Every line is new and written once. A draft for the owner.
 export interface Dream {
   readonly answers: readonly [string, string];
@@ -91,9 +91,9 @@ export const dreams: readonly Dream[] = [
   },
 ];
 
-// Moon Night for everyone, after the dream.
+// Moon Night for everyone after the dream, and the last morning's door.
 export const finale = {
   genesis:
-    "Find the last door under the party: it needs your crew's three words.",
+    "Find the last door under Moon Tower: it needs your crew's three words.",
   party: "Join the party under Moon Tower.",
 } as const;

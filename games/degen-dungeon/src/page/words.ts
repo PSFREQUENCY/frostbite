@@ -3,7 +3,8 @@ import { heroes } from "../rules/heroes.ts";
 import { echoAt, recklessOn } from "../rules/machine.ts";
 import { priceAt } from "../rules/market.ts";
 import { spotNamed } from "../rules/places.ts";
-import { chapterDone, dayOneGoal } from "../rules/story.ts";
+import { lastDay, moonNight } from "../rules/calendar.ts";
+import { questDone, questOf, questsOn, type Quest } from "../rules/story.ts";
 import type { DayState, Weather } from "../rules/types.ts";
 import {
   echoPlaces,
@@ -13,7 +14,7 @@ import {
   tells,
 } from "../script/cast.ts";
 import { dreams, finale } from "../script/dreams.ts";
-import { dayOneLines, talks, tunnelLine } from "../script/lines.ts";
+import { questLines, talks, tunnelLine } from "../script/lines.ts";
 import { stories } from "../script/stories.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
@@ -29,7 +30,6 @@ export const rankNames = [
 
 const told = "Today's story is told. Hustle on, or go home and sleep.";
 
-// Pip's line: what today is about, or what is urgent.
 // The weather readout's words.
 export const weatherNames: Readonly<Record<Weather, string>> = {
   blizzard: "Blizzard",
@@ -41,7 +41,8 @@ export const weatherNames: Readonly<Record<Weather, string>> = {
   storm: "Thunderstorm",
 };
 
-export function goalFor(day: DayState): string {
+// What is urgent before the story: a drain (or a balance that only looks drained), the saucers, the open tunnel, a trip back.
+function urgentLine(day: DayState): string | null {
   if (day.drain > 0)
     return "Your balance is draining! Race home to the hideout terminal.";
   if (day.fake) return "Check the hideout terminal at home before you panic.";
@@ -50,21 +51,39 @@ export function goalFor(day: DayState): string {
       ? "Saucers over the city! Stand still in a beam and get taken up."
       : "Saucers over the city! Grab glow sticks and a pizza, or a bag of meme coins, then stand in a beam.";
   if (day.gate > 0) return tunnelLine;
-  if (day.loop > 0) {
-    const echo = echoAt(day);
-    return echo === null || day.done.includes(echo.id)
-      ? "Bend the timeline, then sleep it off."
-      : `Find your newbie self, ${echoPlaces[echo.id] ?? "somewhere in town"}.`;
-  }
-  if (day.day === 1) return dayOneLines[dayOneGoal(day) ?? "home"] ?? told;
-  if (chapterDone(day)) return told;
-  if (day.day === 5)
-    return day.beat === 0
-      ? (dreams[day.hero]?.line ?? told)
-      : day.beat === 1
-        ? finale.party
-        : finale.genesis;
-  return stories[day.hero]?.[day.day - 2]?.[day.beat]?.line ?? told;
+  if (day.loop === 0) return null;
+  const echo = echoAt(day);
+  return echo === null || day.done.includes(echo.id)
+    ? "Bend the timeline, then sleep it off."
+    : `Find your newbie self, ${echoPlaces[echo.id] ?? "somewhere in town"}.`;
+}
+
+// What one of today's quests asks: the street days' own lines, a hero's beat, the dream, the party, the last door, the tunnel.
+export function questLineOf(day: DayState, quest: Quest): string {
+  if (quest === "beach") return tunnelLine;
+  if (!quest.startsWith("beat-")) return questLines[quest] ?? told;
+  const beat = Number(quest.slice(5));
+  if (day.day === moonNight)
+    return beat === 0 ? (dreams[day.hero]?.line ?? told) : finale.party;
+  if (day.day === lastDay) return finale.genesis;
+  return stories[day.hero]?.[day.day - 3]?.[beat]?.line ?? told;
+}
+
+// What the quest the hero is on asks; once all three are done, that the day's story is told (and on the first morning, home to bed).
+export function questLine(day: DayState): string {
+  const quest = questOf(day);
+  if (quest !== null) return questLineOf(day, quest);
+  return day.day === 1 ? (questLines.home ?? told) : told;
+}
+
+// Pip's line: what is urgent, or which of today's three quests the hero is on and what it asks.
+export function goalFor(day: DayState): string {
+  const urgent = urgentLine(day);
+  if (urgent !== null) return urgent;
+  const quests = questsOn(day.day);
+  const done = quests.filter((quest) => questDone(day, quest)).length;
+  const on = Math.min(done + 1, quests.length);
+  return `${String(on)}/${String(quests.length)} · ${questLine(day)}`;
 }
 
 // Whether the player can see a scam's tell: frost vision, sharp smarts, or street smarts from scams already walked away from.
@@ -80,13 +99,13 @@ export function talkOf(
   const id = day.talk;
   if (id === null) return null;
   if (id === "beat") {
-    if (day.day === 5 && day.beat === 0) {
+    if (day.day === moonNight && day.beat === 0) {
       const dream = dreams[day.hero];
       return dream === undefined
         ? null
         : { answers: dream.answers, say: dream.line };
     }
-    const words = stories[day.hero]?.[day.day - 2]?.[day.beat];
+    const words = stories[day.hero]?.[day.day - 3]?.[day.beat];
     return words?.answers === undefined
       ? null
       : { answers: words.answers, say: words.line };

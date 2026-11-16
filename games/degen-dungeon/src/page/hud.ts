@@ -8,7 +8,7 @@ import { beatOf } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { nearest, spotNamed } from "../rules/places.ts";
 import { machineLines } from "../script/cast.ts";
-import { goalFor } from "./words.ts";
+import { questLine } from "./words.ts";
 
 // The words beside the picture: the heat as stars, and the one line under the screen that says what can be done right here.
 export const starsText = (heat: number): string =>
@@ -46,7 +46,7 @@ export function noteFor(day: DayState): string {
   )
     return here("the watcher's footprints");
   const beat = beatOf(day);
-  if (beat !== null && inReach(day, beat.at)) return here(goalFor(day));
+  if (beat !== null && inReach(day, beat.at)) return here(questLine(day));
   const spot = nearest(day);
   if (spot?.kind === "statue" && !day.won)
     return `${spot.label}: its mask wakes once the story is won.`;

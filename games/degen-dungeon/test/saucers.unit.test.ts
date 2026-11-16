@@ -30,7 +30,7 @@ const counterOf = (node: string): Spot => {
 const beam = beams[0] ?? { x: 0, z: 0 };
 // A second-day bot that walks into the first beam once the saucers are down and stands there long enough to be taken up.
 const intoBeam = (gifts: readonly ("hardware" | "pizza")[], bag = false) => {
-  const bot = createBot(3, 7, 2);
+  const bot = createBot(3, 7, 3);
   for (const kind of gifts) {
     bot.use(counterOf(`shop-${kind}`).id);
     bot.pick(0);
@@ -49,11 +49,11 @@ const intoBeam = (gifts: readonly ("hardware" | "pizza")[], bag = false) => {
 
 describe("the saucers", () => {
   it("come down on the second story day a quarter of the way in, and point the way to the gifts and then a beam", () => {
-    const morning = started(3, 7, 2);
+    const morning = started(3, 7, 3);
     expect(invading(morning)).toBe(false);
     const down = advance(morning, invasionTick);
     expect(invading(down)).toBe(true);
-    expect(invading(advance(started(3, 7, 3), invasionTick))).toBe(false);
+    expect(invading(advance(started(3, 7, 4), invasionTick))).toBe(false);
     const hardware = counterOf("shop-hardware");
     const pizza = counterOf("shop-pizza");
     expect(questAt(down)).toMatchObject({ x: hardware.x, z: hardware.z });
@@ -82,7 +82,7 @@ describe("the saucers", () => {
   });
 
   it("leave alone a hero walking through a beam, or riding through, or standing there a moment too short", () => {
-    const down = advance(started(3, 7, 2), invasionTick);
+    const down = advance(started(3, 7, 3), invasionTick);
     const standing = { ...down, dir: -1, x: beam.x, z: beam.z };
     const walking = advance({ ...standing, dir: 0 }, invasionTick + 3);
     expect([walking.ended, walking.beamed]).toEqual([false, 0]);
@@ -125,7 +125,10 @@ describe("the saucers", () => {
     bot.pick(1);
     const traded = bot.here();
     const value = Math.floor(
-      (aboard.bag * priceAt(aboard.seed, 2, aboard.tick) * tradeTimes) / 100,
+      (aboard.bag *
+        priceAt(aboard.seed, aboard.day, aboard.tick) *
+        tradeTimes) /
+        100,
     );
     expect(traded.pocket).toBe(aboard.pocket + value);
     expect([traded.bag, traded.done.includes("traded")]).toEqual([0, true]);

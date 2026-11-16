@@ -27,7 +27,7 @@ export function parkedNear(
 
 // A day out of doors and in: a coffee at GM Coffee, a run, a borrowed car, the lantern ground after dark with a wish, and home to sleep.
 export function nightDay(wish = 1, seed = 5, boon = 0): Bot {
-  const bot = createBot(seed, 7, 2, 0, 0, boon);
+  const bot = createBot(seed, 7, 3, 0, 0, boon);
   bot.use("room-4-0");
   bot.pick(0);
   bot.pick(1);
@@ -46,7 +46,7 @@ export function nightDay(wish = 1, seed = 5, boon = 0): Bot {
 // shuttle, and the moon underfoot.
 export function moonDay(): Bot {
   for (let seed = 1; seed < 400; seed += 1) {
-    const bot = createBot(seed, 7, 5);
+    const bot = createBot(seed, 7, 6);
     bot.use("launchpad");
     bot.pick(2);
     const { shotAt } = bot.here();

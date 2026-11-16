@@ -86,5 +86,8 @@ function climb(day: Draft, by: number): string | null {
   day.z = to.z;
   day.level = level;
   day.dir = -1;
+  // The first time up a wall today, and the first roof, are remembered (a milestone and a side quest read them).
+  const mark = level === roofLevel ? "roof" : "wall";
+  if (by > 0 && !day.done.includes(mark)) day.done = [...day.done, mark];
   return null;
 }

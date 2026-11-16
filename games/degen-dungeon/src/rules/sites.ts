@@ -1,4 +1,5 @@
-import { days, type Spot } from "./spot.ts";
+import { eras } from "./calendar.ts";
+import type { Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
 import { at, dockWater, helipad } from "./world.ts";
 
@@ -63,39 +64,39 @@ export const sites: readonly Spot[] = [
   offer(at(4, -5_500, 0), "double", "A famous face on a screen", {
     cost: 500,
     crooked: true,
-    on: days(2, 5),
+    on: eras(2, 5),
   }),
   offer(at(7, 4_500, 0), "recovery", "Recovery expert", {
     cost: 400,
     crooked: true,
-    on: days(3, 4),
+    on: eras(3, 4),
   }),
   offer(at(8, 4_500, 0), "job", "Recruiter", {
     cost: 0,
     crooked: true,
     effect: "drain",
-    on: days(4),
+    on: eras(4),
   }),
   offer(at(0, 0, 4_500), "fed", "Agent at a booth", {
     cost: 1_000_000,
     crooked: true,
-    on: days(3),
+    on: eras(3),
   }),
   offer(at(5, 0, 4_500), "slip", "Permission slip", {
     cost: 0,
     crooked: true,
     effect: "leak",
-    on: days(2),
+    on: eras(2),
   }),
   offer(at(1, -4_500, 0), "meter", "Parking meter", {
     cost: 200,
     crooked: true,
-    on: days(4),
+    on: eras(4),
   }),
   offer(at(6, 0, 4_500), "honeypot", "A coin everyone is buying", {
     cost: 600,
     crooked: true,
-    on: days(5),
+    on: eras(5),
   }),
   {
     ...at(1, 2_500, 0),
@@ -154,7 +155,7 @@ export const sites: readonly Spot[] = [
     id: "plug",
     kind: "plug",
     label: "A humming basement",
-    on: days(2, 3, 4, 5),
+    on: eras(2, 3, 4, 5),
   },
   {
     ...at(4, 4_500, 0),
@@ -163,12 +164,12 @@ export const sites: readonly Spot[] = [
     kind: "rebrand",
     label: "Rebrand booth",
   },
-  talk(at(4, 0, 1_500), "frost", "Frost", days(1, 2, 3, 4)),
+  talk(at(4, 0, 1_500), "frost", "Frost", eras(1, 2, 3, 4)),
   talk(at(4, 0, -3_500), "chart", "The Exchange floor"),
-  talk(at(4, 0, 4_000), "maxx", "MAXX window", days(2, 3, 4, 5)),
+  talk(at(4, 0, 4_000), "maxx", "MAXX window", eras(2, 3, 4, 5)),
   talk(at(3, 4_500, 0), "fits", "Fit shop"),
-  talk(at(8, 0, 4_500), "realtor", "Realtor", days(2, 3, 4, 5)),
-  talk(at(3, 0, 4_500), "garage", "Garage", days(2, 3, 4, 5)),
+  talk(at(8, 0, 4_500), "realtor", "Realtor", eras(2, 3, 4, 5)),
+  talk(at(3, 0, 4_500), "garage", "Garage", eras(2, 3, 4, 5)),
   {
     ...at(8, 0, -4_500),
     id: "ride-scooter",

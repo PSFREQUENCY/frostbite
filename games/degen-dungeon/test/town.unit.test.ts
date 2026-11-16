@@ -65,7 +65,7 @@ describe("the mom-and-pop shops", () => {
     const inward = shop.north ? 4 : 12;
     for (const ride of ["foot", "car", "bike"] as const) {
       const start = {
-        ...started(1, 7, 2),
+        ...started(1, 7, 3),
         ride,
         x: shop.counter.x,
         z: street,
@@ -77,7 +77,7 @@ describe("the mom-and-pop shops", () => {
 
   it("sell what their kind sells, for DUN in the pocket, and say what it costs", () => {
     const day = {
-      ...started(3, 7, 4),
+      ...started(3, 7, 5),
       fomo: 50,
       heat: 200,
       peak: 200,
@@ -159,7 +159,7 @@ describe("parked rides", () => {
   });
 
   it("can be taken from the kerb once a day each and again where left: an engine brings heat, a scooter or a bike none", () => {
-    const bot = createBot(2, 7, 2);
+    const bot = createBot(2, 7, 3);
     const home = bot.here();
     const car = parkedNear("car", home.x, home.z);
     bot.use(car.id);
@@ -195,7 +195,7 @@ describe("parked rides", () => {
 
 describe("moving on foot", () => {
   it("walks, runs, crouches or crawls, each at its own pace, and wheels keep their own", () => {
-    const day = started(1, 7, 2);
+    const day = started(1, 7, 3);
     const walk = paceOf(day);
     const paces = gaitTenths.map((_, gait) => paceOf({ ...day, gait }));
     expect(paces[0]).toBe(walk);
@@ -213,7 +213,7 @@ describe("moving on foot", () => {
   });
 
   it("lets heat fade twice as fast while crouching or crawling, not while riding", () => {
-    const hot = { ...started(1, 7, 2), heat: 100, peak: 100 };
+    const hot = { ...started(1, 7, 3), heat: 100, peak: 100 };
     const after = (gait: number, ride: DayState["ride"]) =>
       100 - advance({ ...hot, gait, ride }, 20 * heatFadeTicks).heat;
     expect(after(0, "foot")).toBe(20);

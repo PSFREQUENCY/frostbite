@@ -1,3 +1,4 @@
+import { eraOf } from "./calendar.ts";
 import {
   borrowHeat,
   drainPace,
@@ -43,7 +44,7 @@ function deliver(day: Draft, id: string): string | null {
     return "nothing to deliver here";
   const charm =
     (heroes[day.hero]?.charm ?? 0) + (day.done.includes("fit-shades") ? 1 : 0);
-  const rate = eraPay[day.day - 1] ?? 100;
+  const rate = eraPay[eraOf(day.day) - 1] ?? 100;
   const pay = Math.floor((gig.pay * (100 + 5 * charm) * rate) / 10_000);
   day.pocket += pay;
   day.made += pay;
@@ -109,7 +110,7 @@ function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
     (day.done.includes("fit-parka") || day.done.includes("locker") ? 2 : 0);
   const crowd =
     spot.id === "loot-stall" ||
-    (spot.id === "loot-vault" && (day.day === 1 || day.day === 5));
+    (spot.id === "loot-vault" && [1, 5].includes(eraOf(day.day)));
   day.hot += spot.value;
   day.rep = Math.max(0, day.rep - lootRep);
   heated(day, lootHeat - 12 * stealth + (crowd ? witnessHeat : 0));
@@ -123,7 +124,7 @@ function open(day: Draft, node: string): string | null {
   if (node === "frost")
     day.talk =
       day.day === 1 && !day.done.includes("speech") ? "speech" : "frost";
-  else if (node === "maxx" && day.day > 3)
+  else if (node === "maxx" && eraOf(day.day) > 3)
     return "MAXX is back after maintenance";
   else if (locked(day) && node !== "maxx") return "your wallet is locked";
   else day.talk = node;

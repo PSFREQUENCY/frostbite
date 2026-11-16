@@ -70,7 +70,7 @@ describe("the painted city", () => {
 describe("the backpack", () => {
   it("slides open with the quest, what the hero carries, the crew, the seed paper, the letters read and tonight's lantern", () => {
     const day: DayState = {
-      ...started(1, 7, 2),
+      ...started(1, 7, 3),
       crew: [0],
       done: ["letter-1", "fit-gloves", "moon", "moon-rock"],
       hot: 50,
@@ -104,7 +104,7 @@ describe("the backpack", () => {
     ]).toEqual([true, true]);
     expect(
       document.getElementById("bag-items")?.querySelectorAll("section"),
-    ).toHaveLength(7);
+    ).toHaveLength(8);
     bag.toggle();
     expect(document.getElementById("bag")?.getAttribute("aria-hidden")).toBe(
       "true",
@@ -134,7 +134,7 @@ describe("the hands", () => {
     expect(moves).toEqual([12, 4, -1]);
     const chosen: Choice[] = [];
     const wishes: string[] = [];
-    let day: DayState | null = started(1, 7, 2);
+    let day: DayState | null = started(1, 7, 3);
     let jumps = 0;
     const hands = handsFor({
       answers: () => 5,
@@ -152,15 +152,15 @@ describe("the hands", () => {
       yaw: () => -Math.PI / 2,
     });
     hands.gait(1, true);
-    day = { ...started(1, 7, 2), gait: 1 };
+    day = { ...started(1, 7, 3), gait: 1 };
     hands.gait(1, false);
     hands.gait(2);
-    day = { ...started(1, 7, 2), gait: 2 };
+    day = { ...started(1, 7, 3), gait: 2 };
     hands.gait(2);
     hands.jump();
     hands.act();
     hands.move(8);
-    day = { ...started(1, 7, 2), talk: "lantern" };
+    day = { ...started(1, 7, 3), talk: "lantern" };
     hands.jump();
     hands.answer(2);
     hands.no();
@@ -182,7 +182,7 @@ describe("the hands", () => {
     hands.gait(1);
     expect(chosen).toHaveLength(10);
     // The buttons under the screen do the same, and the day's buttons come back to be switched on and off.
-    day = started(1, 7, 2);
+    day = started(1, 7, 3);
     const buttons = wireButtons(hands);
     expect(buttons.map(({ id }) => id)).toEqual([
       "act",

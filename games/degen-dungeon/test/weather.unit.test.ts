@@ -49,10 +49,10 @@ describe("the weather", () => {
 
   it("holds a spell for three minutes and then clears", () => {
     const seed = Array.from({ length: 50 }, (_, one) => one).find(
-      (one) => spellOf(one, 3, 0, 0) === "storm",
+      (one) => spellOf(one, 4, 0, 0) === "storm",
     );
     if (seed === undefined) throw new Error("no stormy seed");
-    const morning = started(seed, 7, 3);
+    const morning = started(seed, 7, 4);
     const start = spellStarts[0] ?? 0;
     expect(advance(morning, start - 1).weather).toBe("clear");
     expect(advance(morning, start).weather).toBe("storm");
@@ -71,7 +71,7 @@ describe("the weather", () => {
       heatFadeTicks / 2,
       heatFadeTicks * 2,
     ]);
-    const calm = { ...started(4, 7, 3), tick: 2_000 };
+    const calm = { ...started(4, 7, 4), tick: 2_000 };
     const fomo = (weather: Weather): number =>
       advance({ ...calm, weather }, 2_000 + fomoTicks * 12).fomo;
     expect(fomo("storm")).toBe(fomo("clear") + 4);
@@ -94,7 +94,7 @@ describe("frost vision", () => {
 
 describe("the rides on the kerb", () => {
   it("go at their own paces, and anything with an engine brings heat", () => {
-    const day = started(1, 7, 4);
+    const day = started(1, 7, 5);
     expect(
       (["moto", "van", "truck", "semi"] as const).map((ride) =>
         paceOf({ ...day, ride }),
@@ -113,7 +113,7 @@ describe("the rides on the kerb", () => {
   });
 
   it("stay where they are left, the last six of them, and a hired ride is never left", () => {
-    let day: DayState = { ...started(1, 7, 4), x: clear.x, z: clear.z };
+    let day: DayState = { ...started(1, 7, 5), x: clear.x, z: clear.z };
     for (let one = 0; one < 7; one += 1)
       day = act({ ...day, ride: "car", rideId: `car-${String(one)}` });
     expect(day.left.map((ride) => ride.id)).toEqual(

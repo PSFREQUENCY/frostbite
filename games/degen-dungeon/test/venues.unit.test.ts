@@ -47,7 +47,7 @@ describe("the landmarks you can walk into", () => {
       const street = out === 1 ? door.z1 - 100 : door.z0 + 100;
       expect(onStreet(middle.x, street), venue.id).toBe(true);
       for (const ride of ["foot", "scooter"] as const) {
-        const outside = { ...started(1, 7, 2), ride, x: middle.x, z: street };
+        const outside = { ...started(1, 7, 3), ride, x: middle.x, z: street };
         const walked = advance(
           step(outside, "move", { dir: out === 1 ? 12 : 4 }),
           600,
@@ -62,7 +62,7 @@ describe("the landmarks you can walk into", () => {
 
   it("each do their thing once a day: calm, standing, frost vision, a cooler head, a little income", () => {
     const day = {
-      ...started(3, 7, 4),
+      ...started(3, 7, 5),
       fomo: 60,
       heat: 100,
       peak: 100,
@@ -95,7 +95,7 @@ describe("the landmarks you can walk into", () => {
   });
 
   it("keep a bank whose teller moves DUN between pocket and freezer, but not on the morning the freezer looks empty", () => {
-    const day = { ...started(3, 7, 4), freezer: 500, pocket: 1_500 };
+    const day = { ...started(3, 7, 5), freezer: 500, pocket: 1_500 };
     const frozen = pick(day, "bank", 0);
     expect([frozen.pocket, frozen.freezer, frozen.talk]).toEqual([
       500,
@@ -138,7 +138,7 @@ describe("the moonshot", () => {
         (seed) => !hits(seed, 1),
       ) ?? -1;
     const day = (seed: number): DayState => ({
-      ...started(seed, 7, 5),
+      ...started(seed, 7, 6),
       pocket: 20_000,
       tick: 10,
     });

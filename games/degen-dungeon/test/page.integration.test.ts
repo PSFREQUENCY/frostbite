@@ -153,6 +153,7 @@ describe("the page's keys, pause and sound", () => {
     expect(stored.progress).toEqual({
       best: 7,
       day: 1,
+      dream: 0,
       fate: 0,
       hero: 7,
       loops: 0,

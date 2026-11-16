@@ -51,7 +51,7 @@ describe("spots", () => {
   });
 
   it("sell loot for half, stash the pocket in the freezer, and refuse when there is nothing to sell or stash", () => {
-    const bot = createBot(1, 4, 3);
+    const bot = createBot(1, 4, 4);
     bot.go(6_000, 25_500);
     expect(refusal(bot.here(), "act", now(bot))).toBe("nothing to sell");
     bot.go(13_500, 30_000);
@@ -77,7 +77,7 @@ describe("spots", () => {
   });
 
   it("hold a tool, a word, and a booth that sells a new look to those with heat and DUN", () => {
-    const bot = createBot(1, 7, 4);
+    const bot = createBot(1, 7, 5);
     bot.go(22_500, 18_000);
     expect(refusal(bot.here(), "act", now(bot))).toBe("no heat to lose");
     bot.use("word-b");
@@ -100,7 +100,7 @@ describe("spots", () => {
 
 describe("offers", () => {
   it("wait for an answer; a scam taken costs the pocket, and walked away from it is a scam spotted", () => {
-    const bot = createBot(1, 1, 4);
+    const bot = createBot(1, 1, 5);
     bot.use("offer-kiki");
     expect(bot.state().talk).toBe("offer-kiki");
     expect(refusal(bot.state(), "act", now(bot))).toBe("answer first");
@@ -129,15 +129,15 @@ describe("offers", () => {
     bot.use("offer-scruff");
     bot.pick(true);
     expect([bot.state().pocket, bot.state().made]).toEqual([400, 400]);
-    const honest = createBot(1, 7, 4);
+    const honest = createBot(1, 7, 5);
     honest.use("offer-yield");
     honest.pick(true);
     expect(honest.state().pocket).toBe(3_300);
-    const scam = createBot(3, 7, 4);
+    const scam = createBot(3, 7, 5);
     scam.use("offer-yield");
     scam.pick(true);
     expect(scam.state().pocket).toBe(2_700);
-    const passed = createBot(1, 7, 4);
+    const passed = createBot(1, 7, 5);
     passed.use("offer-yield");
     passed.pick(false);
     expect([passed.state().spotted, passed.state().pocket]).toEqual([0, 3_000]);

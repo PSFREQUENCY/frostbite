@@ -1,14 +1,14 @@
+import { eraOf, invasionEra } from "./calendar.ts";
 import { moonPad, visionTicks } from "./constants.ts";
 import { priceAt } from "./market.ts";
 import type { DayState, Draft, Point } from "./types.ts";
 
-// The saucers. On the second story day, from a quarter of the way through it, four saucers hang over street crossings across the island
+// The saucers. In the mania (story day three), from a quarter of the way through it, four saucers hang over street crossings across the island
 // with their beams down, and more circle overhead. Standing still in a beam on foot for a moment (`beamWait`) is being taken up. Aboard,
 // glow sticks and a pizza
 // (bought that day at the hardware store and the pizza counter) make peace; a bag of the market's meme coin can be shown and traded; or
 // the hero goes quietly. Peace or a trade sends the saucers home. Taken up with nothing to offer, or going quietly, ends the day asleep on
 // the moon, and the story starts again from the first morning.
-export const invasionDay = 2;
 export const invasionTick = 4_500;
 export const beams: readonly Point[] = [
   { x: 10_800, z: 11_600 },
@@ -26,7 +26,7 @@ export const settled = (day: Pick<DayState, "done">): boolean =>
 export const invading = (
   day: Pick<DayState, "day" | "done" | "tick">,
 ): boolean =>
-  day.day === invasionDay && day.tick >= invasionTick && !settled(day);
+  eraOf(day.day) === invasionEra && day.tick >= invasionTick && !settled(day);
 export const beamAt = (day: Pick<DayState, "x" | "z">): Point | undefined =>
   beams.find(
     (beam) =>

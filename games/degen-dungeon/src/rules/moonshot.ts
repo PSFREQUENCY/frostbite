@@ -21,6 +21,7 @@ export function stake(day: Draft, which: number): string | null {
   if (day.pocket < amount) return "not enough DUN";
   day.pocket -= amount;
   day.shot = amount;
+  if (!day.done.includes("staked")) day.done = [...day.done, "staked"];
   day.shotAt = (Math.floor(day.tick / shotWindow) + 1) * shotWindow;
   return null;
 }

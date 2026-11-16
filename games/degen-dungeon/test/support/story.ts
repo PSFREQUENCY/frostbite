@@ -1,5 +1,5 @@
-import { waterline } from "../../src/rules/constants.ts";
-import { beatOf } from "../../src/rules/story.ts";
+import { nightTick, waterline } from "../../src/rules/constants.ts";
+import { beatOf, questOf, type Quest } from "../../src/rules/story.ts";
 import { createBot } from "./bot.ts";
 
 type Bot = ReturnType<typeof createBot>;
@@ -31,12 +31,48 @@ function recruit(bot: Bot, from: readonly number[]): void {
   bot.pick(true);
 }
 
-// Plays the day's story through, beat by beat, meeting each need on the way. `answer` picks the first or second answer where a beat asks.
-// On the last day it opens the Genesis Room and runs the tunnel to SHA Beach.
+// The first two days' quests, done the plain way: the speech heard and the paper in the freezer; a gig, a stop on the Green Line, a buy
+// on the Exchange floor.
+function street(bot: Bot, quest: Quest): void {
+  if (quest === "speech") {
+    bot.use("frost");
+    for (let line = 0; line < 3; line += 1) bot.pick(0);
+  }
+  if (quest === "paper") {
+    bot.use("faucet");
+    bot.pick(3);
+  }
+  if (quest === "gig") earn(bot, 0, 1);
+  if (quest === "ride") bot.use("stop-7");
+  if (quest === "trade") {
+    bot.use("chart");
+    bot.pick(0);
+    bot.pick(3);
+  }
+}
+
+// Plays the day's three quests through, meeting each beat's need on the way. `answer` picks the first or second answer where a beat
+// asks. On Moon Night the lantern waits for dark; on the last day a crew of two opens the Genesis Room and the bot runs the tunnel.
 export function tellStory(bot: Bot, answer = 1): Bot {
-  for (let beats = 0; beats < 6; beats += 1) {
+  for (let quests = 0; quests < 6; quests += 1) {
+    const quest = questOf(bot.here());
+    if (quest === null || quest === "beach") break;
+    if (quest === "lantern") {
+      if (bot.here().tick < nightTick) bot.skipTo(nightTick);
+      bot.use("lanterns");
+      bot.pick(0);
+      continue;
+    }
+    if (quest === "crew") {
+      while (bot.here().crew.length < 2)
+        recruit(bot, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+      continue;
+    }
     const beat = beatOf(bot.here());
-    if (beat === null) break;
+    if (beat === null) {
+      street(bot, quest);
+      continue;
+    }
     const need = beat.need ?? {};
     if (
       need.crew !== undefined &&
@@ -44,10 +80,7 @@ export function tellStory(bot: Bot, answer = 1): Bot {
     )
       recruit(bot, need.crew);
     while (bot.here().crew.length < (need.crewSize ?? 0))
-      recruit(
-        bot,
-        [0, 1, 2, 3, 4, 5, 6, 7, 8].filter((hero) => hero !== 9),
-      );
+      recruit(bot, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
     earn(bot, need.pay ?? 0, need.gigs ?? 0);
     if (bot.here().rides < (need.rides ?? 0)) {
       bot.use("stop-7");

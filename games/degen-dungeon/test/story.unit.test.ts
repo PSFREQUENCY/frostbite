@@ -4,11 +4,13 @@ import { maxTicks, vestGap } from "../src/rules/constants.ts";
 import { advance } from "../src/rules/day.ts";
 import { heroes } from "../src/rules/heroes.ts";
 import { degenRules } from "../src/rules/index.ts";
+import { lastDay, moonNight } from "../src/rules/calendar.ts";
 import {
   beatOf,
-  chapterDone,
   chapterOf,
-  dayOneGoal,
+  questOf,
+  questsOn,
+  storyTold,
   tunnelMouth,
 } from "../src/rules/story.ts";
 import type { DayState } from "../src/rules/types.ts";
@@ -27,32 +29,49 @@ const beside = (day: DayState): DayState => {
 };
 
 describe("the story", () => {
-  it("has words for every beat of every hero, and a dream with two endings for each", () => {
+  it("has two quests on the first morning and three every day after it, words for every beat of every hero, and a dream with two endings for each", () => {
+    for (let day = 1; day <= lastDay; day += 1)
+      expect(questsOn(day), `day ${String(day)}`).toHaveLength(
+        day === 1 ? 2 : 3,
+      );
+    expect(questsOn(lastDay + 1)).toEqual([]);
     heroes.forEach((_, hero) => {
-      for (const day of [2, 3, 4])
+      for (const day of [3, 4, 5])
         chapterOf(hero, day).forEach((beat, index) => {
-          const words = stories[hero]?.[day - 2]?.[index];
+          const words = stories[hero]?.[day - 3]?.[index];
           expect(words?.line.length ?? 0).toBeGreaterThan(10);
           expect(words?.answers?.length ?? 0).toBe(beat.pick?.length ?? 0);
         });
       expect(dreams[hero]?.endings).toHaveLength(2);
-      expect(chapterOf(hero, 5)).toHaveLength(3);
-      for (const beat of chapterOf(hero, 5))
+      expect(chapterOf(hero, moonNight)).toHaveLength(2);
+      expect(chapterOf(hero, lastDay)).toHaveLength(1);
+      for (const beat of [
+        ...chapterOf(hero, moonNight),
+        ...chapterOf(hero, lastDay),
+      ])
         expect(onLand(beat.at.x, beat.at.z)).toBe(true);
     });
-    expect(chapterOf(0, 1)).toEqual([]);
+    expect([
+      chapterOf(0, 1),
+      chapterOf(0, 2),
+      chapterOf(12, moonNight),
+    ]).toEqual([[], [], []]);
   });
 
   it("can be told in full by every hero on every day, inside the day, and each telling replays", () => {
     heroes.forEach((_, hero) => {
-      for (const day of [2, 3, 4, 5]) {
+      for (let day = 1; day <= lastDay; day += 1) {
         const bot = tellStory(createBot(20 + hero, hero, day));
         const end = bot.here();
         expect(end.tick, `${String(hero)} on day ${String(day)}`).toBeLessThan(
           maxTicks,
         );
-        if (day < 5) expect(chapterDone(end)).toBe(true);
-        else expect([end.cause, end.dream, end.gate]).toEqual(["beach", 2, 1]);
+        expect(storyTold(end), `${String(hero)} on day ${String(day)}`).toBe(
+          true,
+        );
+        if (day === moonNight) expect(end.dream).toBe(2);
+        if (day === lastDay)
+          expect([end.cause, end.gate]).toEqual(["beach", 1]);
         const config = { day, hero };
         expect(replay({ config, inputs: bot.inputs, seed: 20 + hero })).toEqual(
           bot.state(),
@@ -61,42 +80,64 @@ describe("the story", () => {
     });
   });
 
-  it("runs the first morning as goals: the riot, the speech, the paper, a gig, then home", () => {
+  it("runs the first two days as quests read from the day: the speech and the paper, then a gig, a ride and a trade", () => {
     const bot = createBot(1, 0, 1);
-    expect(dayOneGoal(bot.here())).toBe("riot");
+    expect(questOf(bot.here())).toBe("speech");
     bot.go(18_000, 17_000);
-    expect([dayOneGoal(bot.here()), bot.here().heat > 0]).toEqual([
+    expect([questOf(bot.here()), bot.here().heat > 0]).toEqual([
       "speech",
       true,
     ]);
     bot.use("frost");
     for (let line = 0; line < 3; line += 1) bot.pick(0);
-    expect(dayOneGoal(bot.state())).toBe("paper");
+    expect(questOf(bot.state())).toBe("paper");
     bot.use("faucet");
     bot.pick(2);
-    expect([dayOneGoal(bot.state()), bot.state().paper]).toEqual(["gig", 3]);
-    bot.use("gig-exchange");
-    bot.use("drop-marina");
-    expect(dayOneGoal(bot.state())).toBe("home");
-    bot.sleep();
-    expect(dayOneGoal(bot.state())).toBeNull();
-    expect(dayOneGoal(started(1, 0, 2))).toBeNull();
+    expect([questOf(bot.state()), bot.state().paper]).toEqual([null, 3]);
+    expect(storyTold(bot.state())).toBe(true);
+    const second = createBot(1, 0, 2);
+    expect(questOf(second.here())).toBe("gig");
+    second.use("gig-exchange");
+    second.use("drop-marina");
+    expect(questOf(second.state())).toBe("ride");
+    second.use("stop-7");
+    expect(questOf(second.state())).toBe("trade");
+    second.use("chart");
+    second.pick(0);
+    expect([questOf(second.state()), storyTold(second.state())]).toEqual([
+      null,
+      true,
+    ]);
+    // Done out of order, the quest shown is the first still to do; and a trip back has none.
+    expect(questOf({ ...started(1, 0, 2), bag: 5 })).toBe("gig");
+    expect(questOf({ ...started(1, 0, 1), loop: 1 })).toBeNull();
+    expect(storyTold({ ...started(1, 0, 1), loop: 1 })).toBe(false);
     const sneak = createBot(1, 6, 1);
     sneak.go(18_000, 17_000);
     expect([sneak.here().done, sneak.here().heat]).toEqual([["riot"], 0]);
   });
 
+  it("asks for a lantern after dark on Moon Night, and a crew of two before the last door", () => {
+    const night = { ...started(1, 4, moonNight), beat: 2 };
+    expect(questOf(night)).toBe("lantern");
+    expect(questOf({ ...night, done: ["lantern"] })).toBeNull();
+    const last = started(1, 4, lastDay);
+    expect(questOf(last)).toBe("crew");
+    expect(questOf({ ...last, crew: [5, 3] })).toBe("beat-0");
+    expect(questOf({ ...last, beat: 1, crew: [5, 3], gate: 1 })).toBe("beach");
+  });
+
   it("refuses a beat until its need is met, and says which", () => {
     const needs: readonly [number, number, number, string][] = [
-      [0, 3, 0, "this needs the right crewmate"],
-      [2, 2, 1, "only frost vision shows it"],
-      [0, 2, 2, "not enough DUN"],
-      [5, 2, 0, "finish more gigs first"],
-      [2, 3, 1, "ride the Green Line first"],
-      [7, 2, 2, "trade on the Exchange floor first"],
-      [5, 4, 1, "this needs a full crew"],
-      [6, 4, 2, "lose the heat first"],
-      [7, 5, 2, "this needs a full crew"],
+      [0, 4, 0, "this needs the right crewmate"],
+      [2, 3, 1, "only frost vision shows it"],
+      [0, 3, 2, "not enough DUN"],
+      [5, 3, 0, "finish more gigs first"],
+      [2, 4, 1, "ride the Green Line first"],
+      [7, 3, 2, "trade on the Exchange floor first"],
+      [5, 5, 1, "this needs a full crew"],
+      [6, 5, 2, "lose the heat first"],
+      [7, 7, 0, "this needs a full crew"],
     ];
     for (const [hero, day, beat, reason] of needs) {
       const there = beside({
@@ -110,14 +151,14 @@ describe("the story", () => {
         `${String(hero)} ${String(day)}`,
       ).toBe(reason);
     }
-    const there = beside(started(1, 0, 2));
+    const there = beside(started(1, 0, 3));
     expect(refusal({ ...there, x: there.x + 400 }, "act", at(there))).toBe(
       "nothing to do here",
     );
   });
 
-  it("gives each of a beat's two answers its own gift, and on the last day the first answer is the dream", () => {
-    const asked = beside({ ...started(1, 3, 4), beat: 1 });
+  it("gives each of a beat's two answers its own gift, and on Moon Night the first answer is the dream", () => {
+    const asked = beside({ ...started(1, 3, 5), beat: 1 });
     const open = degenRules.step(asked, { data: { tick: 0 }, type: "act" });
     if (!open.ok) throw new Error(open.reason);
     expect(open.state.talk).toBe("beat");
@@ -136,7 +177,7 @@ describe("the story", () => {
     expect(refusal(open.state, "pick", { choice: 3, tick: 0 })).toBe(
       "pick one of the two",
     );
-    const dream = createBot(3, 1, 5);
+    const dream = createBot(3, 1, moonNight);
     const beat = beatOf(dream.here());
     if (beat === null) throw new Error("no dream");
     dream.go(beat.at.x, beat.at.z);
@@ -146,11 +187,11 @@ describe("the story", () => {
   });
 
   it("opens the oldest tunnel behind the last door, with the Vests behind, and they take the beach from anyone who dawdles", () => {
-    const bot = createBot(5, 4, 5);
+    const bot = createBot(5, 4, lastDay);
     tellStory(bot, 0);
     const end = bot.here();
-    expect([end.cause, end.dream]).toEqual(["beach", 1]);
-    const door = createBot(5, 4, 5);
+    expect([end.cause, end.gate]).toEqual(["beach", 1]);
+    const door = createBot(5, 4, lastDay);
     for (const id of ["recruit-5", "recruit-3"]) {
       door.use(id);
       door.pick(true);

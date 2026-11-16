@@ -35,16 +35,20 @@ describe("the Time Machine on the page", () => {
     expect(nextRun(entered)).toEqual({
       boon: 0,
       day: 1,
+      dream: 0,
       fate: 0,
       loop: 1,
       won: false,
     });
     // The last day ending on SHA Beach wins the story: the Time Machine opens, the statues' masks wake, and the ring is offered again.
-    const last = { ...day, cause: "beach", day: 5 } as const;
+    const last = { ...day, cause: "beach", day: 7 } as const;
     const won = afterDay(
-      { ...freshProgress, day: 5, seen: true },
+      { ...freshProgress, day: 7, dream: 2, seen: true },
       last,
     ).progress;
+    // Moon Night's dream is kept for the last day, which the beach's ending tells; a trip back forgets it.
+    expect(nextRun({ ...won, machine: false }).dream).toBe(2);
+    expect(nextRun({ ...won, day: 6, machine: false }).dream).toBe(0);
     expect([won.machine, won.won, nextRun(won).won, choosing(won)]).toEqual([
       true,
       true,
@@ -70,13 +74,14 @@ describe("the Time Machine on the page", () => {
     expect(nextRun(back.progress)).toEqual({
       boon: 0,
       day: 1,
+      dream: 0,
       fate: 3,
       loop: 0,
       won: false,
     });
     expect(
       nextRun({ ...freshProgress, loops: 40, machine: true, wish: 2 }),
-    ).toEqual({ boon: 0, day: 1, fate: 0, loop: 9, won: false });
+    ).toEqual({ boon: 0, day: 1, dream: 0, fate: 0, loop: 9, won: false });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({
       fate: -3,
       loops: 2,
@@ -94,7 +99,7 @@ describe("the Time Machine on the page", () => {
     expect(guideFor(7, save).start).toBe("ENTER: TIME MACHINE TO DAY 1");
     expect(guideFor(7, save).touchStart).toBe("TAP: TIME MACHINE TO DAY 1");
     expect(guideFor(7, { ...save, machine: false }).start).toBe(
-      "ENTER TO WAKE UP - DAY 4",
+      "ENTER TO WAKE UP - DAY 4 OF 7",
     );
     expect(wakeLine(7, 1)).toContain("a newbie you is waking up");
     expect(wakeLine(7, 0)).toContain("liquidated");

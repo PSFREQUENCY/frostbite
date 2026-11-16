@@ -69,12 +69,15 @@ export const endings = {
 const tripWake =
   "You step out of the ice on day one, and somewhere in town a newbie you is waking up.";
 // After the first morning each day opens on its era.
-export const eraWakes: readonly string[] = [
+// The wake line of each story day after the first (the first morning's is the hero's own).
+export const dayWakes: readonly string[] = [
   "",
+  "The morning after the riot: couriers wanted, the Green Line running, and the Exchange floor open.",
   "The mania: every billboard is a promise, and MAXX pays twenty a day.",
   "You wake up drained: DUN 0, crew 0, rank Newbie. Check the hideout terminal before you panic.",
   "Launch Day: robots roll out of the server farms and start taking routes.",
   "Moon Night: the whole island is gathering under Moon Tower.",
+  "The morning after Moon Night: under the tower, the last door is waiting for you and your crew.",
 ];
 // What the crypto gods sent back for last night's lantern, by the wish they answered (the rules' `boons`).
 export const answers: readonly string[] = [
@@ -96,7 +99,7 @@ export const wakeLine = (
     : answered > 0
       ? (answers[answered] ?? "")
       : day > 1
-        ? (eraWakes[day - 1] ?? "")
+        ? (dayWakes[day - 1] ?? "")
         : (wakeUps[hero] ?? "");
 
 // What gives a newbie away before a tip: the seed decides which kind of newbie a trip back meets.

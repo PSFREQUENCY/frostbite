@@ -7,46 +7,81 @@ import {
   type Gift,
   type Need,
 } from "./chapters.ts";
+import { lastDay, moonNight } from "./calendar.ts";
 import { drainPace, tunnel, vestGap } from "./constants.ts";
 import { cooled, heated, starsOf } from "./heat.ts";
 import { inReach } from "./places.ts";
 import type { DayState, Draft } from "./types.ts";
 
-// The story of a day. The first morning is the same for everyone and is read as goals from the day itself: cross the riot, hear Frost's
-// speech, write the seed paper, finish a gig, sleep at home. From day two each hero has their own beats (`chapters.ts`); the last day is
-// the dream, the party under Moon Tower and the Genesis Room, after which the oldest tunnel runs to SHA Beach.
-export const dayOneGoals = ["riot", "speech", "paper", "gig", "home"] as const;
-export type DayOneGoal = (typeof dayOneGoals)[number];
+// The story: up to three quests a day for seven days, done in order. The first two days are the same for everyone and are read from the
+// day itself: the riot morning (hear Frost's speech, write the seed paper; crossing the riot itself is a side quest), then a first day of
+// honest hustle (a gig, a ride on the Green Line, a trade on the Exchange floor). Days three to five are each hero's own beats (`chapters.ts`). Moon Night opens on the
+// hero's dream, then the party under Moon Tower, then a lantern sent up after dark. On the last day a crew is gathered, the crew's three
+// words open the Genesis Room, and the oldest tunnel runs to SHA Beach. Everything else in the city is a side quest (`sides.ts`).
+export type Quest =
+  | "beach"
+  | "beat-0"
+  | "beat-1"
+  | "beat-2"
+  | "crew"
+  | "gig"
+  | "lantern"
+  | "paper"
+  | "ride"
+  | "speech"
+  | "trade";
+const beats: readonly Quest[] = ["beat-0", "beat-1", "beat-2"];
+const plans: readonly (readonly Quest[])[] = [
+  ["speech", "paper"],
+  ["gig", "ride", "trade"],
+  beats,
+  beats,
+  beats,
+  ["beat-0", "beat-1", "lantern"],
+  ["crew", "beat-0", "beach"],
+];
+export const questsOn = (day: number): readonly Quest[] => plans[day - 1] ?? [];
 
-export function dayOneGoal(day: DayState): DayOneGoal | null {
-  if (day.day !== 1 || day.loop > 0) return null;
-  if (!day.done.includes("riot")) return "riot";
-  if (!day.done.includes("speech")) return "speech";
-  if (day.paper === 0) return "paper";
-  if (day.gigs === 0) return "gig";
-  return day.cause === "home" ? null : "home";
-}
+const crewNeeded = genesis.need?.crewSize ?? 2;
+const met: Readonly<Record<Quest, (day: DayState) => boolean>> = {
+  beach: (day) => day.cause === "beach",
+  "beat-0": (day) => day.beat > 0,
+  "beat-1": (day) => day.beat > 1,
+  "beat-2": (day) => day.beat > 2,
+  crew: (day) => day.crew.length >= crewNeeded,
+  gig: (day) => day.gigs > 0,
+  lantern: (day) => day.done.includes("lantern"),
+  paper: (day) => day.paper > 0,
+  ride: (day) => day.rides > 0,
+  speech: (day) => day.done.includes("speech"),
+  trade: (day) => day.bag > 0 || day.sells > 0,
+};
+export const questDone = (day: DayState, quest: Quest): boolean =>
+  met[quest](day);
+
+// The quest the hero is on: the first of today's not yet done; none on a trip back, or once all of them are done.
+export const questOf = (day: DayState): Quest | null =>
+  day.loop > 0
+    ? null
+    : (questsOn(day.day).find((quest) => !met[quest](day)) ?? null);
+// Whether today's story is told: all of its quests done.
+export const storyTold = (day: DayState): boolean =>
+  day.loop === 0 && questOf(day) === null;
 
 export function chapterOf(hero: number, day: number): readonly Beat[] {
-  if (day === 5) {
+  if (day === moonNight) {
     const dream = dreams[hero];
-    return dream === undefined ? [] : [dream, party, genesis];
+    return dream === undefined ? [] : [dream, party];
   }
-  return chapters[hero]?.[day - 2] ?? [];
+  if (day === lastDay) return [genesis];
+  return chapters[hero]?.[day - 3] ?? [];
 }
 
-// The beat the hero is on, or null on the first morning, on a trip back, and once the day's story is told.
+// The beat the hero is on, or null on the first two days, on a trip back, and once the day's beats are told.
 export const beatOf = (
   day: Pick<DayState, "beat" | "day" | "hero" | "loop">,
 ): Beat | null =>
   day.loop > 0 ? null : (chapterOf(day.hero, day.day)[day.beat] ?? null);
-
-export const chapterDone = (
-  day: Pick<DayState, "beat" | "day" | "hero" | "loop">,
-): boolean =>
-  day.loop === 0 &&
-  day.day > 1 &&
-  day.beat >= chapterOf(day.hero, day.day).length;
 
 function unmet(day: Draft, need: Need | undefined): string | null {
   if (need === undefined) return null;
@@ -112,7 +147,7 @@ export function actStory(day: Draft): string | null | undefined {
   return null;
 }
 
-// One of a beat's two answers (undefined when no beat is waiting). On the last day the first beat's answer is the dream.
+// One of a beat's two answers (undefined when no beat is waiting). On Moon Night the first beat's answer is the dream.
 export function pickStory(
   day: Draft,
   choice: number,
@@ -123,7 +158,7 @@ export function pickStory(
   if (beat === null || gift === undefined) return "pick one of the two";
   day.talk = null;
   give(day, gift);
-  if (day.day === 5 && day.beat === 0) day.dream = choice + 1;
+  if (day.day === moonNight && day.beat === 0) day.dream = choice + 1;
   told(day, beat);
   return null;
 }

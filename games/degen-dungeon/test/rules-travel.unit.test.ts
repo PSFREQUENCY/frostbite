@@ -106,7 +106,7 @@ describe("rides", () => {
     expect(refusal(bot.state(), "act", { tick: bot.state().tick })).toBeNull();
     bot.act();
     expect(bot.state().ride).toBe("foot");
-    const owner = createBot(1, 5, 4);
+    const owner = createBot(1, 5, 5);
     owner.use("ride-scooter");
     expect(owner.state().heat).toBe(0);
     owner.hold(4, 30);
@@ -118,7 +118,7 @@ describe("rides", () => {
   });
 
   it("cannot be swapped without stepping off, and the train takes no rides", () => {
-    const bot = createBot(1, 5, 3);
+    const bot = createBot(1, 5, 4);
     bot.use("ride-scooter");
     bot.go(30_000, 32_500);
     expect(refusal(bot.here(), "act", { tick: bot.here().tick })).toBe(

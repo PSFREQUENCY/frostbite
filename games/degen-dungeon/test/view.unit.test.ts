@@ -30,7 +30,7 @@ describe("the city", () => {
       [210, 75, 150],
     );
     expect(metres(18_000)).toBe(180);
-    const day = started(1, 7, 2);
+    const day = started(1, 7, 3);
     city.mark(day, 1);
     const matrix = new Matrix4();
     const shown = (id: string): boolean => {
@@ -44,7 +44,7 @@ describe("the city", () => {
     expect([
       shown("faucet"),
       shown("letter-1"),
-      shown("letter-4"),
+      shown("letter-7"),
       shown("frost"),
     ]).toEqual([true, false, true, true]);
     expect(city.root.getObjectByName("beat")?.visible).toBe(true);
@@ -54,7 +54,7 @@ describe("the city", () => {
     city.mark(null, 1);
     expect([
       shown("faucet"),
-      shown("letter-4"),
+      shown("letter-7"),
       city.root.getObjectByName("beat")?.visible,
     ]).toEqual([true, false, false]);
   });
@@ -62,9 +62,10 @@ describe("the city", () => {
   it("paints the boards and the hill sign for each era, and runs the Green Line round its ring", () => {
     const boards = buildBoards();
     const hill = boards.root.getObjectByName("hill-sign");
-    boards.era(2);
-    const mania = hill instanceof Mesh ? hill.material : null;
+    // Boards go by a story day's era: day three is the mania, day four the winter.
     boards.era(3);
+    const mania = hill instanceof Mesh ? hill.material : null;
+    boards.era(4);
     expect(hill instanceof Mesh ? hill.material : null).not.toBe(mania);
     expect(hillWords[2]).toBe("NGMI");
     expect(boardLines.every((lines) => lines.length >= 6)).toBe(true);
@@ -208,7 +209,7 @@ describe("the scene", () => {
       {
         ...day,
         cop: { x: 15_000, z: 15_500 },
-        day: 4,
+        day: 5,
         tux: null,
         vests: { x: 18_000, z: 16_000 },
       },
@@ -222,7 +223,7 @@ describe("the scene", () => {
       part("robots")?.visible,
     ]).toEqual([true, true, true]);
     view.day(
-      { ...started(1, 0, 3), dir: 0, tick: 7_300, tools: 3 },
+      { ...started(1, 0, 4), dir: 0, tick: 7_300, tools: 3 },
       1,
       0.016,
       false,
@@ -232,14 +233,14 @@ describe("the scene", () => {
       part("snow")?.visible,
       part("crowd")?.visible,
     ]).toEqual([true, true, false]);
-    view.day({ ...started(1, 0, 5), beat: 1 }, 1, 0.016, false);
+    view.day({ ...started(1, 0, 6), beat: 1 }, 1, 0.016, false);
     expect([
       part("crowd-signs")?.visible,
       part("crowd-bodies")?.visible,
       part("north")?.visible,
     ]).toEqual([false, true, false]);
     view.day(
-      { ...started(1, 0, 5), dir: 12, gate: 1, z: -8_000 },
+      { ...started(1, 0, 6), dir: 12, gate: 1, z: -8_000 },
       1,
       0.016,
       false,

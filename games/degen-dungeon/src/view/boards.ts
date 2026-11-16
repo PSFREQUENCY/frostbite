@@ -8,6 +8,8 @@ import {
   SRGBColorSpace,
 } from "three";
 
+import { eraOf } from "../rules/calendar.ts";
+
 // The billboards on the rooftops and the sign on the hill. They change with the era, so the skyline tells the mood of the market: the
 // riot morning, the mania, the winter, Launch Day and Moon Night. Words are painted on a canvas where the page has one; elsewhere a board
 // is plain colour. Every line is an original gag, and none names a real person, project or brand.
@@ -147,7 +149,8 @@ export function buildBoards(): Boards {
   };
   return {
     era(day) {
-      const lines = boardLines[day - 1] ?? boardLines[0] ?? [];
+      const era = eraOf(day);
+      const lines = boardLines[era - 1] ?? boardLines[0] ?? [];
       faces.forEach((face, index) => {
         face.material = paint(
           lines[index % lines.length] ?? "",
@@ -155,8 +158,8 @@ export function buildBoards(): Boards {
         );
       });
       hill.material = paint(
-        hillWords[day - 1] ?? "WAGMI",
-        day === 3 ? "#ff5d5d" : "#ffffff",
+        hillWords[era - 1] ?? "WAGMI",
+        era === 3 ? "#ff5d5d" : "#ffffff",
       );
     },
     root,

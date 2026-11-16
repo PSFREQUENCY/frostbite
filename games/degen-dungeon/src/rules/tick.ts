@@ -1,3 +1,4 @@
+import { eraOf, stormEra } from "./calendar.ts";
 import { invade } from "./invasion.ts";
 import { launch } from "./moonshot.ts";
 import {
@@ -26,7 +27,8 @@ import { inPark, inRiot } from "./world.ts";
 // holding a bag through the storm, and the beach at the end of the tunnel.
 function zones(day: Draft): void {
   if (day.day === 1 && day.loop === 0 && !day.done.includes("riot")) {
-    if (inRiot(day.x, day.z)) {
+    // Crossing it takes moving through it: a hero who wakes inside it has not crossed it standing still.
+    if (inRiot(day.x, day.z) && day.dir >= 0) {
       day.done = [...day.done, "riot"];
       if ((heroes[day.hero]?.stealth ?? 0) < 5) heated(day, riotHeat);
     }
@@ -50,7 +52,7 @@ function moods(day: Draft): void {
           : heatFadeTicks;
   if (day.heat > 0 && day.tick % fadeIn(day, fade) === 0) cooled(day, 1);
   const rising =
-    (day.day === 2 || day.day === 5 ? fomoTicks : fomoTicks * 3) /
+    ([2, 5].includes(eraOf(day.day)) ? fomoTicks : fomoTicks * 3) /
     (day.weather === "storm" || day.weather === "gale" ? 2 : 1);
   if (day.tick % rising === 0) day.fomo = Math.min(100, day.fomo + 1);
   const sitting = day.ride === "foot" && day.dir < 0 && inPark(day.x, day.z);
@@ -73,7 +75,7 @@ function money(day: Draft): void {
     day.pocket -= Math.min(day.pocket, day.drain);
   if (day.paperAt >= 0 && day.tick === day.paperAt + paperTest && tested(day))
     day.drain = Math.max(day.drain, drainPace);
-  if (day.day === 2 && day.tick % maxxTicks === 0)
+  if (eraOf(day.day) === 2 && day.tick % maxxTicks === 0)
     day.maxx += Math.floor(day.maxx / maxxShare);
   day.peakPocket = Math.max(day.peakPocket, day.pocket);
 }
@@ -93,7 +95,7 @@ export function ticked(day: Draft): void {
     day.looking = day.vision > 0;
   }
   if (
-    day.day === 3 &&
+    eraOf(day.day) === stormEra &&
     day.tick === stormStart + stormTicks &&
     day.bag > 0 &&
     day.sells === 0 &&

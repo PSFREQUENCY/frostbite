@@ -35,6 +35,10 @@
   padding-left: 1.1rem;
 }
 
+.bag ul.log {
+  padding-inline-start: 0.2rem;
+  list-style: none;
+}
 .bag li {
   margin: 0.2rem 0;
   line-height: 1.35;
@@ -151,5 +155,46 @@
   to {
     opacity: 0;
     transform: translateY(-2.2rem);
+  }
+}
+
+/* A cheer over the top of the picture when a quest or a side quest is done. */
+.toast {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 7;
+  max-inline-size: min(26rem, calc(100% - 2rem));
+  padding: 0.5rem 0.9rem;
+  border: 2px solid #ffd166;
+  border-radius: 0.7rem;
+  background: rgb(10 8 30 / 90%);
+  color: #fff6d8;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: toast-in 0.35s ease-out;
+}
+.toast[hidden] {
+  display: none;
+}
+.toast p {
+  margin: 0;
+}
+.toast .head {
+  color: #ffd166;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -0.8rem) scale(0.92);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
   }
 }

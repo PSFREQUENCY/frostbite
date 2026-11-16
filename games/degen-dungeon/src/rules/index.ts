@@ -2,6 +2,7 @@ import { refuse, tickNamed, withFields } from "@frostbite/game-sdk/run-inputs";
 import type { GameVerifier, RunInput } from "@frostbite/game-sdk/run-record";
 
 import { act, gait, look, pick } from "./acts.ts";
+import { lastDay } from "./calendar.ts";
 import { lift } from "./climb.ts";
 import {
   maxInputs,
@@ -42,6 +43,7 @@ const fieldsFor = new Map<string, readonly string[]>([
 const settings: readonly string[] = [
   "boon",
   "day",
+  "dream",
   "fate",
   "hero",
   "loop",
@@ -92,17 +94,21 @@ export const degenRules: GameVerifier<DayState> = {
       keys.some((key) => !settings.includes(key))
     )
       return refuse(
-        "a day takes a day and a hero, and may add loop, fate, boon or won",
+        "a day takes a day and a hero, and may add loop, fate, boon, dream or won",
       );
     const hero = whole(config.hero, 0, heroes.length - 1);
-    const day = whole(config.day, 1, 5);
+    const day = whole(config.day, 1, lastDay);
     const loop = keys.includes("loop") ? whole(config.loop, 1, maxLoops) : 0;
     const fate = keys.includes("fate") ? whole(config.fate, -9, 9) : 0;
     const boon = keys.includes("boon") ? whole(config.boon, 1, 4) : 0;
     const won = keys.includes("won") ? whole(config.won, 1, 1) : 0;
+    // Moon Night's dream (1 or 2) is carried into the last day, where the beach's ending tells it.
+    const dream = keys.includes("dream") ? whole(config.dream, 1, 2) : 0;
     if (won === null) return refuse("won is 1 once the story is won");
     if (hero === null || day === null)
-      return refuse("hero must be 0 to 9 and day 1 to 5");
+      return refuse("hero must be 0 to 9 and day 1 to 7");
+    if (dream === null || (dream > 0 && day !== lastDay))
+      return refuse("a dream is 1 or 2, carried into the last day");
     if (fate === null) return refuse("fate must be -9 to 9");
     if (loop === null || (loop > 0 && day !== 1))
       return refuse("a trip back is loop 1 to 9, and always to day 1");
@@ -112,7 +118,10 @@ export const degenRules: GameVerifier<DayState> = {
       ? refuse("a boon is last night's wish, 1 to 4")
       : {
           ok: true,
-          state: startDay(seed, hero, day, loop, fate, boon, won === 1),
+          state: {
+            ...startDay(seed, hero, day, loop, fate, boon, won === 1),
+            dream,
+          },
         };
   },
   // What the day made, once it is over: the number the game shows and keeps as the player's best day.

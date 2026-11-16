@@ -1,5 +1,6 @@
 import { startState, stepInt } from "@frostbite/game-sdk/seeded";
 
+import { eraOf } from "./calendar.ts";
 import { buyDun, candleTicks, maxTicks } from "./constants.ts";
 import type { Draft } from "./types.ts";
 
@@ -16,9 +17,10 @@ export function pricePath(seed: number, day: number): readonly number[] {
   let state = startState(
     Math.imul(seed ^ (day * 0x9e_37_79_b1), 0x85_eb_ca_6b),
   );
-  const lean = leans[day - 1] ?? 0;
-  const swing = swings[day - 1] ?? 3;
-  let price: number = opens[day - 1] ?? 100;
+  const era = eraOf(day);
+  const lean = leans[era - 1] ?? 0;
+  const swing = swings[era - 1] ?? 3;
+  let price: number = opens[era - 1] ?? 100;
   const path: number[] = [];
   for (let candle = 0; candle < candles; candle += 1) {
     path.push(price);

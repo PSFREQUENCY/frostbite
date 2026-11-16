@@ -53,7 +53,7 @@ describe("the Time Machine", () => {
       "storm-funnel",
       "time-machine",
     ]);
-    const record = { config: { day: 3, hero: 0 }, inputs: top.inputs, seed: 5 };
+    const record = { config: { day: 4, hero: 0 }, inputs: top.inputs, seed: 5 };
     expect(replay(record)).toEqual(top.state());
   });
 

@@ -4,9 +4,10 @@ import {
   type SoundSettings,
 } from "@frostbite/game-sdk/audio/settings";
 
-import { maxLoops, stormDay } from "./rules/constants.ts";
+import { eraOf, lastDay, moonNight, stormEra } from "./rules/calendar.ts";
+import { maxLoops } from "./rules/constants.ts";
 import { scoreOf } from "./rules/heat.ts";
-import { chapterDone, dayOneGoal } from "./rules/story.ts";
+import { storyTold } from "./rules/story.ts";
 import { heroes } from "./rules/heroes.ts";
 import type { DayState } from "./rules/types.ts";
 
@@ -17,6 +18,8 @@ import type { DayState } from "./rules/types.ts";
 export interface Progress {
   readonly best: number;
   readonly day: number;
+  // Moon Night's dream (1 or 2), which the last day's beach ending tells; 0 before it is dreamt.
+  readonly dream: number;
   readonly fate: number;
   readonly hero: number;
   readonly loops: number;
@@ -33,6 +36,7 @@ export interface Progress {
 export const freshProgress: Progress = {
   best: 0,
   day: 1,
+  dream: 0,
   fate: 0,
   hero: 7,
   loops: 0,
@@ -62,7 +66,8 @@ export function restore(saved: unknown): Progress {
   const fields: Readonly<Record<string, unknown>> = { ...saved };
   return {
     best: whole(fields.best, 0, Number.MAX_SAFE_INTEGER, 0),
-    day: whole(fields.day, 1, 5, 1),
+    day: whole(fields.day, 1, lastDay, 1),
+    dream: whole(fields.dream, 0, 2, 0),
     fate: whole(fields.fate, -99, 99, 0),
     hero: whole(fields.hero, 0, heroes.length - 1, freshProgress.hero),
     loops: whole(fields.loops, 0, 99, 0),
@@ -85,10 +90,8 @@ export function afterDay(
   const score = scoreOf(day);
   const trip = day.loop > 0;
   const won = day.cause === "beach";
-  // A story day opens the next one when it is told and slept on: the first morning's goals, or the hero's beats.
-  const told =
-    day.cause === "home" &&
-    (day.day === 1 ? dayOneGoal(day) === null : chapterDone(day));
+  // A story day opens the next one when its three quests are done and it is slept on.
+  const told = day.cause === "home" && storyTold(day);
   return {
     newBest: score > progress.best,
     progress: {
@@ -99,14 +102,20 @@ export function afterDay(
         trip || day.cause === "abducted"
           ? 1
           : told && day.day === progress.day
-            ? Math.min(5, progress.day + 1)
+            ? Math.min(lastDay, progress.day + 1)
             : progress.day,
+      dream:
+        trip || day.cause === "abducted"
+          ? 0
+          : day.day === moonNight && day.dream > 0
+            ? day.dream
+            : progress.dream,
       fate: trip
         ? Math.max(-99, Math.min(99, progress.fate + day.fate))
         : progress.fate,
       loops: Math.min(99, progress.loops + (trip ? 1 : 0)),
       machine: !trip && (progress.machine || won || day.cause === "machine"),
-      slip: progress.slip || (day.day === stormDay && day.storm > 0),
+      slip: progress.slip || (eraOf(day.day) === stormEra && day.storm > 0),
       wish: trip || day.cause === "abducted" ? 0 : day.wish,
       won: progress.won || won,
     },
@@ -125,6 +134,7 @@ export const nextRun = (
 ): {
   readonly boon: number;
   readonly day: number;
+  readonly dream: number;
   readonly fate: number;
   readonly loop: number;
   readonly won: boolean;
@@ -133,6 +143,7 @@ export const nextRun = (
     ? {
         boon: 0,
         day: 1,
+        dream: 0,
         fate: 0,
         loop: Math.min(maxLoops, progress.loops + 1),
         won: progress.won,
@@ -140,6 +151,7 @@ export const nextRun = (
     : {
         boon: progress.wish,
         day: progress.day,
+        dream: progress.day === lastDay ? progress.dream : 0,
         fate: Math.max(-9, Math.min(9, progress.fate)),
         loop: 0,
         won: progress.won,

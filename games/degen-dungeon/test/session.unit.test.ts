@@ -17,7 +17,7 @@ const walk = (
 describe("a day as it is played", () => {
   it("refuses settings the rules refuse", () => {
     expect(() => createRunSession({ day: 9, hero: 7, seed: 1 })).toThrow(
-      "hero must be 0 to 9 and day 1 to 5",
+      "hero must be 0 to 9 and day 1 to 7",
     );
   });
 

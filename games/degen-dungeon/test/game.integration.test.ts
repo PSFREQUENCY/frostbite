@@ -70,7 +70,7 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
     // The run waits on the hero's card; acting wakes the hero.
     expect(byId(window, "pick")?.hasAttribute("hidden")).toBe(false);
     expect(byId(window, "pick-start")?.textContent).toBe(
-      "ENTER TO WAKE UP - DAY 1",
+      "ENTER TO WAKE UP - DAY 1 OF 7",
     );
     byId(window, "act")?.dispatchEvent(new window.MouseEvent("click"));
     await settle(100);
@@ -94,7 +94,7 @@ describe("Degen Dungeon, bundled and run against a simulated platform", () => {
     expect(recorded.submitted).toHaveLength(1);
     expect(recorded.submitted[0]?.runId).toBe("run-1");
     expect(recorded.submitted[0]?.record).toMatchObject({
-      claims: ["home-safe"],
+      claims: [],
       config: { day: 1, hero: 7 },
       seed: 424_242,
     });

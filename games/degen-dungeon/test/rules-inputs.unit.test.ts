@@ -16,11 +16,11 @@ describe("starting a day", () => {
       expect(degenRules.init(1, config)).toEqual({
         ok: false,
         reason:
-          "a day takes a day and a hero, and may add loop, fate, boon or won",
+          "a day takes a day and a hero, and may add loop, fate, boon, dream or won",
       });
     const wrong: Readonly<Record<string, number | string>>[] = [
       { day: 0, hero: 1 },
-      { day: 6, hero: 1 },
+      { day: 8, hero: 1 },
       { day: 1, hero: 10 },
       { day: 1.5, hero: 1 },
       { day: 1, hero: "7" },
@@ -43,11 +43,11 @@ describe("starting a day", () => {
 
   it("is the same for the same seed, wakes the hero at home with that day's pocket, and lets the seed decide today's scam", () => {
     expect(started(11, 7, 1)).toEqual(started(11, 7, 1));
-    const day = started(11, 7, 3);
+    const day = started(11, 7, 4);
     expect([day.x, day.z, day.pocket, day.tick]).toEqual([
       18_000,
       15_500,
-      dayPockets[2],
+      dayPockets[3],
       0,
     ]);
     expect(started(11, 0, 1).x).toBe(6_000);

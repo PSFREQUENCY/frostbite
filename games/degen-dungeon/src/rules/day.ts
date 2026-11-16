@@ -1,3 +1,4 @@
+import { eraOf, stormEra } from "./calendar.ts";
 import { chased } from "./chase.ts";
 import { coin } from "./coin.ts";
 import {
@@ -8,7 +9,6 @@ import {
   loopPocket,
   maxTicks,
   patch,
-  stormDay,
   stormStart,
   stormTicks,
   swapMeetBonus,
@@ -22,7 +22,7 @@ import type { DayState, Draft } from "./types.ts";
 import { centreOf, inSwapMeet } from "./world.ts";
 
 // A day from its first tick: the hero wakes at home with what that story day gives them (the timeline from earlier trips back moves the
-// pocket a hundred DUN a step), and the seed decides today's scam. The third day is the morning of the drain. A trip back (`loop` above
+// pocket a hundred DUN a step), and the seed decides today's scam. The winter's day is the morning of the drain. A trip back (`loop` above
 // 0) starts beside the statue instead, with a traveller's pocket. `boon` is last night's lantern wish (1 to 4), which the seed may answer.
 export function startDay(
   seed: number,
@@ -58,7 +58,7 @@ export function startDay(
     drain: 0,
     dream: 0,
     ended: false,
-    fake: day === 3 && loop === 0,
+    fake: eraOf(day) === stormEra && loop === 0,
     fate: loop > 0 ? 0 : fate,
     fenced: 0,
     firstBuy: -1,
@@ -141,7 +141,7 @@ export function gust(seed: number, x: number, z: number, tick: number): number {
 const pull = [1, 3, 4, 8] as const;
 
 export const storming = (day: Pick<DayState, "day" | "tick">): boolean =>
-  day.day === stormDay &&
+  eraOf(day.day) === stormEra &&
   day.tick >= stormStart &&
   day.tick < stormStart + stormTicks;
 

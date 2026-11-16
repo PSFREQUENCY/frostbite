@@ -116,6 +116,23 @@ at the start of the very first day and can be skipped.
   - Windows (`rules/windows.ts`): act while clinging climbs in at the window in front (one for every 4 m of wall at each storey),
     once a window a day: a snack (frost vision), a loft (standing), an empty flat, or a shut window (heat).
 
+- **Round 9** (seven days, quests, side quests, badges):
+  - The calendar (`rules/calendar.ts`): seven story days over five eras (`[1, 1, 2, 3, 4, 5, 5]`). What a day is like goes by its era
+    (places open by `eras(...)`, the coin's lean, gig pay, FOMO, MAXX, the saucers, the storm, the fake drain, billboards, sky and snow);
+    the story, the letters (three a day), the watcher and the weather's seed go by the day itself. Each day's pocket and freezer are in
+    `dayPockets`/`dayFreezers` (seven each).
+  - Quests (`rules/story.ts`): `questsOn(day)` lists a day's quests (two on the first morning, three after), `questOf` the one the hero
+    is on, `storyTold` whether all are done. The street days' quests read the day (speech, paper; gig, ride, trade), days 3 to 5 are the
+    hero's beats, Moon Night is the dream, the party and a lantern (after dark), the last day a crew of two, the Genesis Room and SHA
+    Beach. Moon Night's dream is saved (`progress.dream`) and carried into the last day as the `dream` setting.
+  - Side quests (`sides.ts`, words in `script/sides.ts`): six a day, read from the day; two markers were added for them, `wall` and
+    `roof` (the first climb and the first roof, `climb.ts`) and `staked` (a moonshot stake). Crossing the riot is a side quest now, and
+    needs a step (a hero who wakes inside it has not crossed it standing still).
+  - The page: Pip's line counts the quest ("2/3 · ..."), the backpack lists the quests and side quests (`page/bag.ts`), and a cheer shows
+    over the picture for each one done (`page/toasts.ts`, `#toast`). The title says "DAY 3 OF 7".
+  - Milestones: one per story quest (twenty), ten top skills, nine hidden ones with riddles for words; thirteen of the old ones are side
+    quests now. The verifier was re-pinned and the sample day claims the first morning's two quests.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

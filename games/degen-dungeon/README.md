@@ -1,7 +1,8 @@
 # Degen Dungeon
 
 Wake up broke in Nakasato (Na'ka Sa'ta), an island city of nine boroughs that is New York, Los Angeles and Philadelphia folded together,
-and climb from Newbie to Whale over five story days. A run is one day of one hero. DUN is in-game credit only.
+and climb from Newbie to Whale over seven story days: up to three story quests a day, and six side quests beside them. A run is one day
+of one hero. DUN is in-game credit only.
 
 ## Play
 
@@ -13,15 +14,22 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   record, as before.
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
-- **The five days.** The FREE FROST riot morning, the mania, the winter (it opens on the morning of the drain and ends in the Great
-  Airdrop), Launch Day, and Moon Night. Billboards, light, snow and crowds change with each.
-- **The first morning** is the same for everyone: cross the riot, hear Frost's speech, take your first DUN at the Faucet and decide where
-  your seed paper lives, finish a gig, sleep. A paper in a pocket or on a phone gets found, and the pocket drains live until the hideout
-  terminal stops it.
-- **Days two to five** follow the hero's own story, three beats a day, marked by a gold beacon and named by Pip on the phone. Some beats
-  need the right crewmate, frost vision, DUN or a trade; some ask a question with two answers. Moon Night opens on the hero's dream, then
-  the party under Moon Tower, the Genesis Room (it needs a crew of three) and a run through the oldest tunnel to SHA Beach, with Max's
-  Vests behind.
+- **The seven days.** The FREE FROST riot morning, a first day of honest hustle, the mania, the winter (it opens on the morning of the
+  drain and ends in the Great Airdrop), Launch Day, Moon Night, and the morning after. Billboards, light, snow and crowds change with
+  each era (the riot morning and the hustle share one, and so do Moon Night and its morning after).
+- **Quests.** Pip's line says which quest you are on ("2/3") and what it asks; the next place glows as a gold beacon, and a cheer comes
+  over the picture as each quest or side quest is done. Sleeping at home once a day's quests are done opens the next day.
+  - Day 1: hear Frost's speech, then take your first DUN at the Faucet and decide where your seed paper lives. A paper in a pocket or on
+    a phone gets found, and the pocket drains live until the hideout terminal stops it.
+  - Day 2: finish an honest gig, ride the Green Line, buy some of the coin of the day on the Exchange floor.
+  - Days 3 to 5 follow the hero's own story, three beats a day. Some beats need the right crewmate, frost vision, DUN or a trade; some ask
+    a question with two answers.
+  - Day 6, Moon Night: the hero's dream, the party under Moon Tower, and a lantern sent up after dark.
+  - Day 7: gather two crewmates, open the Genesis Room with your crew's three words, and run the oldest tunnel to SHA Beach with Max's
+    Vests behind. The beach's ending tells the dream chosen on Moon Night (the save carries it).
+- **Side quests**, six a day and never needed: S's three letters on the day's avenues, a landmark of the day, and four that belong to
+  the day (the riot on the first morning, the saucers in the mania, the storm in the winter, a moonshot and a rooftop on Moon Night...).
+  The backpack lists the day's quests and side quests with ✓ for done and → for the one you are on.
 - **The city:** honest gigs, a crew of three, the Green Line Express, the Exchange floor's coin, MAXX (twenty a day, until the winter),
   the fit shop, the realtor and the garage, a scooter, a car, a yacht and a helicopter, and the scams: Kiki, the famous face, the
   recovery expert, the dream job, the fake Fed, the permission slip, the sticker on the meter and the honeypot coin.
@@ -29,7 +37,7 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   sky is not safe and the wallet locks. Lie low in the hideout under your home, or pay the rebrand booth. Nobody is ever hurt.
 - **Frost vision** (V, or its button) shows hidden words, the watcher's footprints and the tells of a scam: fifteen seconds of it (thirty
   by Lumen's lamp), topped back up every thirty seconds.
-- **The mystery:** twenty-one letters signed S lie on the avenues, a few each day; three street words open a dead locker; the watcher
+- **The mystery:** twenty-one letters signed S lie on the avenues, three each day; three street words open a dead locker; the watcher
   leaves footprints at one corner a day. The game never says who S is.
 - **Status** over your head: GM, SAFU, GRINDER, WAGMI, TOUCHING GRASS, BASED, DIAMOND HANDS, DOWN BAD, PAPER HANDS, DEGEN, BAGHOLDER,
   EXIT LIQUIDITY, RUGGED, REKT or FUDDED.
@@ -111,11 +119,13 @@ the status line says so. Headless test browsers are such a case, so the platform
 
 ## How a day is checked
 
-`src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }`, with `loop` on a trip back,
-and on a story day `fate` for the timeline it carries and `boon` for last night's lantern wish. Inputs are `move`, `gait`, `act`,
+`src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }` (day 1 to 7), with `loop` on a
+trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish and, on the last day, `dream` for
+the dream chosen on Moon Night. Inputs are `move`, `gait`, `act`,
 `pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
-replays the record to the same end and decides the 40 milestones from it. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
-a legal day the verifier is shown with. The settings come from the page, so `fate` and `boon` are the page's word, as before.
+replays the record to the same end and decides the milestones from it: one for each of the twenty story quests, ten top skills, and the
+hidden ones (`src/rules/milestones.ts`). `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon` and `dream` are the page's word, as before.
 
 ## Tests
 

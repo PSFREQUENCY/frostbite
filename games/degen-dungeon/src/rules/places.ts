@@ -1,3 +1,4 @@
+import { eras } from "./calendar.ts";
 import { launchpad, moonPad, reach, shuttleBooth } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { parkedRides } from "./parked.ts";
@@ -52,7 +53,7 @@ const recruits: Spot[] = [
     id: `recruit-${String(bit)}`,
     kind: "recruit",
     label: "Bit",
-    on: days(4, 5),
+    on: eras(4, 5),
   },
 ];
 const stops: Spot[] = loop.map((borough, index) => ({
@@ -63,7 +64,7 @@ const stops: Spot[] = loop.map((borough, index) => ({
   next: `stop-${String(loop[(index + 1) % loop.length] ?? 0)}`,
 }));
 
-// S's twenty-one letters, a few on each day's avenues: three on the first morning, then four, four, five and five.
+// S's twenty-one letters, three on each day's avenues.
 const avenue: readonly (readonly [number, number, number])[] = [
   [3_000, 12_000, 1],
   [21_000, 24_000, 1],
@@ -71,21 +72,21 @@ const avenue: readonly (readonly [number, number, number])[] = [
   [9_000, 12_000, 2],
   [27_000, 24_000, 2],
   [24_000, 9_000, 2],
-  [12_000, 15_000, 2],
+  [12_000, 15_000, 3],
   [15_000, 12_000, 3],
   [33_000, 24_000, 3],
-  [24_000, 21_000, 3],
-  [12_000, 3_000, 3],
+  [24_000, 21_000, 4],
+  [12_000, 3_000, 4],
   [21_000, 12_000, 4],
-  [3_000, 24_000, 4],
-  [24_000, 27_000, 4],
-  [12_000, 21_000, 4],
-  [33_000, 12_000, 4],
-  [27_000, 12_000, 5],
-  [9_000, 24_000, 5],
-  [24_000, 15_000, 5],
-  [12_000, 33_000, 5],
-  [24_000, 3_000, 5],
+  [3_000, 24_000, 5],
+  [24_000, 27_000, 5],
+  [12_000, 21_000, 5],
+  [33_000, 12_000, 6],
+  [27_000, 12_000, 6],
+  [9_000, 24_000, 6],
+  [24_000, 15_000, 7],
+  [12_000, 33_000, 7],
+  [24_000, 3_000, 7],
 ];
 const letters: Spot[] = avenue.map(([x, z, day], index) => ({
   id: `letter-${String(index + 1)}`,

@@ -18,9 +18,10 @@ import {
   type Scene,
 } from "three";
 
+import { eraOf, stormEra } from "../rules/calendar.ts";
 import { box, hash } from "./hash.ts";
 
-// The light of each story day: a cold dawn for the riot morning, a hot neon dusk for the mania, grey snow for the winter, a clean bright
+// The light of each era of the story: a cold dawn for the riot morning, a hot neon dusk for the mania, grey snow for the winter, a clean bright
 // Launch Day, and Moon Night under a huge moon; SHA Beach gets the first sunrise of the game. Snow falls round the camera in the winter.
 interface Mood {
   readonly fog: number;
@@ -140,7 +141,7 @@ export function buildLight(): Light {
       const key = `${String(day)}${String(beach)}`;
       if (key !== shown) {
         shown = key;
-        mood = beach ? sunrise : (moods[day - 1] ?? moods[0] ?? sunrise);
+        mood = beach ? sunrise : (moods[eraOf(day) - 1] ?? moods[0] ?? sunrise);
         scene.fog = new Fog(mood.sky, 40, mood.fog);
         hemisphere.groundColor.set(mood.ground);
         const ground = scene.getObjectByName("ground");
@@ -185,7 +186,7 @@ export function buildLight(): Light {
       stars.position.set(x, 0, z);
       stars.visible = night > 0.05;
       stars.material.opacity = night;
-      flakes.visible = day === 3 && !beach;
+      flakes.visible = eraOf(day) === stormEra && !beach;
       if (!flakes.visible) return;
       for (let index = 0; index < 900; index += 1) {
         const fall = 30 - ((seconds * 2 + hash(index, 8, 1) * 30) % 30);

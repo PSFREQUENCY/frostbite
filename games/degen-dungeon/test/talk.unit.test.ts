@@ -26,7 +26,7 @@ const state = (outcome: DayState | string): DayState => {
 };
 
 describe("talks", () => {
-  const day = started(3, 7, 4);
+  const day = started(3, 7, 5);
 
   it("home sleeps, or goes down to the hideout, where the freezer, the terminal and lying low are", () => {
     expect(state(answer(day, "home", 0))).toMatchObject({
@@ -47,7 +47,7 @@ describe("talks", () => {
     const drained = state(answer({ ...day, drain: drainPace }, "hideout", 1));
     expect([drained.drain, drained.saved]).toEqual([0, true]);
     const fooled = state(
-      answer({ ...started(3, 7, 3), pocket: 0 }, "hideout", 1),
+      answer({ ...started(3, 7, 4), pocket: 0 }, "hideout", 1),
     );
     expect([fooled.fake, fooled.saved]).toEqual([false, false]);
     expect(state(answer(day, "hideout", 2)).talk).toBe("lying");
@@ -98,7 +98,7 @@ describe("talks", () => {
   });
 
   it("MAXX takes deposits and pays them back only in the mania, and is shut after the winter", () => {
-    const mania = started(3, 7, 2);
+    const mania = started(3, 7, 3);
     const banked = state(answer(mania, "maxx", 0));
     expect([banked.pocket, banked.maxx]).toEqual([0, 600]);
     expect(answer(banked, "maxx", 0)).toBe("nothing to deposit");
@@ -107,7 +107,7 @@ describe("talks", () => {
       pocket: 600,
     });
     expect(answer(mania, "maxx", 1)).toBe("nothing to withdraw");
-    const winter = { ...started(3, 7, 3), maxx: 900 };
+    const winter = { ...started(3, 7, 4), maxx: 900 };
     expect(answer(winter, "maxx", 1)).toBe(
       "withdrawals are paused for maintenance",
     );
@@ -125,13 +125,13 @@ describe("talks", () => {
   });
 
   it("the Exchange floor buys small or all in, sells the whole bag, and keeps count of tops and paper hands", () => {
-    const path = pricePath(3, 4);
-    expect(path).toEqual(pricePath(3, 4));
+    const path = pricePath(3, 5);
+    expect(path).toEqual(pricePath(3, 5));
     expect(path).toHaveLength(60);
     expect(Math.min(...path)).toBeGreaterThanOrEqual(5);
-    expect(priceAt(3, 4, candleTicks * 2 + 1)).toBe(path[2]);
-    expect(priceAt(3, 4, 999_999)).toBe(path[59]);
-    expect(topFrom(3, 4, 0)).toBe(Math.max(...path));
+    expect(priceAt(3, 5, candleTicks * 2 + 1)).toBe(path[2]);
+    expect(priceAt(3, 5, 999_999)).toBe(path[59]);
+    expect(topFrom(3, 5, 0)).toBe(Math.max(...path));
     const small = state(answer(day, "chart", 0));
     expect([small.pocket, small.paid, small.firstBuy, small.allIns]).toEqual([
       2_900, 100, 0, 0,
@@ -158,7 +158,7 @@ describe("talks", () => {
       state(answer({ ...day, tick: topped * candleTicks }, "chart", 0)).topped,
     ).toBe(1);
     const dips = path.findIndex(
-      (price, at) => topFrom(3, 4, (at + 1) * candleTicks) * 2 >= price * 3,
+      (price, at) => topFrom(3, 5, (at + 1) * candleTicks) * 2 >= price * 3,
     );
     if (dips >= 0)
       expect(

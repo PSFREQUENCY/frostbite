@@ -49,6 +49,8 @@ export interface RunSessionOptions {
   readonly seed: number;
   // Whether the story has been won, which wakes the statues' masks.
   readonly won?: boolean;
+  // Moon Night's dream (1 or 2), carried into the last day; 0 or left out otherwise.
+  readonly dream?: number;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -58,6 +60,7 @@ export function createRunSession(options: RunSessionOptions): RunSession {
   const loop = options.loop ?? 0;
   const fate = options.fate ?? 0;
   const boon = options.boon ?? 0;
+  const dream = options.dream ?? 0;
   // Only the settings that change the day are written, so a plain day's record stays as small as it was.
   const won: Readonly<Record<string, number>> =
     options.won === true ? { won: 1 } : {};
@@ -68,6 +71,7 @@ export function createRunSession(options: RunSessionOptions): RunSession {
           ...story,
           ...(fate === 0 ? {} : { fate }),
           ...(boon === 0 ? {} : { boon }),
+          ...(dream === 0 ? {} : { dream }),
           ...won,
         };
   const init = degenRules.init(options.seed, config);

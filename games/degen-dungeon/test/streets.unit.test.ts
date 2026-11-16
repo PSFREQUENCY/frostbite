@@ -26,23 +26,26 @@ describe("the time of day", () => {
 });
 
 describe("where to go next", () => {
-  it("points at the first morning's goals, the story's beat, the newbie, home for the drain, and the beach", () => {
+  it("points at today's quest: the first morning's three, the second day's three, the story's beat, the lantern, the crew, the newbie, home for the drain, and the beach", () => {
     const morning = started(1, 7, 1);
-    expect(questAt(morning)).toEqual({ x: 18_000, z: 18_000 });
-    const crossed = { ...morning, done: ["riot"] };
-    expect(questAt(crossed)).toEqual(spotNamed("frost"));
-    const heard = { ...morning, done: ["riot", "speech"] };
+    expect(questAt(morning)).toEqual(spotNamed("frost"));
+    const heard = { ...morning, done: ["speech"] };
     expect(questAt(heard)).toEqual(spotNamed("faucet"));
-    const gig = { ...heard, paper: 1 };
-    expect(questAt({ ...gig, gigs: 1 })).toEqual(spotNamed("home-7"));
+    expect(questAt({ ...heard, paper: 1 })).toEqual(spotNamed("home-7"));
+    const gig = started(1, 7, 2);
     expect(questAt(gig)).toMatchObject({ kind: "gig" });
     expect(questAt({ ...gig, parcel: "faucet" })).toEqual(spotNamed("faucet"));
+    expect(questAt({ ...gig, gigs: 1 })).toMatchObject({ kind: "stop" });
+    expect(questAt({ ...gig, gigs: 1, rides: 1 })).toEqual(spotNamed("chart"));
+    const night = { ...started(1, 7, 6), beat: 2 };
+    expect(questAt(night)).toEqual(spotNamed("lanterns"));
+    expect(questAt(started(1, 7, 7))).toMatchObject({ kind: "recruit" });
     expect(questAt({ ...morning, drain: 1 })).toEqual(spotNamed("home-7"));
     expect(questAt({ ...morning, gate: 1 })).toEqual({
       x: expect.any(Number),
       z: waterline,
     });
-    expect(questAt({ ...started(3, 7, 2) })).not.toBeNull();
+    expect(questAt({ ...started(3, 7, 3) })).not.toBeNull();
     expect(questAt({ ...morning, loop: 1 })).not.toBeNull();
     expect(questAt({ ...morning, ended: true })).toBeNull();
   });
@@ -52,7 +55,7 @@ describe("the street", () => {
   it("takes a car from its kerb, throws glass, and leaves it where the hero steps off", () => {
     if (car === undefined) throw new Error("no parked car");
     const parked = buildParked();
-    const day = started(1, 7, 2);
+    const day = started(1, 7, 3);
     const mesh = parked.root.getObjectByName("parked-car");
     const glass = parked.root.getObjectByName("glass-burst");
     parked.show(day, 10, 10, 0, 0);
@@ -89,7 +92,7 @@ describe("the street", () => {
 
   it("lights the night, lifts the lanterns and the hero's own, and points the camera up after it", () => {
     const town = buildTown();
-    const night = { ...started(1, 7, 2), tick: nightTick };
+    const night = { ...started(1, 7, 3), tick: nightTick };
     town.idle(1);
     town.show(night, 300, 60, 0, 1, 0.016);
     expect(town.lantern(1)).toBeNull();
@@ -112,7 +115,7 @@ describe("the world view's extras", () => {
 
   it("jumps, writes the lantern, turns the camera behind a walker, and puts a helmet on the moon", () => {
     const view = createWorldView(stage);
-    const day = { ...started(1, 7, 2), dir: 0 };
+    const day = { ...started(1, 7, 3), dir: 0 };
     view.day(day, 1, 0.016, false);
     const yaw = view.yaw();
     view.jump();

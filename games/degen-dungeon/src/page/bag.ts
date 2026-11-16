@@ -1,10 +1,13 @@
+import { lastDay } from "../rules/calendar.ts";
 import { heroes } from "../rules/heroes.ts";
+import { questDone, questOf, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { letters } from "../script/letters.ts";
 import { element } from "./elements.ts";
-import { goalFor } from "./words.ts";
+import { sidesOf } from "../sides.ts";
+import { goalFor, questLineOf } from "./words.ts";
 
-// The backpack, which slides out from the side: the quest, what the hero carries (DUN, loot, the freezer), the tools and fits they have,
+// The backpack, which slides out from the side: today's quests and side quests, what the hero carries (DUN, loot, the freezer), the tools and fits they have,
 // the crew, where the seed paper is, the clues found (S's words and every letter picked up today, to read in full), tonight's lantern, and
 // a moon rock if they brought one home. It reads the day; it changes nothing.
 const papers = [
@@ -27,6 +30,33 @@ const fits = [
   ["fit-parka", "Storm parka"],
 ] as const;
 
+// Today's three quests, ticked off, with the one the hero is on marked; then the side quests, with how far along the counted ones are.
+// On a trip back to day one there is only the trip's line.
+function questLog(
+  day: DayState,
+): readonly (readonly [string, readonly string[]])[] {
+  if (day.loop > 0) return [["Quest", [goalFor(day)]]];
+  const on = questOf(day);
+  const sides = sidesOf(day);
+  const sidesDone = sides.filter((side) => side.done).length;
+  return [
+    [
+      `Day ${String(day.day)} of ${String(lastDay)}: quests`,
+      questsOn(day.day).map(
+        (quest) =>
+          `${questDone(day, quest) ? "✓" : quest === on ? "→" : "○"} ${questLineOf(day, quest)}`,
+      ),
+    ],
+    [
+      `Side quests: ${String(sidesDone)} of ${String(sides.length)}`,
+      sides.map(
+        ({ count, done, label }) =>
+          `${done ? "✓" : "○"} ${label}${count === undefined ? "" : ` (${String(count[0])}/${String(count[1])})`}`,
+      ),
+    ],
+  ];
+}
+
 // The backpack's sections, each a title and its lines.
 export function packOf(
   day: DayState,
@@ -36,7 +66,7 @@ export function packOf(
     has(`letter-${String(index + 1)}`) ? [`"${text}"`] : [],
   );
   return [
-    ["Quest", [goalFor(day)]],
+    ...questLog(day),
     [
       "Carrying",
       [
@@ -90,6 +120,9 @@ export function createBag() {
           const heading = document.createElement("h3");
           heading.textContent = title;
           const list = document.createElement("ul");
+          // A quest log's lines carry their own marks (done, on it, still to do) instead of bullets.
+          if (lines.length > 0 && lines.every((line) => /^[✓→○] /u.test(line)))
+            list.className = "log";
           for (const line of lines.length === 0 ? ["Nothing yet"] : lines) {
             const item = document.createElement("li");
             item.textContent = line;

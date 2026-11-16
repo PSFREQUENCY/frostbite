@@ -41,8 +41,7 @@ export const frozenFine = 250;
 export const rebrandCool = 300;
 export const lineCool = 60;
 
-// The Great Airdrop: on its day DUN falls for a minute. The ground is cut in patches, and each patch has a new gust every few seconds.
-export const stormDay = 3;
+// The Great Airdrop: in the winter (`calendar.ts`) DUN falls for a minute. The ground is cut in patches, and each patch has a new gust every few seconds.
 export const stormStart = 7_200;
 export const stormTicks = 1_800;
 export const patch = 1_000;
@@ -51,9 +50,9 @@ export const swapMeetBonus = 8;
 
 // Net worth at which each rank begins (Newbie, Shrimp, Crab, Dolphin, Shark, Whale), and what a story day starts with in the pocket.
 export const rankFloors = [0, 1_000, 5_000, 25_000, 100_000, 500_000] as const;
-export const dayPockets = [0, 600, 0, 3_000, 10_000] as const;
+export const dayPockets = [0, 300, 600, 0, 3_000, 10_000, 10_000] as const;
 // What each story day starts with in the freezer: the climb so far, fixed so that every day replays on its own.
-export const dayFreezers = [0, 400, 4_000, 20_000, 80_000] as const;
+export const dayFreezers = [0, 0, 400, 4_000, 20_000, 80_000, 80_000] as const;
 export const faucetDun = 100;
 export const gigRep = 10;
 export const lootRep = 20;

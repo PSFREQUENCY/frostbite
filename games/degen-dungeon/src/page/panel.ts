@@ -6,9 +6,10 @@ import { statusOf } from "../rules/status.ts";
 import { element } from "./elements.ts";
 import { starsText } from "./hud.ts";
 import { createReceipts } from "./receipts.ts";
+import { createToasts } from "./toasts.ts";
 import { goalFor, rankNames, talkOf, weatherNames } from "./words.ts";
 
-// Everything beside the picture that follows the day: the readouts, Pip's line, the talk with its answer buttons, frost vision's button
+// Everything beside the picture that follows the day: the readouts, Pip's line, a cheer for each quest done, the talk with its answer buttons, frost vision's button
 // with the seconds left, and the climb and drop buttons, live in a helicopter and beside or up a building's wall.
 export function createPanel(hands: {
   readonly answer: (choice: number) => void;
@@ -34,6 +35,7 @@ export function createPanel(hands: {
   const down = element("down", "button");
   let shown = "";
   let placed = "-";
+  const toasts = createToasts(element("toast", "aside"));
   const receipts = createReceipts(
     outs.score.closest("p") ?? outs.score,
     element("receipt", "aside"),
@@ -52,6 +54,7 @@ export function createPanel(hands: {
       outs.fomo.textContent = String(day?.fomo ?? 0);
       outs.weather.textContent = weatherNames[day?.weather ?? "clear"];
       receipts.show(day, performance.now());
+      toasts.show(day, performance.now());
       goal.textContent = day === null ? "" : goalFor(day);
       const left = Math.ceil((day?.vision ?? 0) / ticksPerSecond);
       look.disabled = day === null || (left === 0 && !day.looking);

@@ -90,13 +90,18 @@ export const frostOnS: readonly string[] = [
   "Nine screens, nine first mornings. Somebody was watching all of us.",
 ];
 
-// The first morning's goals, in the order of the rules' `dayOneGoals`.
-export const dayOneLines: Readonly<Record<string, string>> = {
+// What the street days' quests ask (`story.ts`), Moon Night's lantern and the last morning's crew; and, once the first morning's two are
+// done, home to sleep.
+export const questLines: Readonly<Record<string, string>> = {
+  crew: "Gather two of your crew: with yours, their words make three.",
   gig: "Take one honest gig and deliver it.",
   home: "Go home and sleep. Tomorrow the hustle starts.",
+  lantern:
+    "Once night falls, send a lantern up from the lantern ground in the Old Floe.",
   paper: "Get your first DUN at the Faucet and write down your words.",
-  riot: "Cross the FREE FROST riot in The Exchange.",
+  ride: "Ride the Green Line Express to the next stop.",
   speech: "Hear Frost's speech in Ticker Square.",
+  trade: "Buy some of the coin of the day on the Exchange floor.",
 };
 
 // After the Genesis Room: the oldest tunnel, and the beach at its end.
