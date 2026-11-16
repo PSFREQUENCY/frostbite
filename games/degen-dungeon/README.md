@@ -1,6 +1,6 @@
-# Degen Dungeon
+# Degen Dungeon 1
 
-Wake up broke in Nakasato (Na'ka Sa'ta), an island city of nine boroughs that is New York, Los Angeles and Philadelphia folded together,
+The official name is Degen Dungeon 1; the game's id stays `degen-dungeon`. Wake up broke in Nakasato (Na'ka Sa'ta), an island city of nine boroughs that is New York, Los Angeles and Philadelphia folded together,
 and climb from Newbie to Whale over seven story days: up to three story quests a day, and six side quests beside them. A run is one day
 of one hero. DUN is in-game credit only.
 

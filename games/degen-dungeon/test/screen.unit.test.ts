@@ -119,7 +119,7 @@ describe("the cards", () => {
       "SPD 3  MUS 5  STL 1  CHA 4  SMT 2",
     ]);
     expect([rally.title, rally.start, rally.touchStart]).toEqual([
-      "DEGEN DUNGEON",
+      "DEGEN DUNGEON 1",
       "ENTER TO WAKE UP - DAY 2 OF 7",
       "TAP TO WAKE UP - DAY 2 OF 7",
     ]);

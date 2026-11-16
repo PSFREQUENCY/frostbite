@@ -20,7 +20,7 @@ const once = (
     verification: "replay-verified",
   }) as const;
 
-// Degen Dungeon: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests
+// Degen Dungeon 1: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests
 // a day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and
 // the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, the lantern night and the moon
 // colony fill the city between the story's quests. The milestones are one for each story quest, ten top skills and the hidden ones.
@@ -284,7 +284,7 @@ export const degenDungeonGame = defineGame({
   summary:
     "Wake up broke in a 3D island city of crypto degens and climb to the top.",
   tags: ["action", "strategy"],
-  title: "Degen Dungeon",
+  title: "Degen Dungeon 1",
   verification: {
     replay: {
       id: "degen-dungeon",

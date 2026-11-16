@@ -9,9 +9,9 @@ import { heroes } from "./rules/heroes.ts";
 // the Time Machine is open, the day it begins is the trip back.
 // The first screen: the title, and one tap or Enter to play (which starts the run; the cinematic and the hero ring come next).
 export const titleGuide: Guide = {
-  lines: ["A FROSTBITE ARCADE GAME", "TEN HEROES - FIVE DAYS - ONE ISLAND"],
+  lines: ["A FROSTBITE ARCADE GAME", "TEN HEROES - SEVEN DAYS - ONE ISLAND"],
   start: "ENTER TO PLAY",
-  title: "DEGEN DUNGEON",
+  title: "DEGEN DUNGEON 1",
   touchStart: "TAP TO PLAY",
 };
 
@@ -20,7 +20,7 @@ export function guideFor(
   save: Pick<Progress, "day" | "machine" | "slip">,
 ): Guide {
   const who = heroes[hero];
-  const title = "DEGEN DUNGEON";
+  const title = "DEGEN DUNGEON 1";
   if (who === undefined || (who.hidden && !save.slip))
     return {
       lines: ["< ??? >", "REACH THE GREAT AIRDROP", "TO UNLOCK THIS HERO"],

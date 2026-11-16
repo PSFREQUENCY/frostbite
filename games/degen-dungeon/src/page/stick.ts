@@ -3,7 +3,8 @@
 // that way without sliding at all (some phones and app frames take a sliding finger for a scroll and cancel it). Landing elsewhere on
 // the left, the ring jumps under the thumb and the way the thumb then slides is the heading, one of sixteen. A thumb that has hardly
 // moved stands still, and so does one that lifts, which also sends the ring back to its corner. The knob follows the thumb out to the
-// ring's edge. A new thumb on the left takes the stick over (so a thumb whose lifting the phone never reported cannot leave it stuck),
+// ring's edge. A thumb taken away by the phone keeps the hero walking until the next touch. A new thumb on the left takes the stick over
+// (so a thumb whose lifting the phone never reported cannot leave it stuck),
 // and no touch on the left of the screen ever scrolls or zooms the page round it. While an offer waits, the left half is the screen's
 // "no" again, so the stick lets the thumb go by.
 export const stickReach = 40;
@@ -25,7 +26,8 @@ export interface StickOptions {
 
 interface Thumb {
   dir: number;
-  readonly id: number;
+  // The pointer steering, or -1 once the page or the app round it has taken the thumb away.
+  id: number;
   readonly x: number;
   readonly y: number;
 }
@@ -113,6 +115,14 @@ export function attachStick(
   const onUp = (event: PointerEvent): void => {
     if (thumb !== null && event.pointerId === thumb.id) letGo();
   };
+  // Some phones and app frames take a held or sliding finger away (for a scroll or a long press) and report nothing more of it. A hero
+  // already walking keeps going the way they were until the next touch, which takes the stick over or, as a tap, stops them.
+  const onCancel = (event: PointerEvent): void => {
+    const held = thumb;
+    if (held === null || event.pointerId !== held.id) return;
+    if (held.dir < 0) letGo();
+    else held.id = -1;
+  };
   // A drag on the screen would otherwise scroll or zoom the page round it on some phones; and a touch that starts on the stick's half is
   // kept from the page from its first moment, before a slide could be taken for a scroll and the thumb cancelled.
   const still = (event: Event): void => {
@@ -128,7 +138,7 @@ export function attachStick(
   screen.addEventListener("touchmove", still, { passive: false });
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
-  window.addEventListener("pointercancel", onUp);
+  window.addEventListener("pointercancel", onCancel);
   window.addEventListener("blur", letGo);
   return () => {
     letGo();
@@ -137,7 +147,7 @@ export function attachStick(
     screen.removeEventListener("touchmove", still);
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerup", onUp);
-    window.removeEventListener("pointercancel", onUp);
+    window.removeEventListener("pointercancel", onCancel);
     window.removeEventListener("blur", letGo);
   };
 }

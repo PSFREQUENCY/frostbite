@@ -1,4 +1,4 @@
-# Degen Dungeon: handoff
+# Degen Dungeon 1: handoff
 
 The game is playable end to end: ten heroes, five story days each, the city's systems, the mystery, Moon Night to SHA Beach, and the
 Time Machine. Round three added living streets, walk-in shops, parked rides, run, crouch, crawl and jump, a shoulder camera, the

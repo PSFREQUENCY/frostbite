@@ -5,7 +5,7 @@ import { byId, closeGame, play, settle } from "./support/page.ts";
 
 afterEach(closeGame);
 
-describe("Degen Dungeon, bundled and run against a simulated platform", () => {
+describe("Degen Dungeon 1, bundled and run against a simulated platform", () => {
   it("connects, and lets the player start only once it has", async () => {
     const { window } = await play();
     await settle();

@@ -106,7 +106,7 @@ describe("the thumb stick", () => {
     expect(ring?.style.left).toBe("50px");
   });
 
-  it("stands when the thumb is lifted, cancelled or the page loses focus, never lets a drag scroll the page, and stops when let go", () => {
+  it("stands when the thumb is lifted or the page loses focus, keeps walking when the phone takes the thumb away, never lets a drag scroll the page, and stops when let go", () => {
     const { move, screen } = setup();
     const scroll = () => {
       const event = new Event("touchmove", { cancelable: true });
@@ -118,12 +118,20 @@ describe("the thumb stick", () => {
     send(window, "pointerup", { id: 9, x: 100, y: 500 });
     send(window, "pointerup", { x: 100, y: 500 });
     expect(move).not.toHaveBeenCalled();
+    // A thumb the phone takes away keeps the hero walking (it reports nothing more), until the next touch takes the stick over.
     send(screen, "pointerdown", { x: 100, y: 500 });
     send(window, "pointermove", { x: 140, y: 500 });
     send(window, "pointercancel", { x: 140, y: 500 });
+    send(window, "pointerup", { x: 140, y: 500 });
+    expect(move.mock.calls).toEqual([[0]]);
     send(screen, "pointerdown", { x: 100, y: 500 });
     send(window, "pointermove", { x: 100, y: 540 });
     window.dispatchEvent(new Event("blur"));
+    // One cancelled before it steered just stands.
+    send(screen, "pointerdown", { x: 100, y: 500 });
+    send(window, "pointercancel", { x: 100, y: 500 });
+    send(window, "pointermove", { x: 100, y: 540 });
+    send(window, "pointercancel", { id: 7, x: 100, y: 540 });
     expect(move.mock.calls).toEqual([[0], [-1], [4], [-1]]);
     for (const stop of stops.splice(0)) stop();
     expect(

@@ -61,7 +61,7 @@ export function noteFor(day: DayState): string {
   if (day.loop === 0 && risen(day)) return machineLines.risen;
   return byInput(
     "Arrows walk, Shift runs, Space jumps, E uses what is near, B opens the backpack. Sleep at home ends the day.",
-    "The left thumb steers and a tap on the right uses what is near.",
+    "Hold the stick's edge (or slide a thumb on the left) to walk; tap the right to use what is near.",
   );
 }
 
