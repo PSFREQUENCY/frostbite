@@ -1,7 +1,9 @@
 // The thumb stick on a touch screen. During a day a thumb that lands anywhere on the left half of the picture takes the stick: the drawn
 // ring jumps under it, and the way the thumb then slides from where it landed is the hero's heading, one of sixteen. A thumb that has
 // hardly moved stands still, and so does one that lifts, which also sends the ring back to its corner. The knob follows the thumb out
-// to the ring's edge. While an offer waits, the left half is the screen's "no" again, so the stick lets the thumb go by.
+// to the ring's edge. A new thumb on the left takes the stick over (so a thumb whose lifting the phone never reported cannot leave it
+// stuck), and no drag on the screen ever scrolls or zooms the page. While an offer waits, the left half is the screen's "no" again, so
+// the stick lets the thumb go by.
 export const stickReach = 40;
 export const stickDead = 9;
 
@@ -62,9 +64,10 @@ export function attachStick(
     if (held.dir >= 0) move(-1);
   };
   const onDown = (event: PointerEvent): void => {
-    if (event.pointerType !== "touch" || thumb !== null || !steering()) return;
+    if (event.pointerType !== "touch" || !steering()) return;
     const box = screen.getBoundingClientRect();
     if (event.clientX - box.left >= box.width / 2) return;
+    letGo();
     // The thumb is the stick's alone: the screen's other zones never hear of it, so it cannot act by sliding right.
     event.stopImmediatePropagation();
     event.preventDefault();
@@ -91,9 +94,9 @@ export function attachStick(
   const onUp = (event: PointerEvent): void => {
     if (thumb !== null && event.pointerId === thumb.id) letGo();
   };
-  // A page held by a thumb would otherwise scroll or zoom under it on some phones.
-  const still = (event: TouchEvent): void => {
-    if (thumb !== null) event.preventDefault();
+  // A drag on the screen would otherwise scroll or zoom the page round it on some phones.
+  const still = (event: Event): void => {
+    event.preventDefault();
   };
   screen.addEventListener("pointerdown", onDown, { capture: true });
   screen.addEventListener("touchmove", still, { passive: false });

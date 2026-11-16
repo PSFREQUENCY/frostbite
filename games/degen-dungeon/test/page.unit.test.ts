@@ -193,12 +193,11 @@ describe("the player's hands", () => {
     ]).toEqual([-1, -1, 0, 4, 8, 12, 1]);
   });
 
-  it("read the screen as the ring before a day, the stick's half and an act during one, and no and yes while an offer waits", () => {
+  it("leave the screen to the ring's touch before a day, the stick's half and an act during one, and no and yes while an offer waits", () => {
     expect([
       zoneAt("waiting", { x: 0.1, y: 0.5 }),
       zoneAt("waiting", { x: 0.5, y: 0.5 }),
-      zoneAt("waiting", { x: 0.9, y: 0.5 }),
-    ]).toEqual(["prev", "start", "next"]);
+    ]).toEqual([null, null]);
     expect([
       zoneAt("asked", { x: 0.2, y: 0.5 }),
       zoneAt("asked", { x: 0.8, y: 0.5 }),
@@ -209,15 +208,14 @@ describe("the player's hands", () => {
       zoneAt("playing", { x: 0.8, y: 0.5 }),
     ]).toEqual([null, null, "act"]);
     const hand = hands();
-    for (const zone of ["prev", "next", "start", "act", "no"] as const)
-      enterZone(hand, zone);
+    for (const zone of ["act", "no"] as const) enterZone(hand, zone);
     expect(hand.move).not.toHaveBeenCalled();
-    expect(hand.turn.mock.calls).toEqual([[-1], [1]]);
+    expect(hand.turn).not.toHaveBeenCalled();
     expect(
       [hand.tapStart, hand.act, hand.no].map(
         (called) => called.mock.calls.length,
       ),
-    ).toEqual([1, 1, 1]);
+    ).toEqual([0, 1, 1]);
   });
 
   it("walk on held keys, act, answer, lift, start and pause, and turn the ring only while waiting", () => {

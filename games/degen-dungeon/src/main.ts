@@ -59,7 +59,7 @@ const pauseButton = element("pause", "button");
 const context = screen.getContext("2d");
 const world = worldOn(worldCanvas);
 const credits = createCredits(world !== null);
-const pick = createPick();
+const pick = createPick(turn);
 
 let play: PlatformPlay | null = null;
 let progress: Progress = freshProgress;

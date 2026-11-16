@@ -83,7 +83,7 @@ describe("the thumb stick", () => {
     ]);
   });
 
-  it("lets a thumb on the right, a mouse, a second finger and any finger while an offer waits go by to the screen's zones", () => {
+  it("lets a thumb on the right, a mouse and any finger while an offer waits go by to the screen's zones, and gives the stick to a new thumb", () => {
     let playing = true;
     const { after, move, ring, screen } = setup(() => playing);
     expect(
@@ -95,24 +95,26 @@ describe("the thumb stick", () => {
     expect(after).toHaveBeenCalledTimes(3);
     expect(ring?.style.left).toBe("");
     playing = true;
+    // A thumb whose lifting was never reported does not keep the stick: the next one takes it, and the old one is let go.
     send(screen, "pointerdown", { id: 4, x: 100, y: 500 });
+    send(window, "pointermove", { id: 4, x: 140, y: 500 });
     send(screen, "pointerdown", { id: 5, x: 50, y: 300 });
-    send(window, "pointermove", { id: 5, x: 50, y: 200 });
-    expect(after).toHaveBeenCalledTimes(4);
-    expect(move).not.toHaveBeenCalled();
-    expect(ring?.style.left).toBe("100px");
+    send(window, "pointermove", { id: 4, x: 100, y: 540 });
+    send(window, "pointermove", { id: 5, x: 50, y: 260 });
+    expect(after).toHaveBeenCalledTimes(3);
+    expect(move.mock.calls).toEqual([[0], [-1], [12]]);
+    expect(ring?.style.left).toBe("50px");
   });
 
-  it("stands when the thumb is lifted, cancelled or the page loses focus, holds the page still meanwhile, and stops when let go", () => {
+  it("stands when the thumb is lifted, cancelled or the page loses focus, never lets a drag scroll the page, and stops when let go", () => {
     const { move, screen } = setup();
     const scroll = () => {
       const event = new Event("touchmove", { cancelable: true });
       screen.dispatchEvent(event);
       return event.defaultPrevented;
     };
-    expect(scroll()).toBe(false);
-    send(screen, "pointerdown", { x: 100, y: 500 });
     expect(scroll()).toBe(true);
+    send(screen, "pointerdown", { x: 100, y: 500 });
     send(window, "pointerup", { id: 9, x: 100, y: 500 });
     send(window, "pointerup", { x: 100, y: 500 });
     expect(move).not.toHaveBeenCalled();

@@ -66,7 +66,7 @@ export const heroLooks: readonly Look[] = [
   look("giant", 2.7, ["#9fd8ff", "#6fb6e8", "#4a86b8", "#e8f6ff"], {
     bulk: 1.4,
   }),
-  look("wizard", 1.75, ["#e8c9a8", "#4a2f9c", "#3d2a8c", "#ffd166"]),
+  look("wizard", 1.75, ["#8a5634", "#4a2f9c", "#3d2a8c", "#ffd166"]),
   look("dog", 1.55, ["#c98a4b", "#ff7a45", "#33415c", "#8a5a2b"], {
     tail: "#c98a4b",
   }),

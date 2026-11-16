@@ -1,14 +1,15 @@
 import { attachKeys, standardKeys } from "@frostbite/game-sdk/controls";
 import { attachZones, type Where } from "@frostbite/game-sdk/touch-zones";
 
+import { attachRingTouch } from "./ring-touch.ts";
 import { attachStick } from "./stick.ts";
 
 // What the player's hands can do. Keys: arrows or WASD walk (eight ways, by the screen: up is the way the camera looks), Shift held runs,
 // C crouches and Z crawls (each again to stand), Space jumps (or gives the first answer while one waits), E acts and says yes, X or Escape
 // says no, 1 to 5 pick an answer, B or I opens the backpack, V is frost vision, R and F take a helicopter up and down, Enter starts, P
-// pauses; before a day, left and right turn the hero ring. Fingers: before a day a tap on either side turns the ring and a tap in the
-// middle starts; during one a thumb anywhere on the left of the screen is a stick (`stick.ts`, sixteen ways) and a tap on the right acts,
-// or answers yes on the right and no on the left while an offer waits. The buttons under the screen do the rest.
+// pauses; before a day, left and right turn the hero ring. Fingers: before a day a swipe or a tap on either side turns the ring and a tap
+// in the middle starts (`ring-touch.ts`); during one a thumb anywhere on the left of the screen is a stick (`stick.ts`, sixteen ways)
+// and a tap on the right acts, or answers yes on the right and no on the left while an offer waits. The buttons do the rest.
 export interface Hands {
   readonly act: () => void;
   readonly answer: (choice: number) => void;
@@ -29,7 +30,7 @@ export interface Hands {
 }
 // Whether a day is being played, and whether an offer is waiting in it.
 export type Mode = "asked" | "playing" | "waiting";
-export type Zone = "act" | "next" | "no" | "prev" | "start";
+export type Zone = "act" | "no";
 
 const keys = {
   ...standardKeys,
@@ -67,21 +68,17 @@ export const headingOf = (east: number, south: number): number =>
     ? -1
     : (Math.round(Math.atan2(south, east) / (Math.PI / 8)) + 16) % 16;
 
-// The screen's zones: the ring's sides and middle before a day, no and yes while an offer waits, and during a day an act on the right
-// (the left is the stick's, which takes its thumb before the zones see it, so a second finger there does nothing).
+// The screen's zones once a day is on: no and yes while an offer waits, and otherwise an act on the right. Before a day the ring's own
+// touch takes every finger, and during one the stick takes the left half, each before the zones see it.
 export function zoneAt(mode: Mode, where: Where): Zone | null {
-  if (mode === "waiting")
-    return where.x < 0.25 ? "prev" : where.x > 0.75 ? "next" : "start";
+  if (mode === "waiting") return null;
   if (mode === "asked") return where.x < 0.5 ? "no" : "act";
   return where.x < 0.5 ? null : "act";
 }
 
-// What a finger does on entering a zone: a side turns the ring, and the rest are the hands' own names.
+// What a finger does on entering a zone: the zones are the hands' own names.
 export function enterZone(hands: Hands, zone: Zone): void {
-  if (zone === "prev") hands.turn(-1);
-  else if (zone === "next") hands.turn(1);
-  else if (zone === "start") hands.tapStart();
-  else hands[zone]();
+  hands[zone]();
 }
 
 export function attachControls(
@@ -130,7 +127,12 @@ export function attachControls(
     )
       hands[action]();
   });
-  // The stick listens first, so the thumb it takes never reaches the zones.
+  // The ring's touch and the stick listen first, so a finger either takes never reaches the zones.
+  const stopRing = attachRingTouch(screen, {
+    start: hands.tapStart,
+    turn: hands.turn,
+    waiting: () => mode() === "waiting",
+  });
   const stopStick = attachStick(screen, {
     move: hands.move,
     ring: document.querySelector<HTMLElement>("#stick"),
@@ -145,6 +147,7 @@ export function attachControls(
   });
   return () => {
     stopKeys();
+    stopRing();
     stopStick();
     stopZones();
   };

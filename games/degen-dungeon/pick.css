@@ -45,3 +45,31 @@
     inline-size: min(26rem, calc(100% - 2rem));
   }
 }
+/* The ring's arrows on the picture's sides: always in place, seen only while the ring is up (so nothing moves when a run starts). */
+.turn {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  inline-size: 3.4rem;
+  block-size: 3.4rem;
+  padding: 0;
+  border: 2px solid #38e8ff;
+  border-radius: 50%;
+  background: rgb(10 8 30 / 70%);
+  color: #38e8ff;
+  font:
+    700 2.2rem/1 ui-monospace,
+    monospace;
+  visibility: hidden;
+  transform: translateY(-50%);
+  touch-action: manipulation;
+}
+#prev {
+  left: max(0.6rem, env(safe-area-inset-left));
+}
+#next {
+  right: max(0.6rem, env(safe-area-inset-right));
+}
+body[data-ring="yes"] .turn {
+  visibility: visible;
+}

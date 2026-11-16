@@ -22,11 +22,16 @@ beforeAll(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("the hero ring's card", () => {
-  it("shows a hero's words for keys or for fingers, and goes away", () => {
-    const pick = createPick();
+  it("shows a hero's words for keys or for fingers with arrows to turn the ring, and goes away", () => {
+    const turn = vi.fn<(by: number) => void>();
+    const pick = createPick(turn);
     const box = document.getElementById("pick");
     pick.show(titleGuide);
-    expect(box?.hidden).toBe(false);
+    expect([box?.hidden, document.body.dataset.ring]).toEqual([false, "yes"]);
+    document.getElementById("prev")?.click();
+    document.getElementById("next")?.click();
+    document.getElementById("next")?.click();
+    expect(turn.mock.calls).toEqual([[-1], [1], [1]]);
     expect(document.getElementById("pick-name")?.textContent).toBe(
       "A FROSTBITE ARCADE GAME",
     );
@@ -42,7 +47,7 @@ describe("the hero ring's card", () => {
       "TAP TO PLAY",
     );
     pick.show(null);
-    expect(box?.hidden).toBe(true);
+    expect([box?.hidden, document.body.dataset.ring]).toEqual([true, "no"]);
   });
 });
 
