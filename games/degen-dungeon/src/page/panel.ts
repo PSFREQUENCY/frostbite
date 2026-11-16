@@ -1,4 +1,4 @@
-import { canClimb, clinging } from "../rules/climb.ts";
+import { canClimb, clinging, onTheRoof } from "../rules/climb.ts";
 import { rankOf } from "../rules/heat.ts";
 import type { DayState } from "../rules/types.ts";
 import { ticksPerSecond } from "../rules/constants.ts";
@@ -67,7 +67,8 @@ export function createPanel(hands: {
         placed = where;
         const flying = day?.ride === "heli";
         up.disabled = !flying && (day === null || !canClimb(day));
-        down.disabled = !flying && (day === null || !clinging(day));
+        down.disabled =
+          !flying && (day === null || !(clinging(day) || onTheRoof(day)));
       }
       const talk = day === null ? null : talkOf(day);
       box.hidden = talk === null;

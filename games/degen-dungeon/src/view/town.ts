@@ -6,6 +6,7 @@ import { questAt } from "../quest.ts";
 import { buildBeacon } from "./beacon.ts";
 import { buildLanterns } from "./lanterns.ts";
 import { buildParked, type Parked } from "./parked.ts";
+import { buildShopMotion } from "./shop-motion.ts";
 import { buildShops } from "./shops.ts";
 import { buildStreet } from "./street.ts";
 import { buildTraffic } from "./traffic.ts";
@@ -58,6 +59,7 @@ export function buildTown(): Town {
   root.name = "town";
   const street = buildStreet();
   const shops = buildShops();
+  const working = buildShopMotion();
   const parked = buildParked();
   const walkers = buildWalkers();
   const traffic = buildTraffic();
@@ -67,6 +69,7 @@ export function buildTown(): Town {
   root.add(
     street.root,
     shops.root,
+    working.root,
     parked.root,
     walkers.root,
     traffic.root,
@@ -98,6 +101,7 @@ export function buildTown(): Town {
       wished = day.wish;
       street.run(seconds, dark);
       shops.show(x, z, dt);
+      working.show(x, z, seconds, day.done);
       parked.show(day, x, z, heading, seconds, hidden);
       walkers.show(seconds, 1 - dark * 0.6);
       traffic.show(seconds, along, dark, x, z);

@@ -1,9 +1,13 @@
+import { roofLevel, storeys } from "../rules/climb.ts";
 import type { DayState } from "../rules/types.ts";
-import { wallBeside } from "../rules/world.ts";
+import { onLand, wallBeside } from "../rules/world.ts";
+import { roofAt } from "./lots.ts";
 
-// How going up looks. A climber's height eases toward the storey the rules put them on (`storey` metres a storey) at a climber's pace;
-// a helicopter is shown at its level (`levelHeight` metres a level) at once. On a wall the hero turns to face it and closes in until hands
-// and feet are on it; while the height is still changing they climb, and once it holds they hang there.
+// How going up looks. A climber's height eases toward the storey the rules put them on at a climber's pace: the wall in front of them is
+// split into its storeys up to just under its roof (`roofAt`, or `storey` metres a storey where there is none), and on the roof they walk
+// at the height of the roof under their feet. A helicopter is shown at its level (`levelHeight` metres a level) at once. On a wall the
+// hero turns to face it and closes in until hands and feet are on it; while the height is still changing they climb, and once it holds
+// they hang there.
 export const storey = 2.8;
 export const levelHeight = 12;
 const climbPace = 1.6;
@@ -37,8 +41,26 @@ export function createClimber(): Climber {
   return {
     follow(state, x, z, heading, dt) {
       const foot = state.ride === "foot";
-      const target = state.level * (foot ? storey : levelHeight);
       const wall = foot ? wallBeside(state.x, state.z) : null;
+      const top =
+        wall === null
+          ? null
+          : roofAt(
+              (state.x + wall.east * (wall.gap + 150)) / 100,
+              (state.z + wall.south * (wall.gap + 150)) / 100,
+            );
+      const target = !foot
+        ? state.level * levelHeight
+        : state.level === roofLevel
+          ? (roofAt(x, z) ?? storeys * storey)
+          : state.level *
+            (top === null ? storey : Math.max(1, top - 0.8) / storeys);
+      if (foot && state.level === roofLevel) {
+        // On a roof: up to it at a climber's pace, then along at its height.
+        const step = climbPace * dt * (shown < target - 1 ? 1 : 4);
+        shown += Math.max(-step, Math.min(step, target - shown));
+        return { heading, hold: null, x, y: shown, z };
+      }
       // Flying, or put somewhere else at once (the story moved them), a body is simply there.
       if (wall === null) shown = target;
       const step = climbPace * dt;
@@ -57,3 +79,15 @@ export function createClimber(): Climber {
     },
   };
 }
+
+// Whether a ground point (metres) is inside a building for a camera following someone at a height: on the island, off its streets and
+// landmarks (the rules' own map), and under a roof that is not lower than them.
+export const buildingAt =
+  (height: () => number) =>
+  (x: number, z: number): boolean =>
+    x > 0 &&
+    z > 0 &&
+    x < 360 &&
+    z < 360 &&
+    !onLand(x * 100, z * 100) &&
+    (roofAt(x, z) ?? Infinity) > height() + 0.5;

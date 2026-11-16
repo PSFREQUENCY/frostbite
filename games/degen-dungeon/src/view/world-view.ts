@@ -2,7 +2,6 @@ import { BoxGeometry, Mesh, MeshStandardMaterial, Scene } from "three";
 
 import { storming } from "../rules/day.ts";
 import { risen } from "../rules/machine.ts";
-import { onLand } from "../rules/world.ts";
 import type { DayState } from "../rules/types.ts";
 import {
   buildActor,
@@ -21,7 +20,7 @@ import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
-import { createClimber } from "./climbing.ts";
+import { buildingAt, createClimber } from "./climbing.ts";
 import { airAt, hopAt } from "./hop.ts";
 import { castFor, placeCast } from "./lead.ts";
 import { wayOf } from "./poses.ts";
@@ -119,10 +118,9 @@ export function createWorldView(
   const people = createPeople(scene, cast);
   const spinRing = createRing(cast, shadow);
   void models?.then((all) => dress(cast, all, loaded));
-  // Inside a building: on the island and not on its streets or avenues (the rules' own map, in centimetres).
-  const rig = createRig(
-    (x, z) => x > 0 && z > 0 && x < 360 && z < 360 && !onLand(x * 100, z * 100),
-  );
+  // The camera keeps out of buildings, but over a roof lower than the hero it is in open sky (`climbing.ts`).
+  let above = 0;
+  const rig = createRig(buildingAt(() => above));
   const towers = city.root.getObjectByName("towers");
   const climber = createClimber();
   let heading = Math.PI / 2;
@@ -173,6 +171,7 @@ export function createWorldView(
         heading,
         dt,
       );
+      above = at.y;
       const { along, dark } = timeOf(state.tick);
       clock = seconds;
       light.set(

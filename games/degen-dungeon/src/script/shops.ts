@@ -48,8 +48,8 @@ export const shopTalks: Readonly<
     say: "Tape, rope, torches, and glow sticks bright enough to read a tell by.",
   },
   "shop-laundry": {
-    answers: ["Wash and change, 20", "Leave"],
-    say: "Machines tumble. A change of clothes, and you look like somebody else.",
+    answers: ["Wash and change, 20", "Run a washer, 5", "Leave"],
+    say: "Machines tumble. A change of clothes, and you look like somebody else. Or feed a washer and see what the last load left behind.",
   },
   "shop-noodles": {
     answers: ["A bowl of noodles, 15", "Leave"],
@@ -62,6 +62,34 @@ export const shopTalks: Readonly<
   "shop-pizza": {
     answers: ["Two slices, 10", "Leave"],
     say: "Two slices, still hot. Somebody once paid a fortune in coins for a pair of these.",
+  },
+  "wash-change": {
+    answers: ["Pocket it"],
+    say: "The drum slows to a stop. Under somebody's forgotten towels: a little pile of loose change.",
+  },
+  "wash-clothes": {
+    answers: ["Put them on"],
+    say: "A whole clean outfit, left behind and still warm. Pull it on and the heat loses your trail.",
+  },
+  "wash-lint": {
+    answers: ["Shrug"],
+    say: "Lint, and one lonely sock. Very clean lint, though.",
+  },
+  "window-empty": {
+    answers: ["Climb back out"],
+    say: "An empty flat with a sign that says TO LET. Bare floorboards, and an echo when you breathe.",
+  },
+  "window-loft": {
+    answers: ["Climb back out"],
+    say: "An artist's loft. The painter hands you a pencil and lets you sketch the rooftops from the sill.",
+  },
+  "window-shut": {
+    answers: ["Climb back out"],
+    say: "Somebody is home, and not pleased to see a face at the window. It slams. They will mention it to the beat cop.",
+  },
+  "window-snack": {
+    answers: ["Climb back out"],
+    say: "A neighbour leaning on the sill offers you half a sandwich and the news from up here.",
   },
   abduction: {
     answers: [

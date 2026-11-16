@@ -100,6 +100,22 @@ at the start of the very first day and can be skipped.
     Before, a 40 cm band round each open lot shut them off. The drawn pavements are 3 m wide (they were 1.6), with the lamps and
     hydrants at the kerb and parked cars just past it.
 
+- **Round 8** (films, washers, shops at work, roofs and windows):
+  - Films (`view/movie.ts`): three original 30-second films (title card first) drawn into a canvas texture at 12 frames a second
+    and played on Starlight Cinema's screen while the hero is within 90 m.
+  - Washers (`rules/laundry.ts`): the laundromat's counter offers a wash (5 DUN) in the next of its five machines, each once a day;
+    the day's seed decides each drum's find: change of 10 to 40 DUN (four in ten), an outfit that cools 60 heat (three in ten), or
+    lint. A deed may open its own talk now (`pickNode` keeps it), so the find is a short talk.
+  - Shops at work (`view/shop-motion.ts`): the drums turn (fast for six seconds after a wash, then stop until the next day), arcade
+    screens cycle, the pizza oven flickers, coffee and noodle steam rises; only within 40 m of the hero.
+  - Roofs (`rules/world.ts` `onRoof`, `rules/climb.ts`): level 4 is the roof. From the top storey Climb steps 120 cm past the wall
+    onto the ring of buildings round a lot (within 9 m of its edge, never a landmark's lot or the courtyard); there the hero walks
+    only on roof, and Drop at an edge over a street steps to that street's wall at the top storey. The view gives each building of a
+    lot's ring its height (`view/lots.ts` `ringOf`, `roofAt`), splits a wall's storeys up to just under its roof, stands the hero on
+    the roof, and lets the camera over roofs lower than the hero (`view/climbing.ts` `buildingAt`).
+  - Windows (`rules/windows.ts`): act while clinging climbs in at the window in front (one for every 4 m of wall at each storey),
+    once a window a day: a snack (frost vision), a loft (standing), an empty flat, or a shut window (heat).
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

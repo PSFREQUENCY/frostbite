@@ -23,6 +23,7 @@ import { createProps, type Handle } from "./props.ts";
 import { toonSteps } from "./textures.ts";
 import { furnish, openAir, tint } from "./venue-kits.ts";
 import { crowns } from "./venue-lots.ts";
+import { buildMovie, type Movie } from "./movie.ts";
 
 // The landmarks of Nakasato, every one open to walk into (`venues.ts` in the rules says where): round halls with a doorway and an arched
 // canopy to the street, a dome or a neon-rimmed roof, the name over the door, and inside a library's curved shelves, a bank's teller and
@@ -146,6 +147,7 @@ export function buildVenues(): Venues {
   const props = createProps("venue-props");
   const lights: Handle[] = [];
   const machines: [number, number][] = [];
+  const movies: { movie: Movie; x: number; z: number }[] = [];
   for (const venue of venues) {
     const group = new Group();
     group.name = `venue-${venue.kind}`;
@@ -156,6 +158,14 @@ export function buildVenues(): Venues {
       [cx + a * out, y, cz + b * out] as const;
     if (!openAir(venue)) hall(venue, group);
     lights.push(...furnish(venue.kind, place, props).lights);
+    // The cinema's screen plays its films (`movie.ts`), facing the seats and the doorway.
+    if (venue.kind === "cinema") {
+      const movie = buildMovie(23.4, 8.6);
+      movie.mesh.position.set(...place(0, -15.3, 5));
+      movie.mesh.rotation.y = out === 1 ? 0 : Math.PI;
+      group.add(movie.mesh);
+      movies.push({ movie, x: cx, z: cz });
+    }
     if (openAir(venue)) {
       const art = murals();
       const mural = new Mesh(
@@ -239,6 +249,8 @@ export function buildVenues(): Venues {
           Math.hypot(middle.x / 100 - x, middle.z / 100 - z) < radius + 6,
       );
       lamp.intensity = near === undefined || openAir(near) ? 0 : 14;
+      for (const { movie, x: mx, z: mz } of movies)
+        if (Math.hypot(mx - x, mz - z) < 90) movie.play(seconds);
       if (near !== undefined)
         lamp.position.set(near.middle.x / 100, 6, near.middle.z / 100);
     },

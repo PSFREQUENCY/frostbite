@@ -114,6 +114,23 @@ export function wallBeside(x: number, z: number): Wall | null {
   return found;
 }
 
+// The roofs a climber can walk: the ring of low buildings round every built lot, `roofDepth` deep from the lot's edge, not the courtyard
+// inside the ring, the tower in its middle, nor anything on an open lot or a landmark's.
+export const roofDepth = 900;
+const fromEdge = (value: number): number | null => {
+  const local = value % block;
+  const lot = lots.find(([near, far]) => local >= near && local <= far);
+  return lot === undefined ? null : Math.min(local - lot[0], lot[1] - local);
+};
+export function onRoof(x: number, z: number): boolean {
+  if (Math.min(x, z) < 0 || Math.max(x, z) > island) return false;
+  const across = fromEdge(x);
+  const along = fromEdge(z);
+  if (across === null || along === null) return false;
+  if (outdoors(x, z) || inVenue(x, z)) return false;
+  return Math.min(across, along) <= roofDepth;
+}
+
 // The Old Floe's park (its middle and its lawns), where sitting still cools FOMO; the riot across The Exchange on the first morning.
 export const inPark = (x: number, z: number): boolean =>
   (Math.abs(x - 30_000) <= 3_000 && Math.abs(z - 6_000) <= 3_000) ||

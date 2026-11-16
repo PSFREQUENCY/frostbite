@@ -38,9 +38,12 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   billboard over every crossroads; people strolling and stopping to talk; traffic that thickens at rush hour and thins at night; a sun
   that crosses the sky, then the moon and the stars. Walk into seventeen shops (sliding doors, a counter, a clerk): coffee and noodles
   calm FOMO, food and glow sticks give frost vision back, a cut or a wash loses heat, the gym and the bait shop are good for standing,
-  the pawn shop buys loot, and the arcade has four cabinets, one go each a day.
+  the pawn shop buys loot, and the arcade has four cabinets, one go each a day. Each laundromat has five washers: feed one 5 DUN at
+  the counter and see what the last load left (loose change, an outfit that loses the heat, or lint), each machine once a day. The
+  shops are at work: drums turn (hard through a wash), arcade screens flicker, the pizza oven glows, coffee and noodles steam.
 - **Landmarks, all open:** walk into round halls with a doorway and an arched canopy, each with one thing to do once a day: dance in
-  three clubs (The Mempool, Club Halving, Block Party), catch the late show at Starlight Cinema, plug into a pod at The Dome VR, play
+  three clubs (The Mempool, Club Halving, Block Party), catch the late show at Starlight Cinema (three short original films play on
+  its screen in turn), plug into a pod at The Dome VR, play
   the Mega Arcade's cabinets, read the whitepaper at Whitepaper Library, see the exhibits at the Museum of Genesis, collect a print at
   Pixel Vault Gallery, cut a track at Bassline Records, go live at Clipstream Studios, and freeze or thaw DUN at First Block Bank's
   teller. The Meme Market Skate Park and Gig Street Green are open to the sky. Lookout posts, NFT vending machines and company names on
@@ -80,7 +83,11 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
   lawns cools FOMO like the park's middle); inside a hall the floor runs right out to its round wall.
 - **Climb any building's wall:** from the pavement beside one (Climb on a phone, R on a keyboard), a storey at a time up to three, and
   back down with Drop or F. Up a wall nobody walks, uses anything or gets on a ride; the beat cop waits underneath (he only catches feet
-  on the ground), but a tux at four stars still reaches. The hero turns to the wall, climbs hand over hand and hangs there.
+  on the ground), but a tux at four stars still reaches. The hero turns to the wall, climbs hand over hand and hangs there. On the
+  wall, act climbs in at the window in front of you (once a window a day): a neighbour shares a snack (frost vision), an artist lets
+  you sketch from the loft (standing), a flat stands empty, or somebody shuts the window on you (a little heat).
+- **Walk the roofs:** from the top storey, climb once more to step onto the roof. Walk the ring of roofs round the block (not out over
+  its courtyard); at an edge over a street, Drop or F climbs back down that wall.
 - **Bodies that move:** every hero and every person built in code bends at the hips, knees, spine, shoulders and elbows: they stride and
   swing their arms, run leaning in with bent elbows, duck on bent knees, crawl on hands and knees, climb, hang and tuck their legs in a
   jump. Frost Run's models play their own Duck and Hop clips and bend their bones the same way to crawl, climb and hang.

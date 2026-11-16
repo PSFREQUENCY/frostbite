@@ -11,7 +11,8 @@ import {
   rebrandCool,
   witnessHeat,
 } from "./constants.ts";
-import { clinging } from "./climb.ts";
+import { clinging, onTheRoof } from "./climb.ts";
+import { enterWindow } from "./windows.ts";
 import { cooled, heated, rankOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { actMachine, pickMachine } from "./machine.ts";
@@ -197,7 +198,8 @@ function useSpot(day: Draft, spot: Spot): string | null {
 
 export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
-  if (clinging(day)) return "climb down first";
+  if (clinging(day)) return enterWindow(day);
+  if (onTheRoof(day)) return "climb down first";
   if (day.ride === "heli") {
     if (day.level > 0) return "land before stepping out";
     day.ride = "foot";

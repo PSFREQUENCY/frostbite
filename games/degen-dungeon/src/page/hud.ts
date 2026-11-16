@@ -1,4 +1,4 @@
-import { clinging } from "../rules/climb.ts";
+import { clinging, onTheRoof } from "../rules/climb.ts";
 import { byInput } from "@frostbite/game-sdk/touch";
 
 import { starsOf } from "../rules/heat.ts";
@@ -19,8 +19,13 @@ export function noteFor(day: DayState): string {
     return byInput("E or 1 to 5 answers, X walks away.", "Tap an answer.");
   if (clinging(day))
     return byInput(
-      "Up the wall. R climbs higher, F climbs down.",
-      "Up the wall. Climb goes higher, Drop comes down.",
+      "Up the wall. E climbs in the window, R goes higher (and onto the roof from the top), F climbs down.",
+      "Up the wall. Act climbs in the window, Climb goes higher (and onto the roof from the top), Drop climbs down.",
+    );
+  if (onTheRoof(day))
+    return byInput(
+      "On the roof. Walk to an edge over a street, then F climbs down.",
+      "On the roof. Walk to an edge over a street, then Drop climbs down.",
     );
   const here = (what: string): string =>
     byInput(`E: ${what}`, `Tap right: ${what}`);

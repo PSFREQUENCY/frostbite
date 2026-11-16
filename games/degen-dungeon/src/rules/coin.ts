@@ -12,3 +12,7 @@ export function roll(seed: number, salt: number, sides: number): number {
   mixed = Math.imul(mixed ^ (mixed >>> 13), 0xc2_b2_ae_35);
   return stepInt(startState(mixed ^ (mixed >>> 16)), sides).value;
 }
+
+// A number of a name's own (a machine's, a window's), so each has its own luck on the same day.
+export const saltOf = (id: string): number =>
+  [...id].reduce((sum, letter, at) => sum + letter.charCodeAt(0) * (at + 7), 0);

@@ -33,10 +33,10 @@ function step(
   if (!stepped.ok) throw new Error(stepped.reason);
   return stepped.state;
 }
-// A shop's counter, answered: buy (0) then leave (1).
+// A shop's counter, answered: buy (0) then leave (always the last answer).
 const bought = (day: DayState, kind: string): DayState =>
   step(step({ ...day, talk: `shop-${kind}` }, "pick", { choice: 0 }), "pick", {
-    choice: 1,
+    choice: (nodes[`shop-${kind}`]?.length ?? 2) - 1,
   });
 
 describe("the mom-and-pop shops", () => {

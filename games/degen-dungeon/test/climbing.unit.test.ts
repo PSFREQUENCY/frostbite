@@ -1,7 +1,13 @@
 import { Group, type Object3D } from "three";
 import { describe, expect, it } from "vitest";
 
-import { createClimber, levelHeight, storey } from "../src/view/climbing.ts";
+import { rooms } from "../src/rules/rooms.ts";
+import {
+  buildingAt,
+  createClimber,
+  levelHeight,
+} from "../src/view/climbing.ts";
+import { ringOf, roofAt, shopRoof } from "../src/view/lots.ts";
 import { bendPose, bendSeat, bonesOf } from "../src/view/models/bend.ts";
 import { clipFor } from "../src/view/models/load.ts";
 import { poseFor } from "../src/view/poses.ts";
@@ -23,13 +29,56 @@ describe("a climb as it is shown", () => {
     let shown = going;
     for (let frame = 0; frame < 20; frame += 1)
       shown = climber.follow({ ...wall, level: 1 }, 150, 171, 0.3, 0.25);
-    expect([shown.y, shown.hold]).toEqual([storey, "hanging"]);
+    // The wall's storeys reach to just under its roof.
+    const top = roofAt(150, 168.5) ?? 0;
+    expect(top).toBeGreaterThan(3);
+    expect(shown.hold).toBe("hanging");
+    expect(shown.y).toBeCloseTo((top - 0.8) / 3);
     expect(shown.z).toBeCloseTo(171 - (0.7 - 0.42));
     const down = climber.follow(wall, 150, 171, 0.3, 0.5);
-    expect([down.hold, down.y]).toEqual(["climbing", storey - 0.8]);
+    expect(down.hold).toBe("climbing");
+    expect(down.y).toBeCloseTo((top - 0.8) / 3 - 0.8);
     for (let frame = 0; frame < 20; frame += 1)
       shown = climber.follow(wall, 150, 171, 0.3, 0.25);
     expect([shown.hold, shown.y]).toEqual([null, 0]);
+  });
+
+  it("walks a hero on a roof at the roof's own height, and lets the camera over roofs lower than them", () => {
+    const climber = createClimber();
+    const roof = { level: 4, ride: "foot" as const, x: 15_000, z: 16_910 };
+    let shown = climber.follow(roof, 150, 169.1, 1, 0.1);
+    for (let frame = 0; frame < 120; frame += 1)
+      shown = climber.follow(roof, 150, 169.1, 1, 0.1);
+    expect([shown.hold, shown.x, shown.z]).toEqual([null, 150, 169.1]);
+    expect(shown.y).toBeCloseTo(roofAt(150, 169.1) ?? 0);
+    const inside = buildingAt(() => 0);
+    const over = buildingAt(() => 99);
+    expect([inside(150, 169.1), over(150, 169.1), inside(180, 180)]).toEqual([
+      true,
+      false,
+      false,
+    ]);
+    // Where nothing is known of the roof (a tower), the camera keeps out at any height.
+    expect(buildingAt(() => 99)(155, 155)).toBe(true);
+  });
+
+  it("knows each lot's ring of roofs, a shop's flats, and no roof over a street or a landmark", () => {
+    const ring = ringOf(4, 0);
+    expect(ring.length).toBeGreaterThan(6);
+    for (const piece of ring) {
+      const [x0, x1, z0, z1] = piece.box;
+      expect(roofAt((x0 + x1) / 2, (z0 + z1) / 2)).toBe(piece.height);
+    }
+    expect(ringOf(4, 0)).toBe(ring);
+    const shop = rooms[0];
+    expect(
+      roofAt(
+        ((shop?.room.x0 ?? 0) + (shop?.room.x1 ?? 0)) / 200,
+        ((shop?.room.z0 ?? 0) + (shop?.room.z1 ?? 0)) / 200,
+      ),
+    ).toBe(shopRoof);
+    expect(roofAt(180, 180)).toBeNull();
+    expect(ringOf(1, 2)).toEqual([]);
   });
 
   it("shows a helicopter at its level at once, and a hero moved by the story where they now are", () => {

@@ -1,4 +1,4 @@
-import { clinging } from "./climb.ts";
+import { clinging, onTheRoof } from "./climb.ts";
 import { fogLine, gaitTenths } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
@@ -11,6 +11,7 @@ import {
   onBeach,
   onLand,
   onMoon,
+  onRoof,
   onStreet,
   onWater,
 } from "./world.ts";
@@ -68,6 +69,7 @@ export const paceOf = (
 // and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {
   if (onMoon(day.x, day.z)) return onMoon;
+  if (onTheRoof(day)) return onRoof;
   if (day.ride === "boat") return onWater;
   if (day.ride === "heli") return inSky;
   if (day.ride !== "foot") return onStreet;

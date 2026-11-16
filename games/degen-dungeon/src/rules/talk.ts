@@ -4,6 +4,7 @@ import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
 import { activities, teller, venture } from "./venues.ts";
 import { cooled, rankOf } from "./heat.ts";
+import { wash } from "./laundry.ts";
 import { buy, sell } from "./market.ts";
 import type { Draft } from "./types.ts";
 
@@ -60,7 +61,13 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
             })),
             leave,
           ]
-        : [{ does: `buy-${kind}`, to: `shop-${kind}` }, leave],
+        : kind === "laundry"
+          ? [
+              { does: "buy-laundry", to: "shop-laundry" },
+              { does: "wash" },
+              leave,
+            ]
+          : [{ does: `buy-${kind}`, to: `shop-${kind}` }, leave],
     ]),
   ),
   bank: [
@@ -71,6 +78,15 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   colony: [{ does: "colony" }, leave],
   // Aboard a saucer there is no walking away: the page's "no" is going quietly.
   abduction: [{ does: "peace" }, { does: "trade" }, { does: "quietly" }],
+  // What a washing machine turned up (`laundry.ts`, run from the laundromat's counter): read it and walk on.
+  "wash-change": [leave],
+  "wash-clothes": [leave],
+  "wash-lint": [leave],
+  // Who was in at a window (`windows.ts`).
+  "window-empty": [leave],
+  "window-loft": [leave],
+  "window-shut": [leave],
+  "window-snack": [leave],
   launchpad: [
     { does: "shot-0" },
     { does: "shot-1" },
@@ -221,6 +237,8 @@ function deed(day: Draft, name: string): string | null {
       return stash(day);
     case "terminal":
       return terminal(day);
+    case "wash":
+      return wash(day);
     default:
       return null;
   }
@@ -235,8 +253,11 @@ export function pickNode(
   if (answers === undefined) return undefined;
   const answer = answers[choice];
   if (answer === undefined) return "no such answer";
+  const asked = day.talk;
   const reason = answer.does === undefined ? null : deed(day, answer.does);
   if (reason !== null) return reason;
-  day.talk = day.ended ? null : (answer.to ?? null);
+  // A deed may open a node of its own: a wash shows what the drum turned up.
+  const opened = day.talk === asked ? null : day.talk;
+  day.talk = day.ended ? null : (answer.to ?? opened);
   return null;
 }
