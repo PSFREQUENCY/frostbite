@@ -5,6 +5,8 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
 
 ## Play
 
+- **The opening credits** roll over the city first (the block of ice, the island growing, the signs, the name of the place), then the
+  hero ring. Enter or a tap in the middle starts a day at any moment; the arrows or a tap on a side go straight to the ring.
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
 - **The five days.** The FREE FROST riot morning, the mania, the winter (it opens on the morning of the drain and ends in the Great
@@ -63,14 +65,22 @@ and climb from Newbie to Whale over five story days. A run is one day of one her
 - **Cinematic clips:** walking into a shop or landmark for the first time today, finishing an activity or a story beat, a letter, a
   ride, a lantern, a moonshot landing or rugging, and the shuttle each play a short letterboxed clip with a title. The day waits while
   it plays, and any key or tap skips it.
-- **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner statue in The Old Floe
-  rises. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
+- **Nine statues**, one on the middle street of each borough: athletes carved at full sprint (chest, shoulders, arms, flat hands, thighs,
+  knees, calves, feet on their toes), each in its own stone and its own mask: the Harbor Sprinter's gold visor, the Tide Leaper's fin,
+  the Ice Runner's blank white mask, the Neon Ghost's mirror visor, the Golden Bull's horns, the Grinner's grin, the Weaver's stripes,
+  the Digger's lamp and the Sunburst's rays. Act at one to put its mask on and play the day on as that statue come to life, a stride
+  quicker on foot; act at it again to take it off. Nobody real is carved: every figure is an original.
+- **Walk and drive anywhere outdoors:** the streets and their pavements, the plazas round every landmark's hall, the skate park and the
+  green; inside a hall the floor runs right out to its round wall.
+- **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner lifts off its plinth on a
+  column of light. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
   timeline for better or worse, and the timeline carries into the next playthrough.
 
 Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
 answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F fly a helicopter, Enter starts, P
-pauses. On a phone the left thumb steers, a tap on the right acts, and the buttons under the screen jump, run, duck, crawl and open the
-backpack. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
+pauses. On a phone or tablet the picture fills the screen: the left thumb steers on a drawn stick, a tap on the right acts, and round
+buttons under the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds) and open the bag; the goal and the
+talks float over the picture. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
 over a square or on a ride, and cuts in close when you use something. The next place to go glows on the corner map and stands in the
 city as a column of light.
 

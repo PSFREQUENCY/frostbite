@@ -27,21 +27,21 @@ const once = (
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. On day two, flying saucers come for the city: bring glow sticks and pizza to make peace, or meme coins to trade, or wake up back at the start. Weather turns from fog to blizzards to thunderstorms. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Reach the top and the Ice Runner statue rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale over five story days: the FREE FROST riot morning, the mania, the winter and its Great Airdrop, Launch Day, and Moon Night. Pick one of ten heroes, each with their own story. Hear Frost's speech, write down your seed words and choose where the paper lives, hustle honest gigs, crew up, trade the coin of the day, and spot the scams before they drain you. Walk, run, duck and crawl through living streets: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch the late show, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words, the watcher's footprints and the tells of a scam. S's letters lie among the flyers, and on Moon Night your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. On day two, flying saucers come for the city: bring glow sticks and pizza to make peace, or meme coins to trade, or wake up back at the start. Weather turns from fog to blizzards to thunderstorms. After dark, send a lantern up to the crypto gods; they may answer in the morning. Stake DUN on a moonshot: most go to nothing, a lucky one goes a hundred times up and buys a seat to the moon colony. Nine masked statues stand one in each borough: wear a mask and play as that statue come to life. Reach the top and the Ice Runner rises: step into its Time Machine, go back to day one, and meet your newbie self, where every answer bends the timeline. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
     once(
-      "faucet",
-      "First DUN",
-      "Take your first DUN from the Faucet.",
-      "The Faucet gives every newbie a first handful of DUN.",
+      "first-contact",
+      "First contact",
+      "Make peace with the saucers on the second story day: stand in a beam with glow sticks and a pizza.",
+      "Glow sticks for them, pizza for everyone, and the saucers went home.",
     ),
     once(
-      "first-gig",
-      "Honest work",
-      "Finish one delivery.",
-      "A parcel carried to its door and paid for.",
+      "intergalactic-otc",
+      "Intergalactic OTC",
+      "Trade a bag of the Exchange's meme coin to the saucers' visitors.",
+      "They paid three times what the market would.",
     ),
     once(
       "grinder",
@@ -50,10 +50,10 @@ export const degenDungeonGame = defineGame({
       "Three honest gigs before the day is out.",
     ),
     once(
-      "first-crew",
-      "Crewed up",
-      "Recruit one crewmate.",
-      "Somebody said yes to running with you.",
+      "taken-up",
+      "Taken up",
+      "Stand in a saucer's beam with nothing to offer, and wake up on the first morning again.",
+      "Lights, a hum, the moon going by, and then your own ceiling.",
     ),
     once(
       "full-crew",
@@ -98,10 +98,10 @@ export const degenDungeonGame = defineGame({
       "You made it home.",
     ),
     once(
-      "storm-catch",
-      "Storm chaser",
-      "Catch 5,000 DUN in the Great Airdrop.",
-      "The sky opened and you held out your hands.",
+      "nine-masks",
+      "Nine masks",
+      "Wear the masks of all nine statues in one day.",
+      "Every borough's runner, one after another, before the day was out.",
     ),
     once(
       "storm-funnel",
@@ -116,10 +116,10 @@ export const degenDungeonGame = defineGame({
       "Three scraps of paper, each with one word.",
     ),
     once(
-      "payday",
-      "Payday",
-      "Make 1,000 DUN in one day from gigs, honest offers and the fence.",
-      "A thousand DUN made in one day.",
+      "road-trip",
+      "Road trip",
+      "Take five kinds of ride from the kerb in one day: bike, scooter, car, motorbike, pickup or minivan.",
+      "Pedals, a deck, a saddle and two engines, all in one day.",
     ),
     once(
       "time-machine",
@@ -140,10 +140,10 @@ export const degenDungeonGame = defineGame({
       "The kind answer is not always the one that helps.",
     ),
     once(
-      "the-speech",
-      "Three things",
-      "Hear Frost's speech in Ticker Square on the first morning.",
-      "Cross the riot. Frost is thawed and talking.",
+      "masked",
+      "Masked",
+      "Put on a statue's mask and play as it.",
+      "A runner in stone stepped down, and it was you.",
     ),
     once(
       "seed-paper",
@@ -260,10 +260,10 @@ export const degenDungeonGame = defineGame({
       "Write your message, pick a wish, and watch it rise with thousands more.",
     ),
     once(
-      "joyride",
-      "Joyride",
-      "Take a car parked on the street.",
-      "The window breaks, and a star of heat comes with the keys.",
+      "big-rig",
+      "Big rig",
+      "Climb into a semi truck's cab parked on the street.",
+      "Up the steps, through the door, and the whole street looks small.",
     ),
     once(
       "to-the-moon",
@@ -283,7 +283,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "d6c73b2f103a30251bd153705d4af85b5ee95c70c7202113fb161f7f01dcc664",
+        "f3248ef20650d696e025f1a6f1cd5df2f2bdf6876d64ec5b295d5e2c8e954b5c",
       version: 1,
     },
   },

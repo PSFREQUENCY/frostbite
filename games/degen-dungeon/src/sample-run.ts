@@ -56,7 +56,7 @@ const inputOf = (step: Step): RunInput => {
 
 export function sampleRun(): RunRecord {
   return {
-    claims: ["faucet", "first-gig", "home-safe", "the-speech", "seed-paper"],
+    claims: ["home-safe", "seed-paper"],
     config: { day: 1, hero: 7 },
     gameId,
     inputs: steps.map(inputOf),

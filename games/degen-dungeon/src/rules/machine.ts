@@ -63,9 +63,9 @@ function drift(day: Draft, by: number): void {
 
 // The act button beside the statue or the newbie: null when it is done, why it cannot be, or undefined when neither is in reach.
 export function actMachine(day: Draft): string | null | undefined {
-  if (inReach(day, statue)) {
+  // Asleep, the Ice Runner is a statue like the others, and acting at it puts its mask on.
+  if (inReach(day, statue) && risen(day)) {
     if (day.loop > 0) return "the machine is cooling down";
-    if (!risen(day)) return "the statue is asleep";
     day.cause = "machine";
     day.ended = true;
     return null;

@@ -37,13 +37,18 @@ describe("a day as it is played", () => {
       ok: false,
       reason: "answer first",
     });
+    expect(session.state().talk).toBe("paper");
+    expect(session.send({ choice: 0, type: "pick" })).toEqual({ ok: true });
+    expect(session.send({ choice: 1, type: "pick" })).toEqual({
+      ok: false,
+      reason: "nobody asked",
+    });
     expect([
       session.clock(),
       session.state().pocket,
       told,
       session.earned(),
-    ]).toEqual([270, 100, ["faucet"], ["faucet"]]);
-    expect(session.state().talk).toBe("paper");
+    ]).toEqual([270, 100, ["seed-paper"], ["seed-paper"]]);
     const record = session.record();
     expect(record.inputs.map(({ type }) => type)).toEqual([
       "move",
@@ -51,15 +56,16 @@ describe("a day as it is played", () => {
       "move",
       "move",
       "act",
+      "pick",
       "end",
     ]);
     expect([record.claims, record.config]).toEqual([
-      ["faucet"],
+      ["seed-paper"],
       { day: 1, hero: 7 },
     ]);
     expect(replay(record)).toEqual(session.state());
     expect(session.state().cause).toBe("closed");
-    expect(session.record().inputs).toHaveLength(6);
+    expect(session.record().inputs).toHaveLength(7);
     expect(session.send({ type: "act" })).toEqual({
       ok: false,
       reason: "the day has ended",

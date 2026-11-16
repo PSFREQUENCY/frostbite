@@ -65,20 +65,34 @@ export const headingOf = (east: number, south: number): number =>
     ? -1
     : (Math.round(Math.atan2(south, east) / (Math.PI / 8)) + 16) % 16;
 
-// The stick sits in the lower left of the screen. A finger away from its middle steers that way; on its middle it steers nowhere.
+// The stick sits in the lower left of the screen. A finger away from its middle steers that way; on its middle it steers nowhere. The
+// screen's shape (width over height) keeps the ways true on a tall phone screen as on a wide one.
 const stick = { x: 0.22, y: 0.62 };
-export function steer(where: Where): number | null {
-  const east = (where.x - stick.x) * 16;
+export function steer(where: Where, shape = 16 / 9): number | null {
+  const east = (where.x - stick.x) * shape * 9;
   const south = (where.y - stick.y) * 9;
   if (Math.hypot(east, south) < 0.5) return null;
   return (Math.round(Math.atan2(south, east) / (Math.PI / 8)) + 16) % 16;
 }
 
-export function zoneAt(mode: Mode, where: Where): Zone | null {
+export function zoneAt(mode: Mode, where: Where, shape = 16 / 9): Zone | null {
   if (mode === "waiting")
     return where.x < 0.25 ? "prev" : where.x > 0.75 ? "next" : "start";
   if (mode === "asked") return where.x < 0.5 ? "no" : "act";
-  return where.x < 0.5 ? steer(where) : "act";
+  return where.x < 0.5 ? steer(where, shape) : "act";
+}
+
+// The drawn stick's knob leans the way a heading points (or rests in the middle for none).
+export function lean(knob: HTMLElement | null, heading: number): void {
+  const angle = (heading * Math.PI) / 8;
+  knob?.style.setProperty(
+    "--east",
+    heading < 0 ? "0" : Math.cos(angle).toFixed(2),
+  );
+  knob?.style.setProperty(
+    "--south",
+    heading < 0 ? "0" : Math.sin(angle).toFixed(2),
+  );
 }
 
 // What a finger does on entering a zone: a heading is held, a side turns the ring, and the rest are the hands' own names.
@@ -136,16 +150,27 @@ export function attachControls(
     )
       hands[action]();
   });
+  const knob = document.querySelector<HTMLElement>("#stick span");
   const stopZones = attachZones<Zone>(screen, {
     enter: (zone) => {
+      if (typeof zone === "number") lean(knob, zone);
       enterZone(hands, zone);
     },
     fingersOnly: true,
     leave: (zone) => {
-      if (typeof zone === "number") hands.move(-1);
+      if (typeof zone !== "number") return;
+      lean(knob, -1);
+      hands.move(-1);
     },
     slide: true,
-    zoneAt: (where) => zoneAt(mode(), where),
+    zoneAt: (where) =>
+      zoneAt(
+        mode(),
+        where,
+        screen.clientHeight > 0
+          ? screen.clientWidth / screen.clientHeight
+          : 16 / 9,
+      ),
   });
   return () => {
     stopKeys();

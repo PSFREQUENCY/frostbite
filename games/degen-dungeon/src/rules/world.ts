@@ -10,7 +10,7 @@ import {
   tunnel,
 } from "./constants.ts";
 import { inRoom } from "./rooms.ts";
-import { inVenue } from "./venues.ts";
+import { inVenue, outdoors } from "./venues.ts";
 import type { Point } from "./types.ts";
 
 // The island: nine boroughs in a grid, a street through the middle of each both ways, avenues between them, buildings in the corners,
@@ -49,13 +49,14 @@ const inLot = (value: number): boolean => {
     ([near, far]) => local > near - bodyRadius && local < far + bodyRadius,
   );
 };
-// Where wheels may be: on the island and not in a building. Feet may also be inside one of the shops or landmarks you can walk into.
+// Where wheels may be: on the island and not in a building, which takes in the plazas round the landmarks and the open lots. Feet may
+// also be inside one of the shops or landmarks you can walk into.
 export const onStreet = (x: number, z: number): boolean =>
   x >= bodyRadius &&
   z >= bodyRadius &&
   x <= island - bodyRadius &&
   z <= island - bodyRadius &&
-  !(inLot(x) && inLot(z));
+  (!(inLot(x) && inLot(z)) || outdoors(x, z));
 export const onLand = (x: number, z: number): boolean =>
   onStreet(x, z) || inRoom(x, z) || inVenue(x, z);
 // Where a helicopter may be, and a boat (which also keeps off the shore).

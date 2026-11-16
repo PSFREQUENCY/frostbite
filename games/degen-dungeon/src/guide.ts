@@ -26,7 +26,7 @@ export function guideFor(
       name,
       stats,
       "LEFT AND RIGHT: CHOOSE A HERO",
-      "ARROWS WALK - SPACE ACTS",
+      "ARROWS WALK - E ACTS - SPACE JUMPS",
     ],
     start: save.machine
       ? "ENTER: TIME MACHINE TO DAY 1"

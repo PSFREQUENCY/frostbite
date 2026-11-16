@@ -43,6 +43,8 @@ export type Spot = Base &
     | { readonly kind: "stop"; readonly next: string }
     | { readonly kind: "talk"; readonly node: string }
     | { readonly kind: "tool"; readonly tool: number }
+    // A masked statue on a borough's middle street (`statues.ts`).
+    | { readonly kind: "statue"; readonly index: number }
   );
 
 // Days as bits: `days(2, 3)` is open on days two and three.

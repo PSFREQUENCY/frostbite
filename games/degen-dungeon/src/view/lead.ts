@@ -123,3 +123,15 @@ export function placeCast(
   });
   return lead;
 }
+
+// The cast as it is drawn: a hero wearing a statue's mask is that statue come to life.
+export const castFor = (
+  cast: readonly Actor[],
+  forms: readonly Actor[],
+  state: Pick<DayState, "form" | "hero">,
+): readonly Actor[] =>
+  state.form < 0
+    ? cast
+    : cast.map((actor, hero) =>
+        hero === state.hero ? (forms[state.form] ?? actor) : actor,
+      );

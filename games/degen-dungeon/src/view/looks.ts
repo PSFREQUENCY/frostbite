@@ -1,5 +1,8 @@
 // How each body looks: the ten heroes in the order of the rules' `heroes`, then Bit, the tux, the beat cop, Max's Vests, and the town's
 // crowd. Every look is an original design; the colours are a draft for the owner.
+import { masks } from "./masks.ts";
+import { stones } from "./statues.ts";
+
 export type Face =
   | "bear"
   | "bull"
@@ -30,6 +33,8 @@ export interface Look {
   readonly tail?: string;
   // Horns, hats, ears and the like.
   readonly trim: string;
+  // A statue's mask over the face (by the statue's number), for a hero playing as one.
+  readonly mask?: number;
 }
 
 const look = (
@@ -117,3 +122,13 @@ export const clerkLooks: readonly Look[] = [
   person("#ff5d5d", "#c98a4b", "#c99a73"),
   person("#6aa8ff", "#2a1d14", "#6b4a32"),
 ];
+
+// The statues come to life: a hero who puts on a statue's mask plays as it, in its stone from head to foot, broad in the shoulder and
+// tall, the mask over the face.
+export const formLooks: readonly Look[] = stones.map((stone, index) =>
+  look("person", 1.9, [stone, stone, stone, masks[index]?.detail ?? stone], {
+    bulk: 1.15,
+    headSize: 0.9,
+    mask: index,
+  }),
+);

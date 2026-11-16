@@ -4,7 +4,13 @@ import { storming } from "../rules/day.ts";
 import { risen } from "../rules/machine.ts";
 import { onLand } from "../rules/world.ts";
 import type { DayState } from "../rules/types.ts";
-import { buildActor, heightOf, heroCount, type Actor } from "./actor.ts";
+import {
+  buildActor,
+  buildForm,
+  heightOf,
+  heroCount,
+  type Actor,
+} from "./actor.ts";
 import { buildAirdrop } from "./airdrop.ts";
 import { buildBoards } from "./boards.ts";
 import type { ClipKind } from "../script/clips.ts";
@@ -15,7 +21,7 @@ import { frameOf, opening } from "./cine.ts";
 import { buildCity, metres } from "./city.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
-import { hopAt, placeCast } from "./lead.ts";
+import { castFor, hopAt, placeCast } from "./lead.ts";
 import { buildLine } from "./line.ts";
 import { buildMoon } from "./moon.ts";
 import { loadModels, modelOf, rigged, type Model } from "./models/load.ts";
@@ -31,7 +37,8 @@ import { buildWeatherFx } from "./weather-fx.ts";
 import { createRing, ring } from "./ring.ts";
 import { intentFor, roomFor } from "./shot.ts";
 import { createStage, type Stage } from "./stage.ts";
-import { buildStatue } from "./statue.ts";
+import { buildStatue } from "./statues.ts";
+import { statues } from "../rules/statues.ts";
 import { buildTown, timeOf } from "./town.ts";
 
 // The whole island in 3D: the city and its era, the cast, the crowds, the rides, the chasers, the airdrop and the far north, with the camera
@@ -76,6 +83,8 @@ export function createWorldView(
   const saucers = buildSaucers();
   const skies = buildWeatherFx();
   const moon = buildMoon();
+  // The statues come to life, one for each mask a hero can wear.
+  const forms = statues.map((_, index) => buildForm(index));
   const cast: Actor[] = Array.from({ length: heroCount + 1 }, (_, hero) =>
     buildActor(hero),
   );
@@ -101,6 +110,7 @@ export function createWorldView(
     skies.root,
     shadow,
     ...cast.map(({ root }) => root),
+    ...forms.map(({ root }) => root),
     ...chasers.actors.map(({ root }) => root),
   );
   const loaded = new Map<ModelName, Model>();
@@ -128,7 +138,7 @@ export function createWorldView(
   let open = 0.5;
   let sampled = -1;
   const hideAll = (): void => {
-    for (const { root } of cast) root.visible = false;
+    for (const { root } of [...cast, ...forms]) root.visible = false;
     chasers.hide();
     rides.show("foot", 0, 0, 0, 0, 0);
     shadow.visible = false;
@@ -208,7 +218,7 @@ export function createWorldView(
       // On the moon: a helmet, a black sky, and jumps that hang in the air.
       const up = moon.on(at.x, at.z);
       const lead = placeCast(
-        cast,
+        castFor(cast, forms, state),
         state,
         at,
         seconds,

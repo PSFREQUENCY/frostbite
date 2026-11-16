@@ -114,6 +114,7 @@ export function startDay(
     rideId: "",
     left: [],
     weather: "clear",
+    form: -1,
     beamed: 0,
     words: 0,
     x: home.x,

@@ -5,7 +5,9 @@ Time Machine. Round three added living streets, walk-in shops, parked rides, run
 backpack, the quest beacon, landmarks, day and night with the lantern night, and the moon colony. Round four opened every landmark,
 rounded the city, added the moonshot and the cinematic clips. Round five fixed riding (seats, pedalling, a deck to stand on, doors,
 the crew aboard or running alongside), added minivans, motorbikes, pickups and semi cabs and rides that stay where they are left,
-the saucers on day two, weather, money pop-ups with receipts, and frost vision that tops back up. What follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
+the saucers on day two, weather, money pop-ups with receipts, and frost vision that tops back up. Round six put the credits before the hero ring, laid the game out for phones, carved nine masked
+statues the hero can play as, opened the landmarks' plazas to feet and wheels, and swapped seven easy milestones for new ones. What
+follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
 polish. The plan it follows is the "Degen Dungeon: game plan" doc (Plan, Stories and Lore tabs).
 
 ## How it fits together
@@ -65,6 +67,18 @@ at the start of the very first day and can be skipped.
   seat pose joint by joint, and Frost Run's models bend their leg and arm bones the same way. Cabins have tinted glass so whoever sits
   inside shows through.
 
+- **Round six's rules** (the verifier was re-pinned): `statues.ts` holds the nine statues (one per borough, on the middle street, clear of
+  every other spot); acting at one sets `form` (−1 for none) and marks "statue-N" done; a masked hero gets `strideTenths` more on foot.
+  The Ice Runner is statue 2 and takes the hero to the Time Machine only once it has risen. Landmark halls have round floors
+  (`floorRadius`) and the plaza round them (`outdoors`, past `plazaRadius`) counts as street, as do the open lots. Milestones "faucet",
+  "first-gig", "first-crew", "the-speech", "storm-catch", "payday" and "joyride" became "first-contact", "intergalactic-otc",
+  "taken-up", "masked", "nine-masks", "road-trip" and "big-rig" (the road trip does not count a semi's cab, so it never shares an event
+  with the big rig). The sample day claims "home-safe" and "seed-paper".
+- **The page** (`page/credits.ts`, `touch.css`): the credits hold the first-screen card for two and a half seconds, then put it away
+  while the opening plays; Enter and a tap in the middle still start a day at once, as the platform's contract asks. On a touch screen
+  the 3D picture fills the frame (`stage.ts` opens the field of view on a tall screen), the game screen keeps only its map at the top,
+  and every button is fixed in place.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they
@@ -76,9 +90,10 @@ at the start of the very first day and can be skipped.
 5. Sound per era and effects for the drain, the freeze and the airdrop (one loop and four effects today).
 6. Balance (including the moon fare): pay, prices and the coin's swings are first guesses; play each hero's five days and tune.
 7. The Time Machine: more meetings on later loops, and the newbie walking between places.
-8. Hrimm (the big ice model) still towers over a bike; Volt, a four-legged model, stands on a deck rather than sitting. The saucer
+8. The living statues use the code-built body in their stone and mask, not the carved figure's muscles. Hrimm (the big ice model)
+   still towers over a bike; Volt, a four-legged model, stands on a deck rather than sitting. The saucer
    abduction is a cut to the moon and a clip, not an authored beam-up.
-9. The next rounds asked for (see PR.md's roadmap): the nine statues and the clue book, the basketball court, six parks and the WAGMI
+9. The next rounds asked for (see PR.md's roadmap): the statues' clues and the clue book, the basketball court, six parks and the WAGMI
    hill, the ADOR department store and businesses, the Global DEX, three theatres, the hacker and mining lines, car lots, alleys, the
    studio apartment and storage, The Fuzzy Spot, the fashion districts, the jeweler to wizard line, the music career and the art gala.
 

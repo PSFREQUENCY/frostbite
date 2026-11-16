@@ -3,6 +3,7 @@ import type { Group, Mesh } from "three";
 import { animalFace } from "./faces-animals.ts";
 import { peopleFace } from "./faces-people.ts";
 import type { Look } from "./looks.ts";
+import { wearMask } from "./masks.ts";
 import { part } from "./parts.ts";
 
 // Adds the head's parts and its eyes, and hands back the eyes so the body can blink them.
@@ -22,5 +23,6 @@ export function addFeatures(head: Group, look: Look): readonly Mesh[] {
   );
   animalFace(head, look, r);
   peopleFace(head, look, r);
+  if (look.mask !== undefined) wearMask(head, look.mask, r);
   return eyes;
 }

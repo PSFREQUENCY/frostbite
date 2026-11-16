@@ -35,6 +35,11 @@ export const clipWords: Readonly<
     "BIG RIG",
     "You climb up into the cab and the whole street looks smaller.",
   ],
+  statue: [
+    "spin",
+    "MASK ON",
+    "The stone steps down off its plinth, and now it moves when you move.",
+  ],
   traded: [
     "orbit",
     "INTERGALACTIC OTC",

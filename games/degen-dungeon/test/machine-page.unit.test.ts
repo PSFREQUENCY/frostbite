@@ -12,7 +12,7 @@ import { echoAt, recklessOn, statue } from "../src/rules/machine.ts";
 import { resultOf } from "../src/screen/result.ts";
 import { echoTells, machineLines, wakeLine } from "../src/script/cast.ts";
 import type { Stage } from "../src/view/stage.ts";
-import { buildStatue } from "../src/view/statue.ts";
+import { buildStatue } from "../src/view/statues.ts";
 import { createWorldView } from "../src/view/world-view.ts";
 
 describe("the Time Machine on the page", () => {
@@ -139,7 +139,11 @@ describe("the Time Machine on the page", () => {
     const scene = draw.mock.calls[0]?.[0];
     const echoes = (): readonly { visible: boolean }[] =>
       scene?.children.filter(({ name }) => name === "echo") ?? [];
-    expect(scene?.getObjectByName("statue")).toBeDefined();
+    expect(scene?.getObjectByName("statues")?.children).toHaveLength(9);
+    expect(
+      scene?.getObjectByName("statue-4")?.getObjectByName("figure")?.children
+        .length,
+    ).toBe(1);
     expect(echoes().map(({ visible }) => visible)).toEqual([true]);
     const echo = echoAt(trip);
     if (echo === null) throw new Error("nobody to meet");

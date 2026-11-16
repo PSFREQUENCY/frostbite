@@ -158,6 +158,8 @@ export interface DayState {
   // The parked ride under the hero (its spot's id, or "" for none or a hired one), and the rides left on the street (the last six).
   readonly rideId: string;
   readonly left: readonly Left[];
+  // The statue whose mask the hero wears (`statues.ts`), or -1 for their own face.
+  readonly form: number;
   // The weather now, and how long the hero has stood in a saucer's beam (ticks).
   readonly weather: Weather;
   readonly beamed: number;

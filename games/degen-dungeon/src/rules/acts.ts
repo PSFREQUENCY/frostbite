@@ -16,6 +16,7 @@ import { heroes } from "./heroes.ts";
 import { actMachine, pickMachine } from "./machine.ts";
 import { actMystery } from "./mystery.ts";
 import { inReach, nearest, spotNamed, spots, type Spot } from "./places.ts";
+import { wear } from "./statues.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
 import { motors, type Draft, type Ride } from "./types.ts";
@@ -180,6 +181,8 @@ function useSpot(day: Draft, spot: Spot): string | null {
       return null;
     case "ride":
       return board(day, spot.ride, spot.rank);
+    case "statue":
+      return wear(day, spot.index);
     case "stop":
       return rideLine(day, spot.next);
     case "talk":

@@ -1,6 +1,7 @@
 import { launchpad, moonPad, reach, shuttleBooth } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { parkedRides } from "./parked.ts";
+import { statueId, statues } from "./statues.ts";
 import { rooms } from "./rooms.ts";
 import { sites } from "./sites.ts";
 import { bit, days, type Spot } from "./spot.ts";
@@ -156,6 +157,14 @@ const outings: readonly Spot[] = venues.map(
   }),
 );
 const fixed: readonly Spot[] = [
+  ...statues.map(({ label, x, z }, index): Spot => ({
+    id: statueId(index),
+    index,
+    kind: "statue",
+    label,
+    x,
+    z,
+  })),
   ...homes,
   ...heroWords,
   ...recruits,

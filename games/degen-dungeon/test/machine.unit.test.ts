@@ -1,3 +1,4 @@
+import { statueId } from "../src/rules/statues.ts";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -36,18 +37,16 @@ const seedWhere = (reckless: boolean): number => {
 const now = (state: DayState): { tick: number } => ({ tick: state.tick });
 
 describe("the Time Machine", () => {
-  it("sleeps until the hero reaches the top, then takes whoever steps up to it", () => {
+  it("sleeps as a statue whose mask anyone can wear until the hero reaches the top, then takes whoever steps up to it", () => {
     const early = createBot(1, 7, 1);
     early.go(statue.x, statue.z);
     expect(risen(early.here())).toBe(false);
-    expect(refusal(early.here(), "act", now(early.here()))).toBe(
-      "the statue is asleep",
-    );
+    early.act();
+    expect([early.here().form, early.here().ended]).toEqual([2, false]);
     const top = machineDay();
     expect([top.state().cause, top.state().ended]).toEqual(["machine", true]);
     expect(risen(top.state())).toBe(true);
     expect(degenRules.earned(top.state())).toEqual([
-      "storm-catch",
       "storm-funnel",
       "time-machine",
     ]);
@@ -90,7 +89,7 @@ describe("the Time Machine", () => {
       for (const place of [statue, ...places]) {
         if (place === null) throw new Error("nobody there");
         expect(onLand(place.x, place.z)).toBe(true);
-        for (const spot of spots)
+        for (const spot of spots.filter(({ id }) => id !== statueId(2)))
           expect(
             Math.max(Math.abs(spot.x - place.x), Math.abs(spot.z - place.z)),
           ).toBeGreaterThan(2 * reach);

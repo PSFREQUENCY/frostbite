@@ -14,6 +14,20 @@ export interface Stage {
 }
 
 const aspect = 16 / 9;
+// The field of view (degrees, up and down) for a canvas of a shape: the screen's own on a wide one, and opened out on a tall phone screen
+// so the street still shows to either side, up to a limit.
+export const fovFor = (fov: number, shape: number): number =>
+  shape >= aspect
+    ? fov
+    : Math.min(
+        88,
+        (2 *
+          Math.atan(
+            Math.tan((fov * Math.PI) / 360) * Math.min(aspect / shape, 2.2),
+          ) *
+          180) /
+          Math.PI,
+      );
 
 export function createStage(canvas: HTMLCanvasElement): Stage | null {
   if (typeof WebGL2RenderingContext === "undefined") return null;
@@ -35,11 +49,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
   return {
     camera,
     draw(scene) {
-      // The picture keeps the screen's shape inside the canvas's box, as the game screen does, so the two line up.
-      const boxWidth = canvas.clientWidth > 0 ? canvas.clientWidth : 960;
-      const boxHeight = canvas.clientHeight > 0 ? canvas.clientHeight : 540;
-      const width = Math.round(Math.min(boxWidth, boxHeight * aspect));
-      const height = Math.round(width / aspect);
+      // The picture fills the canvas's box, whatever its shape; the game screen's map is drawn over its top.
+      const width = canvas.clientWidth > 0 ? canvas.clientWidth : 960;
+      const height = canvas.clientHeight > 0 ? canvas.clientHeight : 540;
       const ratio = Math.min(2, globalThis.devicePixelRatio || 1);
       const size = `${String(width)}x${String(height)}@${String(ratio)}`;
       if (size !== fitted) {
@@ -47,6 +59,9 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
         renderer.setSize(width, height, false);
         fitted = size;
       }
+      camera.aspect = width / height;
+      camera.fov = fovFor(camera.fov, camera.aspect);
+      camera.updateProjectionMatrix();
       renderer.render(scene, camera);
     },
   };

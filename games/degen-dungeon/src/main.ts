@@ -19,6 +19,7 @@ import { attachControls, type Mode } from "./page/controls.ts";
 import { element, everyFrame } from "./page/elements.ts";
 import { handsFor, wireButtons } from "./page/hands.ts";
 import { createClips } from "./page/clips.ts";
+import { createCredits } from "./page/credits.ts";
 import { listEarned, noteFor } from "./page/hud.ts";
 import { createPanel } from "./page/panel.ts";
 import {
@@ -38,8 +39,8 @@ import { worldOn } from "./view/world-view.ts";
 
 // The page of the game: it draws, it plays, and it asks the platform to remember. It saves nothing itself and asks nothing of the
 // network. The rules, the session, the picture and the words are in their own modules; this only joins them to the page and the platform.
-// The first screen is the hero select (one Enter or one tap starts a day, as every game on the platform must); the opening cinematic
-// plays at the start of the first day and can be skipped; then the hero wakes up and the day runs.
+// The first screen opens on the credits over the city, then the hero select; one Enter or one tap starts a day at any point, as every game
+// on the platform must; then the hero wakes up and the day runs.
 const client = createGameClient();
 const status = element("status", "p");
 const note = element("note", "p");
@@ -58,6 +59,7 @@ const startButton = element("start", "button");
 const pauseButton = element("pause", "button");
 const context = screen.getContext("2d");
 const world = worldOn(worldCanvas);
+const credits = createCredits(world !== null);
 
 let play: PlatformPlay | null = null;
 let progress: Progress = freshProgress;
@@ -67,8 +69,7 @@ let runId: string | null = null;
 let titles = new Map<string, string>();
 let heldNote = "";
 let hero = freshProgress.hero;
-// Seconds into the opening while it plays, the picture's own clock, and until when the camera stays on the hands or the waking face.
-let intro: number | null = null;
+// Until when the camera stays on the hands or the waking face.
 let seconds = 0;
 let closeUntil = 0;
 let wakeUntil = 0;
@@ -94,28 +95,28 @@ function show(dt = 0): void {
   panel.render(view.phase === "running" ? day : null, progress.best);
   bag.render(view.phase === "running" ? day : null);
   if (view.phase === "running" && day !== null) {
-    const caption = intro === null ? null : (world?.opening(intro) ?? null);
-    if (caption === null) {
-      intro = null;
-      world?.day(day, seconds, dt, seconds < closeUntil, clips.current());
-    }
+    world?.day(day, seconds, dt, seconds < closeUntil, clips.current());
     if (!pause.paused())
       note.textContent =
-        caption ??
-        (seconds < wakeUntil
+        seconds < wakeUntil
           ? wakeLine(day.hero, day.loop, day.day, day.answered)
-          : noteFor(day));
-  } else world?.turntable(hero, locked(), seconds, dt);
+          : noteFor(day);
+  } else if (credits.on())
+    credits.frame(dt, (at) => world?.opening(at) ?? null);
+  else world?.turntable(hero, locked(), seconds, dt);
   if (context !== null)
     drawScreen(context, view.phase === "ready" ? null : day, world !== null);
   guideLayer.show(
-    cardFor(view.phase, guideFor(hero, progress), () =>
-      day === null ? null : resultOf(day, view),
-    ),
+    credits.flying()
+      ? null
+      : cardFor(view.phase, guideFor(hero, progress), () =>
+          day === null ? null : resultOf(day, view),
+        ),
   );
 }
 
 function setRunning(running: boolean): void {
+  document.body.dataset.running = running ? "yes" : "no";
   startButton.hidden = running;
   for (const button of moveButtons) button.disabled = !running;
 }
@@ -147,10 +148,8 @@ const loop = createRunLoop({
     if (running === null) return false;
     const dt = ticks / ticksPerSecond;
     seconds += dt;
-    // The day does not start until the opening is over, so nothing is missed by watching it.
     const before = running.state();
-    if (intro !== null) intro += dt;
-    else if (clips.playing()) clips.step(dt);
+    if (clips.playing()) clips.step(dt);
     else
       for (let at = 0; at < ticks && !running.state().ended; at += 1)
         running.tick();
@@ -166,14 +165,10 @@ const loop = createRunLoop({
   ticksPerSecond,
 });
 
-// A choice during a day. Any act skips the opening while it plays; a spot used is a moment for the close-up.
+// A choice during a day; a spot used is a moment for the close-up.
 function choose(choice: Choice): void {
   const running = session;
   if (running === null || !loop.active()) return;
-  if (intro !== null) {
-    if (choice.type === "act") intro = null;
-    return;
-  }
   // A clip playing: anything but a step skips it.
   if (clips.playing() && choice.type !== "move") return clips.skip();
   const before = running.state();
@@ -203,7 +198,7 @@ const begin = (): Promise<void> =>
       },
       seed: ready?.seed ?? localSeed(),
     });
-    intro = progress.seen || world === null ? null : 0;
+    credits.stop();
     clips.reset();
     wakeUntil = seconds + 6;
     progress = { ...progress, hero, seen: true };
@@ -223,6 +218,7 @@ function start(): void {
 
 function turn(by: number): void {
   if (loop.running()) return;
+  credits.stop();
   hero = (hero + by + heroes.length) % heroes.length;
   view = { ...view, phase: "ready" };
   show();

@@ -14,6 +14,7 @@ import {
   stormDay,
 } from "./support/days.ts";
 import { moonDay, nightDay } from "./support/night.ts";
+import { bigRigDay, masksDay, roadTripDay, saucerDay } from "./support/sky.ts";
 import { replay } from "./support/replay.ts";
 import { tellStory } from "./support/story.ts";
 import { machineDay, tripDay } from "./support/trips.ts";
@@ -37,6 +38,12 @@ describe("the milestones", () => {
       moonDay(),
       machineDay(),
       tripDay(),
+      saucerDay(["hardware", "pizza"], false, 0),
+      saucerDay([], true, 1),
+      saucerDay([]),
+      masksDay(),
+      roadTripDay(),
+      bigRigDay(),
       tellStory(createBot(11, 5, 2)),
       tellStory(createBot(12, 0, 3)),
       tellStory(createBot(13, 7, 4)),
@@ -51,29 +58,20 @@ describe("the milestones", () => {
 
   it("are each earned for what the day did, and only that", () => {
     expect(earned(busyDay())).toEqual([
-      "faucet",
-      "first-gig",
       "grinder",
-      "first-crew",
       "full-crew",
       "full-loop",
       "cold-storage",
       "home-safe",
       "three-words",
-      "payday",
-      "the-speech",
       "seed-paper",
       "your-word",
       "dear-newbie",
       "dead-locker",
     ]);
     expect(earned(hotDay())).toEqual(["fenced", "shook-the-tuxes"]);
-    expect(earned(stormDay(false))).toEqual(["storm-catch"]);
-    expect(earned(drainDay())).toEqual([
-      "faucet",
-      "seed-paper",
-      "saved-the-rest",
-    ]);
+    expect(earned(stormDay(false))).toEqual([]);
+    expect(earned(drainDay())).toEqual(["seed-paper", "saved-the-rest"]);
     expect(earned(cornersDay())).toEqual([
       "scam-spotted",
       "the-watcher",
@@ -83,8 +81,16 @@ describe("the milestones", () => {
       "fresh-fit",
     ]);
     expect(earned(grassDay())).toEqual(["touching-grass"]);
-    expect(earned(nightDay())).toEqual(["home-safe", "lantern", "joyride"]);
+    expect(earned(nightDay())).toEqual(["home-safe", "lantern"]);
     expect(earned(moonDay())).toContain("to-the-moon");
+    expect(earned(saucerDay(["hardware", "pizza"], false, 0))).toEqual([
+      "first-contact",
+    ]);
+    expect(earned(saucerDay([], true, 1))).toEqual(["intergalactic-otc"]);
+    expect(earned(saucerDay([]))).toEqual(["taken-up"]);
+    expect(earned(masksDay())).toEqual(["nine-masks", "masked"]);
+    expect(earned(roadTripDay())).toEqual(["road-trip"]);
+    expect(earned(bigRigDay())).toEqual(["big-rig"]);
   });
 
   it("are not earned by a day in which nothing is done, and a bot's day replays to the same end", () => {

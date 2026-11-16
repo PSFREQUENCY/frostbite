@@ -21,8 +21,10 @@ export type VenueKind =
   | "skate"
   | "studio";
 export interface Venue {
-  // The hall's walkable floor (centimetres), or for an open venue the whole lot.
+  // The square round the hall's walkable floor (centimetres), or for an open venue the whole lot, and the lot the landmark stands on.
   readonly hall: Box;
+  readonly lot: Box;
+  readonly open: boolean;
   // The doorway from the street into the hall; an open venue has none.
   readonly door: Box | null;
   readonly id: string;
@@ -49,8 +51,11 @@ const table: readonly (readonly [number, 1 | 2, VenueKind, string])[] = [
   [8, 1, "club", "Block Party"],
   [8, 2, "park", "Gig Street Green"],
 ];
-// Half the width of a hall's square floor, which sits inside the round wall the city draws (radius 18.5 metres).
+// Half the width of the square a hall's doorway reaches into; the hall's floor is round, inside the round wall the city draws (18.5
+// metres), and the plaza round it starts a metre outside the wall's floor edge, so nobody steps through the wall.
 const half = 1_300;
+export const floorRadius = 1_780;
+export const plazaRadius = 1_880;
 
 export const venues: readonly Venue[] = table.map(
   ([borough, corner, kind, label]) => {
@@ -70,7 +75,12 @@ export const venues: readonly Venue[] = table.map(
     const open = kind === "skate" || kind === "park";
     const hall = open
       ? lot
-      : { x0: x - half, x1: x + half, z0: z - half, z1: z + half };
+      : {
+          x0: x - floorRadius,
+          x1: x + floorRadius,
+          z0: z - floorRadius,
+          z1: z + floorRadius,
+        };
     const edge = out === 1 ? lot.z1 : lot.z0;
     const door = open
       ? null
@@ -86,7 +96,9 @@ export const venues: readonly Venue[] = table.map(
       id: `venue-${String(borough)}-${String(corner)}`,
       kind,
       label,
+      lot,
       middle: { x, z },
+      open,
       out,
     };
   },
@@ -94,15 +106,28 @@ export const venues: readonly Venue[] = table.map(
 
 const inside = (box: Box, x: number, z: number): boolean =>
   x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1;
-// Whether a point (centimetres) is on a landmark's floor or in its doorway.
+// How far a point is from a hall's middle, squared (centimetres).
+const away = (venue: Venue, x: number, z: number): number =>
+  (x - venue.middle.x) ** 2 + (z - venue.middle.z) ** 2;
+// Whether a point (centimetres) is on a landmark's floor: inside its round hall, or anywhere on an open lot.
+const onFloor = (venue: Venue, x: number, z: number): boolean =>
+  venue.open ? inside(venue.lot, x, z) : away(venue, x, z) <= floorRadius ** 2;
+// Whether a point is on a landmark's floor or in its doorway.
 export const inVenue = (x: number, z: number): boolean =>
   venues.some(
-    ({ door, hall }) =>
-      inside(hall, x, z) || (door !== null && inside(door, x, z)),
+    (venue) =>
+      onFloor(venue, x, z) || (venue.door !== null && inside(venue.door, x, z)),
+  );
+// Out of doors on a landmark's lot, where wheels go as well as feet: the plaza round a hall (clear of its wall), and the open lots.
+export const outdoors = (x: number, z: number): boolean =>
+  venues.some((venue) =>
+    venue.open
+      ? inside(venue.lot, x, z)
+      : inside(venue.lot, x, z) && away(venue, x, z) >= plazaRadius ** 2,
   );
 // The landmark whose floor a point is on, if any.
 export const venueAt = (x: number, z: number): Venue | null =>
-  venues.find(({ hall }) => inside(hall, x, z)) ?? null;
+  venues.find((venue) => onFloor(venue, x, z)) ?? null;
 
 // What there is to do at each kind of landmark: what it costs, how much FOMO it calms, standing it earns, frost vision it gives back
 // (ticks), heat it cools, and DUN it pays. Each is once a day. The arcade hall uses the arcade's cabinets and the bank its teller.

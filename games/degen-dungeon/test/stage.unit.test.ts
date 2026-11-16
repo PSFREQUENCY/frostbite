@@ -1,7 +1,7 @@
 import { Scene } from "three";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createStage } from "../src/view/stage.ts";
+import { createStage, fovFor } from "../src/view/stage.ts";
 
 const made = vi.hoisted(() => ({
   fail: false,
@@ -53,14 +53,19 @@ describe("the three-dimensional stage", () => {
     expect(createStage(canvasOf(new FakeGl()))).toBeNull();
   });
 
-  it("draws the scene at the screen's shape inside its box, sizing only when the box changes", () => {
+  it("fills its box whatever its shape, sizing only when the box changes, and opens the view out on a tall screen", () => {
     vi.stubGlobal("WebGL2RenderingContext", FakeGl);
     const stage = createStage(canvasOf(new FakeGl()));
     stage?.draw(new Scene());
     stage?.draw(new Scene());
     expect([made.renders, made.sizes]).toEqual([2, ["ratio", "960x540"]]);
     made.sizes.length = 0;
-    createStage(canvasOf(new FakeGl(), 1_000, 400))?.draw(new Scene());
-    expect(made.sizes).toEqual(["ratio", "711x400"]);
+    const wide = createStage(canvasOf(new FakeGl(), 1_000, 400));
+    wide?.draw(new Scene());
+    expect(made.sizes).toEqual(["ratio", "1000x400"]);
+    expect(wide?.camera.aspect).toBeCloseTo(2.5);
+    expect(fovFor(50, 2.5)).toBe(50);
+    expect(fovFor(50, 9 / 19.5)).toBeGreaterThan(70);
+    expect(fovFor(80, 0.3)).toBe(88);
   });
 });

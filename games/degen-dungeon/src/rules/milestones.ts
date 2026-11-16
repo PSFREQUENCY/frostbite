@@ -1,4 +1,5 @@
 import { moments } from "./machine.ts";
+import { masksWorn } from "./statues.ts";
 import { chapterDone } from "./story.ts";
 import type { DayState } from "./types.ts";
 
@@ -8,15 +9,23 @@ const has = (day: DayState, ...names: readonly string[]): boolean =>
   names.some((name) => day.done.includes(name));
 const told = (on: number) => (day: DayState) =>
   day.day === on && chapterDone(day);
+// How many kinds of ride the hero took from the kerb today, not counting a semi's cab (which has a milestone of its own).
+const kindsTaken = (day: DayState): number =>
+  new Set(
+    day.done.flatMap((id) => {
+      const kind = /^(bike|car|moto|scooter|truck|van)-\d+$/u.exec(id)?.[1];
+      return kind === undefined ? [] : [kind];
+    }),
+  ).size;
 
 export const milestones: readonly {
   readonly earned: (day: DayState) => boolean;
   readonly id: string;
 }[] = [
-  { earned: (day) => has(day, "faucet"), id: "faucet" },
-  { earned: (day) => day.gigs >= 1, id: "first-gig" },
+  { earned: (day) => has(day, "contact"), id: "first-contact" },
+  { earned: (day) => has(day, "traded"), id: "intergalactic-otc" },
   { earned: (day) => day.gigs >= 3, id: "grinder" },
-  { earned: (day) => day.crew.length >= 1, id: "first-crew" },
+  { earned: (day) => day.cause === "abducted", id: "taken-up" },
   { earned: (day) => day.crew.length >= 2, id: "full-crew" },
   { earned: (day) => day.spotted >= 1, id: "scam-spotted" },
   { earned: (day) => day.rides >= 8, id: "full-loop" },
@@ -24,10 +33,10 @@ export const milestones: readonly {
   { earned: (day) => day.shook, id: "shook-the-tuxes" },
   { earned: (day) => has(day, "stash"), id: "cold-storage" },
   { earned: (day) => day.cause === "home", id: "home-safe" },
-  { earned: (day) => day.storm >= 5_000, id: "storm-catch" },
+  { earned: (day) => masksWorn(day) >= 9, id: "nine-masks" },
   { earned: (day) => day.storm >= 100_000, id: "storm-funnel" },
   { earned: (day) => day.words >= 3, id: "three-words" },
-  { earned: (day) => day.made >= 1_000, id: "payday" },
+  { earned: (day) => kindsTaken(day) >= 5, id: "road-trip" },
   { earned: (day) => day.cause === "machine", id: "time-machine" },
   { earned: (day) => has(day, ...moments), id: "met-yourself" },
   {
@@ -35,7 +44,7 @@ export const milestones: readonly {
       day.fate >= 3 && moments.every((id) => day.done.includes(id)),
     id: "brighter-timeline",
   },
-  { earned: (day) => has(day, "speech"), id: "the-speech" },
+  { earned: (day) => masksWorn(day) >= 1, id: "masked" },
   { earned: (day) => has(day, "paper"), id: "seed-paper" },
   {
     earned: (day) => day.done.some((id) => id.startsWith("heroword-")),
@@ -65,8 +74,8 @@ export const milestones: readonly {
   },
   { earned: (day) => has(day, "lantern"), id: "lantern" },
   {
-    earned: (day) => day.done.some((id) => id.startsWith("car-")),
-    id: "joyride",
+    earned: (day) => day.done.some((id) => id.startsWith("semi-")),
+    id: "big-rig",
   },
   { earned: (day) => has(day, "moon"), id: "to-the-moon" },
 ];

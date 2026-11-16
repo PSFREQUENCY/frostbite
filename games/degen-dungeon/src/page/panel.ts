@@ -54,6 +54,7 @@ export function createPanel(hands: {
       const left = Math.ceil((day?.vision ?? 0) / ticksPerSecond);
       look.disabled = day === null || (left === 0 && !day.looking);
       look.textContent = `${day?.looking === true ? "Vision on" : "Frost vision"}, ${String(left)}s`;
+      look.dataset.left = String(left);
       up.hidden = day?.ride !== "heli";
       down.hidden = up.hidden;
       const talk = day === null ? null : talkOf(day);

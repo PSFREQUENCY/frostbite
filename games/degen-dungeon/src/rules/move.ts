@@ -1,5 +1,6 @@
 import { fogLine, gaitTenths } from "./constants.ts";
 import { heroes } from "./heroes.ts";
+import { strideTenths } from "./statues.ts";
 import type { DayState, Draft, Ride } from "./types.ts";
 import {
   dockWater,
@@ -48,14 +49,15 @@ const ridePace: Readonly<Record<Ride, number>> = {
 };
 // On foot the gait changes the pace (running, crouching, crawling); a tuned car is quicker.
 export const paceOf = (
-  state: Pick<DayState, "done" | "gait" | "hero" | "ride">,
+  state: Pick<DayState, "done" | "form" | "gait" | "hero" | "ride">,
 ): number =>
   state.ride === "foot"
     ? Math.max(
         1,
         Math.floor(
           ((ridePace.foot + (heroes[state.hero]?.speed ?? 1)) *
-            (gaitTenths[state.gait] ?? 10)) /
+            ((gaitTenths[state.gait] ?? 10) +
+              (state.form >= 0 ? strideTenths : 0))) /
             10,
         ),
       )

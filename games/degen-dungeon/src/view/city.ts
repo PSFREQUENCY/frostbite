@@ -45,6 +45,7 @@ const spotTints: Readonly<Record<Spot["kind"], string>> = {
   ride: "#5aa9ff",
   stop: "#22c55e",
   talk: "#ffb000",
+  statue: "#e8f4ff",
   tool: "#f4a261",
   word: "#f7f3d7",
 };

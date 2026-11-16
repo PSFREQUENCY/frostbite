@@ -2,6 +2,8 @@
 
 @import "@frostbite/game-sdk/audio/panel.css";
 @import "@frostbite/game-sdk/phone.css";
+/* After the SDK's phone layout, so this game's own touch layout wins where both name the same part. */
+@import "touch.css";
 
 :root {
   color-scheme: dark;

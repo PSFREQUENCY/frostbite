@@ -33,6 +33,8 @@ const finished = (id: string): Clip | null => {
   if (["bike", "car", "moto", "scooter", "semi", "truck", "van"].includes(kind))
     return clip(kind);
   if (["fit", "game", "letter"].includes(kind)) return clip(kind);
+  if (kind === "statue")
+    return clip("statue", spotNamed(id)?.label.toUpperCase());
   if (clipWords[id] !== undefined) return clip(id);
   const label = spotNamed(id)?.label;
   return label === undefined ? null : clip("task", label.toUpperCase());
