@@ -17,33 +17,33 @@ afterEach(() => {
 
 const nonceOf = (response: Response) =>
   /nonce-([^']+)/u.exec(
-    response.headers.get("Content-Security-Policy-Report-Only") ?? "",
+    response.headers.get("Content-Security-Policy") ?? "",
   )?.[1];
 
 describe("the proxy", () => {
-  it("gives every response its security headers, in report-only mode by default", () => {
-    const response = proxy(
-      new NextRequest("https://platform.example.com/games"),
-    );
-    expect(
-      response.headers.get("Content-Security-Policy-Report-Only"),
-    ).toContain("default-src 'self'");
-    expect(response.headers.get("Content-Security-Policy")).toBeNull();
-    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
-    expect(response.headers.get("Strict-Transport-Security")).not.toBeNull();
-  });
-
-  it("enforces the policy when the deployment says so", () => {
-    vi.stubEnv("SECURITY_CSP_MODE", "enforce");
+  it("gives every response its security headers, with the policy enforced by default", () => {
     const response = proxy(
       new NextRequest("https://platform.example.com/games"),
     );
     expect(response.headers.get("Content-Security-Policy")).toContain(
-      "script-src",
+      "default-src 'self'",
     );
     expect(
       response.headers.get("Content-Security-Policy-Report-Only"),
     ).toBeNull();
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(response.headers.get("Strict-Transport-Security")).not.toBeNull();
+  });
+
+  it("only reports what the policy would block when the deployment says so", () => {
+    vi.stubEnv("SECURITY_CSP_MODE", "report-only");
+    const response = proxy(
+      new NextRequest("https://platform.example.com/games"),
+    );
+    expect(
+      response.headers.get("Content-Security-Policy-Report-Only"),
+    ).toContain("script-src");
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
 
   it("uses a new nonce for every request, and none is guessable from another", () => {
@@ -72,9 +72,9 @@ describe("the proxy", () => {
     vi.stubEnv("PUBLIC_BASE_URL", "http://localhost:3000");
     const response = proxy(new NextRequest("http://localhost:3000/"));
     expect(response.headers.get("Strict-Transport-Security")).toBeNull();
-    expect(
-      response.headers.get("Content-Security-Policy-Report-Only"),
-    ).not.toContain("upgrade-insecure-requests");
+    expect(response.headers.get("Content-Security-Policy")).not.toContain(
+      "upgrade-insecure-requests",
+    );
   });
 
   it("leaves out static files and prefetches", () => {
@@ -84,5 +84,65 @@ describe("the proxy", () => {
       "next-router-prefetch",
       "purpose",
     ]);
+  });
+
+  describe("a page's error reports", () => {
+    const report = (headers: Record<string, string> = {}) =>
+      new NextRequest("https://platform.example.com/telemetry/errors/e/?ip=0", {
+        headers,
+        method: "POST",
+      });
+
+    it("are sent on to the provider with no page headers and none of the person's, when a provider is set", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_TOKEN", "phc_test");
+      vi.stubEnv("ERROR_REPORTING_INGEST_ORIGIN", "https://eu.i.example.com");
+      const response = proxy(report({ cookie: "frostbite_session=SECRET" }));
+      expect(response.headers.get("x-middleware-rewrite")).toBe(
+        "https://eu.i.example.com/e/?ip=0",
+      );
+      expect(response.headers.get("Content-Security-Policy")).toBeNull();
+      expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
+    });
+
+    it("are answered with nothing when no provider is set", () => {
+      const response = proxy(report());
+      expect(response.status).toBe(204);
+      expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+    });
+
+    it("cannot be brought down by a mistake in the error-reporting settings for any page", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "mystery");
+      expect(() =>
+        proxy(new NextRequest("https://platform.example.com/games")),
+      ).not.toThrow();
+      expect(() => proxy(report())).toThrow(/Unknown provider/u);
+    });
+  });
+
+  describe("a page's analytics events", () => {
+    const event = () =>
+      new NextRequest("https://platform.example.com/telemetry/events/e/?ip=0", {
+        headers: { cookie: "frostbite_session=SECRET" },
+        method: "POST",
+      });
+
+    it("are sent on to the analytics provider's address, whatever the error reporting is set to", () => {
+      vi.stubEnv("NEXT_PUBLIC_ANALYTICS_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ANALYTICS_TOKEN", "phc_events");
+      vi.stubEnv("ANALYTICS_INGEST_ORIGIN", "https://events.example.com");
+      const response = proxy(event());
+      expect(response.headers.get("x-middleware-rewrite")).toBe(
+        "https://events.example.com/e/?ip=0",
+      );
+      expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
+    });
+
+    it("are answered with nothing when analytics has no provider, even if errors do", () => {
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_PROVIDER", "posthog");
+      vi.stubEnv("NEXT_PUBLIC_ERROR_REPORTING_TOKEN", "phc_test");
+      vi.stubEnv("ERROR_REPORTING_INGEST_ORIGIN", "https://eu.i.example.com");
+      expect(proxy(event()).status).toBe(204);
+    });
   });
 });

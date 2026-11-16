@@ -30,10 +30,15 @@ export async function verifyEmailCode(
   request: Requester,
   email: string,
   code: string,
+  referralCode: string | null = null,
 ): Promise<VerifyCodeOutcome> {
   try {
     await request(emailCodeRoutes.verify, emailCodeSignedInResponseSchema, {
-      body: { code, email },
+      body: {
+        code,
+        email,
+        ...(referralCode === null ? {} : { referralCode }),
+      },
     });
     return { kind: "signed-in" };
   } catch (error) {

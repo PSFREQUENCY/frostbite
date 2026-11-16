@@ -20,11 +20,14 @@ const space = /[\t\n\r ]/u;
 class Reader {
   position = 0;
   elements = 0;
+  // Written out, not as constructor parameter properties: the worker runs this file with Node's type stripping, which refuses them.
+  readonly text: string;
+  readonly policy: DrawingPolicy;
 
-  constructor(
-    readonly text: string,
-    readonly policy: DrawingPolicy,
-  ) {}
+  constructor(text: string, policy: DrawingPolicy) {
+    this.text = text;
+    this.policy = policy;
+  }
 
   more(): boolean {
     return this.position < this.text.length;

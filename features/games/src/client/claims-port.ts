@@ -33,6 +33,8 @@ export function createClaimsService(options: {
   // The speed the player chose for their claims, read when a claim is asked for; none, the platform's usual speed.
   readonly feeSpeed?: () => FeeSpeed | undefined;
   readonly gameId: string;
+  // Told which milestone's claim is being made ready, and `null` once it is (or could not be): the player sees something at once.
+  readonly onPreparing?: (milestoneId: string | null) => void;
   // Tells the player why a claim could not start, in full: the game is given only the reasons the SDK's protocol has.
   readonly onRefused?: (reason: GameClaimUnavailableReason) => void;
   // Shows the player the claim that was started, to review and sign.
@@ -48,6 +50,7 @@ export function createClaimsService(options: {
       const connected = wallet();
       if (connected === null)
         return { reason: "no-wallet", status: "unavailable" };
+      options.onPreparing?.(milestoneId);
       try {
         const feeSpeed = options.feeSpeed?.();
         const answer = await api.start({
@@ -69,6 +72,8 @@ export function createClaimsService(options: {
         if (error instanceof ApiError && error.code === "unauthorized")
           return { reason: "signed-out", status: "unavailable" };
         throw error;
+      } finally {
+        options.onPreparing?.(null);
       }
     },
   };

@@ -63,6 +63,7 @@ const config: ChainConfig = {
     "publish-template": finality,
     "define-milestone": finality,
     "set-claims-paused": finality,
+    "pay-batch": finality,
     transfer: finality,
   },
   displayName: "Bitcoin regtest",

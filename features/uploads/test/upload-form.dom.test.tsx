@@ -24,8 +24,20 @@ describe("upload form", () => {
       "Creator avatar",
     ]);
     expect(container.querySelector("input")?.accept).toBe(
+      "image/jpeg,image/png,image/webp,image/svg+xml",
+    );
+  });
+
+  it("offers a vector picture only where the use takes it", async () => {
+    const container = await mount(
+      <UploadForm disabled={false} onFile={() => undefined} />,
+    );
+    await chooseOption(container, "creator-avatar");
+    expect(container.querySelector("input")?.accept).toBe(
       "image/jpeg,image/png,image/webp",
     );
+    await chooseOption(container, "collection-banner");
+    expect(container.querySelector("input")?.accept).toContain("image/svg+xml");
   });
 
   it("states the size limit of the chosen purpose", async () => {

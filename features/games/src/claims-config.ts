@@ -1,4 +1,5 @@
 import type { ClaimChainPorts } from "@frostbite/game-claims";
+import type { ReferralsConfig } from "@frostbite/referrals";
 import type {
   ChainRef,
   DelayPolicy,
@@ -20,4 +21,6 @@ export interface GameClaimsConfig {
   readonly clock?: () => Date;
   // When a claim's wait is called delayed (see `rewardsPolicy.delay`).
   readonly delay: DelayPolicy;
+  // What the referral program needs to earn its cut of a claim's platform fee when the claim is complete (see `configs/referrals.ts`).
+  readonly referrals: ReferralsConfig;
 }

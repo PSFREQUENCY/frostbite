@@ -9,11 +9,12 @@ const limits = {
   maxDimension: defaultUploadPolicy.maxImageDimension,
   maxPixels: defaultUploadPolicy.maxImagePixels,
 };
+const svg = defaultUploadPolicy.svg;
 const reasonFor = (
   bytes: Uint8Array,
   declaredMediaType: "image/png" | "image/jpeg" | "image/webp",
 ) => {
-  const result = validateImage({ bytes, declaredMediaType, limits });
+  const result = validateImage({ bytes, declaredMediaType, limits, svg });
   return result.ok ? "accepted" : result.reason;
 };
 
@@ -108,6 +109,7 @@ describe("beta media policy against real and hostile files", () => {
       validateImage({
         bytes: withComment,
         declaredMediaType: "image/jpeg",
+        svg,
         limits,
       }),
     ).toMatchObject({ height: 5, ok: true, width: 7 });

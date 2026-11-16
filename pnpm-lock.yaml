@@ -59,6 +59,9 @@ importers:
       '@frostbite/feature-public-products':
         specifier: workspace:*
         version: link:features/public-products
+      '@frostbite/feature-referrals':
+        specifier: workspace:*
+        version: link:features/referrals
       '@frostbite/feature-uploads':
         specifier: workspace:*
         version: link:features/uploads
@@ -80,6 +83,12 @@ importers:
       '@frostbite/provider-workflows-inngest':
         specifier: workspace:*
         version: link:providers/workflows/inngest
+      '@frostbite/referrals':
+        specifier: workspace:*
+        version: link:packages/referrals
+      '@frostbite/rewards':
+        specifier: workspace:*
+        version: link:packages/rewards
       '@frostbite/share':
         specifier: workspace:*
         version: link:packages/share
@@ -126,6 +135,9 @@ importers:
       '@frostbite/chain':
         specifier: workspace:*
         version: link:../../packages/chain
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -162,6 +174,9 @@ importers:
       '@frostbite/feature-public-products':
         specifier: workspace:*
         version: link:../../features/public-products
+      '@frostbite/feature-referrals':
+        specifier: workspace:*
+        version: link:../../features/referrals
       '@frostbite/game-admin':
         specifier: workspace:*
         version: link:../../packages/game-admin
@@ -180,6 +195,9 @@ importers:
       '@frostbite/plugin-kit':
         specifier: workspace:*
         version: link:../../packages/plugin-kit
+      '@frostbite/referrals':
+        specifier: workspace:*
+        version: link:../../packages/referrals
       '@frostbite/scenes':
         specifier: workspace:*
         version: link:../../packages/scenes
@@ -189,6 +207,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@repo/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -208,6 +229,9 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@frostbite/milestone-art':
+        specifier: workspace:*
+        version: link:../../packages/milestone-art
       '@frostbite/test-kit':
         specifier: workspace:*
         version: link:../../packages/test-kit
@@ -265,6 +289,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@repo/configs':
         specifier: workspace:*
         version: link:../../configs
@@ -350,6 +377,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -362,9 +392,15 @@ importers:
       '@frostbite/plugin-kit':
         specifier: workspace:*
         version: link:../../packages/plugin-kit
+      '@frostbite/referrals':
+        specifier: workspace:*
+        version: link:../../packages/referrals
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@frostbite/wallet':
         specifier: workspace:*
         version: link:../../packages/wallet
@@ -824,6 +860,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -854,6 +893,12 @@ importers:
       '@frostbite/plugin-kit':
         specifier: workspace:*
         version: link:../../packages/plugin-kit
+      '@frostbite/referrals':
+        specifier: workspace:*
+        version: link:../../packages/referrals
+      '@frostbite/rewards':
+        specifier: workspace:*
+        version: link:../../packages/rewards
       '@frostbite/scenes':
         specifier: workspace:*
         version: link:../../packages/scenes
@@ -863,6 +908,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@frostbite/wallet':
         specifier: workspace:*
         version: link:../../packages/wallet
@@ -979,6 +1027,9 @@ importers:
       '@frostbite/client-http':
         specifier: workspace:*
         version: link:../../packages/client-http
+      '@frostbite/client-react':
+        specifier: workspace:*
+        version: link:../../packages/client-react
       '@frostbite/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -1006,6 +1057,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../../packages/telemetry
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1174,6 +1228,91 @@ importers:
       eslint:
         specifier: 10.9.1
         version: 10.9.1(jiti@2.7.0)
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+
+  features/referrals:
+    dependencies:
+      '@frostbite/chain':
+        specifier: workspace:*
+        version: link:../../packages/chain
+      '@frostbite/client-http':
+        specifier: workspace:*
+        version: link:../../packages/client-http
+      '@frostbite/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@frostbite/feature-chain-status':
+        specifier: workspace:*
+        version: link:../chain-status
+      '@frostbite/http':
+        specifier: workspace:*
+        version: link:../../packages/http
+      '@frostbite/plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      '@frostbite/referrals':
+        specifier: workspace:*
+        version: link:../../packages/referrals
+      '@frostbite/rewards':
+        specifier: workspace:*
+        version: link:../../packages/rewards
+      '@frostbite/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@frostbite/wallet':
+        specifier: workspace:*
+        version: link:../../packages/wallet
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.0)(valibot@1.4.2(typescript@5.9.3))(zod@4.5.4)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@frostbite/test-kit':
+        specifier: workspace:*
+        version: link:../../packages/test-kit
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@repo/vitest-config':
+        specifier: workspace:*
+        version: link:../../packages/vitest-config
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      '@types/react':
+        specifier: ^19
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.5(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^6.1.1
+        version: 6.1.1(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      jsdom:
+        specifier: 30.0.1
+        version: 30.0.1(@noble/hashes@2.4.0)
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
@@ -1474,6 +1613,40 @@ importers:
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
 
   games/lantern-maze:
+    dependencies:
+      '@frostbite/game-sdk':
+        specifier: workspace:*
+        version: link:../../packages/game-sdk
+    devDependencies:
+      '@frostbite/test-kit':
+        specifier: workspace:*
+        version: link:../../packages/test-kit
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@repo/vitest-config':
+        specifier: workspace:*
+        version: link:../../packages/vitest-config
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+
+  games/permafrost:
     dependencies:
       '@frostbite/game-sdk':
         specifier: workspace:*
@@ -1888,6 +2061,9 @@ importers:
 
   packages/client-react:
     dependencies:
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -1989,6 +2165,9 @@ importers:
       '@frostbite/shared':
         specifier: workspace:*
         version: link:../shared
+      '@frostbite/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       zod:
         specifier: ^4.5.4
         version: 4.5.4
@@ -2591,6 +2770,9 @@ importers:
 
   packages/media:
     dependencies:
+      '@frostbite/milestone-art':
+        specifier: workspace:*
+        version: link:../milestone-art
       '@frostbite/plugin-kit':
         specifier: workspace:*
         version: link:../plugin-kit
@@ -2761,6 +2943,98 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
 
+  packages/referrals:
+    dependencies:
+      '@frostbite/chain':
+        specifier: workspace:*
+        version: link:../chain
+      '@frostbite/database':
+        specifier: workspace:*
+        version: link:../database
+      '@frostbite/rewards':
+        specifier: workspace:*
+        version: link:../rewards
+      '@frostbite/shared':
+        specifier: workspace:*
+        version: link:../shared
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.0)(valibot@1.4.2(typescript@5.9.3))(zod@4.5.4)
+      zod:
+        specifier: 4.5.4
+        version: 4.5.4
+    devDependencies:
+      '@frostbite/test-kit':
+        specifier: workspace:*
+        version: link:../test-kit
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@repo/vitest-config':
+        specifier: workspace:*
+        version: link:../vitest-config
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+
+  packages/rewards:
+    dependencies:
+      '@frostbite/database':
+        specifier: workspace:*
+        version: link:../database
+      '@frostbite/shared':
+        specifier: workspace:*
+        version: link:../shared
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.0)(valibot@1.4.2(typescript@5.9.3))(zod@4.5.4)
+      zod:
+        specifier: 4.5.4
+        version: 4.5.4
+    devDependencies:
+      '@frostbite/test-kit':
+        specifier: workspace:*
+        version: link:../test-kit
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@repo/vitest-config':
+        specifier: workspace:*
+        version: link:../vitest-config
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+
   packages/scenes:
     dependencies:
       react:
@@ -2897,6 +3171,43 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
+
+  packages/telemetry:
+    dependencies:
+      posthog-js:
+        specifier: 1.448.0
+        version: 1.448.0(@types/react@19.2.18)(react@19.2.8)
+      posthog-node:
+        specifier: 5.73.0
+        version: 5.73.0(@opentelemetry/api@1.9.1)(rxjs@7.8.2)
+      zod:
+        specifier: ^4.5.4
+        version: 4.5.4
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@repo/vitest-config':
+        specifier: workspace:*
+        version: link:../vitest-config
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      '@vitest/coverage-v8':
+        specifier: 4.1.11
+        version: 4.1.11(vitest@4.1.11)
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.11
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0))
 
   packages/test-kit:
@@ -3368,6 +3679,9 @@ importers:
       '@frostbite/test-kit':
         specifier: workspace:*
         version: link:../../packages/test-kit
+      '@game/permafrost':
+        specifier: workspace:*
+        version: link:../../games/permafrost
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
@@ -5261,6 +5575,15 @@ packages:
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
+  '@posthog/browser-common@0.10.8':
+    resolution: {integrity: sha512-TQmqLVNFoKaL4dDV5Q8AScX2dIwdq8By2cj2KU1hMGe88tn7Usbf3U/hv5okhobEojntqJeslPIRBrG79Su+vg==}
+
+  '@posthog/core@1.67.3':
+    resolution: {integrity: sha512-BAVJB+ADAjFNBVZKCRbMi5+WMJaSFHHIEId0/ebvAwhOVIMmK4mVrktGGjx9zJBHLe82JdQVVRhpaOwLgoBMgA==}
+
+  '@posthog/types@1.425.0':
+    resolution: {integrity: sha512-VaAlT5cl2wQ8mRkC3agp32YqI1HCZyeDE9qc5cziXgtbqK8kGeodhqZpJgSIPz0wAl3yRtKN4yOL+d7wxDRPww==}
+
   '@protobuf-ts/protoc@2.11.1':
     resolution: {integrity: sha512-mUZJaV0daGO6HUX90o/atzQ6A7bbN2RSuHtdwo8SSF2Qoe3zHwa4IHyCN1evftTeHfLmdz+45qo47sL+5P8nyg==}
     hasBin: true
@@ -5603,6 +5926,9 @@ packages:
 
   '@types/tough-cookie@4.0.5':
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
+
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
   '@types/webxr@0.5.24':
     resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
@@ -6328,6 +6654,9 @@ packages:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
+  core-js@3.51.0:
+    resolution: {integrity: sha512-7bDKx/5jm5MxzsXxc93g6Z2+4ZsuT/MddrfRmTDJNAkWsYWHU8EVNEsBiIEWnMAMCHMmRfUEjkuo3jeNBOIHRw==}
+
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
@@ -6442,6 +6771,9 @@ packages:
 
   diffie-hellman@5.0.3:
     resolution: {integrity: sha512-kqag/Nl+f3GwyK25fhUMYj81BUOrZ9IuJsjIcDE5icNM9FJHAVm3VcUDxdLPoQtTuUylWm6ZIknYJwwaPxsUzg==}
+
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
@@ -6844,6 +7176,9 @@ packages:
   fetch-blob@3.2.0:
     resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
     engines: {node: ^12.20 || >= 14.13}
+
+  fflate@0.4.9:
+    resolution: {integrity: sha512-zdxgIEddhfsyCaWpJ2SdXEP8ZMrKJ6+5jl4OupODcywU0IhRk6gdXuVGcPICyfx2H97hVK7xmJtRLPjkxAX8Vw==}
 
   fflate@0.8.3:
     resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
@@ -7824,9 +8159,43 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
+  posthog-js@1.448.0:
+    resolution: {integrity: sha512-MX5/l3J5a/NPGCHcPDGh+UnbarZeoSed7ukfx9FKPmNXL4CAwtgsjnJFqlx+f6FpzO6Hfo7WWfUY+9WIavSwjA==}
+    peerDependencies:
+      '@types/react': '>=16.8.0'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+
+  posthog-node@5.73.0:
+    resolution: {integrity: sha512-OH5PZA2GVftiHPwTCA31fy2E33sWW/o2f+ubxi3/ugPEEYzq+/Fw4h2igVpa+RThw1oYrmzgOHCOFdSkh2SzOQ==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.2.0
+      '@react-email/render': ^2.1.0
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      '@react-email/render':
+        optional: true
+      rxjs:
+        optional: true
+
   postinstall@0.10.3:
     resolution: {integrity: sha512-ENJzsDixmwtLx+/+6brMy0yjHNAkazW6+xRfO8rKVlh+z3s5/4qyfZBudEvXscdXDtHHQ/mKZBsrgVOZL6lB8Q==}
     hasBin: true
+
+  preact@10.29.8:
+    resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
+    peerDependencies:
+      preact-render-to-string: '>=5'
+    peerDependenciesMeta:
+      preact-render-to-string:
+        optional: true
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -7888,6 +8257,9 @@ packages:
   qs@6.16.0:
     resolution: {integrity: sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==}
     engines: {node: '>=0.6'}
+
+  query-selector-shadow-dom@1.0.1:
+    resolution: {integrity: sha512-lT5yCqEBgfoMYpf3F2xQRK7zEr1rhIIZuceDK6+xRkJQ4NMbHTwXqk4NkwDwQMNqXgG9r9fyHnzwNVs6zV5KRw==}
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -8641,6 +9013,12 @@ packages:
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
+
+  web-vitals@6.2.1:
+    resolution: {integrity: sha512-rLcLXA2sx6+9dE88NHFubwTtGxpK4yYBLj6qHPdFoCaLr0cXGb4efOqtKLlm4loGA4OEKHIQKMKzZkKyOh5ctw==}
+
+  web-vitals@6.2.3:
+    resolution: {integrity: sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -10592,6 +10970,21 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
+  '@posthog/browser-common@0.10.8':
+    dependencies:
+      '@posthog/core': 1.67.3
+      '@posthog/types': 1.425.0
+      dompurify: 3.4.17
+      preact: 10.29.8
+    transitivePeerDependencies:
+      - preact-render-to-string
+
+  '@posthog/core@1.67.3':
+    dependencies:
+      '@posthog/types': 1.425.0
+
+  '@posthog/types@1.425.0': {}
+
   '@protobuf-ts/protoc@2.11.1': {}
 
   '@protobuf-ts/runtime@2.11.1': {}
@@ -10931,6 +11324,9 @@ snapshots:
       meshoptimizer: 1.1.1
 
   '@types/tough-cookie@4.0.5': {}
+
+  '@types/trusted-types@2.0.7':
+    optional: true
 
   '@types/webxr@0.5.24': {}
 
@@ -11785,6 +12181,8 @@ snapshots:
 
   cookie@1.1.1: {}
 
+  core-js@3.51.0: {}
+
   core-util-is@1.0.3: {}
 
   cors@2.8.6:
@@ -11913,6 +12311,10 @@ snapshots:
       bn.js: 4.12.5
       miller-rabin: 4.0.1
       randombytes: 2.1.0
+
+  dompurify@3.4.17:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   dot-case@3.0.4:
     dependencies:
@@ -12313,6 +12715,8 @@ snapshots:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 3.3.3
+
+  fflate@0.4.9: {}
 
   fflate@0.8.3: {}
 
@@ -13320,12 +13724,39 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
+  posthog-js@1.448.0(@types/react@19.2.18)(react@19.2.8):
+    dependencies:
+      '@posthog/browser-common': 0.10.8
+      '@posthog/core': 1.67.3
+      '@posthog/types': 1.425.0
+      core-js: 3.51.0
+      dompurify: 3.4.17
+      fflate: 0.4.9
+      preact: 10.29.8
+      query-selector-shadow-dom: 1.0.1
+      web-vitals: 6.2.3
+      web-vitals-soft-navs: web-vitals@6.2.1
+    optionalDependencies:
+      '@types/react': 19.2.18
+      react: 19.2.8
+    transitivePeerDependencies:
+      - preact-render-to-string
+
+  posthog-node@5.73.0(@opentelemetry/api@1.9.1)(rxjs@7.8.2):
+    dependencies:
+      '@posthog/core': 1.67.3
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+      rxjs: 7.8.2
+
   postinstall@0.10.3:
     dependencies:
       '@danieldietrich/copy': 0.4.2
       glob: 10.5.0
       minimist: 1.2.8
       resolve: 1.22.12
+
+  preact@10.29.8: {}
 
   prelude-ls@1.2.1: {}
 
@@ -13385,6 +13816,8 @@ snapshots:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
+
+  query-selector-shadow-dom@1.0.1: {}
 
   queue-microtask@1.2.3: {}
 
@@ -14290,6 +14723,10 @@ snapshots:
       defaults: 1.0.4
 
   web-streams-polyfill@3.3.3: {}
+
+  web-vitals@6.2.1: {}
+
+  web-vitals@6.2.3: {}
 
   webidl-conversions@3.0.1: {}
 

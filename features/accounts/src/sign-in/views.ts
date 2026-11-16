@@ -4,10 +4,27 @@ import type { ComponentType } from "react";
 // How a person signs in with one kind of method, on the sign-in page. The server decides which kinds the deployment offers (the
 // method registry); a view only says how that kind looks and works. Adding a method to the page is one view added to
 // `signInViews` (./registry.ts): the page, the surface and this selection are not edited.
+// What a method says of a sign-in as it goes, for the platform to count (and nothing else): that a person began one, and why one failed, as a
+// code of the account outcomes' catalogue. Which method it was is the surface's to know, and success is told by `onSignedIn`.
+export interface SignInTracker {
+  readonly failed: (reason: string) => void;
+  readonly started: () => void;
+}
+
+// What a view is given when nothing counts it: a page of its own, or a test.
+export const noTracking: SignInTracker = {
+  failed: () => undefined,
+  started: () => undefined,
+};
+
 export interface SignInViewProps {
   readonly expectedNetwork: WalletNetwork;
   // Called once the server has said the person is signed in.
   readonly onSignedIn: () => void;
+  // The code of whoever referred the person, from the address they arrived by; the sign-in request carries it, and it is used only if the
+  // sign-in makes a new account. None when they came another way.
+  readonly referralCode: string | null;
+  readonly track: SignInTracker;
 }
 
 export interface SignInView {

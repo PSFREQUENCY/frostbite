@@ -1,5 +1,6 @@
 import { feeSourceEnvironmentDefinitions } from "./fee-definitions.ts";
 import { mailEnvironmentDefinitions } from "./mail-definitions.ts";
+import { telemetryEnvironmentDefinitions } from "./telemetry-definitions.ts";
 
 export const environmentNames = [
   "local",
@@ -212,7 +213,7 @@ const coreDefinitions = [
   {
     key: "SECURITY_CSP_MODE",
     description:
-      "Content Security Policy mode: report-only (violations are reported, nothing is blocked) or enforce; blank means report-only.",
+      "Content Security Policy mode: report-only (violations are reported, nothing is blocked) or enforce; blank means enforce.",
     exposure: "server",
     required: false,
     secret: false,
@@ -288,6 +289,7 @@ export const environmentDefinitions = [
   ...coreDefinitions,
   ...mailEnvironmentDefinitions,
   ...feeSourceEnvironmentDefinitions,
+  ...telemetryEnvironmentDefinitions,
 ] as const;
 
 export const environmentKeys = environmentDefinitions.map(({ key }) => key);

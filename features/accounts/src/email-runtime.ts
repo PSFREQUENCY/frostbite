@@ -14,6 +14,7 @@ import {
   parseEnvironment,
 } from "@repo/config/env";
 
+import { linkReferralOnNewAccount } from "./referral-link.ts";
 import type { AccountMethods } from "./runtime.ts";
 import { database } from "./shared-database.ts";
 
@@ -60,7 +61,9 @@ export function createEmailResolvers(
     const codes = createContactCodeService({
       channels,
       clock,
-      repository: createDrizzleContactCodeRepository(database()),
+      repository: createDrizzleContactCodeRepository(database(), {
+        onAccountCreated: linkReferralOnNewAccount,
+      }),
       sessions,
     });
     built = {

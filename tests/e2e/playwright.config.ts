@@ -1,6 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import { resolve } from "node:path";
 
+import {
+  analyticsStubOrigin,
+  errorReportingStubOrigin,
+} from "./src/ingest-stub.ts";
 import { resolveE2EServerConfig } from "./src/server-config.ts";
 
 const { baseURL, port: serverPort } = resolveE2EServerConfig(
@@ -18,6 +22,8 @@ const ciWorkers = Number(process.env.E2E_WORKERS ?? 3);
 
 export default defineConfig({
   testDir: "./tests",
+  // The stand-in for the analytics provider runs for the whole run, because every page now sends its page view to it.
+  globalSetup: "./src/analytics-stub-setup.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   // One retry tells a flaky test from a broken one; more only multiplies the cost of every real failure.
@@ -69,7 +75,14 @@ export default defineConfig({
   webServer: {
     command: "pnpm --filter web start:standalone",
     cwd: repositoryRoot,
-    env: { HOSTNAME: "127.0.0.1", PORT: serverPort },
+    // The platform forwards a page's error reports to the stand-in for the error provider that one spec starts (tests/error-reporting.spec.ts),
+    // and its analytics events to the stand-in that runs throughout (src/analytics-stub-setup.ts).
+    env: {
+      ANALYTICS_INGEST_ORIGIN: analyticsStubOrigin,
+      ERROR_REPORTING_INGEST_ORIGIN: errorReportingStubOrigin,
+      HOSTNAME: "127.0.0.1",
+      PORT: serverPort,
+    },
     reuseExistingServer: false,
     url: baseURL,
   },

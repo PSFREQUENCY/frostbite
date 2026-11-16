@@ -27,8 +27,7 @@ milestone is, the day and its transaction on the explorer; the cards show no tra
 (M2, #133). It is read from `GET /api/v1/games/milestones/minted`
 (authenticated; the player is the session, the request carries nothing), and lists only claims the network's records show
 `complete`: a claim that is waiting, delayed or failed has minted nothing. The date is when the platform recorded the claim
-complete. Each entry shows the picture the chain serves for the item the claim minted (and the dock's claim list shows it for a complete
-claim), read from `GET /api/v1/games/milestones/picture?claimId=` (authenticated; a file, `image/svg+xml`, kept privately by the browser for a day and tied to the session cookie; a claim that is not the player's, or with no picture, is a `404` that says why and is never kept). The page points an image tag at that address; a stand-in of the same size holds the place while it loads and when it fails, and says so. The
+complete. Each entry shows the picture the chain serves for the item the claim minted (the dock's Mints tab is words only, with no picture), read from `GET /api/v1/games/milestones/picture?claimId=` (authenticated; a file, `image/svg+xml`, kept privately by the browser for a day and tied to the session cookie; a claim that is not the player's, or with no picture, is a `404` that says why and is never kept). The page points an image tag at that address; a stand-in of the same size holds the place while it loads and when it fails, and says so. The
 platform learns the item's id from the network when the claim's transaction is shown included, and shows the picture only if the item
 says it was issued by the contract the claim was made against and is an `image/svg+xml`; otherwise the piece shows no picture, and
 never a broken one. It is drawn through an image tag, which cannot run what a drawing holds.
@@ -51,16 +50,24 @@ metadata. A preview picture is cached for up to an hour at the edge, so an ended
 
 In a game, the platform reads the best score from the progress the game saves (`{ best }`, the SDK's `Progress`), so no game has to say it:
 the best the game loaded is the bar, and a save that beats it is a new best (`domain/best-score.ts`, watched in `use-game-session.ts`).
+A claim that cannot start (the platform said no, or could not be reached) is said in the dialog that was opened for it
+(`data-testid="claim-refused"`), with the reason in the platform's words; closing it clears it, and the next claim starts clean.
+
 A signed-in player whose progress is on their account (`sync === "account"`) then gets a small **Share** chip in the game's top bar, outside
 the picture and never over the play area, that shares that score; the page it opens calls it self-reported, because no replay verifier
 returns a score. A milestone the player holds has the same chip on its card in the game's milestone list. A player with no account sees
 neither, because a link is made from the account's own records.
 
-## The Minted gallery (M2)
+## The Minted gallery (M2) and the Mints tab
 
-A game that mints milestones has a **Minted** section in its dock: how many players minted each milestone, then every mint, newest first, a
-page at a time (`ui/minted-gallery.tsx`). It is public. It is read from `GET /api/v1/games/gallery?gameId=` (a page of 24; `cursor` for the
-next; the per-milestone counts only with the first page) and each picture from `GET /api/v1/games/gallery/picture?claimId=`, which reads
+A game that mints milestones has a **Mints** section in its dock, one tab for two things (`ui/mints-tab.tsx`): the player's own claims (**Mine**,
+short rows with the name, where each stands and a Details button; `ui/claims-card.tsx`) and the game's public gallery (**Everyone**): how many
+players minted each milestone, then every mint, newest first, a page at a time (`ui/minted-gallery.tsx`). It starts on Mine, and has no switch where
+only one of the two exists. Neither shows a picture: the minted picture is on the player's own shelf (`/my-milestones`) and in a shared page.
+The dock's order is Milestones, Leaderboard, Mints, Wallet, then the page's own sections, so a phone reaches the leaderboard and the mints
+without scrolling the strip. The gallery is public. It is read from `GET /api/v1/games/gallery?gameId=` (a page of 24; `cursor` for the
+next; the per-milestone counts only with the first page). Its picture route, `GET /api/v1/games/gallery/picture?claimId=`, is no longer used by
+this tab (follow-up: remove it, or keep it for a later gallery of pictures), and reads
 the picture as the player the completed claim belongs to and answers "not found" for a claim that is not complete or is of a game the
 platform does not list. Owner decisions (2026-10-27, confirmed 2026-11-08): every mint appears, the wallet in short form (shortened on the
 server, so the whole address never leaves it), no opt-in; each mint says whether the platform replayed the run (`replay-verified`) or the

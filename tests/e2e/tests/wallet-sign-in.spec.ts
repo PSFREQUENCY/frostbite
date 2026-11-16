@@ -17,6 +17,7 @@ import {
   signInWithWallet,
   walletButton,
   walletMenu,
+  walletReconnectTimeoutMs,
   type TestWallet,
 } from "./support/fake-wallet.ts";
 
@@ -85,7 +86,9 @@ test("a player signs in with a wallet, stays signed in across a reload, and sign
   // After a reload the session holds and the widget reconnects to the same wallet without being asked.
   await page.reload();
   expect((await methodsOf(page)).status).toBe(200);
-  await expect(walletButton(page)).toContainText(w0.address.slice(0, 6));
+  await expect(walletButton(page)).toContainText(w0.address.slice(0, 6), {
+    timeout: walletReconnectTimeoutMs,
+  });
   await page.goto("/account");
   await expect(
     page.getByRole("heading", { exact: true, name: "Account" }),
@@ -106,7 +109,12 @@ test("a wallet that belongs to another account is refused, and the refusal says 
   const mine = await signInWith(browser, baseURL, w2);
   // Another tab of the same browser reconnects to the wallet by itself (here, the one it now has).
   const second = await openApp(browser, baseURL, w1, mine.ctx);
-  await expect(walletButton(second.page)).toContainText(w1.address.slice(0, 6));
+  await expect(walletButton(second.page)).toContainText(
+    w1.address.slice(0, 6),
+    {
+      timeout: walletReconnectTimeoutMs,
+    },
+  );
   await second.page.goto("/account");
   await linkButton(second.page).click();
   await expect(
@@ -127,7 +135,12 @@ test("a second wallet can be linked, removed, and while it is held no other acco
 }) => {
   const mine = await signInWith(browser, baseURL, w3);
   const second = await openApp(browser, baseURL, w4, mine.ctx);
-  await expect(walletButton(second.page)).toContainText(w4.address.slice(0, 6));
+  await expect(walletButton(second.page)).toContainText(
+    w4.address.slice(0, 6),
+    {
+      timeout: walletReconnectTimeoutMs,
+    },
+  );
   await second.page.goto("/account");
   await linkButton(second.page).click();
   await expect

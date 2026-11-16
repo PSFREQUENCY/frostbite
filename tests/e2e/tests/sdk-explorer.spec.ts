@@ -237,10 +237,9 @@ test("an earned milestone can be claimed from the dock, and the page says what i
   await expect(dock.getByRole("alert")).toHaveText(
     "Connect a wallet to claim.",
   );
-  // The claims the player has, and what a claim costs, are said in their own section.
-  const claims = await openDock(page, "Claims");
-  await expect(claims).toContainText(
+  // The claims the player has are in the Mints section; what a claim costs is said in the review the player signs from.
+  const mints = await openDock(page, "Mints");
+  await expect(mints).toContainText(
     "You have not claimed anything from this game.",
   );
-  await expect(claims).toContainText("You pay the network fee to claim.");
 });

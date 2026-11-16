@@ -27,6 +27,11 @@ the account and (later) minting; the game owns only its rules and its drawing.
   reads and writes; the account is reconciled once before the game's first read, then sent the whole local
   state after each change (one request at a time). A missing account (`signed-out`) ends syncing; a failed
   sync is `pending` and retried with the next change. `status()` is what the page may truthfully say.
+  The browser's records remember which account they were synced with (`owner`, the account's id for the
+  player in that game). When a different account signs in, the records are asked about first with nothing
+  to merge, then dropped (`forget`) so the account only ever sees its own; they are never sent to it. Records
+  made while nobody was signed in have no owner and merge into the first account that signs in, as before.
+  When the account cannot be reached nothing is sent, and a sign-out empties records that belong to an account.
 - `./cabinets`: `combineCabinets` / `cabinet(rules)` build one verifier from the rules of several cabinets; a record names its
   cabinet in `config.cabinet`, and an unknown or missing name is an `invalid-config` outcome.
 - `./frame-headers`: the response headers (CSP `sandbox allow-scripts`, `connect-src 'none'`, …) the platform

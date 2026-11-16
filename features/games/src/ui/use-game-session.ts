@@ -20,6 +20,7 @@ import {
   type AccountPort,
   type SyncStatus,
 } from "@frostbite/game-sdk/synced-backend";
+import { useAnalytics } from "@frostbite/client-react";
 import {
   useCallback,
   useEffect,
@@ -33,6 +34,7 @@ import { createAccountPort } from "../client/account-sync.ts";
 import { newBestWatcher } from "../domain/best-score.ts";
 import { createClaimsService } from "../client/claims-port.ts";
 import { createRunsService } from "../client/runs-port.ts";
+import { countRuns } from "./game-analytics.ts";
 import { useHostEvents } from "./use-host-events.ts";
 import { useKeyForwarding } from "./use-key-forwarding.ts";
 
@@ -70,6 +72,7 @@ function browserStorage(): {
       kept: false,
       storage: {
         getItem: (key) => memory.get(key) ?? null,
+        removeItem: (key) => void memory.delete(key),
         setItem: (key, value) => void memory.set(key, value),
       },
     };
@@ -125,7 +128,10 @@ export function useGameSession(
   // The account is looked up when the session starts, not whenever the function that finds it is a new one: a
   // session restarted by a re-render would reload the game and lose what the player was doing.
   const remoteFor = useEffectEvent((gameId: string) => accountFor(gameId));
-  const runsOf = useEffectEvent((gameId: string) => runsFor(gameId));
+  const analytics = useAnalytics();
+  const runsOf = useEffectEvent((gameId: string) =>
+    countRuns(runsFor(gameId), analytics, gameId),
+  );
   const claimsOf = useEffectEvent((gameId: string) =>
     claimsFor(gameId, () => walletNow.current ?? null),
   );

@@ -77,6 +77,7 @@ describe("asset processing persistence", () => {
         assetId,
         byteLength: png.length,
         contentSha256: pngSha256,
+        contentType: "image/png",
         height: 5,
         objectKey,
         storageProviderId: providerId,

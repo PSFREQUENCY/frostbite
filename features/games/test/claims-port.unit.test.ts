@@ -58,15 +58,17 @@ function setup(
   const fetchImpl = vi.fn<FetchLike>(async () => answer());
   const onStarted = vi.fn<(started: GameClaim) => void>();
   const onRefused = vi.fn<(reason: GameClaimUnavailableReason) => void>();
+  const onPreparing = vi.fn<(milestoneId: string | null) => void>();
   const service = createClaimsService({
     api: createClaimsApi(fetchImpl),
     ...(feeSpeed === undefined ? {} : { feeSpeed }),
     gameId: "arcade",
+    onPreparing,
     onRefused,
     onStarted,
     wallet: () => connected,
   });
-  return { fetchImpl, onRefused, onStarted, service };
+  return { fetchImpl, onPreparing, onRefused, onStarted, service };
 }
 
 describe("asking for a claim from the page", () => {
@@ -195,5 +197,37 @@ describe("asking for a claim from the page", () => {
     const broken = setup(() => json({ status: "started" }));
     await expect(broken.service.claim("first-win")).rejects.toThrow();
     expect(onStarted).not.toHaveBeenCalled();
+  });
+});
+
+describe("telling the page a claim is being made ready", () => {
+  it("names the milestone before the platform is asked, and says it is over once the platform has answered", async () => {
+    const { fetchImpl, onPreparing, service } = setup(() =>
+      json({ claim, resumed: false, status: "started" }),
+    );
+    fetchImpl.mockImplementationOnce(async () => {
+      // While the platform is working, the page has already been told.
+      expect(onPreparing.mock.calls).toEqual([["first-win"]]);
+      return json({ claim, resumed: false, status: "started" });
+    });
+    await service.claim("first-win");
+    expect(onPreparing.mock.calls).toEqual([["first-win"], [null]]);
+  });
+
+  it("says it is over when the platform refuses or cannot be reached, so the page never keeps waiting", async () => {
+    const refused = setup(() =>
+      json({ reason: "claims-paused", status: "unavailable" }),
+    );
+    await refused.service.claim("first-win");
+    expect(refused.onPreparing.mock.calls).toEqual([["first-win"], [null]]);
+    const broken = setup(() => json({}, 500));
+    await expect(broken.service.claim("first-win")).rejects.toBeDefined();
+    expect(broken.onPreparing.mock.calls).toEqual([["first-win"], [null]]);
+  });
+
+  it("does not say anything when no wallet is connected, because nothing is made ready", async () => {
+    const { onPreparing, service } = setup(() => json({}), null);
+    await service.claim("first-win");
+    expect(onPreparing).not.toHaveBeenCalled();
   });
 });

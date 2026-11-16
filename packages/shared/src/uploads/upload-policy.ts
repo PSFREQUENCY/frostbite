@@ -16,6 +16,19 @@ export const uploadPurposes = [
 export const uploadPurposeSchema = z.enum(uploadPurposes);
 export type UploadPurpose = z.infer<typeof uploadPurposeSchema>;
 
+// What a vector picture may be, and for which uses it is accepted. It is read by a strict reader, so its size, depth and number of elements are
+// bounded here, and it is drawn once at `rasterSide` (the longest side, in pixels) before the usual thumbnail and preview are made from that.
+const svgPolicySchema = z
+  .object({
+    maxAttributeLength: z.number().int().positive(),
+    maxBytes: z.number().int().positive(),
+    maxDepth: z.number().int().min(1).max(256),
+    maxElements: z.number().int().positive(),
+    purposes: z.array(uploadPurposeSchema),
+    rasterSide: z.number().int().positive(),
+  })
+  .strict();
+
 const policySchema = z
   .object({
     activeIntentLimitPerUser: z.number().int().min(1).max(100),
@@ -41,6 +54,7 @@ const policySchema = z
       uploadPurposeSchema,
       z.number().int().positive(),
     ),
+    svg: svgPolicySchema,
     presignedUrlLifetimeMs: z.number().int().min(minuteMs).max(hourMs),
     // How long a signed derivative URL stays valid (ADR-016). A bearer URL, so kept short.
     derivativeReadLifetimeMs: z.number().int().min(minuteMs).max(hourMs),
@@ -77,18 +91,38 @@ const policySchema = z
     "The cleanup retry maximum cannot be less than its base.",
   )
   .refine(
+    ({ maxImageDimension, svg }) => svg.rasterSide <= maxImageDimension,
+    "A vector picture cannot be drawn larger than the largest image allowed.",
+  )
+  .refine(
     ({ derivativeReadLifetimeMs, presignedUrlLifetimeMs }) =>
       derivativeReadLifetimeMs <= presignedUrlLifetimeMs,
     "Derivative read lifetime cannot exceed the presigned URL lifetime.",
   );
 
 export type UploadPolicy = z.infer<typeof policySchema>;
+export type SvgPolicy = z.infer<typeof svgPolicySchema>;
 export type UploadPolicyOverrides = Omit<
   Partial<UploadPolicy>,
-  "maxBytesByPurpose"
+  "maxBytesByPurpose" | "svg"
 > & {
   readonly maxBytesByPurpose?: Partial<UploadPolicy["maxBytesByPurpose"]>;
+  readonly svg?: Partial<UploadPolicy["svg"]>;
 };
+
+const svgDefaults: SvgPolicy = {
+  maxAttributeLength: 100_000,
+  maxBytes: 2 * megabyte,
+  maxDepth: 64,
+  maxElements: 10_000,
+  purposes: [
+    "collection-artwork",
+    "collection-banner",
+    "collection-item-artwork",
+  ],
+  rasterSide: 1_024,
+};
+const defaultSvgPolicy = Object.freeze(svgDefaults);
 
 export const defaultUploadPolicy: UploadPolicy = Object.freeze({
   activeIntentLimitPerUser: 2,
@@ -103,6 +137,8 @@ export const defaultUploadPolicy: UploadPolicy = Object.freeze({
     "collection-item-artwork": 25 * megabyte,
     "creator-avatar": 5 * megabyte,
   }),
+  // Vector pictures: collection pictures only, 2 MB, drawn at 1024 px (the preview size), read with a bound on nesting and elements.
+  svg: defaultSvgPolicy,
   presignedUrlLifetimeMs: 15 * minuteMs,
   derivativeReadLifetimeMs: 5 * minuteMs,
   libraryPageSize: 48,
@@ -124,6 +160,7 @@ export function resolveUploadPolicy(
         ...defaultUploadPolicy.maxBytesByPurpose,
         ...overrides.maxBytesByPurpose,
       },
+      svg: { ...defaultUploadPolicy.svg, ...overrides.svg },
     }),
   );
 }

@@ -11,7 +11,7 @@ import { platformSessionCookieName } from "@frostbite/shared/auth";
 import { parseAuthSessionEnvironment } from "@repo/config/env";
 import type { ActiveSession } from "@frostbite/auth";
 
-import { logInternalError } from "./internal-error-log.ts";
+import { reportInternalError } from "./report-internal-error.ts";
 
 export async function executeNextOperation(
   operation: RegisteredHttpOperation,
@@ -32,7 +32,7 @@ export async function executeNextOperation(
       method: request.method,
       rawInput,
     },
-    { createCorrelationId: randomUUID, report: logInternalError },
+    { createCorrelationId: randomUUID, report: reportInternalError },
   );
 
   for (const effect of response.effects) {

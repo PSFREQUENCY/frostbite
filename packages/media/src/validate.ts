@@ -1,14 +1,18 @@
 import { createHash } from "node:crypto";
 
-import type {
-  AssetRejectionReason,
-  UploadContentType,
+import {
+  svgContentType,
+  type AssetRejectionReason,
+  type RasterContentType,
+  type SvgPolicy,
+  type UploadContentType,
 } from "@frostbite/shared/uploads";
 
 import type { FormatParseResult, ImageLimits } from "./contracts.ts";
 import { parseJpeg } from "./jpeg.ts";
 import { parsePng } from "./png.ts";
 import { detectMediaType } from "./signature.ts";
+import { prepareSvg } from "./svg.ts";
 import { parseWebp } from "./webp.ts";
 
 export { mediaValidatorVersion, type ImageLimits } from "./contracts.ts";
@@ -25,7 +29,7 @@ export type ImageValidation =
   | { readonly ok: false; readonly reason: AssetRejectionReason };
 
 function parseByType(
-  mediaType: UploadContentType,
+  mediaType: RasterContentType,
   bytes: Uint8Array,
 ): FormatParseResult {
   switch (mediaType) {
@@ -44,8 +48,24 @@ export function validateImage(input: {
   readonly bytes: Uint8Array;
   readonly declaredMediaType: UploadContentType;
   readonly limits: ImageLimits;
+  readonly svg: SvgPolicy;
 }): ImageValidation {
   const detected = detectMediaType(input.bytes);
+  if (input.declaredMediaType === svgContentType) {
+    // A picture that is plainly one of the pixel formats is not the vector picture it was declared to be.
+    if (detected !== null) return { ok: false, reason: "media-type-mismatch" };
+    const prepared = prepareSvg(input.bytes, input.svg);
+    if (!prepared.ok) return prepared;
+    // The size recorded is the one it will be drawn at; the hash is of what was sent, so a change after this is noticed.
+    return {
+      byteLength: input.bytes.length,
+      height: prepared.height,
+      mediaType: svgContentType,
+      ok: true,
+      sha256: createHash("sha256").update(input.bytes).digest("hex"),
+      width: prepared.width,
+    };
+  }
   if (detected === null) return { ok: false, reason: "unsupported-format" };
   if (detected !== input.declaredMediaType)
     return { ok: false, reason: "media-type-mismatch" };

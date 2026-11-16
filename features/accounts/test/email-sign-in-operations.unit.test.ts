@@ -108,7 +108,26 @@ describe("entering an emailed code over HTTP", () => {
       code: "123456",
       destination: "ada@example.com",
       kind: "email",
+      referralCode: null,
     });
+  });
+
+  it("hands on the code of whoever invited the person, and accepts only a code of the right shape", async () => {
+    const { service, verify } = operations();
+    await verify.execute(
+      { code: "123456", email: "ada@example.com", referralCode: "23456789" },
+      context,
+    );
+    expect(service.verify).toHaveBeenCalledWith(
+      expect.objectContaining({ referralCode: "23456789" }),
+    );
+    expect(
+      verify.inputSchema.safeParse({
+        code: "123456",
+        email: "ada@example.com",
+        referralCode: "nope",
+      }).success,
+    ).toBe(false);
   });
 
   it("gives one answer for every failure", async () => {

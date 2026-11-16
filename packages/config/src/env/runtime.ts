@@ -94,7 +94,7 @@ const blankAsUnset = (value: string | undefined) =>
   value === undefined || value.trim() === "" ? undefined : value.trim();
 
 export const securityEnvironmentSchema = z.object({
-  SECURITY_CSP_MODE: z.enum(["report-only", "enforce"]).default("report-only"),
+  SECURITY_CSP_MODE: z.enum(["report-only", "enforce"]).default("enforce"),
   TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
 });
 
@@ -105,8 +105,8 @@ export interface SecurityEnvironment {
   readonly trustedProxyHops: number;
 }
 
-// The settings the security headers and the rate limiter share. Blank values mean the safe default: report
-// before blocking, and one trusted proxy.
+// The settings the security headers and the rate limiter share. Blank values mean the safe default: the
+// policy is enforced (not only reported), and one trusted proxy.
 export function parseSecurityEnvironment(
   source: NodeJS.ProcessEnv,
 ): SecurityEnvironment {

@@ -1,4 +1,5 @@
 import { walletNetworkSchema } from "@frostbite/shared/chain";
+import { referralCodeSchema } from "@frostbite/shared/referrals";
 import { uuidV7TextSchema } from "@frostbite/shared/identifiers";
 import { z } from "zod";
 
@@ -78,6 +79,12 @@ export const walletVerifyRequestSchema = z.strictObject({
   signature: z.string().min(1).max(4_096),
 });
 
+// Signing in, which makes an account if the wallet has none: the code of whoever referred the person may go with the signature. Linking and
+// stepping up (for an account that exists) take no such code.
+export const walletSignInVerifySchema = walletVerifyRequestSchema.extend({
+  referralCode: referralCodeSchema.optional(),
+});
+
 export const walletSignedInResponseSchema = z.strictObject({
   signedIn: z.literal(true),
 });
@@ -112,5 +119,6 @@ export type WalletChallengeResponse = z.infer<
   typeof walletChallengeResponseSchema
 >;
 export type WalletVerifyRequest = z.infer<typeof walletVerifyRequestSchema>;
+export type WalletSignInVerify = z.infer<typeof walletSignInVerifySchema>;
 export type WalletUnlinkRequest = z.infer<typeof walletUnlinkRequestSchema>;
 export type AuthMethodsResponse = z.infer<typeof authMethodsResponseSchema>;

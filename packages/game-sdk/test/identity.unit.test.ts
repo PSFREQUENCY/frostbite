@@ -20,6 +20,7 @@ function memoryStorage(map = new Map<string, string>()): KeyValueStorage & {
   return {
     getItem: (key) => map.get(key) ?? null,
     map,
+    removeItem: (key) => void map.delete(key),
     setItem: (key, value) => void map.set(key, value),
   };
 }

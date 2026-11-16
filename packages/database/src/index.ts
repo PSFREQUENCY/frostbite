@@ -123,6 +123,23 @@ export {
   gameMintTotals,
 } from "./schema/game-claims.ts";
 export { platformFeeSettings } from "./schema/platform-fee.ts";
+export {
+  referralPayoutBatches,
+  referralPayoutBatchItems,
+} from "./schema/referral-batches.ts";
+export {
+  referralCodes,
+  referralFreezes,
+  referralLinks,
+  referralReversals,
+} from "./schema/referrals.ts";
+export {
+  rewardBalances,
+  rewardEntries,
+  rewardPayoutTransitions,
+  rewardPayouts,
+  rewardProgramSettings,
+} from "./schema/rewards.ts";
 export { gameRuns } from "./schema/game-runs.ts";
 export { gamePlayDays } from "./schema/game-play-days.ts";
 export { gameScoreBests } from "./schema/game-score-bests.ts";

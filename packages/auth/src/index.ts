@@ -14,6 +14,11 @@ export {
 } from "./domain/contracts.ts";
 export { serializeWalletChallenge } from "./domain/serialize-challenge.ts";
 export { createWalletAuthService } from "./application/service.ts";
+export type {
+  AccountCreatedHook,
+  NewAccount,
+  NewAccountSource,
+} from "./application/account-created.ts";
 export { createDrizzleWalletAuthRepository } from "./adapters/drizzle-wallet-auth-repository.ts";
 export { createDrizzleSessionRepository } from "./adapters/drizzle-session-repository.ts";
 export { createSessionService } from "./application/session-service.ts";
@@ -114,10 +119,12 @@ export {
   walletNetworkSchema,
   walletSignedInResponseSchema,
   walletUnlinkRequestSchema,
+  walletSignInVerifySchema,
   walletVerifyRequestSchema,
   type AuthMethodsResponse,
   type WalletChallengeRequest,
   type WalletChallengeResponse,
+  type WalletSignInVerify,
   type WalletUnlinkRequest,
   type WalletVerifyRequest,
 } from "./wallets/http.ts";
@@ -163,11 +170,13 @@ export {
   emailCodeRequestResponseSchema,
   emailCodeRequestSchema,
   emailCodeRoutes,
+  emailCodeSignInVerifySchema,
   emailCodeSignedInResponseSchema,
   emailCodeVerifySchema,
   emailEmptyInputSchema,
   emailLinkedResponseSchema,
   type EmailAddressesView,
   type EmailCodeRequest,
+  type EmailCodeSignInVerify,
   type EmailCodeVerify,
 } from "./contacts/email-http.ts";

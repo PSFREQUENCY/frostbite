@@ -81,6 +81,29 @@ export function simulated() {
       tamper: (signed) => ({ ...signed, payload: `x${signed.payload}` }),
     },
   };
+  // A batch paying two people from the same wallet.
+  const batchIntent: TransactionIntent = {
+    chain: one,
+    operation: "pay-batch",
+    payments: [
+      { amount: { asset: nativeAsset(one), baseUnits: 5n }, recipient },
+      {
+        amount: { asset: nativeAsset(one), baseUnits: 7n },
+        recipient: simulatedAddress(one, "0a0b0c"),
+      },
+    ],
+    sender,
+  };
+  const batchFixtures: ChainConformanceFixtures = {
+    ...fixtures,
+    transaction: {
+      funding,
+      intent: batchIntent,
+      now: () => fixedNow,
+      sign: signSimulated,
+      tamper: (signed) => ({ ...signed, payload: `x${signed.payload}` }),
+    },
+  };
   const rewards: RewardsConformanceFixtures = {
     contract,
     holder: simulatedAddress(one, "070809"),
@@ -89,6 +112,8 @@ export function simulated() {
   };
   return {
     ...chain,
+    batchFixtures,
+    batchIntent,
     claimFixtures,
     claimIntent,
     contract,

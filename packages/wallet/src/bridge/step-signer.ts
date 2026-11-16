@@ -27,11 +27,15 @@ export class WalletRefusedError extends Error {
 // what it answers is put back into the transaction. Null when this family's transactions are not ones a wallet signs here. The
 // platform checks the result against what it built before it sends anything.
 export async function signWithWallet(
-  wallet: Pick<WalletConnectionClient, "signPsbt">,
+  wallet: Pick<WalletConnectionClient, "publicKey" | "signPsbt">,
   transaction: StepTransaction,
 ): Promise<StepTransaction | null> {
   if (transaction.family !== bitcoinAlkanes) return null;
-  const requests = walletRequests(transaction.format, transaction.payload);
+  const requests = walletRequests(
+    transaction.format,
+    transaction.payload,
+    wallet.publicKey,
+  );
   if (requests === null) return null;
   const answers: string[] = [];
   for (const { inputs, psbt } of requests)
@@ -50,6 +54,8 @@ export async function signWithWallet(
 
 // What is said when signing with the wallet did not give a signed transaction: the wallet's own words (or the platform's, when the
 // wallet answered with something unusable) follow, so the cause is not hidden behind "did not sign".
+export const pastedSignatureMissingCopy = "Paste the signed transaction first.";
+
 export const walletRefusedCopy = (error: unknown): string => {
   const reason = error instanceof Error ? error.message.trim() : "";
   return reason === ""

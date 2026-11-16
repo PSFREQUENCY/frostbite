@@ -39,6 +39,7 @@ function setup(
     gameId: "g",
     storage: {
       getItem: (k) => map.get(k) ?? null,
+      removeItem: (k) => void map.delete(k),
       setItem: (k, v) => void map.set(k, v),
     },
   });
@@ -76,6 +77,7 @@ describe("the backend that syncs with the account", () => {
         gameId: "g",
         storage: {
           getItem: (k) => map.get(k) ?? null,
+          removeItem: (k) => void map.delete(k),
           setItem: (k, v) => void map.set(k, v),
         },
       }),
@@ -154,7 +156,11 @@ describe("the backend that syncs with the account", () => {
       local: {
         ...createLocalBackend({
           gameId: "g",
-          storage: { getItem: () => null, setItem: () => undefined },
+          storage: {
+            getItem: () => null,
+            removeItem: () => undefined,
+            setItem: () => undefined,
+          },
         }),
         replace: () => {
           throw new Error("quota");

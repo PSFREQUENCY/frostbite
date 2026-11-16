@@ -12,5 +12,4 @@ export const galleryCopy = {
   mintedTo: (wallet: string) => `Minted to ${wallet}`,
   minted: (count: number) =>
     count === 1 ? "1 minted" : `${count.toLocaleString("en-US")} minted`,
-  title: "Minted",
 } as const;

@@ -9,6 +9,7 @@
     "./beta-network": "./src/env/beta-network.ts",
     "./mail": "./src/env/mail.ts",
     "./rewards-chain": "./src/env/rewards-chain.ts",
+    "./telemetry": "./src/env/telemetry.ts",
     "./authorization": "./src/policy/authorization.ts",
     "./email-addresses": "./src/policy/email-addresses.ts",
     "./email-code": "./src/policy/email-code.ts",
@@ -26,6 +27,7 @@
   },
   "dependencies": {
     "@frostbite/mail": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@frostbite/shared": "workspace:*",
     "zod": "^4.5.4"
   },

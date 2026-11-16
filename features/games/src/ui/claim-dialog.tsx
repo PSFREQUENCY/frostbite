@@ -15,7 +15,11 @@ import {
   shortenMiddle,
 } from "@repo/ui/arcade";
 
-import { claimCopy, platformFeeNote } from "../domain/claim-copy.ts";
+import {
+  claimCopy,
+  claimPreparingCopy,
+  platformFeeNote,
+} from "../domain/claim-copy.ts";
 
 // The claim a player signs from, in a dialog over the whole page so nothing (the dock, the game) can hide it: where the claim stands,
 // what it costs, and one button to sign. The rest of what the platform built is behind "Details". It shows exactly what the platform
@@ -26,6 +30,8 @@ export function ClaimDialog({
   message,
   onClose,
   onSign,
+  preparing,
+  refusal,
   signerNote,
   title,
   working,
@@ -34,6 +40,10 @@ export function ClaimDialog({
   readonly message: string | null;
   readonly onClose: () => void;
   readonly onSign: () => void;
+  // True while the claim is being made ready: the dialog is open at once and says so, then shows the claim.
+  readonly preparing: boolean;
+  // Why the claim could not start, said where the player is looking; null otherwise.
+  readonly refusal: string | null;
   // Why nothing can be signed, or null while something can.
   readonly signerNote: string | null;
   readonly title: string;
@@ -53,10 +63,21 @@ export function ClaimDialog({
         ) : undefined
       }
       onClose={onClose}
-      open={claim !== null}
+      open={claim !== null || preparing || refusal !== null}
       title={`Claim: ${title}`}
     >
-      {claim === null || copy === null ? null : (
+      {claim === null && refusal !== null ? (
+        <div className="review-stack" data-testid="claim-refused">
+          <p role="alert">{refusal}</p>
+        </div>
+      ) : claim === null && preparing ? (
+        <div className="review-stack" data-testid="claim-preparing">
+          <ActionProgress
+            detail={claimPreparingCopy.detail}
+            title={claimPreparingCopy.title}
+          />
+        </div>
+      ) : claim === null || copy === null ? null : (
         <div
           className="review-stack"
           data-state={claim.state}

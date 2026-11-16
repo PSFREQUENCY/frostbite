@@ -2,12 +2,12 @@ import {
   emailCodeRequestResponseSchema,
   emailCodeRequestSchema,
   emailCodeRoutes,
+  emailCodeSignInVerifySchema,
   emailCodeSignedInResponseSchema,
-  emailCodeVerifySchema,
   emailMethodKind,
   type ContactCodeService,
   type EmailCodeRequest,
-  type EmailCodeVerify,
+  type EmailCodeSignInVerify,
 } from "@frostbite/auth";
 import type { HttpOperation } from "@frostbite/http";
 import {
@@ -38,7 +38,10 @@ export function createEmailSignInOperations(
     outputSchema: emailCodeRequestResponseSchema,
     ...emailCodeRoutes.request,
   };
-  const verify: HttpOperation<EmailCodeVerify, { readonly signedIn: true }> = {
+  const verify: HttpOperation<
+    EmailCodeSignInVerify,
+    { readonly signedIn: true }
+  > = {
     access: { kind: "public" },
     applicationErrors: ["unauthorized"],
     execute: async (input) => {
@@ -46,6 +49,8 @@ export function createEmailSignInOperations(
         code: input.code,
         destination: input.email,
         kind: emailMethodKind,
+        // Used only if this sign-in makes the account: the code of whoever referred the person.
+        referralCode: input.referralCode ?? null,
       });
       return result.ok
         ? {
@@ -59,7 +64,7 @@ export function createEmailSignInOperations(
     },
     idempotency: "none",
     input: "json",
-    inputSchema: emailCodeVerifySchema,
+    inputSchema: emailCodeSignInVerifySchema,
     outputSchema: emailCodeSignedInResponseSchema,
     ...emailCodeRoutes.verify,
   };

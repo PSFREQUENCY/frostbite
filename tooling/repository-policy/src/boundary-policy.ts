@@ -32,6 +32,20 @@ const familyImportOwners = [
   "tooling/testnet-preflight/",
 ];
 
+// Telemetry vendor SDKs. Analytics and error reporting go through the ports in `@frostbite/telemetry`, so changing the vendor is a setting and
+// one adapter file, not a change at every call site. Only the adapter files may name a vendor.
+const telemetryVendorImports = ["posthog-js", "posthog-node"];
+const telemetryVendorPrefixes = ["@posthog/"];
+const telemetryVendorOwners =
+  /^packages\/telemetry\/src\/(?:analytics\/providers|errors\/providers|providers-shared)\//u;
+
+function isTelemetryVendor(imported: string): boolean {
+  return (
+    telemetryVendorImports.includes(imported) ||
+    telemetryVendorPrefixes.some((prefix) => imported.startsWith(prefix))
+  );
+}
+
 function isFamilySpecific(imported: string): boolean {
   return (
     familySpecificImports.includes(imported) ||
@@ -141,6 +155,14 @@ export async function findBoundaryViolations(
       ) {
         violations.push(
           `${path} imports chain-family code ${imported}; use the neutral chain ports.`,
+        );
+      }
+      if (
+        isTelemetryVendor(imported) &&
+        !telemetryVendorOwners.test(path.replaceAll(sep, "/"))
+      ) {
+        violations.push(
+          `${path} imports telemetry vendor ${imported}; report through @frostbite/telemetry and keep the vendor in an adapter file.`,
         );
       }
       if (

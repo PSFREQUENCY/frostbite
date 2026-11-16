@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import { galleryPictureHref } from "@frostbite/shared/games";
 import { click, mount, settle, textOf } from "@frostbite/test-kit/dom";
 import { describe, expect, it, vi } from "vitest";
 
@@ -36,7 +35,7 @@ const show = (list: GalleryApi["list"]) =>
   );
 
 describe("a game's gallery of mints", () => {
-  it("says it is loading, then shows the counts of each milestone, most minted first, and each mint with its picture, its short wallet and how it was known", async () => {
+  it("says it is loading, then shows the counts of each milestone, most minted first, and each mint as a short row with its short wallet and how it was known", async () => {
     let answer: (page: never) => void = () => undefined;
     const container = await show(
       () => new Promise((resolve) => (answer = resolve as never)),
@@ -74,9 +73,8 @@ describe("a game's gallery of mints", () => {
       "self-reported",
     );
     expect(cards[1]?.querySelector(".mint-gallery-card__level")).toBeNull();
-    expect(cards[0]?.querySelector("img")?.getAttribute("src")).toBe(
-      galleryPictureHref(mint(1).claimId),
-    );
+    // No picture of the mint: a row is words and a link, so the tab stays short and the same on every game.
+    expect(container.querySelector("img, .minted-art")).toBeNull();
     expect(
       cards[0]?.querySelector<HTMLAnchorElement>(
         `a[href="https://explorer.test/tx/${"ab".repeat(32)}"]`,

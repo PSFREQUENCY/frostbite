@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalytics } from "@frostbite/client-react";
 import type { ShareConfig } from "@frostbite/share";
 import { ShareButton } from "@frostbite/share/react";
 import { profilePath } from "@frostbite/shared/profiles";
@@ -15,6 +16,7 @@ export function ProfileShare({
   readonly config: ShareConfig;
   readonly name: string;
 }) {
+  const analytics = useAnalytics();
   const path = profilePath(name);
   const makeLink = useCallback(
     async () => new URL(path, window.location.origin).href,
@@ -27,6 +29,7 @@ export function ProfileShare({
       heading={share.heading(name)}
       kicker={share.kicker}
       makeLink={makeLink}
+      onShare={(platform) => analytics.capture("share_clicked", { platform })}
       text={share.text(name)}
     />
   );

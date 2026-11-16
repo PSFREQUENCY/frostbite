@@ -94,7 +94,7 @@ describe("the security headers", () => {
   const headers = (overrides: Partial<SecurityContext> = {}) =>
     new Map(securityHeaders(context(overrides)));
 
-  it("sends the policy as report-only until the mode is enforce, then as the real policy", () => {
+  it("sends the policy as report-only when that mode is chosen, and as the real policy when it is enforced", () => {
     const reporting = headers();
     expect(reporting.has("Content-Security-Policy-Report-Only")).toBe(true);
     expect(reporting.has("Content-Security-Policy")).toBe(false);

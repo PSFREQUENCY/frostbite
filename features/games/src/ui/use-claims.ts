@@ -1,4 +1,5 @@
 import { ApiError } from "@frostbite/client-http";
+import { useAnalytics } from "@frostbite/client-react";
 import type { WalletInfo } from "@frostbite/game-sdk/protocol";
 import type { FeeSpeed } from "@frostbite/shared/chain";
 import type {
@@ -17,6 +18,11 @@ import {
   isSettledClaim,
   unreachableCopy,
 } from "../domain/claim-copy.ts";
+import {
+  countClaimChanged,
+  countClaimRefused,
+  countClaimStarted,
+} from "./game-analytics.ts";
 
 // What the wallet is asked to sign, and what it gives back (the same transaction, signed). The platform page's wallet
 // provides it; where the wallet cannot sign claims, there is none, and the page says so.
@@ -24,6 +30,11 @@ export type ClaimTransaction = NonNullable<GameClaim["toSign"]>;
 export type ClaimSigner = (
   transaction: ClaimTransaction,
 ) => Promise<ClaimTransaction | null>;
+
+export interface ClaimRefusal {
+  readonly milestoneId: string;
+  readonly text: string;
+}
 
 // How often an unsettled claim is looked at.
 export const defaultClaimPollMs = 4_000;
@@ -43,6 +54,7 @@ export function useClaims(options: {
   readonly wallet: WalletInfo | null;
 }) {
   const { api, enabled, gameId, onChange, sign, wallet } = options;
+  const analytics = useAnalytics();
   const [feeSpeed, setFeeSpeed] = useState<FeeSpeed | null>(
     options.feeSpeed ?? null,
   );
@@ -50,24 +62,39 @@ export function useClaims(options: {
   const [claims, setClaims] = useState<readonly GameClaim[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // Why a claim that was asked for could not start, and for which milestone: shown in the dialog that was opened for it, which would
+  // otherwise close with no word said where the player is looking.
+  const [refusal, setRefusal] = useState<ClaimRefusal | null>(null);
   const [working, setWorking] = useState(false);
+  // The milestone whose claim is being made ready: the platform builds the transaction, which takes a moment, and only one is made at a time.
+  const [preparing, setPreparing] = useState<string | null>(null);
+  const preparingNow = useRef<string | null>(null);
+  const prepare = useCallback((milestoneId: string | null) => {
+    preparingNow.current = milestoneId;
+    setPreparing(milestoneId);
+  }, []);
   const known = useRef(new Map<string, GameClaimState>());
   const changed = useRef(onChange);
   useEffect(() => {
     changed.current = onChange;
   }, [onChange]);
 
-  const upsert = useCallback((claim: GameClaim, announce: boolean) => {
-    const before = known.current.get(claim.id);
-    known.current.set(claim.id, claim.state);
-    setClaims((held) =>
-      held.some(({ id }) => id === claim.id)
-        ? held.map((entry) => (entry.id === claim.id ? claim : entry))
-        : [...held, claim],
-    );
-    if (announce && before !== claim.state)
-      changed.current?.(claim.milestoneId, claim.state);
-  }, []);
+  const upsert = useCallback(
+    (claim: GameClaim, announce: boolean) => {
+      const before = known.current.get(claim.id);
+      known.current.set(claim.id, claim.state);
+      setClaims((held) =>
+        held.some(({ id }) => id === claim.id)
+          ? held.map((entry) => (entry.id === claim.id ? claim : entry))
+          : [...held, claim],
+      );
+      if (announce && before !== claim.state) {
+        changed.current?.(claim.milestoneId, claim.state);
+        countClaimChanged(analytics, gameId, before, claim.state);
+      }
+    },
+    [analytics, gameId],
+  );
 
   // The claims already on the account, shown without telling the game anything about them.
   useEffect(() => {
@@ -108,16 +135,22 @@ export function useClaims(options: {
   const begin = useCallback(
     (claim: GameClaim) => {
       upsert(claim, true);
+      countClaimStarted(analytics, gameId);
       setActiveId(claim.id);
       setMessage(null);
+      setRefusal(null);
     },
-    [upsert],
+    [analytics, gameId, upsert],
   );
 
   const start = useCallback(
     async (milestoneId: string) => {
       if (wallet === null) return setMessage(claimUnavailableCopy["no-wallet"]);
+      // A second press while one is being made ready starts nothing: the first is the one the player will see.
+      if (preparingNow.current !== null) return;
       setMessage(null);
+      setRefusal(null);
+      prepare(milestoneId);
       try {
         const answer = await api.start({
           ...(feeSpeed === null ? {} : { feeSpeed }),
@@ -126,16 +159,26 @@ export function useClaims(options: {
           wallet: wallet.address,
         });
         if (answer.status === "started") begin(answer.claim);
-        else setMessage(claimUnavailableCopy[answer.reason]);
+        else {
+          countClaimRefused(analytics, gameId, answer.reason);
+          setRefusal({
+            milestoneId,
+            text: claimUnavailableCopy[answer.reason],
+          });
+        }
       } catch (error) {
-        setMessage(
-          error instanceof ApiError && error.code === "unauthorized"
-            ? claimUnavailableCopy["signed-out"]
-            : unreachableCopy,
-        );
+        setRefusal({
+          milestoneId,
+          text:
+            error instanceof ApiError && error.code === "unauthorized"
+              ? claimUnavailableCopy["signed-out"]
+              : unreachableCopy,
+        });
+      } finally {
+        prepare(null);
       }
     },
-    [api, begin, feeSpeed, gameId, wallet],
+    [analytics, api, begin, feeSpeed, gameId, prepare, wallet],
   );
 
   const active = claims.find(({ id }) => id === activeId) ?? null;
@@ -177,15 +220,27 @@ export function useClaims(options: {
             wallet === null ? "not-connected" : "wallet-cannot-sign"
           ],
     claims,
-    dismiss: useCallback(() => setActiveId(null), []),
+    dismiss: useCallback(() => {
+      setActiveId(null);
+      setRefusal(null);
+    }, []),
     feeSpeed,
+    prepare,
+    preparing,
+    refusal,
     setFeeSpeed,
     message,
     // Tells the player why a claim a game asked for could not start, in the page's own words (the game is given only a coarse reason).
     refuse: useCallback(
-      (reason: GameClaimUnavailableReason) =>
-        setMessage(claimUnavailableCopy[reason]),
-      [],
+      (reason: GameClaimUnavailableReason) => {
+        countClaimRefused(analytics, gameId, reason);
+        // Still being made ready, so the dialog that was opened for it knows which milestone this is.
+        setRefusal({
+          milestoneId: preparingNow.current ?? "",
+          text: claimUnavailableCopy[reason],
+        });
+      },
+      [analytics, gameId],
     ),
     reopen: useCallback((claimId: string) => setActiveId(claimId), []),
     sign: signActive,

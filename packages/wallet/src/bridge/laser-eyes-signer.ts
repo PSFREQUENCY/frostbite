@@ -1,3 +1,5 @@
+import { psbtTransactionId } from "./psbt-id.ts";
+
 import type {
   AlkanesSignerPort,
   SignedPsbt,
@@ -60,9 +62,9 @@ function requireState(
   return state;
 }
 
-export function requireSignedPsbt(
+export async function requireSignedPsbt(
   result: Awaited<ReturnType<LaserEyesSigningClient["signPsbt"]>>,
-): SignedPsbt {
+): Promise<SignedPsbt> {
   if (
     result?.signedPsbtBase64 === undefined ||
     result.signedPsbtBase64.length === 0 ||
@@ -71,9 +73,13 @@ export function requireSignedPsbt(
   ) {
     throw new Error("LaserEyes returned an incomplete signed PSBT.");
   }
-  if (result.txId !== undefined) {
+  // Some wallets (Xverse) answer with an empty id, or with the transaction's own id, although they were told not to send it. Both are
+  // taken as nothing sent; an id that is not this transaction's is not trusted. The platform sends the transaction itself, after it has
+  // checked what was signed.
+  const own = await psbtTransactionId(result.signedPsbtBase64);
+  if (result.txId !== undefined && result.txId !== "" && result.txId !== own) {
     throw new Error(
-      "LaserEyes broadcast a PSBT that was requested for signing only.",
+      `LaserEyes broadcast a PSBT that was requested for signing only (the wallet named ${result.txId}, the signed transaction is ${own ?? "not readable"}).`,
     );
   }
   return {
@@ -107,7 +113,7 @@ export function createLaserEyesSigner(
       inputsToSign,
       tx: psbt,
     });
-    return requireSignedPsbt(result);
+    return await requireSignedPsbt(result);
   }
 
   return {

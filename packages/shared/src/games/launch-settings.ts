@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-import {
-  gameBasePathSchema,
-  gameOriginSchema,
-  webUrlSchema,
-} from "./launch.ts";
+import { gameBasePathSchema, gameOriginSchema } from "./launch.ts";
 import { gameIdSchema, type GameManifest } from "./manifest.ts";
 import { chainRefTextSchema } from "../chain/chain-ref.ts";
+import { webUrlSchema } from "../http/web-url.ts";
 
 // What a deployment may set about a game, without editing its manifest: where it is served, where it sends
 // the player back to, and which chain it uses there. Keyed by game identifier in the platform's configuration.

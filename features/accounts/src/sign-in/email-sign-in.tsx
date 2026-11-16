@@ -9,7 +9,11 @@ import type { SignInViewProps } from "./views.ts";
 
 // Signing in with a code sent by email: ask for it, then enter it. "A code was sent" is shown only after the server has said so, and the
 // page never says whether the address already has an account.
-export function EmailSignIn({ onSignedIn }: SignInViewProps) {
+export function EmailSignIn({
+  onSignedIn,
+  referralCode,
+  track,
+}: SignInViewProps) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"address" | "code" | "signed-in">("address");
@@ -20,6 +24,8 @@ export function EmailSignIn({ onSignedIn }: SignInViewProps) {
   async function ask(event?: FormEvent) {
     event?.preventDefault();
     setWorking(true);
+    // Asking again for a code is the same sign-in, not a new one.
+    if (step === "address") track.started();
     const outcome = await requestEmailCode(request, email);
     setWorking(false);
     if (outcome.kind === "sent") {
@@ -27,6 +33,7 @@ export function EmailSignIn({ onSignedIn }: SignInViewProps) {
       setCode("");
       setNotice(null);
     } else {
+      track.failed(outcome.outcome);
       setNotice(outcome.message);
     }
   }
@@ -34,12 +41,13 @@ export function EmailSignIn({ onSignedIn }: SignInViewProps) {
   async function enter(event: FormEvent) {
     event.preventDefault();
     setWorking(true);
-    const outcome = await verifyEmailCode(request, email, code);
+    const outcome = await verifyEmailCode(request, email, code, referralCode);
     setWorking(false);
     if (outcome.kind === "signed-in") {
       setStep("signed-in");
       onSignedIn();
     } else {
+      track.failed(outcome.outcome);
       setNotice(outcome.message);
     }
   }

@@ -95,7 +95,9 @@ describe("the claims section of the dock", () => {
     arrive();
     await flush();
     expect(api.list).toHaveBeenCalledExactlyOnceWith("embedded-game");
-    expect(text()).toContain("Your claims");
+    expect(
+      h.container.querySelector('[aria-label="Claims of this game"]'),
+    ).not.toBeNull();
     expect(text()).toContain("Claimed");
     expect(
       reply.mock.calls.filter(
@@ -105,16 +107,15 @@ describe("the claims section of the dock", () => {
     ).toEqual([]);
   });
 
-  it("says nothing was claimed when nothing was, and that the player pays the fee", async () => {
+  it("says nothing was claimed when nothing was", async () => {
     await mount(undefined, {
       claims: { api: fakeApi(), wallet },
       game: claimGame,
     });
     await flush();
     expect(text()).toContain("You have not claimed anything from this game.");
-    expect(text()).toContain(
-      "complete only when the network's records show it",
-    );
+    // The cost is said in the review the player signs from, not repeated in the list.
+    expect(text()).not.toContain("complete only when");
   });
 
   it("opens the details of a claim again after they were closed", async () => {
@@ -155,7 +156,7 @@ describe("the claims section of the dock", () => {
   it("is not on a game whose milestones cannot be claimed", async () => {
     await mount(undefined, { game: claimGame });
     await flush();
-    expect(text()).not.toContain("Your claims");
+    expect(text()).not.toContain("Mints");
     expect(button("Claim ")).toBeUndefined();
   });
 });

@@ -7,7 +7,8 @@ import {
 } from "@frostbite/shared/games";
 import { profilePath } from "@frostbite/shared/profiles";
 import { ProfileAvatar, StatusLamp } from "@repo/ui/arcade";
-import { useState } from "react";
+import { useAnalytics } from "@frostbite/client-react";
+import { useEffect, useState } from "react";
 
 import type { LeaderboardApi } from "../client/leaderboard-api.ts";
 import { leaderboardCopy as copy } from "../domain/leaderboard-copy.ts";
@@ -63,6 +64,11 @@ export function Leaderboard({
   readonly now?: number;
 }) {
   const [window, setWindow] = useState<LeaderboardWindow>("all");
+  const analytics = useAnalytics();
+  // A board was looked at: when it opens, and again each time another window is chosen.
+  useEffect(() => {
+    analytics.capture("leaderboard_viewed", { game: gameId, window });
+  }, [analytics, gameId, window]);
   // Read once, when the board opens, so a render never reads the clock.
   const [since] = useState(() => now ?? Date.now());
   const state = useLeaderboard(gameId, window, api);

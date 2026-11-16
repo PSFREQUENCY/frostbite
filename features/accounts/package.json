@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/registration.ts",
     "./methods": "./src/methods.ts",
+    "./referral-link": "./src/referral-link.ts",
     "./setup-operation": "./src/setup/operation.ts",
     "./entrypoint": "./src/entrypoint.tsx",
     "./widget": "./src/widget/wallet-root.tsx"
@@ -25,11 +26,14 @@
     "@frostbite/cache": "workspace:*",
     "@frostbite/authorization": "workspace:*",
     "@frostbite/client-http": "workspace:*",
+    "@frostbite/client-react": "workspace:*",
     "@frostbite/database": "workspace:*",
     "@frostbite/mail": "workspace:*",
     "@frostbite/http": "workspace:*",
     "@frostbite/plugin-kit": "workspace:*",
+    "@frostbite/referrals": "workspace:*",
     "@frostbite/shared": "workspace:*",
+    "@frostbite/telemetry": "workspace:*",
     "@frostbite/wallet": "workspace:*",
     "@repo/config": "workspace:*",
     "@repo/ui": "workspace:*",

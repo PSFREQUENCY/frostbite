@@ -4,6 +4,11 @@ import {
 } from "@frostbite/shared/accounts";
 import { collectionReviewCapability } from "@frostbite/shared/collections";
 import { gameAdminCapability } from "@frostbite/shared/games";
+import {
+  referralAdministerCapability,
+  referralPayCapability,
+  referralViewCapability,
+} from "@frostbite/shared/referrals";
 
 // What each of the two working roles may do, written once so the administrator's powers are exactly these and cannot drift from them.
 const reviewerCapabilities = [
@@ -11,7 +16,13 @@ const reviewerCapabilities = [
   collectionReviewCapability,
 ] as const;
 // Any staff member may administer a game's rewards contract, including pausing it (ADR-018 Amendment 3); every step is logged.
-const staffCapabilities = ["platform:operate", gameAdminCapability] as const;
+const staffCapabilities = [
+  "platform:operate",
+  gameAdminCapability,
+  referralViewCapability,
+  // Paying referrers moves the platform's money, signed by the staff member with their own wallet, like the other steps staff sign.
+  referralPayCapability,
+] as const;
 
 export const authorizationPolicy = {
   organization: {
@@ -27,6 +38,8 @@ export const authorizationPolicy = {
       manageRolesCapability,
       ...reviewerCapabilities,
       ...staffCapabilities,
+      // Changing the referral program and freezing a referrer move money owed to people: for administrators, not every staff member.
+      referralAdministerCapability,
     ],
     reviewer: reviewerCapabilities,
     staff: staffCapabilities,
@@ -34,5 +47,5 @@ export const authorizationPolicy = {
   // Staff and admin take effect only while the account holds a wallet (ADR-021): they sign chain steps with one, and an email code
   // alone is too weak a way to hold them.
   requiredMethods: { admin: ["wallet"], staff: ["wallet"] },
-  version: "beta-v3",
+  version: "beta-v5",
 } as const satisfies AuthorizationPolicy;

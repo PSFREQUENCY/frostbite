@@ -16,6 +16,10 @@ export const uploadOutcomes = {
     http: "invalid_request",
     message: "The file is larger than allowed for this use.",
   },
+  "file-type-not-allowed": {
+    http: "invalid_request",
+    message: "That kind of file cannot be used for this purpose.",
+  },
   // Finishing one.
   "upload-not-found": {
     http: "not_found",
@@ -47,6 +51,7 @@ const formatNames: Readonly<Record<UploadContentType, string>> = {
   "image/png": "PNG",
   "image/jpeg": "JPEG",
   "image/webp": "WebP",
+  "image/svg+xml": "SVG",
 };
 
 // The accepted formats as a sentence needs them: "PNG, JPEG, or WebP" to offer a choice, "PNG, JPEG, and WebP" to say what is allowed.

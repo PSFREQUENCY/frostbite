@@ -1,4 +1,4 @@
-import type { UploadContentType } from "@frostbite/shared/uploads";
+import type { RasterContentType } from "@frostbite/shared/uploads";
 
 const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
 
@@ -14,7 +14,7 @@ export function ascii(bytes: Uint8Array, offset: number, length: number) {
 }
 
 // The leading bytes decide the format; filenames, extensions, and declared types never do.
-export function detectMediaType(bytes: Uint8Array): UploadContentType | null {
+export function detectMediaType(bytes: Uint8Array): RasterContentType | null {
   if (startsWith(bytes, pngSignature)) return "image/png";
   if (startsWith(bytes, [0xff, 0xd8, 0xff])) return "image/jpeg";
   if (

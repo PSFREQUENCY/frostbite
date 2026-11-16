@@ -50,6 +50,8 @@ export interface ContactCodeRepository {
     readonly destination: string;
     readonly kind: MethodKind;
     readonly now: Date;
+    // The code of whoever referred the person, used only if this makes a new account.
+    readonly referralCode?: string | null;
     readonly session: SessionMaterial;
   }): Promise<CompleteCodeSignInResult>;
   // Forgets a code that was issued but could not be delivered, so a failed send neither counts against the person nor leaves a code

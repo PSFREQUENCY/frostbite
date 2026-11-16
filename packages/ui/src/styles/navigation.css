@@ -163,6 +163,11 @@
   border: var(--arcade-border-width) solid var(--arcade-border);
   border-radius: var(--arcade-radius-medium);
 }
+/* A console page inside an area with a sidebar sits in the column the area already centres and limits, so it keeps a small edge of its
+   own. Centring itself against the window as well would squeeze it twice: on a wide screen the page shrank to a strip. */
+.app-body[data-sidebar="true"] .console-page {
+  padding: 2rem;
+}
 .area-sidebar {
   align-self: start;
   position: sticky;
@@ -243,7 +248,8 @@
   .area-sidebar__link[data-current="true"] {
     border-bottom-color: var(--arcade-yellow);
   }
-  .app-body[data-sidebar="true"] .arcade-section {
+  .app-body[data-sidebar="true"] .arcade-section,
+  .app-body[data-sidebar="true"] .console-page {
     padding: 1.25rem;
   }
 }

@@ -9,6 +9,7 @@ describe("the local backend", () => {
       map,
       store: {
         getItem: (k: string) => map.get(k) ?? null,
+        removeItem: (k: string) => void map.delete(k),
         setItem: (k: string, v: string) => void map.set(k, v),
       },
     };
@@ -113,6 +114,7 @@ describe("the local backend", () => {
         getItem: () => {
           throw new Error("blocked");
         },
+        removeItem: () => undefined,
         setItem: () => undefined,
       },
     });

@@ -4,7 +4,6 @@ import {
   ExplorerBoundary,
   TransactionLink,
 } from "@frostbite/feature-chain-status/transaction";
-import { galleryPictureHref } from "@frostbite/shared/games";
 import { StatusLamp } from "@repo/ui/arcade";
 
 import type { GalleryApi } from "../client/gallery-api.ts";
@@ -12,7 +11,6 @@ import type { PublicGame } from "../domain/catalog.ts";
 import { galleryCopy } from "../domain/gallery-copy.ts";
 import { mintedDay } from "../domain/minted-view.ts";
 import { verificationLabel } from "../domain/verification-label.ts";
-import { MintedArt } from "./minted-art.tsx";
 import { useGallery } from "./use-gallery.ts";
 
 // A game's public gallery of mints: how many players minted each milestone, then every mint, newest first, a page at a time. Anyone can read
@@ -30,7 +28,6 @@ export function MintedGallery({
   const { loadMore, state } = useGallery(game.id, api);
   const title = (milestoneId: string) =>
     game.milestones.find(({ id }) => id === milestoneId)?.title ?? milestoneId;
-  const cover = game.cover?.image ?? null;
   if (state.kind === "loading")
     return <StatusLamp label={galleryCopy.loading} tone="attention" />;
   if (state.kind === "failed") return <p role="alert">{galleryCopy.failed}</p>;
@@ -59,14 +56,6 @@ export function MintedGallery({
           <ul className="mint-gallery__grid">
             {state.mints.map((mint) => (
               <li className="mint-gallery-card" key={mint.claimId}>
-                <span className="mint-gallery-card__art">
-                  <MintedArt
-                    claimId={mint.claimId}
-                    cover={cover}
-                    name={title(mint.milestoneId)}
-                    src={galleryPictureHref(mint.claimId)}
-                  />
-                </span>
                 <strong>{title(mint.milestoneId)}</strong>
                 <small>{galleryCopy.mintedTo(mint.wallet)}</small>
                 <small>{mintedDay(mint.mintedAt)}</small>

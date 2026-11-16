@@ -2,7 +2,7 @@
 
 import {
   defaultUploadPolicy,
-  uploadContentTypes,
+  uploadContentTypesFor,
   type UploadPurpose,
 } from "@frostbite/shared/uploads";
 import {
@@ -24,8 +24,6 @@ import {
 } from "../client/rejection-copy.ts";
 import { BulkUploadList } from "./components/bulk-upload-list.tsx";
 import { useBulkUpload } from "./hooks/use-bulk-upload.ts";
-
-const accept = uploadContentTypes.join(",");
 
 // Many images at once, for use inside another page. Each file keeps its own name (so a list of items can
 // name its images), is sent a few at a time, and is reported on separately.
@@ -61,7 +59,7 @@ export function BulkUpload({
   return (
     <div className="arcade-form">
       <ArcadeFileDrop
-        accept={accept}
+        accept={uploadContentTypesFor(purpose).join(",")}
         hint={`${formatsToChoose}, up to ${limit} each, up to ${services.policy.bulkFileLimit} files in one go. Each file keeps its name.`}
         label={`Upload many: ${purposeLabels[purpose].toLowerCase()}`}
         onFiles={(files) => setSkipped(bulk.add(files).skipped)}

@@ -12,12 +12,13 @@ import { signInWithPasskey } from "./passkey-sign-in-flow.ts";
 import type { SignInViewProps } from "./views.ts";
 
 // Signing in with a passkey. "Signed in" is shown only after the server has said so, and the page moves on once.
-export function PasskeySignIn({ onSignedIn }: SignInViewProps) {
+export function PasskeySignIn({ onSignedIn, track }: SignInViewProps) {
   const [state, setState] = useState<"idle" | "signed-in" | "working" | Failed>(
     "idle",
   );
   async function signIn() {
     setState("working");
+    track.started();
     const result = await signInWithPasskey({
       ask: (options) => startAuthentication({ optionsJSON: options }),
       request: createRequester(sameOriginFetch),
@@ -25,6 +26,7 @@ export function PasskeySignIn({ onSignedIn }: SignInViewProps) {
     });
     setState(result.kind === "signed-in" ? "signed-in" : result);
     if (result.kind === "signed-in") onSignedIn();
+    else track.failed(result.outcome);
   }
   return (
     <div className="sign-in-method">

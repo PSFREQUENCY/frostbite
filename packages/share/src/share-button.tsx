@@ -18,6 +18,7 @@ export function ShareButton({
   heading,
   kicker,
   makeLink,
+  onShare,
   text,
   variant = "button",
 }: {
@@ -28,6 +29,8 @@ export function ShareButton({
   readonly heading: string;
   readonly kicker: string;
   readonly makeLink: () => Promise<string | null>;
+  // Told where the person chose to send it (see the sheet); nothing else about them. The control counts nothing itself.
+  readonly onShare?: ((destination: string) => void) | undefined;
   readonly text: string;
   // `icon` is a round button with the mark alone, to sit over a picture; `chip` is a small one with the words, for a thin bar.
   readonly variant?: "button" | "chip" | "icon";
@@ -53,6 +56,7 @@ export function ShareButton({
         kicker={kicker}
         makeLink={makeLink}
         onClose={() => setOpen(false)}
+        onShare={onShare}
         open={open}
         text={text}
       />

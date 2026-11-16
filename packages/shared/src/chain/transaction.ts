@@ -37,6 +37,17 @@ export const platformFeeRequestSchema = z
 
 // Chain-neutral fields every intent shares. Anything family-specific (UTXO funding, gas settings)
 // goes in `extension`, which the owning adapter validates with its own schema.
+// How many people one batch payment may pay: a transaction with more outputs than this is larger than the nodes relay, and a batch that large
+// is better as two.
+export const maxBatchPayments = 100;
+
+// One payment of a batch: how much, and to whom.
+export const batchPaymentSchema = z
+  .object({ amount: amountSchema, recipient: addressSchema })
+  .strict()
+  .readonly();
+export type BatchPayment = z.infer<typeof batchPaymentSchema>;
+
 const intentBase = {
   chain: chainRefSchema,
   extension: extensionSchema.optional(),
@@ -122,6 +133,15 @@ export const transactionIntentSchema = z
         recipient: addressSchema,
       })
       .strict(),
+    // Staff pay several people in one transaction (the batch of referral payouts): each payment names who is paid and how much, and the
+    // sender pays the network's fee on top of the sum.
+    z
+      .object({
+        ...intentBase,
+        operation: z.literal("pay-batch"),
+        payments: z.array(batchPaymentSchema).min(1).max(maxBatchPayments),
+      })
+      .strict(),
   ])
   .superRefine((intent, context) => {
     const embedded = [
@@ -138,6 +158,12 @@ export const transactionIntentSchema = z
         : []),
       ...(intent.operation === "transfer"
         ? [intent.recipient.chain, intent.amount.asset.chain]
+        : []),
+      ...(intent.operation === "pay-batch"
+        ? intent.payments.flatMap(({ amount, recipient }) => [
+            recipient.chain,
+            amount.asset.chain,
+          ])
         : []),
     ];
     if (embedded.some((chain) => chain !== intent.chain)) {
@@ -196,6 +222,12 @@ export const transactionSummarySchema = z
       .strict()
       .optional(),
     operation: chainOperationSchema,
+    // For a `pay-batch`: every payment, as the person signing it reads them.
+    payments: z
+      .array(batchPaymentSchema)
+      .min(1)
+      .max(maxBatchPayments)
+      .optional(),
     recipient: addressSchema.optional(),
   })
   .strict()
@@ -209,6 +241,10 @@ export const transactionSummarySchema = z
       ...(summary.contract ? [summary.contract.chain] : []),
       ...(summary.template?.at ? [summary.template.at.chain] : []),
       ...(summary.collectibleAt ? [summary.collectibleAt.chain] : []),
+      ...(summary.payments?.flatMap(({ amount, recipient }) => [
+        recipient.chain,
+        amount.asset.chain,
+      ]) ?? []),
       ...(summary.platformFee
         ? [
             summary.platformFee.recipient.chain,

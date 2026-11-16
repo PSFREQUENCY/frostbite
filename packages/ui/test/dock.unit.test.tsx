@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -147,5 +147,37 @@ describe("the dock", () => {
     await act(() => window.dispatchEvent(new Event("blur")));
     await click(button(container, "About"));
     expect(panels(container)[1]?.hidden).toBe(false);
+  });
+});
+
+describe("the notice over the dock", () => {
+  async function mountWith(notice: ReactNode) {
+    const container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    await act(() =>
+      root?.render(
+        <ArcadeDock
+          label="About this game"
+          notice={notice}
+          sections={sections}
+        />,
+      ),
+    );
+    return container;
+  }
+
+  it("is drawn in its own layer over the strip, not among the buttons and not in the sections", async () => {
+    const container = await mountWith(<p data-testid="note">Level up</p>);
+    const note = container.querySelector('[data-testid="note"]');
+    expect(note?.closest(".arcade-dock__notice")).not.toBeNull();
+    expect(note?.closest(".arcade-dock__strip")).toBeNull();
+    expect(note?.closest(".arcade-dock__panel")).toBeNull();
+    expect(note?.closest(".arcade-dock")).not.toBeNull();
+  });
+
+  it("leaves no layer behind when there is no notice", async () => {
+    const container = await mountWith(undefined);
+    expect(container.querySelector(".arcade-dock__notice")).toBeNull();
   });
 });

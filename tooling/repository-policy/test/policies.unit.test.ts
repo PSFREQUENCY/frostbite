@@ -99,6 +99,38 @@ describe("source policies", () => {
     ]);
   });
 
+  it("keeps telemetry vendors inside the adapter files", async () => {
+    const [root, outside] = await temporaryFile(
+      "apps/web/src/report.ts",
+      'import posthog from "posthog-js";\nimport { PostHog } from "posthog-node";\nimport { x } from "@posthog/next";\nvoid [posthog, PostHog, x];\n',
+    );
+    await expect(findBoundaryViolations(root, [outside])).resolves.toEqual([
+      "apps/web/src/report.ts imports telemetry vendor posthog-js; report through @frostbite/telemetry and keep the vendor in an adapter file.",
+      "apps/web/src/report.ts imports telemetry vendor posthog-node; report through @frostbite/telemetry and keep the vendor in an adapter file.",
+      "apps/web/src/report.ts imports telemetry vendor @posthog/next; report through @frostbite/telemetry and keep the vendor in an adapter file.",
+    ]);
+    for (const allowed of [
+      "packages/telemetry/src/analytics/providers/posthog.ts",
+      "packages/telemetry/src/errors/providers/posthog.ts",
+      "packages/telemetry/src/providers-shared/posthog-client.ts",
+    ]) {
+      const [adapterRoot, adapter] = await temporaryFile(
+        allowed,
+        'import posthog from "posthog-js";\nvoid posthog;\n',
+      );
+      await expect(
+        findBoundaryViolations(adapterRoot, [adapter]),
+      ).resolves.toEqual([]);
+    }
+    const [portRoot, port] = await temporaryFile(
+      "packages/telemetry/src/analytics/index.ts",
+      'import posthog from "posthog-js";\nvoid posthog;\n',
+    );
+    await expect(
+      findBoundaryViolations(portRoot, [port]),
+    ).resolves.toHaveLength(1);
+  });
+
   it("allows shared domains to import another public shared domain", async () => {
     const [root, file] = await temporaryFile(
       "packages/shared/src/features.ts",

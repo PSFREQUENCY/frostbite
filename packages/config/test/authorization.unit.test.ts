@@ -4,6 +4,11 @@ import {
 } from "@frostbite/shared/accounts";
 import { collectionReviewCapability } from "@frostbite/shared/collections";
 import { gameAdminCapability } from "@frostbite/shared/games";
+import {
+  referralAdministerCapability,
+  referralPayCapability,
+  referralViewCapability,
+} from "@frostbite/shared/referrals";
 import { describe, expect, it } from "vitest";
 
 import { authorizationPolicy } from "../src/policy/authorization.ts";
@@ -31,6 +36,23 @@ describe("authorization policy", () => {
     expect(authorizationPolicy.platform.reviewer).not.toContain(
       gameAdminCapability,
     );
+  });
+
+  it("lets any staff member and administrator look at the referral program, and only an administrator change it or freeze a referrer", () => {
+    const { admin, reviewer, staff } = authorizationPolicy.platform;
+    expect(staff).toContain(referralViewCapability);
+    expect(admin).toContain(referralViewCapability);
+    expect(reviewer).not.toContain(referralViewCapability);
+    expect(admin).toContain(referralAdministerCapability);
+    expect(staff).not.toContain(referralAdministerCapability);
+    expect(reviewer).not.toContain(referralAdministerCapability);
+  });
+
+  it("lets staff and administrators sign a batch that pays referrers, and not reviewers", () => {
+    const { admin, reviewer, staff } = authorizationPolicy.platform;
+    expect(staff).toContain(referralPayCapability);
+    expect(admin).toContain(referralPayCapability);
+    expect(reviewer).not.toContain(referralPayCapability);
   });
 
   it("gives an administrator everything a staff member or a reviewer may do, and the power to manage roles", () => {

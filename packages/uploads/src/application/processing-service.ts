@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 
 import type { ImageProcessor } from "@frostbite/media/processing";
+import { prepareSvg } from "@frostbite/media/svg";
 import {
   parseObjectKey,
   type ObjectKey,
@@ -12,6 +13,7 @@ import { uuidV7Schema, type UuidV7 } from "@frostbite/shared/identifiers";
 import {
   derivativeMaxSide,
   derivativeKinds,
+  svgContentType,
   type DerivativePolicy,
   type UploadPolicy,
 } from "@frostbite/shared/uploads";
@@ -90,8 +92,21 @@ export function createAssetProcessingService(dependencies: {
     // A longer object is cut off by the read cap; a shorter one cannot match the recorded hash.
     if (bytes === null || sha256(bytes) !== subject.contentSha256)
       return { reason: "content-changed", state: "unprocessable" };
+    // A vector picture is cleaned again here, from the bytes that were checked, and only the cleaned text goes to the decoder.
+    let source = bytes;
+    if (subject.contentType === svgContentType) {
+      const prepared = prepareSvg(bytes, uploadPolicy.svg);
+      if (!prepared.ok)
+        return { reason: prepared.reason, state: "unprocessable" };
+      if (
+        prepared.width !== subject.width ||
+        prepared.height !== subject.height
+      )
+        return { reason: "decoded-size-mismatch", state: "unprocessable" };
+      source = prepared.svg;
+    }
     const result = await processor.process({
-      bytes,
+      bytes: source,
       derivatives: derivativeKinds.map((kind) => ({
         kind,
         maxSide: derivativeMaxSide(derivativePolicy, kind),

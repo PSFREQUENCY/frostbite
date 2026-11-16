@@ -48,6 +48,11 @@ export async function installFakeWallet(
   );
 }
 
+// How long the widget may take to show a wallet again after a page loads. The wallet library loads on demand (about 600 KB) and then asks the
+// extension, so on a busy machine (three browser shards and a server on one) the default five seconds is too little to tell a slow page from a
+// broken one.
+export const walletReconnectTimeoutMs = 20_000;
+
 // The wallet widget at the end of every page's header, and the menu it opens.
 export const walletButton = (page: Page) =>
   page.locator(".wallet-widget__trigger");
@@ -61,7 +66,9 @@ export async function connectWallet(page: Page, wallet: TestWallet) {
   await page
     .getByRole("button", { name: "Connect UniSat", exact: true })
     .click();
-  await expect(walletButton(page)).toContainText(wallet.address.slice(0, 6));
+  await expect(walletButton(page)).toContainText(wallet.address.slice(0, 6), {
+    timeout: walletReconnectTimeoutMs,
+  });
 }
 
 // Signs in as a player does: on the sign-in page, which is the only place that signs anyone in. Connects the (fake) wallet there, signs the
@@ -74,7 +81,9 @@ export async function signInWithWallet(page: Page, wallet: TestWallet) {
     .getByRole("button", { name: "Sign in with wallet" })
     .click();
   await expect(page).not.toHaveURL(/\/sign-in/u);
-  await expect(walletButton(page)).toContainText(wallet.address.slice(0, 6));
+  await expect(walletButton(page)).toContainText(wallet.address.slice(0, 6), {
+    timeout: walletReconnectTimeoutMs,
+  });
 }
 
 // Opens the widget's menu if it is not open.

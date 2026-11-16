@@ -66,6 +66,7 @@ export function useLiveWalletConnection(): WalletConnectionClient {
     connecting: state.isConnecting,
     network: state.network,
     provider: state.provider ?? null,
+    publicKey: state.publicKey,
     connect: state.connect,
     disconnect: state.disconnect,
     signMessage: async (message) => {
@@ -77,7 +78,7 @@ export function useLiveWalletConnection(): WalletConnectionClient {
     },
     signPsbt: async (psbt, inputs) => {
       requireConnectedAccount();
-      const signed = requireSignedPsbt(
+      const signed = await requireSignedPsbt(
         await state.signPsbt({
           broadcast: false,
           finalize: true,

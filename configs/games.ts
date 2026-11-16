@@ -21,6 +21,7 @@ import { shardMatchGame } from "./games/shard-match.ts";
 import { auroraPulseGame } from "./games/aurora-pulse.ts";
 import { pocketDragonGame } from "./games/pocket-dragon.ts";
 import { degenDungeonGame } from "./games/degen-dungeon.ts";
+import { permafrostGame } from "./games/permafrost.ts";
 // game:new adds imports above this line.
 
 // Games that exist to check the platform, listed only where it is run for development or tests.
@@ -49,6 +50,7 @@ export const games = defineGames([
   shardMatchGame,
   auroraPulseGame,
   degenDungeonGame,
+  permafrostGame,
   // game:new adds games above this line.
 ]);
 

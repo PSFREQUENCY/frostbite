@@ -4,11 +4,11 @@ import {
   walletChallengeResponseSchema,
   walletChangedResponseSchema,
   walletEmptyRequestSchema,
+  walletSignInVerifySchema,
   walletSignedInResponseSchema,
-  walletVerifyRequestSchema,
   type WalletChallengeRequest,
   type WalletChallengeResponse,
-  type WalletVerifyRequest,
+  type WalletSignInVerify,
 } from "@frostbite/auth";
 import type { HttpOperation } from "@frostbite/http";
 import { unauthenticated } from "@frostbite/http/outcome";
@@ -36,34 +36,37 @@ export function createWalletSignInOperations(
       outputSchema: walletChallengeResponseSchema,
       ...walletAuthRoutes.beginSignIn,
     };
-  const verify: HttpOperation<
-    WalletVerifyRequest,
-    { readonly signedIn: true }
-  > = {
-    access: { kind: "public" },
-    applicationErrors: ["conflict", "unauthorized"],
-    execute: async (input) => {
-      const result = await getServices().auth.verify({
-        challengeId: uuidV7Schema.parse(input.challengeId),
-        expectedAction: "sign-in",
-        signature: input.signature,
-      });
-      return result.ok
-        ? {
-            effects: [
-              { kind: "replace-platform-session", token: result.sessionToken },
-            ],
-            ok: true,
-            value: { signedIn: true },
-          }
-        : verificationFailure(result.code);
-    },
-    idempotency: "none",
-    input: "json",
-    inputSchema: walletVerifyRequestSchema,
-    outputSchema: walletSignedInResponseSchema,
-    ...walletAuthRoutes.verifySignIn,
-  };
+  const verify: HttpOperation<WalletSignInVerify, { readonly signedIn: true }> =
+    {
+      access: { kind: "public" },
+      applicationErrors: ["conflict", "unauthorized"],
+      execute: async (input) => {
+        const result = await getServices().auth.verify({
+          challengeId: uuidV7Schema.parse(input.challengeId),
+          expectedAction: "sign-in",
+          // Used only if this sign-in makes the account: the code of whoever referred the person.
+          referralCode: input.referralCode ?? null,
+          signature: input.signature,
+        });
+        return result.ok
+          ? {
+              effects: [
+                {
+                  kind: "replace-platform-session",
+                  token: result.sessionToken,
+                },
+              ],
+              ok: true,
+              value: { signedIn: true },
+            }
+          : verificationFailure(result.code);
+      },
+      idempotency: "none",
+      input: "json",
+      inputSchema: walletSignInVerifySchema,
+      outputSchema: walletSignedInResponseSchema,
+      ...walletAuthRoutes.verifySignIn,
+    };
   const signOut: HttpOperation<
     Record<string, never>,
     { readonly changed: true }

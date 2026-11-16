@@ -82,3 +82,22 @@
     transform: translateY(0.75rem);
   }
 }
+/* A passing notice sits over the strip, exactly its height, so it neither moves the game nor covers it. Taps go through to the buttons. */
+.arcade-dock__notice {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--arcade-dock-height);
+  padding-inline: 0.5rem;
+  pointer-events: none;
+}
+.arcade-dock__notice .arcade-toast {
+  overflow: hidden;
+  padding: 0.25rem 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

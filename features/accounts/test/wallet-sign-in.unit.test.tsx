@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { accountOutcomes } from "@frostbite/shared/account-outcomes";
 import { act } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   address,
@@ -21,9 +21,22 @@ import {
 import { WalletSignIn } from "../src/sign-in/wallet-sign-in.tsx";
 
 const onSignedIn = vi.fn();
-const view = (network: "signet" | "mainnet" = "signet") => (
-  // A new function on every render, as the sign-in surface gives it: moving on must still happen once.
-  <WalletSignIn expectedNetwork={network} onSignedIn={() => onSignedIn()} />
+const track = { failed: vi.fn(), started: vi.fn() };
+const view = (
+  network: "signet" | "mainnet" = "signet",
+  referralCode: string | null = null,
+) => (
+  // A new function and a new tracker on every render, as the sign-in surface gives them: moving on, and counting a failure, must still
+  // happen once.
+  <WalletSignIn
+    expectedNetwork={network}
+    onSignedIn={() => onSignedIn()}
+    referralCode={referralCode}
+    track={{
+      failed: (reason) => track.failed(reason),
+      started: () => track.started(),
+    }}
+  />
 );
 const press = (name: string) =>
   act(async () => {
@@ -34,6 +47,11 @@ const press = (name: string) =>
   });
 
 describe("signing in with a wallet on the sign-in page", () => {
+  beforeEach(() => {
+    track.failed.mockClear();
+    track.started.mockClear();
+  });
+
   it("asks to connect a wallet first, and opens the chooser when asked", async () => {
     onSignedIn.mockClear();
     answers["/api/v1/auth/methods"] = () => denied("unauthorized", 401);
@@ -66,6 +84,8 @@ describe("signing in with a wallet on the sign-in page", () => {
     await press("Sign in with wallet");
     expect(container.textContent).toContain("Signed in. Taking you back…");
     expect(onSignedIn).toHaveBeenCalledTimes(1);
+    expect(track.started).toHaveBeenCalledTimes(1);
+    expect(track.failed).not.toHaveBeenCalled();
     expect(
       requests
         .map(({ path }) => path)
@@ -75,6 +95,29 @@ describe("signing in with a wallet on the sign-in page", () => {
       "/api/v1/auth/wallet/challenge",
       "/api/v1/auth/wallet/verify",
       "/api/v1/auth/methods",
+    ]);
+  });
+
+  it("sends the code of whoever invited the person with the signature, and sends none when nobody did", async () => {
+    Object.assign(connection, { address, connected: true, provider: "xverse" });
+    let signedIn = false;
+    Object.assign(answers, {
+      "/api/v1/auth/methods": () =>
+        signedIn ? methods([address]) : denied("unauthorized", 401),
+      "/api/v1/auth/wallet/challenge": challenge,
+      "/api/v1/auth/wallet/verify": () => {
+        signedIn = true;
+        return json({ signedIn: true });
+      },
+    });
+    await show(view("signet", "23456789"));
+    await settle();
+    await press("Sign in with wallet");
+    const verified = requests.filter(
+      ({ path }) => path === "/api/v1/auth/wallet/verify",
+    );
+    expect(verified.map(({ body }) => body)).toEqual([
+      expect.objectContaining({ referralCode: "23456789" }),
     ]);
   });
 
@@ -108,6 +151,19 @@ describe("signing in with a wallet on the sign-in page", () => {
     );
     expect(onSignedIn).not.toHaveBeenCalled();
     expect(container.textContent).not.toContain("Signed in. Taking you back");
+    // Counted by the outcome's code, once, however many times the page renders again.
+    await show(view());
+    await settle();
+    expect(track.started).toHaveBeenCalledTimes(1);
+    expect(track.failed).toHaveBeenCalledExactlyOnceWith("wallet-not-verified");
+  });
+
+  it("does not count a sign-in that nobody began", async () => {
+    answers["/api/v1/auth/methods"] = () => methods([address]);
+    await show(view());
+    await settle();
+    expect(track.started).not.toHaveBeenCalled();
+    expect(track.failed).not.toHaveBeenCalled();
   });
 
   it("warns when the wallet is on another network than the platform's", async () => {

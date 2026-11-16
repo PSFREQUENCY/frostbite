@@ -6,6 +6,7 @@ import { gameMilestonePolicyLabels } from "../domain/catalog.ts";
 import {
   canStartClaim,
   claimCopy,
+  claimPreparingCopy,
   claimTone,
   showsDelayed,
 } from "../domain/claim-copy.ts";
@@ -19,6 +20,8 @@ export const replayCheckable =
 // How a player starts, or looks again at, the claim of a milestone.
 export interface MilestoneClaiming {
   readonly latestOf: (milestoneId: string) => GameClaim | null;
+  // The milestone whose claim is being made ready, if any: its button shows it, and no other claim can be started meanwhile.
+  readonly preparing?: string | null;
   readonly review: (claimId: string) => void;
   readonly start: (milestoneId: string) => void;
 }
@@ -76,10 +79,14 @@ export function MilestoneCard({
         action={
           claim === undefined ? undefined : canStartClaim(latest) ? (
             <ArcadeActionButton
+              busy={claim.preparing === milestone.id}
+              disabled={claim.preparing != null}
               onClick={() => claim.start(milestone.id)}
               tone="mint"
             >
-              {`Claim ${milestone.title}`}
+              {claim.preparing === milestone.id
+                ? claimPreparingCopy.button
+                : `Claim ${milestone.title}`}
             </ArcadeActionButton>
           ) : (
             <ArcadeActionButton

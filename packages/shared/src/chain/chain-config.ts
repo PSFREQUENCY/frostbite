@@ -15,6 +15,7 @@ export const chainOperations = [
   "define-milestone",
   "set-claims-paused",
   "transfer",
+  "pay-batch",
 ] as const;
 
 export const chainRoleSchema = z.enum(chainRoles);

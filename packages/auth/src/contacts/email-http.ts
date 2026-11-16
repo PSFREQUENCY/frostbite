@@ -1,3 +1,4 @@
+import { referralCodeSchema } from "@frostbite/shared/referrals";
 import { z } from "zod";
 
 // Signing in with a code sent by email. Both steps are open to anyone, because there is no session yet.
@@ -49,6 +50,11 @@ export const emailCodeVerifySchema = z.strictObject({
   code: z.string().min(1).max(12),
   email: emailTextSchema,
 });
+// Signing in, which makes an account if the address has none: the code of whoever referred the person may go with it. Linking an address to an
+// account that exists takes no such code (`emailCodeVerifySchema`).
+export const emailCodeSignInVerifySchema = emailCodeVerifySchema.extend({
+  referralCode: referralCodeSchema.optional(),
+});
 export const emailCodeSignedInResponseSchema = z.strictObject({
   signedIn: z.literal(true),
 });
@@ -71,3 +77,4 @@ export const emailLinkedResponseSchema = z.strictObject({
 export type EmailAddressesView = z.infer<typeof emailAddressesResponseSchema>;
 export type EmailCodeRequest = z.infer<typeof emailCodeRequestSchema>;
 export type EmailCodeVerify = z.infer<typeof emailCodeVerifySchema>;
+export type EmailCodeSignInVerify = z.infer<typeof emailCodeSignInVerifySchema>;

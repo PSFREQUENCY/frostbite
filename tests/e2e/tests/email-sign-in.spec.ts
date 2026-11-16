@@ -62,11 +62,13 @@ test("a signed-out visitor to a protected page signs in with an emailed code and
   await askForCode(page, address);
   const code = await codeSentTo(address);
   // A wrong code is refused with the same words whoever's it is, and the right one still works afterwards (five tries).
-  await page.getByLabel("Code").fill(code === "000000" ? "111111" : "000000");
+  await page
+    .getByLabel("Code", { exact: true })
+    .fill(code === "000000" ? "111111" : "000000");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(alertOf(page)).toContainText("not right, or it has expired");
 
-  await page.getByLabel("Code").fill(code);
+  await page.getByLabel("Code", { exact: true }).fill(code);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/u);
   const cookies = await page.context().cookies();
@@ -88,7 +90,7 @@ test("asking again at once is refused and says when to try again; a code that si
   await expect(alertOf(page)).toContainText("A code was sent recently");
 
   const code = await codeSentTo(address);
-  await page.getByLabel("Code").fill(code);
+  await page.getByLabel("Code", { exact: true }).fill(code);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/$/u);
 

@@ -55,6 +55,10 @@ export interface GameClaimsDependencies {
   // The fee in force on the chain right now, read for each claim that starts.
   platformFee(chain: ChainRef): Promise<PlatformFeeSetting | null>;
   readonly repository: GameClaimRepository;
+  // Told of a claim that took effect (the network's records show it complete), each time the claim is looked at while it is complete, so a
+  // failure to act on it is made good by the next look and whoever acts on it must do so once however often it is told. Optional: the rewards
+  // that follow a claim are not part of claiming. A failure here never fails the claim; it is reported like any other.
+  completed?(claim: StoredClaim): Promise<void>;
   // Told of anything unexpected that stopped a claim from starting (what it was, never the player's address), so an operator can see why
   // a player was only told "try again". Optional: nothing is lost when it is absent, the player is told the same.
   report?(failure: { readonly error: unknown; readonly step: string }): void;
