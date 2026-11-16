@@ -21,29 +21,25 @@ const once = (
   }) as const;
 
 // Degen Dungeon 1: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests
-// a day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach and
-// the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, the lantern night and the moon
-// colony fill the city between the story's quests. The milestones are one for each story quest, ten top skills and the hidden ones.
+// a day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA
+// Beach and the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, Zuri's Degen Dash (a
+// nine-stage race round the city, from the second day), the lantern night and the moon colony fill the city between the story's quests.
+// The milestones are the story's (its quests, the Dash won and Moon Night's lantern), ten top skills and the hidden ones.
 // The title, the words and every milestone are a draft for the owner; a milestone's id is one the game's rules decide
 // (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, in at the windows and over the roofs, out across the lawns and the skate park: step into the corner shops and run their washers, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: dance in three clubs, catch a film at the cinema, plug into the VR dome, skate the park, play the arcade, read in the library, and bank your DUN. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam, and S's letters lie among the flyers, three a day. In the mania, flying saucers come for the city: bring glow sticks and pizza to make peace, or wake up back at the start; after that they visit as friends, and thirteen beam-ups leave you a saucer to fly. Weather turns from fog to blizzards to storms. On Moon Night, send a lantern up to the crypto gods; on the last morning, your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Nine masked statues stand one in each borough, and their masks wake once the story is won. Reach the top and the Ice Runner rises. A milestone for every story quest, ten top skills and hidden achievements to find. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, in at the windows and over the roofs: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: three clubs, a cinema, a VR dome, a skate park, an arcade, a library and a bank. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam, and S's letters lie among the flyers, three a day. In the mania, flying saucers come for the city: bring glow sticks and pizza to make peace, or wake up back at the start; after that they visit as friends, and thirteen beam-ups leave you a saucer to fly. Weather turns from fog to blizzards to storms. From day two, Zuri sells tickets to the Degen Dash, nine stages round the city against the clock: only top skills win its 50,000 DUN, trophy, art and parade, and on Moon Night you must finish it. Then send a lantern up to the crypto gods; on the last morning, your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Nine masked statues stand one in each borough, and their masks wake once the story is won. Reach the top and the Ice Runner rises. Milestones for the story, ten top skills and hidden achievements to find. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
-    // One for each of the story's twenty quests: two on the first morning, then three a day.
-    once(
-      "heard-frost",
-      "Heard Frost",
-      "Day 1, quest 2: hear Frost's speech to the end.",
-      "The ice speaks once. Everybody remembers where they stood.",
-    ),
+    // The story's: one for each of its quests from the seed paper on (Frost's speech and finishing the Degen Dash have none), then the Dash
+    // won and Moon Night's lantern.
     once(
       "seed-paper",
       "Write it down",
-      "Day 1, quest 3: write down your seed words and choose where the paper lives.",
+      "Day 1, quest 2: write down your seed words and choose where the paper lives.",
       "The Faucet comes with a phone and a pen.",
     ),
     once(
@@ -127,14 +123,8 @@ export const degenDungeonGame = defineGame({
     once(
       "moon-party",
       "Moon party",
-      "Day 6, quest 2: join the party under Moon Tower.",
+      "Day 6, quest 3: once the Degen Dash is run, join the party under Moon Tower.",
       "The whole island, one tower, and a moon too big for the sky.",
-    ),
-    once(
-      "lantern",
-      "Message to the gods",
-      "Day 6, quest 3: send a lantern up from the lantern ground after dark on Moon Night.",
-      "Write your message, pick a wish, and watch it rise with thousands more.",
     ),
     once(
       "full-crew",
@@ -153,6 +143,18 @@ export const degenDungeonGame = defineGame({
       "SHA Beach",
       "Day 7, quest 3: run the oldest tunnel to SHA Beach at sunrise.",
       "The footprints run to the waterline. Do not let the Vests get there first.",
+    ),
+    once(
+      "degen-dash",
+      "Degen Dash champion",
+      "Win the Degen Dash: clear all nine stages round the city under par, with no heat. Zuri sells tickets from day 2; on Moon Night, finishing it is quest 2.",
+      "Run, duck, crawl, climb, look, drive and know your stuff. The prize: 50,000 DUN, a trophy, art and a parade.",
+    ),
+    once(
+      "lantern",
+      "Message to the gods",
+      "Moon Night side quest: send a lantern up from the lantern ground after dark.",
+      "Write your message, pick a wish, and watch it rise with thousands more.",
     ),
     // The top skills.
     once(
@@ -289,7 +291,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "bb0dce229687f0b8d3e4515079c9326185fcef82035f1c87fb7a655f1883867b",
+        "2fe873d221006824f87b09522b0024aa67018d70eeb0e1f4eecac3f8d6e27ed2",
       version: 1,
     },
   },

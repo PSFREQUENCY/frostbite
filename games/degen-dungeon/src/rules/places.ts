@@ -5,7 +5,7 @@ import { saucerOpen } from "./invasion.ts";
 import { parkedRides } from "./parked.ts";
 import { statueId, statues } from "./statues.ts";
 import { rooms } from "./rooms.ts";
-import { sites } from "./sites.ts";
+import { dashSites, sites } from "./sites.ts";
 import { bit, days, type Spot } from "./spot.ts";
 import type { DayState, Point } from "./types.ts";
 import { nodeOf, venues } from "./venues.ts";
@@ -185,25 +185,30 @@ const fixed: readonly Spot[] = [
     ...launchpad,
   },
 ];
-export const spots: readonly Spot[] = [...fixed, ...parkedRides(fixed)];
+export const spots: readonly Spot[] = [
+  ...fixed,
+  ...parkedRides(fixed),
+  ...dashSites,
+];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);
 
-// Whether a place is there for this hero today (a hidden one only while frost vision is on).
+// Whether a place is there for this hero today (a hidden one only while frost vision is on, a Dash one only while a run is on).
 export const openTo = (
   spot: Spot,
-  day: Pick<DayState, "beamups" | "day" | "done" | "hero" | "looking">,
+  day: Pick<DayState, "beamups" | "dash" | "day" | "done" | "hero" | "looking">,
 ): boolean =>
   (spot.on === undefined || (spot.on & (1 << day.day)) !== 0) &&
   (spot.only === undefined || spot.only === day.hero) &&
   (spot.hidden !== true || day.looking) &&
-  (spot.saucer !== true || saucerOpen(day));
+  (spot.saucer !== true || saucerOpen(day)) &&
+  (spot.dash !== true || day.dash > 0);
 
 // The open place within reach, the nearest if there are several.
 export function nearest(
   day: Pick<
     DayState,
-    "beamups" | "day" | "done" | "hero" | "looking" | "x" | "z"
+    "beamups" | "dash" | "day" | "done" | "hero" | "looking" | "x" | "z"
   >,
 ): Spot | null {
   let best: Spot | null = null;

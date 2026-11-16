@@ -1,4 +1,6 @@
 import { lastDay } from "../rules/calendar.ts";
+import { stages } from "../rules/course.ts";
+import { clockOf, dashPar } from "../rules/dash.ts";
 import { heroes } from "../rules/heroes.ts";
 import {
   beamupsToday,
@@ -8,10 +10,11 @@ import {
 } from "../rules/invasion.ts";
 import { questDone, questOf, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
+import { dashPack } from "../script/dash.ts";
 import { letters } from "../script/letters.ts";
 import { element } from "./elements.ts";
 import { sidesOf } from "../sides.ts";
-import { goalFor, questLineOf } from "./words.ts";
+import { clockText, goalFor, questLineOf } from "./words.ts";
 
 // The backpack, which slides out from the side: today's quests and side quests, what the hero carries (DUN, loot, the freezer), the tools and fits they have,
 // the crew, where the seed paper is, the clues found (S's words and every letter picked up today, to read in full), tonight's lantern, and
@@ -54,6 +57,28 @@ function visitorsLog(
   ];
 }
 
+// The Degen Dash today: a ticket held, a run on (its stage and clock), and what a finish brought (the trophy and the champion's print for
+// a win, a medal for a finish), with the last time over the line.
+function dashLog(
+  day: DayState,
+): readonly (readonly [string, readonly string[]])[] {
+  const won = day.done.includes("dash-won");
+  const lines = [
+    ...(day.tickets > 0 ? [dashPack.ticket] : []),
+    ...(day.dash > 0
+      ? [
+          `Stage ${String(day.dash)} of ${String(stages.length)}, ${clockText(clockOf(day))} on the clock (par ${clockText(dashPar)})`,
+        ]
+      : []),
+    ...(won ? [dashPack.trophy, dashPack.print] : []),
+    ...(!won && day.done.includes("dash-finished") ? [dashPack.medal] : []),
+    ...(day.dashTime > 0
+      ? [`Last time over the line: ${clockText(day.dashTime)}`]
+      : []),
+  ];
+  return lines.length === 0 ? [] : [["The Degen Dash", lines]];
+}
+
 // Today's three quests, ticked off, with the one the hero is on marked; then the side quests, with how far along the counted ones are.
 // On a trip back to day one there is only the trip's line.
 function questLog(
@@ -72,6 +97,7 @@ function questLog(
       ),
     ],
     ...visitorsLog(day),
+    ...dashLog(day),
     [
       `Side quests: ${String(sidesDone)} of ${String(sides.length)}`,
       sides.map(

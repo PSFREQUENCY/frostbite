@@ -1,3 +1,4 @@
+import { dashTalks } from "./dash.ts";
 import { shopTalks } from "./shops.ts";
 import { venueTalks } from "./venues.ts";
 
@@ -80,6 +81,7 @@ export const talks: Readonly<
   },
   ...shopTalks,
   ...venueTalks,
+  ...dashTalks,
 };
 
 // What Frost says about S, a different hint each day.
@@ -90,14 +92,13 @@ export const frostOnS: readonly string[] = [
   "Nine screens, nine first mornings. Somebody was watching all of us.",
 ];
 
-// What the street days' quests ask (`story.ts`), Moon Night's lantern and the last morning's crew; and, once the first morning's two are
-// done, home to sleep.
+// What the street days' quests ask (`story.ts`), Moon Night's Degen Dash and the last morning's crew; and, once the first morning's two
+// are done, home to sleep.
 export const questLines: Readonly<Record<string, string>> = {
   crew: "Gather two of your crew: with yours, their words make three.",
+  dash: "Get a ticket from Zuri at the Degen Dash arch, north of Ticker Square, and run all nine stages to the finish.",
   gig: "Take one honest gig and deliver it.",
   home: "Go home and sleep. Tomorrow the hustle starts.",
-  lantern:
-    "Once night falls, send a lantern up from the lantern ground in the Old Floe.",
   paper: "Get your first DUN at the Faucet and write down your words.",
   ride: "Ride the Green Line Express to the next stop.",
   speech: "Hear Frost's speech in Ticker Square.",

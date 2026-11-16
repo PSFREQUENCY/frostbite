@@ -4,8 +4,9 @@ import { gameId, verifierId, verifierVersion } from "./rules/constants.ts";
 
 // One legal day the verifier is shown with, the first morning's two quests and a little more: Rally wakes in The Exchange, inside the
 // FREE FROST riot, walks out through it, hears Frost's speech, takes his first DUN from the Faucet and writes his seed paper (into the
-// freezer), carries a parcel from the courier desk to the yacht club, and walks home to sleep. It is a plain record, not one built with the SDK's recorder, so the published verifier carries only the rules. A pair
-// is a heading and the tick it was taken on, a number alone is the tick of an act, and a triple is an answer.
+// freezer), carries a parcel from the courier desk to the yacht club, and walks home to sleep. Its one milestone is the seed paper's:
+// the speech is a quest without one. It is a plain record, not one built with the SDK's recorder, so the published verifier carries only
+// the rules. A pair is a heading and the tick it was taken on, a number alone is the tick of an act, and a triple is an answer.
 type Step =
   | number
   | readonly [dir: number, tick: number]
@@ -56,7 +57,7 @@ const inputOf = (step: Step): RunInput => {
 
 export function sampleRun(): RunRecord {
   return {
-    claims: ["heard-frost", "seed-paper"],
+    claims: ["seed-paper"],
     config: { day: 1, hero: 7 },
     gameId,
     inputs: steps.map(inputOf),

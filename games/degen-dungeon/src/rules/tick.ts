@@ -1,4 +1,5 @@
 import { eraOf, stormEra } from "./calendar.ts";
+import { dashed } from "./dash.ts";
 import { invade } from "./invasion.ts";
 import { launch } from "./moonshot.ts";
 import {
@@ -87,6 +88,7 @@ export function ticked(day: Draft): void {
   money(day);
   launch(day);
   invade(day);
+  dashed(day);
   // Frost vision comes back every thirty seconds.
   if (day.tick % visionEvery === 0)
     day.vision = Math.max(day.vision, visionTicks);

@@ -17,6 +17,8 @@ export interface Gift {
 }
 export interface Need {
   readonly cool?: true;
+  // The Degen Dash finished today (`dash.ts`).
+  readonly dash?: true;
   // Someone from this list is in the crew.
   readonly crew?: readonly number[];
   readonly crewSize?: number;
@@ -212,8 +214,13 @@ export const dreams: readonly Beat[] = [
   pick(5, 0, { rep: 100 }, { dun: 2_000 }),
 ];
 
-// Moon Night for everyone after the dream: the party under Moon Tower, then the last door, which needs the crew's three words.
-export const party: Beat = { at: { x: 18_000, z: 16_800 }, gift: { fomo: 10 } };
+// Moon Night for everyone after the dream and the Degen Dash: the party under Moon Tower, then the last door, which needs the crew's three
+// words.
+export const party: Beat = {
+  at: { x: 18_000, z: 16_800 },
+  gift: { fomo: 10 },
+  need: { dash: true },
+};
 export const genesis: Beat = {
   at: { x: 18_000, z: 19_500 },
   need: { crewSize: 2 },

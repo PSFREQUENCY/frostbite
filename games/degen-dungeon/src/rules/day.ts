@@ -120,6 +120,11 @@ export function startDay(
     beamed: 0,
     beamups: 0,
     words: 0,
+    dash: 0,
+    dashFrom: 0,
+    dashTime: 0,
+    tickets: 0,
+    zuri: null,
     x: home.x,
     z: home.z,
   };

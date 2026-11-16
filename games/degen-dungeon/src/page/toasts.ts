@@ -1,8 +1,10 @@
+import { stages } from "../rules/course.ts";
 import { saucerBeamups } from "../rules/invasion.ts";
 import { questDone, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { sidesOf } from "../sides.ts";
-import { questLineOf } from "./words.ts";
+import { dashCheers } from "../script/dash.ts";
+import { dashLine, questLineOf } from "./words.ts";
 
 // A cheer over the picture when a quest or a side quest is done: which one, and how many of today's are done, for a few seconds. The
 // first look at a day only notes what is already done, so waking up cheers nothing, and a new day starts the count again.
@@ -57,7 +59,34 @@ function finished(
             ],
       ]);
     });
-  return new Map(cheers);
+  return new Map([...cheers, ...dashCheered(day)]);
+}
+
+// The Degen Dash: a ticket in hand, the clock started, each gate cleared on a run, and the finish (a win cheered over the finish).
+function dashCheered(day: DayState): readonly Cheer[] {
+  const of = `OF ${String(stages.length)}`;
+  const gates = Array.from(
+    { length: Math.max(0, day.dash - 1) },
+    (_, gate) => gate + 1,
+  ).map((gate): Cheer => [
+    `dash-gate-${String(gate)}`,
+    [`STAGE ${String(gate)} ${of} CLEARED`, dashLine(day) ?? ""],
+  ]);
+  return [
+    ...(day.tickets > 0
+      ? [["dash-ticket", ["TICKET IN HAND", dashCheers.ticket]] as const]
+      : []),
+    ...(day.dash > 0
+      ? [["dash-go", ["THE DEGEN DASH IS ON", dashCheers.go]] as const]
+      : []),
+    ...gates,
+    ...(day.done.includes("dash-finished")
+      ? [["dash-finished", ["DASH FINISHED", dashCheers.finished]] as const]
+      : []),
+    ...(day.done.includes("dash-won")
+      ? [["dash-won", ["DEGEN DASH CHAMPION", dashCheers.champion]] as const]
+      : []),
+  ];
 }
 
 export function createToasts(card: HTMLElement) {

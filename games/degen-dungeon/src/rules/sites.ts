@@ -1,5 +1,6 @@
 import { eras } from "./calendar.ts";
-import type { Spot } from "./spot.ts";
+import { dashArch, dashCar, dashDesk } from "./course.ts";
+import { days, type Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
 import { at, dockWater, helipad, saucerPad } from "./world.ts";
 
@@ -211,5 +212,35 @@ export const sites: readonly Spot[] = [
     rank: 0,
     ride: "saucer",
     saucer: true,
+  },
+];
+
+// The Degen Dash (`dash.ts`): Zuri's arch from the second day on, and her desk and the Dash car while a run is on. They are listed after
+// the rides parked at the kerbs, which keep clear of the places above, so that the kerbs stay as they were before the Dash came to town.
+export const dashSites: readonly Spot[] = [
+  {
+    ...dashArch,
+    id: "dash",
+    kind: "talk",
+    label: "The Degen Dash arch",
+    node: "dash",
+    on: days(2, 3, 4, 5, 6, 7),
+  },
+  {
+    ...dashDesk,
+    dash: true,
+    id: "dash-desk",
+    kind: "talk",
+    label: "Zuri's desk",
+    node: "quiz",
+  },
+  {
+    ...dashCar,
+    dash: true,
+    id: "ride-dash",
+    kind: "ride",
+    label: "The Dash car",
+    rank: 0,
+    ride: "car",
   },
 ];

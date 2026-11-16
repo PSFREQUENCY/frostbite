@@ -1,6 +1,7 @@
-import { nightTick, waterline } from "../../src/rules/constants.ts";
+import { waterline } from "../../src/rules/constants.ts";
 import { beatOf, questOf, type Quest } from "../../src/rules/story.ts";
 import { createBot } from "./bot.ts";
+import { runDash } from "./dash.ts";
 
 type Bot = ReturnType<typeof createBot>;
 const honest = [
@@ -52,15 +53,14 @@ function street(bot: Bot, quest: Quest): void {
 }
 
 // Plays the day's three quests through, meeting each beat's need on the way. `answer` picks the first or second answer where a beat
-// asks. On Moon Night the lantern waits for dark; on the last day a crew of two opens the Genesis Room and the bot runs the tunnel.
+// asks. On Moon Night the bot runs the Degen Dash between the dream and the party; on the last day a crew of two opens the Genesis Room
+// and the bot runs the tunnel.
 export function tellStory(bot: Bot, answer = 1): Bot {
   for (let quests = 0; quests < 6; quests += 1) {
     const quest = questOf(bot.here());
     if (quest === null || quest === "beach") break;
-    if (quest === "lantern") {
-      if (bot.here().tick < nightTick) bot.skipTo(nightTick);
-      bot.use("lanterns");
-      bot.pick(0);
+    if (quest === "dash") {
+      runDash(bot);
       continue;
     }
     if (quest === "crew") {

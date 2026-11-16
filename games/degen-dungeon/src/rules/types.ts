@@ -172,6 +172,13 @@ export interface DayState {
   // Beam-ups on earlier days (`invasion.ts`): the page's word, as `fate` is, carried from its save.
   readonly beamups: number;
   readonly words: number;
+  // The Degen Dash (`dash.ts`): the stage the hero is on (1 to 9, or 0 with no run on), the tick its clock started (once over the line, the
+  // tick it stopped), the last finish's time in ticks, the tickets held, and where Zuri waits after walking up with one.
+  readonly dash: number;
+  readonly dashFrom: number;
+  readonly dashTime: number;
+  readonly tickets: number;
+  readonly zuri: Point | null;
   readonly x: number;
   readonly z: number;
 }

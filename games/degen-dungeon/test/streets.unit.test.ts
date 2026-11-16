@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { questAt } from "../src/quest.ts";
 import { moonPad, nightTick, waterline } from "../src/rules/constants.ts";
+import { dashCar, stages } from "../src/rules/course.ts";
 import { spotNamed, spots } from "../src/rules/places.ts";
 import type { DayState } from "../src/rules/types.ts";
 import { buildParked } from "../src/view/parked.ts";
@@ -26,7 +27,7 @@ describe("the time of day", () => {
 });
 
 describe("where to go next", () => {
-  it("points at today's quest: the first morning's three, the second day's three, the story's beat, the lantern, the crew, the newbie, home for the drain, and the beach", () => {
+  it("points at today's quest: the first morning's three, the second day's three, the story's beat, the Dash's arch and gates, the crew, the newbie, home for the drain, and the beach", () => {
     const morning = started(1, 7, 1);
     expect(questAt(morning)).toEqual(spotNamed("frost"));
     const heard = { ...morning, done: ["speech"] };
@@ -37,8 +38,12 @@ describe("where to go next", () => {
     expect(questAt({ ...gig, parcel: "faucet" })).toEqual(spotNamed("faucet"));
     expect(questAt({ ...gig, gigs: 1 })).toMatchObject({ kind: "stop" });
     expect(questAt({ ...gig, gigs: 1, rides: 1 })).toEqual(spotNamed("chart"));
-    const night = { ...started(1, 7, 6), beat: 2 };
-    expect(questAt(night)).toEqual(spotNamed("lanterns"));
+    const night = { ...started(1, 7, 6), beat: 1 };
+    expect(questAt(night)).toEqual(spotNamed("dash"));
+    // On a run: the next gate, and the Dash car before the drive.
+    expect(questAt({ ...night, dash: 1 })).toEqual(stages[0]);
+    expect(questAt({ ...night, dash: 7 })).toEqual(dashCar);
+    expect(questAt({ ...night, dash: 7, ride: "car" })).toEqual(stages[6]);
     expect(questAt(started(1, 7, 7))).toMatchObject({ kind: "recruit" });
     expect(questAt({ ...morning, drain: 1 })).toEqual(spotNamed("home-7"));
     expect(questAt({ ...morning, gate: 1 })).toEqual({

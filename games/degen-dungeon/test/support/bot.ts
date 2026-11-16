@@ -99,6 +99,8 @@ export function createBot(
     here,
     // Sets off on a heading and keeps going.
     head: (dir: number): void => send("move", { dir }),
+    // Straight along one axis to a line, at the pace it moves now.
+    leg,
     hold,
     inputs,
     lift: (by: number): void => send("lift", { by }),

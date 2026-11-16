@@ -123,7 +123,7 @@ at the start of the very first day and can be skipped.
     `dayPockets`/`dayFreezers` (seven each).
   - Quests (`rules/story.ts`): `questsOn(day)` lists a day's quests (two on the first morning, three after), `questOf` the one the hero
     is on, `storyTold` whether all are done. The street days' quests read the day (speech, paper; gig, ride, trade), days 3 to 5 are the
-    hero's beats, Moon Night is the dream, the party and a lantern (after dark), the last day a crew of two, the Genesis Room and SHA
+    hero's beats, Moon Night is the dream, the party and a lantern (after dark; round 11 made it the Degen Dash and the party), the last day a crew of two, the Genesis Room and SHA
     Beach. Moon Night's dream is saved (`progress.dream`) and carried into the last day as the `dream` setting.
   - Side quests (`sides.ts`, words in `script/sides.ts`): six a day, read from the day; two markers were added for them, `wall` and
     `roof` (the first climb and the first roof, `climb.ts`) and `staked` (a moonshot stake). Crossing the riot is a side quest now, and
@@ -144,6 +144,34 @@ at the start of the very first day and can be skipped.
   - Bumps (`view/bumps.ts`): the street's walkers and talking pairs (`view/walkers.ts`) and the riot and party crowds (`view/crowd.ts`)
     stagger, fall and get up, or hop clear of a ride. View only: the street's people are not in the rules.
 
+- **Round 11** (the official name, and the Degen Dash):
+  - The official name is Degen Dungeon 1 (the id stays `degen-dungeon`).
+  - The Degen Dash (`rules/course.ts` the places, `rules/dash.ts` the rules, words in `script/dash.ts`): from day 2, Zuri's arch
+    (`dash`, a talk spot whose act starts a run or opens her `zuri` talk; a ride is stepped off there first) and, while a run is on
+    (`dash` > 0 opens spots marked `dash: true`), her desk (`dash-desk`, node `quiz`) and the Dash car (`ride-dash`, a hired car of
+    rank 0, so no heat). These three are listed after the kerbs' parked rides so that the kerbs stay where they were. The day gained
+    `dash` (the stage, 1 to 9), `dashFrom` (the clock's start; after a finish, its stop, for the parade), `dashTime`, `tickets` and
+    `zuri` (where she waits). Each tick `dashed` clears the stage the hero is on when they are in its reach the right way (gait 1, 2
+    and 3, the top storey, the roof, frost vision, any engine, the desk's right answer, then the arch on anything), closes the course
+    after `dashMax` (six minutes), and pays at the line: under `dashPar` (3,000 ticks) with no star of heat is a win (`dash-won`,
+    50,000 DUN once a day, counted as made), else a finish (`dash-finished`, 1,000 DUN once a day). A wrong answer adds
+    `quizPenalty` (300 ticks) and asks again; four questions, one a day by the seed. Zuri walks up at `zuriTicks` (or as soon after as
+    the hero is free: on foot in the street, no ticket, no talk, no drain, not on the moon) and waits until the hero is 9 m off; act
+    beside her, with no place in reach, opens her talk (`zuri-N` marks each hour as served). She never stops the hero.
+  - Story and badges: Moon Night's plan is the dream, `dash` (finished, won or not) and the party, which now needs the Dash finished.
+    The lantern is a Moon Night side quest (in place of painting a ride) and keeps its badge, now earned by a lantern on Moon Night.
+    Frost's speech is still day 1's first quest but has no badge; "degen-dash" (the Dash won, on any day) took "heard-frost"'s place,
+    so the story's set is still twenty. The sample day claims only "seed-paper". The verifier was re-pinned.
+  - The view: Zuri (`view/zuri.ts`) is the town's jointed body (`body.ts` now names its hips, spine, head and forearms) dressed in a
+    turquoise halter crop top and a long high-waisted skirt with a high split, gold hoops, choker, bangles and chain belt, a gold ticket,
+    and an Afro-hawk of 520 instanced coils over cropped sides. `view/dash-view.ts` stands her at the arch, at the desk on a run, or
+    walks her up from behind the hero; `view/dash-course.ts` draws the arch (sign, neon, chequered line), each gate's obstacle, a ring
+    at the next gate, the frost-vision mark, and the Dash car; `view/parade.ts` throws confetti and fireworks and holds the trophy over
+    the champion for 30 seconds, and the crowd (`crowd.ts`, a "parade" gathering) lines the avenue with CHAMPION! signs. The page shows
+    the stage and clock in Pip's line, points the beacon at the next gate (or the car), lists the ticket, trophy, print or medal in the
+    backpack and cheers each step.
+  - `rules/boarding.ts` took boarding, the Green Line and stepping off out of `acts.ts`, which had grown past 300 lines.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they
@@ -155,6 +183,9 @@ at the start of the very first day and can be skipped.
 5. Sound per era and effects for the drain, the freeze and the airdrop (one loop and four effects today).
 6. Balance (including the moon fare): pay, prices and the coin's swings are first guesses; play each hero's five days and tune.
 7. The Time Machine: more meetings on later loops, and the newbie walking between places.
+   7a. The Degen Dash: the par (1:40) is the bot's best (about a minute) plus room for a person; tune it once people have played it. The
+   trophy and the print stay in the backpack for the day they are won, not across days. The parade is confetti, fireworks, the trophy
+   and the crowd, not floats or a band.
 8. The living statues use the code-built body in their stone and mask, not the carved figure's muscles. Hrimm (the big ice model)
    still towers over a bike; Volt, a four-legged model, stands on a deck rather than sitting. The saucer
    abduction is a cut to the moon and a clip, not an authored beam-up.

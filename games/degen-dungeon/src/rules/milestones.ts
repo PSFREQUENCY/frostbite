@@ -1,12 +1,13 @@
+import { moonNight } from "./calendar.ts";
 import { moments } from "./machine.ts";
 import { masksWorn } from "./statues.ts";
 import { questDone, type Quest } from "./story.ts";
 import type { DayState } from "./types.ts";
 
 // Every milestone this game can earn, each decided by the state of a day alone (so a replay can decide it too). The ids are the ones in
-// the game's manifest, which holds their words. No two are earned by the same event. In three sets: one for each of the story's twenty
-// quests (two on the first morning, then three a day), ten for the top skills, and the top achievements, most of them hidden ones to
-// stumble on. A draft for the owner.
+// the game's manifest, which holds their words. No two are earned by the same event. In three sets: the story's (its quests, each on its
+// own day, from the seed paper on: Frost's speech and finishing the Degen Dash have none; then winning the Dash, and Moon Night's
+// lantern), ten for the top skills, and the top achievements, most of them hidden ones to stumble on. A draft for the owner.
 const has = (day: DayState, ...names: readonly string[]): boolean =>
   names.some((name) => day.done.includes(name));
 // How many kinds of ride the hero took from the kerb today, not counting a semi's cab.
@@ -20,7 +21,6 @@ const kindsTaken = (day: DayState): number =>
 
 // The story's quests, by day: a quest's milestone is earned by doing it on its own day.
 const quests: readonly (readonly [string, number, Quest])[] = [
-  ["heard-frost", 1, "speech"],
   ["seed-paper", 1, "paper"],
   ["first-gig", 2, "gig"],
   ["green-line", 2, "ride"],
@@ -36,10 +36,17 @@ const quests: readonly (readonly [string, number, Quest])[] = [
   ["big-play", 5, "beat-2"],
   ["dream", 6, "beat-0"],
   ["moon-party", 6, "beat-1"],
-  ["lantern", 6, "lantern"],
   ["full-crew", 7, "crew"],
   ["genesis-room", 7, "beat-0"],
   ["sha-beach", 7, "beach"],
+];
+// The story's two more: the Degen Dash won (under par with no heat, on any day it runs) and a lantern sent up on Moon Night.
+const more: readonly (readonly [string, (day: DayState) => boolean])[] = [
+  ["degen-dash", (day) => has(day, "dash-won")],
+  [
+    "lantern",
+    (day) => day.day === moonNight && day.loop === 0 && has(day, "lantern"),
+  ],
 ];
 // The top skills: working, running, reading the market and the street, keeping calm, driving and climbing.
 const skills: readonly (readonly [string, (day: DayState) => boolean])[] = [
@@ -81,7 +88,7 @@ export const milestones: readonly {
       day.day === on && day.loop === 0 && questDone(day, quest),
     id,
   })),
-  ...[...skills, ...hidden].map(([id, earned]) => ({ earned, id })),
+  ...[...more, ...skills, ...hidden].map(([id, earned]) => ({ earned, id })),
 ];
 
 export const milestoneIds: readonly string[] = milestones.map(({ id }) => id);

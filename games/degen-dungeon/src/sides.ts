@@ -69,7 +69,13 @@ const checks: readonly (readonly Check[])[] = [
     has(`recruit-${String(bit)}`),
     (day) => day.warned > 0,
   ],
-  [has("did-film"), has("staked"), has("roof"), has("did-track"), has("paint")],
+  [
+    has("did-film"),
+    has("staked"),
+    has("roof"),
+    has("did-track"),
+    has("lantern"),
+  ],
   [
     has("did-exhibits"),
     begins("semi-"),

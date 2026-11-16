@@ -14,7 +14,8 @@ import {
   roofDay,
   stormDay,
 } from "./support/days.ts";
-import { moonDay, nightDay } from "./support/night.ts";
+import { dashDay } from "./support/dash.ts";
+import { lanternNight, moonDay, nightDay } from "./support/night.ts";
 import {
   bigRigDay,
   masksDay,
@@ -53,6 +54,7 @@ describe("the milestones", () => {
       bigRigDay(),
       roofDay(),
       saucerPilotDay(),
+      lanternNight(),
       ...[1, 2, 3, 4, 5, 6, 7].map((day) =>
         tellStory(createBot(10 + day, day % 9, day)),
       ),
@@ -65,12 +67,7 @@ describe("the milestones", () => {
   });
 
   it("are each earned for what the day did, and only that", () => {
-    expect(earned(busyDay())).toEqual([
-      "heard-frost",
-      "seed-paper",
-      "grinder",
-      "dead-locker",
-    ]);
+    expect(earned(busyDay())).toEqual(["seed-paper", "grinder", "dead-locker"]);
     expect(earned(hotDay())).toEqual(["shook-the-tuxes"]);
     expect(earned(stormDay(false))).toEqual([]);
     expect(earned(drainDay())).toEqual(["seed-paper", "saved-the-rest"]);
@@ -95,20 +92,24 @@ describe("the milestones", () => {
     expect(earned(bigRigDay())).toEqual([]);
     expect(earned(roofDay())).toEqual(["rooftop-runner"]);
     expect(earned(saucerPilotDay())).toEqual(["saucer-pilot"]);
-    // Each story day earns its own quests' milestones, in order.
+    expect(earned(lanternNight())).toEqual(["lantern"]);
+    // The Dash finished over par, or under it with heat, is a medal and no milestone.
+    expect(earned(dashDay(true))).toEqual(["rooftop-runner"]);
+    // Each story day earns its own quests' milestones, in order (Frost's speech and finishing the Dash have none); on Moon Night the bot
+    // wins the Degen Dash on the way, and on the roof stage stands on its first roof.
     const quests = [1, 2, 3, 4, 5, 6, 7].map((day) =>
       earned(tellStory(createBot(10 + day, day % 9, day))).slice(
         0,
-        day === 1 ? 2 : 3,
+        day === 1 ? 1 : 3,
       ),
     );
     expect(quests).toEqual([
-      ["heard-frost", "seed-paper"],
+      ["seed-paper"],
       ["first-gig", "green-line", "first-trade"],
       ["caught-the-mania", "riding-the-pump", "hustle"],
       ["cold-open", "thin-ice", "crew-up"],
       ["countdown", "liftoff", "big-play"],
-      ["dream", "moon-party", "lantern"],
+      ["dream", "moon-party", "degen-dash"],
       ["full-crew", "genesis-room", "sha-beach"],
     ]);
   });

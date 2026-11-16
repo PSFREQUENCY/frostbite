@@ -1,3 +1,6 @@
+import { ticksPerSecond } from "../rules/constants.ts";
+import { stages } from "../rules/course.ts";
+import { clockOf, dashPar, stageOf } from "../rules/dash.ts";
 import { invading, peaceable } from "../rules/invasion.ts";
 import { heroes } from "../rules/heroes.ts";
 import { echoAt, recklessOn } from "../rules/machine.ts";
@@ -5,7 +8,7 @@ import { priceAt } from "../rules/market.ts";
 import { spotNamed } from "../rules/places.ts";
 import { lastDay, moonNight } from "../rules/calendar.ts";
 import { questDone, questOf, questsOn, type Quest } from "../rules/story.ts";
-import type { DayState, Weather } from "../rules/types.ts";
+import { motors, type DayState, type Weather } from "../rules/types.ts";
 import {
   echoPlaces,
   echoTells,
@@ -13,6 +16,7 @@ import {
   recruitLine,
   tells,
 } from "../script/cast.ts";
+import { drivingLine, trialLines } from "../script/dash.ts";
 import { dreams, finale } from "../script/dreams.ts";
 import { questLines, talks, tunnelLine } from "../script/lines.ts";
 import { stories } from "../script/stories.ts";
@@ -41,7 +45,24 @@ export const weatherNames: Readonly<Record<Weather, string>> = {
   storm: "Thunderstorm",
 };
 
-// What is urgent before the story: a drain (or a balance that only looks drained), the saucers, the open tunnel, a trip back.
+// A clock's ticks as minutes and seconds.
+export const clockText = (ticks: number): string => {
+  const seconds = Math.max(0, Math.floor(ticks / ticksPerSecond));
+  return `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, "0")}`;
+};
+
+// Pip's line on a Degen Dash: the stage, what it asks, and the clock against par.
+export function dashLine(day: DayState): string | null {
+  const stage = stageOf(day);
+  if (stage === null) return null;
+  const driving =
+    stage.trial === "car" && motors.some((ride) => ride === day.ride);
+  const asks = driving ? drivingLine : trialLines[stage.trial];
+  return `Degen Dash ${String(day.dash)}/${String(stages.length)} · ${asks} · ${clockText(clockOf(day))} (par ${clockText(dashPar)})`;
+}
+
+// What is urgent before the story: a drain (or a balance that only looks drained), the saucers, the open tunnel, a Degen Dash on, a trip
+// back.
 function urgentLine(day: DayState): string | null {
   if (day.drain > 0)
     return "Your balance is draining! Race home to the hideout terminal.";
@@ -51,6 +72,8 @@ function urgentLine(day: DayState): string | null {
       ? "Saucers over the city! Stand still in a beam and get taken up."
       : "Saucers over the city! Grab glow sticks and a pizza, or a bag of meme coins, then stand in a beam.";
   if (day.gate > 0) return tunnelLine;
+  const dash = dashLine(day);
+  if (dash !== null) return dash;
   if (day.loop === 0) return null;
   const echo = echoAt(day);
   return echo === null || day.done.includes(echo.id)
@@ -114,10 +137,10 @@ export function talkOf(
   if (talk !== undefined)
     return {
       answers: talk.answers,
-      say: talk.say.replace(
-        "{price}",
-        String(priceAt(day.seed, day.day, day.tick)),
-      ),
+      say: talk.say
+        .replace("{price}", String(priceAt(day.seed, day.day, day.tick)))
+        .replace("{time}", clockText(day.dashTime))
+        .replace("{par}", clockText(dashPar)),
     };
   const spot = spotNamed(id);
   const scam = spot?.kind === "offer" && (spot.crooked ?? day.crooked);

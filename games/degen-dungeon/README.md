@@ -24,11 +24,13 @@ of one hero. DUN is in-game credit only.
   - Day 2: finish an honest gig, ride the Green Line, buy some of the coin of the day on the Exchange floor.
   - Days 3 to 5 follow the hero's own story, three beats a day. Some beats need the right crewmate, frost vision, DUN or a trade; some ask
     a question with two answers.
-  - Day 6, Moon Night: the hero's dream, the party under Moon Tower, and a lantern sent up after dark.
+  - Day 6, Moon Night: the hero's dream, then the Degen Dash run to the finish (won or not), then the party under Moon Tower. The
+    lantern after dark is a side quest now.
   - Day 7: gather two crewmates, open the Genesis Room with your crew's three words, and run the oldest tunnel to SHA Beach with Max's
     Vests behind. The beach's ending tells the dream chosen on Moon Night (the save carries it).
 - **Side quests**, six a day and never needed: S's three letters on the day's avenues, a landmark of the day, and four that belong to
-  the day (the riot on the first morning, the saucers in the mania, the storm in the winter, a moonshot and a rooftop on Moon Night...).
+  the day (the riot on the first morning, the saucers in the mania, the storm in the winter, a moonshot, a rooftop and the lantern on
+  Moon Night...).
   The backpack lists the day's quests and side quests with ✓ for done and → for the one you are on.
 - **The city:** honest gigs, a crew of three, the Green Line Express, the Exchange floor's coin, MAXX (twenty a day, until the winter),
   the fit shop, the realtor and the garage, a scooter, a car, a yacht and a helicopter, and the scams: Kiki, the famous face, the
@@ -78,6 +80,16 @@ of one hero. DUN is in-game credit only.
   make FOMO climb twice as fast. A player of good standing sees calmer skies.
 - **Money on the move:** every DUN in or out floats up beside the readout (green in, red out) with a chime and a digital receipt: the
   amount, the new balance, the block and a transaction id.
+- **The Degen Dash:** from the second day, Zuri, the Dash's host (an Afro-hawk, a turquoise two-piece and a lot of gold), sells tickets
+  (250 DUN) at her arch on the avenue north of Ticker Square, and now and then walks up to a hero on foot who has none and waits beside
+  them (act to talk to her). With a ticket, act at the arch to start the clock, then clear nine stages in order round the Exchange's
+  borough, each its own way: sprint through the first gate (running), duck under a low bar (crouching), crawl under a net, climb the
+  wall to its top storey, cross the roof to the flag, find a mark only frost vision shows, take the Dash car (it waits by the north
+  street) through the checkpoint on the east street, answer Zuri's crypto-safety question at her desk (a wrong answer adds ten
+  seconds), and get back to the arch. Pip's line shows the stage, what it asks and the clock; the beacon points at the next gate.
+  Under par (1:40) and with no heat is a win: 50,000 DUN (once a day), the trophy and a champion's print in the backpack, and a parade
+  (confetti, fireworks over the arch, the trophy held up over your head, and the street lining the avenue to cheer). Slower is a
+  finish and a finisher's medal (1,000 DUN once a day). After six minutes the course closes. Finishing it is Moon Night's second quest.
 - **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
   cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
 - **The moonshot and the moon:** stake 1,000, 5,000 or 10,000 DUN at the Moonshot Launchpad under Moon Tower; it rides the next launch
@@ -131,15 +143,18 @@ the status line says so. Headless test browsers are such a case, so the platform
 trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish, `beamups` for the beam-ups of
 earlier days and, on the last day, `dream` for the dream chosen on Moon Night. Inputs are `move`, `gait`, `act`,
 `pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
-replays the record to the same end and decides the milestones from it: one for each of the twenty story quests, ten top skills, and the
-top achievements: nine hidden ones and the saucer pilot (`src/rules/milestones.ts`). `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+replays the record to the same end and decides the milestones from it, forty in all: twenty for the story (its quests from the seed
+paper on, as Frost's speech and finishing the Dash have none, then the Degen Dash won and Moon Night's lantern), ten top skills, and
+the top achievements: nine hidden ones and the saucer pilot (`src/rules/milestones.ts`). The Dash's course and rules are
+`src/rules/course.ts` and `src/rules/dash.ts`. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
 a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon`, `beamups` and `dream` are the page's word, as
 before.
 
 ## Tests
 
 `npx vitest run --config vitest.config.ts --coverage` from this folder. Bots (`test/support/`) play every hero's every story day to the
-end, and between them earn every milestone; an idle day earns none.
+end, and between them earn every milestone; an idle day earns none. The Dash bot (`test/support/dash.ts`) runs the course the quick way:
+about a minute (1,802 to 2,119 ticks, by the hero's speed), against a par of 3,000 ticks.
 
 ## Ownership
 

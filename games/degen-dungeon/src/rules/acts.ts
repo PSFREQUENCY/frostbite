@@ -6,15 +6,16 @@ import {
   gaitStealth,
   nightTick,
   gigRep,
-  lineCool,
   lootHeat,
   lootRep,
   rebrandCool,
   witnessHeat,
 } from "./constants.ts";
+import { board, rideLine, stepOff } from "./boarding.ts";
 import { clinging, onTheRoof } from "./climb.ts";
+import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { enterWindow } from "./windows.ts";
-import { cooled, heated, rankOf } from "./heat.ts";
+import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { actMachine, pickMachine } from "./machine.ts";
 import { actMystery } from "./mystery.ts";
@@ -22,8 +23,7 @@ import { inReach, nearest, spotNamed, spots, type Spot } from "./places.ts";
 import { wear } from "./statues.ts";
 import { actStory, pickStory } from "./story.ts";
 import { locked, pickNode, stash } from "./talk.ts";
-import { flies, motors, type Draft, type Ride } from "./types.ts";
-import { dockLand, dockWater } from "./world.ts";
+import { flies, motors, type Draft } from "./types.ts";
 
 // The act button and the answer to a question. Each answers null when it is done, or why it cannot be. The statue,
 // the newbie of a trip back, the watcher and the story's beat are asked first; then the nearest open place. A new kind of place is a new
@@ -74,34 +74,6 @@ function ask(day: Draft, spot: Spot): string | null {
   return null;
 }
 
-function board(day: Draft, ride: Ride, rank: number): string | null {
-  if (day.ride === ride) {
-    day.ride = "foot";
-    day.rideId = "";
-    if (ride === "boat") Object.assign(day, dockLand);
-    return null;
-  }
-  if (day.ride !== "foot") return "leave the ride you are on first";
-  if (rankOf(day) < rank) heated(day, borrowHeat);
-  day.ride = ride;
-  day.rideId = "";
-  day.level = 0;
-  if (ride === "saucer") day.done = [...new Set([...day.done, "saucer"])];
-  if (ride === "boat") Object.assign(day, dockWater);
-  return null;
-}
-
-function rideLine(day: Draft, next: string): string | null {
-  const to = spotNamed(next);
-  if (day.ride !== "foot" || to === undefined)
-    return "the train takes people, not rides";
-  day.x = to.x;
-  day.z = to.z;
-  day.rides += 1;
-  cooled(day, lineCool);
-  return null;
-}
-
 // Loot taken in front of a crowd (the market, or The Exchange on the riot morning and Moon Night) brings witnesses. A hooded parka (bought,
 // or found in a dead locker) hides a face.
 function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
@@ -120,6 +92,10 @@ function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
 // Opening a talk: Frost gives the speech on the first morning, the floor and the shops need an unlocked wallet, and MAXX is shut after the
 // winter.
 function open(day: Draft, node: string): string | null {
+  // At Zuri's arch a ride is left first (the Dash starts on foot, and may finish on wheels).
+  if (node === "dash")
+    return day.ride === "foot" ? startDash(day) : stepOff(day);
+  if (node === "quiz") return askAtDesk(day);
   if (node === "lantern" && day.tick < nightTick)
     return "the lanterns go up after dark";
   if (node === "frost")
@@ -225,25 +201,13 @@ export function act(day: Draft): string | null {
     return null;
   }
   if (spot !== null) return useSpot(day, spot);
+  // Zuri, waiting beside the hero with a Degen Dash ticket.
+  if (zuriNear(day)) {
+    day.talk = "zuri";
+    return null;
+  }
   if (day.ride === "foot" || day.ride === "boat") return "nothing to do here";
   return stepOff(day);
-}
-
-// Stepping off a ride: one taken from the kerb stays where it is left (the last six are remembered) and can be taken again.
-function stepOff(day: Draft): null {
-  if (
-    day.rideId !== "" &&
-    day.ride !== "foot" &&
-    day.ride !== "boat" &&
-    !flies(day.ride)
-  )
-    day.left = [
-      ...day.left,
-      { id: day.rideId, ride: day.ride, x: day.x, z: day.z },
-    ].slice(-6);
-  day.ride = "foot";
-  day.rideId = "";
-  return null;
 }
 
 // An offer taken: a scam costs what it asks, and some drain the pocket fast or leak it slowly until the hideout terminal stops it.

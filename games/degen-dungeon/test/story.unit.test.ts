@@ -117,10 +117,15 @@ describe("the story", () => {
     expect([sneak.here().done, sneak.here().heat]).toEqual([["riot"], 0]);
   });
 
-  it("asks for a lantern after dark on Moon Night, and a crew of two before the last door", () => {
-    const night = { ...started(1, 4, moonNight), beat: 2 };
-    expect(questOf(night)).toBe("lantern");
-    expect(questOf({ ...night, done: ["lantern"] })).toBeNull();
+  it("asks for the Degen Dash between the dream and the party on Moon Night, and a crew of two before the last door", () => {
+    const night = { ...started(1, 4, moonNight), beat: 1 };
+    expect(questOf(night)).toBe("dash");
+    // Over the line counts, won or not; the party then waits.
+    const finished = { ...night, done: ["dash-finished"] };
+    expect(questOf(finished)).toBe("beat-1");
+    expect(questOf({ ...finished, beat: 2 })).toBeNull();
+    // The lantern is a side quest now, and tells nothing.
+    expect(questOf({ ...night, beat: 2, done: ["lantern"] })).toBe("dash");
     const last = started(1, 4, lastDay);
     expect(questOf(last)).toBe("crew");
     expect(questOf({ ...last, crew: [5, 3] })).toBe("beat-0");
@@ -138,6 +143,7 @@ describe("the story", () => {
       [5, 5, 1, "this needs a full crew"],
       [6, 5, 2, "lose the heat first"],
       [7, 7, 0, "this needs a full crew"],
+      [3, 6, 1, "finish the Degen Dash first"],
     ];
     for (const [hero, day, beat, reason] of needs) {
       const there = beside({

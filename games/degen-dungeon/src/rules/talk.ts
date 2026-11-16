@@ -1,6 +1,7 @@
 import { eraOf } from "./calendar.ts";
 import { heatPerStar } from "./constants.ts";
 import { counter, counters, games, lunar, play } from "./counters.ts";
+import { dashDeed, dashNodes } from "./dash.ts";
 import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
 import { activities, teller, venture } from "./venues.ts";
@@ -104,6 +105,7 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   crater: [{ does: "rock" }, leave],
   "moon-pad": [{ does: "land" }, leave],
   shuttle: [{ does: "fly" }, leave],
+  ...dashNodes,
   speech: [{ to: "speech-2" }],
   "speech-2": [{ to: "speech-3" }],
   "speech-3": [{ does: "heard" }],
@@ -200,6 +202,7 @@ function deed(day: Draft, name: string): string | null {
   if (name === "bank-in" || name === "bank-out")
     return teller(day, name === "bank-in");
   if (name.startsWith("shot-")) return stake(day, Number(name.slice(5)));
+  if (name.startsWith("dash-")) return dashDeed(day, name);
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
   if (name === "peace" || name === "trade" || name === "quietly")

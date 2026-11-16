@@ -17,11 +17,12 @@ import { createBumps, type Mover } from "./bumps.ts";
 import type { DayState } from "../rules/types.ts";
 import { box, hash } from "./hash.ts";
 import { painted } from "./boards.ts";
+import { paradeOn } from "./parade.ts";
 
 // The town in numbers: the FREE FROST riot packing The Exchange on the first morning (signs up, bouncing), the Moon Night party under
 // Moon Tower (every one of them in the same hooded parka), and the delivery robots rolling the streets on Launch Day. Each crowd is a few
 // instanced meshes; nobody in it is anyone in particular.
-export type Gathering = "party" | "riot" | "robots";
+export type Gathering = "parade" | "party" | "riot" | "robots";
 const count = 160;
 const matrix = new Matrix4();
 const tilt = new Quaternion();
@@ -66,11 +67,10 @@ export function buildCrowd(): Crowd {
     count,
   );
   const heads = new InstancedMesh(new SphereGeometry(0.22, 8, 6), cloth, count);
-  const signs = new InstancedMesh(
-    new PlaneGeometry(1, 0.6),
-    painted("FREE FROST", "#ff5d5d"),
-    count,
-  );
+  // The riot's placards, or a Degen Dash champion's cheers.
+  const placards = painted("FREE FROST", "#ff5d5d");
+  const cheers = painted("CHAMPION!", "#f2c14e");
+  const signs = new InstancedMesh(new PlaneGeometry(1, 0.6), placards, count);
   const robots = new InstancedMesh(
     new BoxGeometry(0.9, 0.8, 1.2),
     new MeshStandardMaterial({
@@ -100,7 +100,9 @@ export function buildCrowd(): Crowd {
       const robotic = gathering === "robots";
       bodies.visible = !robotic;
       heads.visible = !robotic;
-      signs.visible = gathering === "riot";
+      const loud = gathering === "riot" || gathering === "parade";
+      signs.visible = loud;
+      signs.material = gathering === "parade" ? cheers : placards;
       robots.visible = robotic;
       for (let index = 0; index < count; index += 1) {
         const [x, z] =
@@ -108,14 +110,16 @@ export function buildCrowd(): Crowd {
             ? spot(index, [180, 180], 40)
             : gathering === "party"
               ? spot(index, [180, 160], 26)
-              : spot(
-                  index,
-                  [
-                    60 + 120 * (index % 3),
-                    60 + 120 * Math.floor((index % 9) / 3),
-                  ],
-                  50,
-                );
+              : gathering === "parade"
+                ? spot(index, [180, 173], 30)
+                : spot(
+                    index,
+                    [
+                      60 + 120 * (index % 3),
+                      60 + 120 * Math.floor((index % 9) / 3),
+                    ],
+                    50,
+                  );
         if (robotic) {
           const roll = Math.sin(seconds * 0.5 + index) * 20;
           robots.setMatrixAt(
@@ -129,7 +133,7 @@ export function buildCrowd(): Crowd {
         const at = placed(index, x, z, seconds, hero);
         const hop =
           at.lift +
-          (gathering === "riot"
+          (loud
             ? Math.abs(Math.sin(seconds * 5 + index)) * 0.25
             : Math.abs(Math.sin(seconds * 3 + index)) * 0.1);
         // Knocked over, a body tips about its feet the way it went, head and sign with it.
@@ -180,10 +184,11 @@ export function buildCrowd(): Crowd {
   };
 }
 
-// Which crowd a day has: the riot before the speech on the first morning, the robots on Launch Day, the party once Moon Night's dream is
-// dreamt.
+// Which crowd a day has: a Degen Dash champion's parade, the riot before the speech on the first morning, the robots on Launch Day, the
+// party once Moon Night's dream is dreamt.
 export const gatheringOf = (state: DayState): Gathering | null => {
   if (state.gate > 0) return null;
+  if (paradeOn(state)) return "parade";
   if (state.day === 1 && !state.done.includes("speech")) return "riot";
   if (eraOf(state.day) === 4) return "robots";
   return state.day === moonNight && state.beat >= 1 ? "party" : null;

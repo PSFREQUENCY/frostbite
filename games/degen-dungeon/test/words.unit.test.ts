@@ -28,10 +28,15 @@ describe("Pip's line", () => {
     expect(goalFor({ ...day, fake: true })).toContain("hideout terminal");
     expect(goalFor({ ...day, gate: 1 })).toContain("oldest tunnel");
     const night = started(2, 6, 6);
-    expect([0, 1, 2].map((beat) => goalFor({ ...night, beat }))).toEqual([
+    const finished = { ...night, beat: 1, done: ["dash-finished"] };
+    expect([
+      goalFor(night),
+      goalFor({ ...night, beat: 1 }),
+      goalFor(finished),
+    ]).toEqual([
       `1/3 · ${dreams[6]?.line ?? ""}`,
-      `2/3 · ${finale.party}`,
-      `3/3 · ${questLines.lantern ?? ""}`,
+      `2/3 · ${questLines.dash ?? ""}`,
+      `3/3 · ${finale.party}`,
     ]);
     const last = started(2, 6, 7);
     expect([

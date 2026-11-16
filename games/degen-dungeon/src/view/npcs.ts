@@ -7,19 +7,25 @@ import { buildActor, type Actor } from "./actor.ts";
 import { buildBody } from "./body.ts";
 import type { Subject } from "./camera.ts";
 import { metres } from "./city.ts";
+import { createDashView } from "./dash-view.ts";
 import { clerkLooks, placeLooks } from "./looks.ts";
 
 // The people at the island's places, near the hero: every hero who could join stands at their recruit spot (the cast's own bodies, so a
 // Frost Run model shows there too), and Frost, Kiki, Scruff, the clerks and the hustlers wait at their talks and offers. Only those within
-// sight are shown, each turned to face the hero.
+// sight are shown, each turned to face the hero. Zuri, at the Degen Dash's arch and desk, is the Dash's own (`dash-view.ts`).
 const sight = 70;
 const people = spots.filter(
   (spot) =>
-    spot.kind === "offer" || spot.kind === "talk" || spot.kind === "recruit",
+    (spot.kind === "offer" ||
+      spot.kind === "talk" ||
+      spot.kind === "recruit") &&
+    spot.id !== "dash" &&
+    spot.id !== "dash-desk",
 );
 
 export function createPeople(scene: Scene, cast: readonly Actor[]) {
   const made = new Map<string, Actor>();
+  const dash = createDashView(scene);
   const someone = (id: string, index: number): Actor => {
     const known = made.get(id);
     if (known !== undefined) return known;
@@ -47,8 +53,10 @@ export function createPeople(scene: Scene, cast: readonly Actor[]) {
   return {
     hide(): void {
       for (const actor of made.values()) actor.root.visible = false;
+      dash.hide();
     },
     show(state: DayState, at: Subject, seconds: number, dt: number): void {
+      dash.show(state, at, seconds, dt);
       people.forEach((spot, index) => {
         // A shop's clerk stands behind the counter, toward the back wall; anyone else beside their spot.
         const shop = roomAt(spot.x, spot.z);

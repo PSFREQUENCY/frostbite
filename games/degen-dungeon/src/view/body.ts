@@ -157,6 +157,9 @@ export function buildBody(look: Look): Body {
   const thickness = radius * 0.85;
   const sink = thigh + shin - (leg + 0.1);
   const spine = joint(hips, 0.02);
+  // Named, so that clothes and hair can be added to a body after it is built (`zuri.ts`).
+  hips.name = "hips";
+  spine.name = "spine";
   const torso = new Mesh(
     new CapsuleGeometry(0.2 * look.bulk, 0.34, 4, 10),
     paint(look.body),
@@ -167,6 +170,7 @@ export function buildBody(look: Look): Body {
   spine.add(torso);
   const neck = joint(spine, 0.62);
   const head = joint(neck, 0.16);
+  head.name = "head";
   const skull = new Mesh(
     new SphereGeometry(0.17 * look.headSize, 12, 10),
     paint(look.coat),
@@ -183,6 +187,7 @@ export function buildBody(look: Look): Body {
       look.coat,
     ]),
   );
+  arms.forEach(({ lower }, side) => (lower.name = `forearm-${String(side)}`));
   const tail = look.tail === undefined ? null : joint(hips, 0, 0, -0.16);
   if (tail !== null && look.tail !== undefined) {
     const piece = bone(tail, 0.04, 0.42, look.tail);

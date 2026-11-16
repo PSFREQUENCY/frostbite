@@ -9,6 +9,8 @@ interface Base extends Point {
   readonly only?: number;
   // Only once the visitors have left the hero a saucer of their own (`invasion.ts`).
   readonly saucer?: boolean;
+  // Only while a Degen Dash is run (`dash.ts`).
+  readonly dash?: boolean;
 }
 export type Spot = Base &
   (

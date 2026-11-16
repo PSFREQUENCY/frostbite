@@ -1,13 +1,15 @@
 import { waterline } from "./rules/constants.ts";
+import { dashCar } from "./rules/course.ts";
+import { stageOf } from "./rules/dash.ts";
 import { beams, invading, peaceable } from "./rules/invasion.ts";
 import { echoAt } from "./rules/machine.ts";
 import { openTo, spotNamed, spots, type Spot } from "./rules/places.ts";
 import { beatOf, questOf, tunnelMouth, type Quest } from "./rules/story.ts";
-import type { DayState, Point } from "./rules/types.ts";
+import { motors, type DayState, type Point } from "./rules/types.ts";
 
 // Where the next thing to do is, for the glow on the map and the beacon in the city: home while the balance drains (the terminal is
-// there), the beach once the oldest tunnel is open, the newbie on a trip back, or where today's quest is done; and home to sleep once
-// the day's three quests are done. It reads the day and decides nothing.
+// there), the beach once the oldest tunnel is open, the next gate on a Degen Dash (the Dash car before the drive), the newbie on a trip
+// back, or where today's quest is done; and home to sleep once the day's three quests are done. It reads the day and decides nothing.
 // While the saucers are over the island: the hardware store for glow sticks, the pizza counter, then the nearest beam (straight to a beam
 // with a bag of meme coins to show).
 function saucerGoal(day: DayState): Point | null {
@@ -59,8 +61,8 @@ function questPlace(day: DayState, quest: Quest): Point | null {
       return nearestWhere(day, (spot) => spot.kind === "stop");
     case "trade":
       return spotNamed("chart") ?? null;
-    case "lantern":
-      return spotNamed("lanterns") ?? null;
+    case "dash":
+      return spotNamed("dash") ?? null;
     case "crew":
       return nearestWhere(
         day,
@@ -82,6 +84,11 @@ export function questAt(day: DayState): Point | null {
   if (day.drain > 0 || day.fake) return home;
   if (invading(day)) return saucerGoal(day) ?? home;
   if (day.gate > 0) return { x: tunnelMouth.x, z: waterline };
+  const stage = stageOf(day);
+  if (stage !== null)
+    return stage.trial === "car" && !motors.some((ride) => ride === day.ride)
+      ? dashCar
+      : stage;
   if (day.loop > 0) {
     const echo = echoAt(day);
     return echo !== null && !day.done.includes(echo.id) ? echo : home;

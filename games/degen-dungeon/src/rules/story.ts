@@ -15,17 +15,18 @@ import type { DayState, Draft } from "./types.ts";
 
 // The story: up to three quests a day for seven days, done in order. The first two days are the same for everyone and are read from the
 // day itself: the riot morning (hear Frost's speech, write the seed paper; crossing the riot itself is a side quest), then a first day of
-// honest hustle (a gig, a ride on the Green Line, a trade on the Exchange floor). Days three to five are each hero's own beats (`chapters.ts`). Moon Night opens on the
-// hero's dream, then the party under Moon Tower, then a lantern sent up after dark. On the last day a crew is gathered, the crew's three
-// words open the Genesis Room, and the oldest tunnel runs to SHA Beach. Everything else in the city is a side quest (`sides.ts`).
+// honest hustle (a gig, a ride on the Green Line, a trade on the Exchange floor). Days three to five are each hero's own beats
+// (`chapters.ts`). Moon Night opens on the hero's dream, then the Degen Dash run to the finish (`dash.ts`), then the party under Moon
+// Tower. On the last day a crew is gathered, the crew's three words open the Genesis Room, and the oldest tunnel runs to SHA Beach.
+// Everything else in the city is a side quest (`sides.ts`), the lantern after dark on Moon Night among them.
 export type Quest =
   | "beach"
   | "beat-0"
   | "beat-1"
   | "beat-2"
   | "crew"
+  | "dash"
   | "gig"
-  | "lantern"
   | "paper"
   | "ride"
   | "speech"
@@ -37,7 +38,7 @@ const plans: readonly (readonly Quest[])[] = [
   beats,
   beats,
   beats,
-  ["beat-0", "beat-1", "lantern"],
+  ["beat-0", "dash", "beat-1"],
   ["crew", "beat-0", "beach"],
 ];
 export const questsOn = (day: number): readonly Quest[] => plans[day - 1] ?? [];
@@ -49,8 +50,8 @@ const met: Readonly<Record<Quest, (day: DayState) => boolean>> = {
   "beat-1": (day) => day.beat > 1,
   "beat-2": (day) => day.beat > 2,
   crew: (day) => day.crew.length >= crewNeeded,
+  dash: (day) => day.done.includes("dash-finished"),
   gig: (day) => day.gigs > 0,
-  lantern: (day) => day.done.includes("lantern"),
   paper: (day) => day.paper > 0,
   ride: (day) => day.rides > 0,
   speech: (day) => day.done.includes("speech"),
@@ -94,6 +95,8 @@ function unmet(day: Draft, need: Need | undefined): string | null {
   if (need.traded === true && day.bag === 0 && day.sells === 0)
     return "trade on the Exchange floor first";
   if (need.vision === true && !day.looking) return "only frost vision shows it";
+  if (need.dash === true && !day.done.includes("dash-finished"))
+    return "finish the Degen Dash first";
   if (need.cool === true && starsOf(day.heat) >= 3)
     return "lose the heat first";
   if (day.pocket < (need.pay ?? 0)) return "not enough DUN";

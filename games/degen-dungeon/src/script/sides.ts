@@ -42,7 +42,7 @@ export const sideLabels: readonly (readonly string[])[] = [
     "Stake DUN on a moonshot",
     "Watch the moon from a rooftop",
     "Cut a track at Bassline Records",
-    "Paint your ride at the Garage",
+    "Once night falls, send a lantern up from the lantern ground in the Old Floe",
   ],
   [
     "See the exhibits at the Museum of Genesis",

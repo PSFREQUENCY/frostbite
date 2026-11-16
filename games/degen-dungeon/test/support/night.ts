@@ -42,6 +42,16 @@ export function nightDay(wish = 1, seed = 5, boon = 0): Bot {
   return bot;
 }
 
+// Moon Night's side quest: a lantern sent up from the lantern ground once it is dark, and the day closed.
+export function lanternNight(): Bot {
+  const bot = createBot(6, 7, 6);
+  bot.skipTo(nightTick);
+  bot.use("lanterns");
+  bot.pick(0);
+  bot.end();
+  return bot;
+}
+
 // A lucky Moon Night: a seed whose next launch hits, ten thousand DUN staked at the launchpad, the hundredfold landing, a seat on the
 // shuttle, and the moon underfoot.
 export function moonDay(): Bot {

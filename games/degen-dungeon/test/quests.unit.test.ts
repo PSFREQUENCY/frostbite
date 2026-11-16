@@ -27,7 +27,7 @@ const finishing: readonly Partial<DayState>[] = [
     done: ["did-vr", "fit-shades", "home-studio", `recruit-${String(bit)}`],
     warned: 1,
   },
-  { done: ["did-film", "staked", "roof", "did-track", "paint"] },
+  { done: ["did-film", "staked", "roof", "did-track", "lantern"] },
   {
     done: [
       "did-exhibits",

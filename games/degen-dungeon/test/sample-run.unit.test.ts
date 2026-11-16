@@ -6,7 +6,7 @@ import { sampleRun } from "../src/sample-run.ts";
 import { replay } from "./support/replay.ts";
 
 describe("the sample day the verifier is shown with", () => {
-  it("is legal, ends at home and earns exactly the milestones it claims: the first morning's two quests", () => {
+  it("is legal, ends at home and earns exactly the milestones it claims: the seed paper's (Frost's speech has none)", () => {
     const sample = sampleRun();
     const day = replay(sample);
     expect(day.cause).toBe("home");

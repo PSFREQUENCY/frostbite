@@ -1,6 +1,7 @@
 import { clinging, onTheRoof } from "../rules/climb.ts";
 import { byInput } from "@frostbite/game-sdk/touch";
 
+import { zuriNear } from "../rules/dash.ts";
 import { starsOf } from "../rules/heat.ts";
 import { echoAt, inReach, risen, statue } from "../rules/machine.ts";
 import { sighted, watcherAt } from "../rules/mystery.ts";
@@ -56,6 +57,7 @@ export function noteFor(day: DayState): string {
   if (spot?.kind === "statue" && !day.won)
     return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
+  if (zuriNear(day)) return here("Zuri, with a Degen Dash ticket");
   if (day.parcel !== null)
     return `Carry the parcel to: ${spotNamed(day.parcel)?.label ?? "its door"}`;
   if (day.loop === 0 && risen(day)) return machineLines.risen;
