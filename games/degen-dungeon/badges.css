@@ -1,0 +1,185 @@
+/* Badges (`src/page/badges.ts`): the tray in the picture's top corner, and the reveal when one is earned. Sizes follow the picture's
+   width (cqi), so the medallion is as big on a phone's picture as on a desktop's. */
+.stage {
+  container-type: inline-size;
+}
+.badges {
+  grid-area: 1 / 1;
+  place-self: start end;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.5rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.25rem;
+  border: 0.125rem solid #f2c14e;
+  border-radius: 999px;
+  background: rgb(18 8 43 / 0.82);
+  color: #ffe9a8;
+  font-size: 0.875rem;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+/* On a touch screen the top right corner holds the icons, and on its side the thumb's buttons fill the right edge under them. Upright,
+   the tray sits under the icons, beside the goal; on its side, left of the icons under the readouts, with the goal kept clear of it.
+   Until a hero wakes the hero ring's card needs the room, as the readouts do. */
+@media (pointer: coarse) {
+  :root body:not([data-awake="yes"]) .badges {
+    visibility: hidden;
+  }
+  .badges {
+    margin: calc(max(0.25rem, env(safe-area-inset-top)) + 6.3rem)
+      max(0.75rem, env(safe-area-inset-right)) 0 0;
+  }
+  @media (orientation: landscape) {
+    .badges {
+      margin: calc(max(0.25rem, env(safe-area-inset-top)) + 2.4rem)
+        max(9.8rem, calc(env(safe-area-inset-right) + 9.3rem)) 0 0;
+    }
+    :root body main #goal {
+      max-inline-size: calc(100% - 18rem);
+    }
+  }
+}
+.badges-coin {
+  inline-size: 1.4rem;
+  block-size: 1.4rem;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 200deg,
+    #fff4c2,
+    #f2c14e,
+    #9c6a12,
+    #ffe28a,
+    #f2c14e,
+    #fff4c2
+  );
+  box-shadow:
+    inset 0 0 0 0.12rem #fff3c4,
+    0 0 0.5rem rgb(242 193 78 / 0.7);
+}
+.badges-of {
+  color: #b9aaec;
+}
+.badges.bump {
+  animation: badge-bump 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes badge-bump {
+  40% {
+    transform: scale(1.4);
+    box-shadow: 0 0 1.5rem #ffd166;
+  }
+}
+
+/* The reveal: everything centred over the picture, nothing in the way of a finger. */
+.reveal {
+  grid-area: 1 / 1;
+  place-self: center;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  gap: 0.7cqi;
+  text-align: center;
+  pointer-events: none;
+  perspective: 60cqi;
+}
+.reveal p {
+  margin: 0;
+}
+.reveal-centre {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.reveal-rays,
+.reveal-flash,
+.reveal-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+.reveal-rays {
+  inline-size: 72cqi;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    rgb(255 209 102 / 0.4) 0deg 7deg,
+    transparent 7deg 20deg
+  );
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 66%);
+  mask: radial-gradient(circle, #000 18%, transparent 66%);
+  animation:
+    rays-in 0.5s ease-out 0.3s both,
+    rays-turn 8s linear infinite;
+}
+.reveal-flash {
+  inline-size: 40cqi;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fffbe6 0 14%,
+    rgb(255 209 102 / 0.75) 30%,
+    transparent 66%
+  );
+  animation: flash 0.9s ease-out 0.35s both;
+}
+.confetto {
+  position: absolute;
+  inline-size: 1.1cqi;
+  block-size: 1.8cqi;
+  border-radius: 0.2cqi;
+  background: var(--c);
+  animation: confetti 2s cubic-bezier(0.15, 0.75, 0.35, 1) var(--delay) both;
+}
+
+/* The words under it. */
+.reveal-kicker {
+  color: #ffd166;
+  font-size: max(0.7rem, 2.1cqi);
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-shadow: 0 0 0.6rem #000000;
+  animation: rise-in 0.5s ease-out 0.5s both;
+}
+.reveal-title {
+  background: linear-gradient(180deg, #fffbe8, #ffd166 55%, #e0a23a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: max(1.15rem, 5cqi);
+  font-weight: 900;
+  filter: drop-shadow(0 0.3cqi 0 #3a2400)
+    drop-shadow(0 0 1.2cqi rgb(255 209 102 / 0.6));
+  animation: title-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.4) 0.6s both;
+}
+.reveal-count {
+  color: #ece8ff;
+  font-size: max(0.7rem, 1.9cqi);
+  text-shadow: 0 0 0.5rem #000000;
+  animation: rise-in 0.5s ease-out 0.8s both;
+}
+
+/* Off to the tray: the medallion spins small into the corner as everything else fades. */
+.fly .medal {
+  animation: medal-fly 0.8s cubic-bezier(0.55, 0, 0.75, 0.25) forwards;
+}
+.fly .reveal-rays,
+.fly .reveal-flash,
+.fly .reveal-burst,
+.fly .reveal-kicker,
+.fly .reveal-title,
+.fly .reveal-count {
+  animation: fade-out 0.35s ease forwards;
+}
+
+/* Sitting on a WAGMI letter: the lookout. The picture is cleared of everything over it, for a screenshot. */
+body[data-vista="yes"] .badges,
+body[data-vista="yes"] .toast,
+body[data-vista="yes"] .stick {
+  opacity: 0;
+}

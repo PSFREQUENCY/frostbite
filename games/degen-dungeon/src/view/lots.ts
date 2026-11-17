@@ -1,0 +1,272 @@
+import type { Matrix4 } from "three";
+
+import { block, lots } from "../rules/constants.ts";
+import { rooms } from "../rules/rooms.ts";
+import { box, hash } from "./hash.ts";
+import type { Shell } from "./shell.ts";
+import { venues } from "../rules/venues.ts";
+
+// How each borough builds (`blocks.ts` draws it): the floors of the low buildings round each lot, the height of the tower set back in its
+// middle (none in the park and the market), the trees on its pavements, the neon trim of its windows, and its two wall colours.
+export interface Style {
+  readonly core: readonly [number, number] | null;
+  readonly floors: readonly [number, number];
+  readonly trees: "palm" | "pine" | null;
+  readonly trim: string | null;
+  readonly walls: readonly [string, string];
+}
+type Row = readonly [
+  Style["core"],
+  Style["floors"],
+  Style["trees"],
+  Style["trim"],
+  Style["walls"],
+];
+const table: readonly Row[] = [
+  [[16, 26], [2, 4], null, null, ["#8c4a36", "#6e2f26"]],
+  [[12, 22], [1, 3], "palm", null, ["#f7c6a3", "#cfe8e0"]],
+  [null, [2, 3], "pine", null, ["#dfe9f2", "#c9d7e3"]],
+  [[40, 80], [3, 5], null, "#ff3df2", ["#2a2350", "#1d1b33"]],
+  [[50, 120], [3, 6], null, "#5beac6", ["#2c5b86", "#21405f"]],
+  [null, [1, 3], "palm", null, ["#ff8a5b", "#ffd166"]],
+  [[18, 30], [2, 4], null, "#ffd166", ["#a14a35", "#8c3b2e"]],
+  [[14, 28], [1, 2], null, "#ffb000", ["#5d6470", "#4a4f58"]],
+  [[20, 34], [2, 4], "pine", "#ff9a3c", ["#b0603e", "#9a4a32"]],
+];
+export const styles: readonly Style[] = table.map(
+  ([core, floors, trees, trim, walls]) => ({
+    core,
+    floors,
+    trees,
+    trim,
+    walls,
+  }),
+);
+
+export interface Builders {
+  readonly fronts: Shell;
+  readonly high: Shell;
+  readonly low: Shell;
+  readonly roofs: [Matrix4, string][];
+  readonly tanks: [Matrix4, string][];
+}
+
+const depth = 9;
+const floorHeight = 3.2;
+// How round the low buildings' corners are (metres).
+const soft = 1.4;
+// A row of buildings along one side of a lot, from `from` to `to` (metres along the side), each 6 to 12 metres wide.
+function row(
+  from: number,
+  to: number,
+  seed: number,
+  each: (a: number, b: number, roll: number) => void,
+): void {
+  let at = from;
+  for (let index = 0; to - at > 0.5; index += 1) {
+    const roll = hash(seed, index, 17);
+    const width = to - at < 15 ? to - at : 6 + roll * 6;
+    each(at, at + width, roll);
+    at += width;
+  }
+}
+
+// One lot: a ring of low buildings (faces 0 north, 1 east, 2 south, 3 west), a shop front on the ground floor of many, and the tower.
+// The shop you can walk into takes its place in the row on the middle street (`shops.ts` builds it), and the rows beside it stop short.
+// The tower set back in the middle of a lot (metres), if it has one: none in the park and the market, under Moon Tower, or on a landmark.
+export function coreOf(
+  borough: number,
+  corner: number,
+): {
+  readonly box: readonly [number, number, number, number];
+  readonly height: number;
+  readonly round: boolean;
+} | null {
+  const look = styles[borough];
+  if (look?.core == null || (borough === 4 && corner === 1)) return null;
+  if (landmark(borough, corner)) return null;
+  const roll = hash(borough, corner, 99);
+  const [x0, z0] = cornerOf(borough, corner);
+  return {
+    box: [x0 + 13, x0 + 29, z0 + 13, z0 + 29],
+    height: look.core[0] + (look.core[1] - look.core[0]) * roll,
+    round: roll > 0.5,
+  };
+}
+// Whether a lot holds a landmark instead of a ring of buildings.
+const landmark = (borough: number, corner: number): boolean =>
+  venues.some(({ id }) => id === `venue-${String(borough)}-${String(corner)}`);
+// The north-west corner of a lot (metres).
+export const cornerOf = (
+  borough: number,
+  corner: number,
+): readonly [number, number] => [
+  (block * (borough % 3) + (lots[corner % 2]?.[0] ?? 0)) / 100,
+  (block * Math.floor(borough / 3) + (lots[Math.floor(corner / 2)]?.[0] ?? 0)) /
+    100,
+];
+
+// One piece of a lot's ring: its footprint (metres), its height, the side it faces (0 north, 1 east, 2 south, 3 west) and its roll.
+export interface Piece {
+  readonly box: readonly [number, number, number, number];
+  readonly face: number;
+  readonly height: number;
+  readonly roll: number;
+}
+const rings = new Map<number, readonly Piece[]>();
+// The ring of low buildings round a lot, as `buildLot` builds it (and as a climber walks its roofs): none on a landmark's lot.
+export function ringOf(borough: number, corner: number): readonly Piece[] {
+  const key = borough * 4 + corner;
+  const kept = rings.get(key);
+  if (kept !== undefined) return kept;
+  const look = styles[borough];
+  const pieces: Piece[] = [];
+  rings.set(key, pieces);
+  if (look === undefined || landmark(borough, corner)) return pieces;
+  const lane = Math.floor(corner / 2);
+  const column = corner % 2;
+  const [x0, z0] = cornerOf(borough, corner);
+  const [x1, z1] = [x0 + 42, z0 + 42];
+  const seed = borough * 4 + corner;
+  const street = lane === 0 ? 2 : 0;
+  const add = (
+    box: readonly [number, number, number, number],
+    roll: number,
+    face: number,
+  ): void => {
+    const floors =
+      look.floors[0] + Math.floor(roll * (look.floors[1] - look.floors[0] + 1));
+    pieces.push({ box, face, height: floors * floorHeight + 0.6, roll });
+  };
+  // The lot's walk-in rooms: one on the middle street, and one on its outer side (a corner store or a gas station).
+  const inLot = rooms.filter(
+    (room) => room.borough === borough && room.corner === corner,
+  );
+  const outerFace = street === 2 ? 0 : 2;
+  for (const face of [0, 2]) {
+    const z = face === 0 ? z0 : z1 - depth;
+    const shop = inLot.find(
+      ({ outer }) =>
+        (face === street && !outer) || (face === outerFace && outer),
+    );
+    const runs =
+      shop === undefined
+        ? [[x0, x1]]
+        : [
+            [x0, shop.room.x0 / 100 - 0.4],
+            [shop.room.x1 / 100 + 0.4, x1],
+          ];
+    for (const [from = x0, to = x1] of runs)
+      row(from, to, seed * 8 + face, (a, b, roll) =>
+        add([a, b, z, z + depth], roll, face),
+      );
+  }
+  // The rows down the sides stop short of a room's back wall where the room is on their side.
+  for (const face of [1, 3]) {
+    const x = face === 3 ? x0 : x1 - depth;
+    const side = face === (column === 0 ? 3 : 1);
+    let from = z0 + depth;
+    let to = z1 - depth;
+    for (const { room } of side ? inLot : []) {
+      if (room.z1 / 100 < (z0 + z1) / 2)
+        from = Math.max(from, room.z1 / 100 + 0.4);
+      else to = Math.min(to, room.z0 / 100 - 0.4);
+    }
+    row(from, to, seed * 8 + face, (a, b, roll) =>
+      add([x, x + depth, a, b], roll, face),
+    );
+  }
+  return pieces;
+}
+
+// How high the roof is at a point of the city (metres), over a ring building or a shop's flats, or null where there is no roof.
+export function roofAt(x: number, z: number): number | null {
+  const shop = rooms.find(
+    (room) =>
+      x >= room.room.x0 / 100 &&
+      x <= room.room.x1 / 100 &&
+      z >= Math.min(room.room.z0, room.door.z0) / 100 &&
+      z <= Math.max(room.room.z1, room.door.z1) / 100,
+  );
+  if (shop !== undefined) return shopRoof;
+  const across = Math.floor(x / (block / 100));
+  const down = Math.floor(z / (block / 100));
+  for (let corner = 0; corner < 4; corner += 1) {
+    const piece = ringOf(down * 3 + across, corner).find(
+      ({ box: [x0, x1, z0, z1] }) => x >= x0 && x <= x1 && z >= z0 && z <= z1,
+    );
+    if (piece !== undefined) return piece.height;
+  }
+  return null;
+}
+// The shops' two floors of flats come to this height (`shops.ts`).
+export const shopRoof = 10.5;
+
+export function buildLot(
+  borough: number,
+  corner: number,
+  into: Builders,
+): void {
+  const look = styles[borough];
+  if (look === undefined) return;
+  if (landmark(borough, corner)) return;
+  const column = corner % 2;
+  const lane = Math.floor(corner / 2);
+  const seed = borough * 4 + corner;
+  const street = lane === 0 ? 2 : 0;
+  for (const {
+    box: [bx0, bx1, bz0, bz1],
+    face,
+    height,
+    roll,
+  } of ringOf(borough, corner)) {
+    into.low.block(
+      bx0,
+      bx1,
+      bz0,
+      bz1,
+      height,
+      0.82 + roll * 0.18,
+      Math.floor(roll * 4),
+      soft,
+    );
+    const [cx, cz] = [(bx0 + bx1) / 2, (bz0 + bz1) / 2];
+    if (roll > 0.55)
+      into.roofs.push([box(cx, height + 0.5, cz, 1.6, 1, 1.2), "#9aa3b5"]);
+    if (roll < 0.2)
+      into.tanks.push([box(cx, height + 1.2, cz, 1.6, 2.4, 1.6), "#8a6a4a"]);
+    // A little shop on the ground floor of most buildings on a street, fewer on an avenue.
+    const inner = face === street || face === (column === 0 ? 1 : 3);
+    if (roll * 10 - Math.floor(roll * 10) > (inner ? 0.65 : 0.3)) continue;
+    const kind = Math.floor(hash(seed, Math.round(bx0 * 10 + bz0), 3) * 8);
+    const u0 = (kind % 4) / 4;
+    const v0 = kind < 4 ? 0.5 : 0;
+    const uv = [u0, v0, u0 + 0.25, v0 + 0.5] as const;
+    const out = 0.06;
+    // Clear of the rounded corners.
+    const sides = [
+      [bx1 - soft, bz0 - out, bx0 + soft, bz0 - out],
+      [bx1 + out, bz1 - soft, bx1 + out, bz0 + soft],
+      [bx0 + soft, bz1 + out, bx1 - soft, bz1 + out],
+      [bx0 - out, bz0 + soft, bx0 - out, bz1 - soft],
+    ] as const;
+    const side = sides[face];
+    if (side !== undefined) into.fronts.quad(side, 0, 4, uv);
+  }
+  // The tower, set back from the pavement.
+  const core = coreOf(borough, corner);
+  if (core === null) return;
+  const [cx0, cx1, cz0, cz1] = core.box;
+  const roll = hash(borough, corner, 99);
+  // The towers are futuristic: some round, the rest with soft corners.
+  into.high.block(
+    cx0,
+    cx1,
+    cz0,
+    cz1,
+    core.height,
+    0.85 + roll * 0.15,
+    Math.floor(roll * 4),
+    core.round ? (cx1 - cx0) / 2 : 4,
+  );
+}

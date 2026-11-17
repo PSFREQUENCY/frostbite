@@ -20,6 +20,7 @@ import { lanternMazeGame } from "./games/lantern-maze.ts";
 import { shardMatchGame } from "./games/shard-match.ts";
 import { auroraPulseGame } from "./games/aurora-pulse.ts";
 import { pocketDragonGame } from "./games/pocket-dragon.ts";
+import { degenDungeonGame } from "./games/degen-dungeon.ts";
 import { permafrostGame } from "./games/permafrost.ts";
 // game:new adds imports above this line.
 
@@ -48,6 +49,7 @@ export const games = defineGames([
   lanternMazeGame,
   shardMatchGame,
   auroraPulseGame,
+  degenDungeonGame,
   permafrostGame,
   // game:new adds games above this line.
 ]);

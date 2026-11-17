@@ -1,0 +1,111 @@
+import { eraOf, stormEra } from "./calendar.ts";
+import { dashed } from "./dash.ts";
+import { thawed } from "./freeze.ts";
+import { invade } from "./invasion.ts";
+import { launch } from "./moonshot.ts";
+import {
+  drainPace,
+  fomoTicks,
+  grassTicks,
+  heatFadeTicks,
+  maxxShare,
+  maxxTicks,
+  paperTest,
+  riotHeat,
+  stormStart,
+  stormTicks,
+  visionEvery,
+  visionTicks,
+  waterline,
+} from "./constants.ts";
+import { cooled, heated } from "./heat.ts";
+import { heroes } from "./heroes.ts";
+import type { Draft } from "./types.ts";
+import { fadeIn, skies } from "./weather.ts";
+import { inPark, inRiot } from "./world.ts";
+
+// Everything a tick does besides moving and chasing: the riot on the first morning, heat fading (fast under the city), FOMO rising in
+// the good times and falling in the park, a drained pocket emptying, the seed paper's test, MAXX interest, frost vision running down,
+// holding a bag through the storm, and the beach at the end of the tunnel.
+function zones(day: Draft): void {
+  if (day.day === 1 && day.loop === 0 && !day.done.includes("riot")) {
+    // Crossing it takes moving through it: a hero who wakes inside it has not crossed it standing still.
+    if (inRiot(day.x, day.z) && day.dir >= 0) {
+      day.done = [...day.done, "riot"];
+      if ((heroes[day.hero]?.stealth ?? 0) < 5) heated(day, riotHeat);
+    }
+  }
+  if (day.gate > 0 && day.z <= waterline) {
+    day.cause = "beach";
+    day.ended = true;
+    day.dir = -1;
+  }
+}
+
+function moods(day: Draft): void {
+  const low = day.ride === "foot" && day.gait >= 2;
+  const fade =
+    day.talk === "lying"
+      ? 3
+      : day.talk === "hideout"
+        ? 10
+        : low
+          ? heatFadeTicks / 2
+          : heatFadeTicks;
+  if (day.heat > 0 && day.tick % fadeIn(day, fade) === 0) cooled(day, 1);
+  const rising =
+    ([2, 5].includes(eraOf(day.day)) ? fomoTicks : fomoTicks * 3) /
+    (day.weather === "storm" || day.weather === "gale" ? 2 : 1);
+  if (day.tick % rising === 0) day.fomo = Math.min(100, day.fomo + 1);
+  const sitting = day.ride === "foot" && day.dir < 0 && inPark(day.x, day.z);
+  if (sitting && day.fomo > 0 && day.tick % grassTicks === 0) day.fomo -= 1;
+  day.peakFomo = Math.max(day.peakFomo, day.fomo);
+  if (sitting && day.fomo === 0 && day.peakFomo >= 50) day.grass = true;
+}
+
+// The paper in a pocket (without diamond-hand gloves) or as a photo on the phone is found; under a mattress it is found only if the
+// heat brought someone to the door. Either way the balance drains, live, until the hideout terminal stops it.
+function tested(day: Draft): boolean {
+  if (day.paper === 1) return !day.done.includes("fit-gloves");
+  if (day.paper === 2)
+    return day.heat >= 200 && !day.done.includes("home-studio");
+  return day.paper === 3;
+}
+
+function money(day: Draft): void {
+  if (day.drain > 0 && day.tick % 10 === 0)
+    day.pocket -= Math.min(day.pocket, day.drain);
+  if (day.paperAt >= 0 && day.tick === day.paperAt + paperTest && tested(day))
+    day.drain = Math.max(day.drain, drainPace);
+  if (eraOf(day.day) === 2 && day.tick % maxxTicks === 0)
+    day.maxx += Math.floor(day.maxx / maxxShare);
+  day.peakPocket = Math.max(day.peakPocket, day.pocket);
+}
+
+export function ticked(day: Draft): void {
+  zones(day);
+  skies(day);
+  moods(day);
+  money(day);
+  launch(day);
+  invade(day);
+  dashed(day);
+  thawed(day);
+  if (day.fizz > 0) day.fizz -= 1;
+  // Frost vision comes back every thirty seconds.
+  if (day.tick % visionEvery === 0)
+    day.vision = Math.max(day.vision, visionTicks);
+  if (day.looking) {
+    day.vision = Math.max(0, day.vision - 1);
+    day.looking = day.vision > 0;
+  }
+  if (
+    eraOf(day.day) === stormEra &&
+    day.tick === stormStart + stormTicks &&
+    day.bag > 0 &&
+    day.sells === 0 &&
+    day.firstBuy >= 0 &&
+    day.firstBuy < stormStart
+  )
+    day.done = [...day.done, "diamond"];
+}
