@@ -50,6 +50,11 @@ export interface Point {
   readonly x: number;
   readonly z: number;
 }
+// Something frozen by the freeze ray: a crowd's member, a ride, someone at a place, or a chaser, and the tick it thaws on.
+export interface Frost {
+  readonly id: string;
+  readonly until: number;
+}
 
 export interface DayState {
   // All-in bets made today.
@@ -179,6 +184,17 @@ export interface DayState {
   readonly dashTime: number;
   readonly tickets: number;
   readonly zuri: Point | null;
+  // The heading the hero last moved on (0 to 15), which the freeze ray fires along.
+  readonly facing: number;
+  // The freeze ray (`freeze.ts`): whether the hero carries it, the tick of the last shot, what is frozen and until when, and the most
+  // frozen at once today.
+  readonly gun: boolean;
+  readonly rayAt: number;
+  readonly frozen: readonly Frost[];
+  readonly peakFrozen: number;
+  // A Nakasato ID, carried from day to day once made (`stores.ts`), and a Fuzzy's fizz left (ticks).
+  readonly idCard: boolean;
+  readonly fizz: number;
   readonly x: number;
   readonly z: number;
 }

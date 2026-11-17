@@ -92,7 +92,7 @@ describe("the lantern night", () => {
       });
     expect(degenRules.init(1, { boon: 2, day: 1, hero: 7, loop: 1 })).toEqual({
       ok: false,
-      reason: "a trip back starts fresh, with no fate and no boon",
+      reason: "a trip back starts fresh, with no fate, boon or ID",
     });
     expect(degenRules.init(1, { boon: 2, day: 3, fate: -2, hero: 7 }).ok).toBe(
       true,

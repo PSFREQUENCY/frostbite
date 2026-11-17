@@ -3,7 +3,7 @@
 // Angles are radians in the code-built body's own sense (`body.ts`): a leg or an arm turned negative swings forward, a knee bends
 // positive and an elbow negative, the spine leans forward positive, and the neck looks down positive. The models bend their bones by the
 // same numbers (`models/bend.ts`).
-export type Way = "climb" | "crawl" | "crouch" | "hang" | "upright";
+export type Way = "climb" | "crawl" | "crouch" | "hang" | "sit" | "upright";
 
 export interface Leg {
   readonly hip: number;
@@ -25,20 +25,23 @@ export interface Pose {
   readonly twist: number;
 }
 
-// The way a gait shows, on a wall or not: 2 crouches and 3 crawls; up a wall the body climbs while it is moving and hangs while it is not.
+// The way a gait shows, on a wall or not: 2 crouches and 3 crawls; up a wall the body climbs while it is moving and hangs while it is not,
+// and on top of a WAGMI letter it sits (in a seat's pose, `lead.ts`).
 export const wayOf = (
   gait: number,
-  wall: "climbing" | "hanging" | null,
+  wall: "climbing" | "hanging" | "sitting" | null,
 ): Way =>
   wall === "climbing"
     ? "climb"
     : wall === "hanging"
       ? "hang"
-      : gait === 2
-        ? "crouch"
-        : gait === 3
-          ? "crawl"
-          : "upright";
+      : wall === "sitting"
+        ? "sit"
+        : gait === 2
+          ? "crouch"
+          : gait === 3
+            ? "crawl"
+            : "upright";
 
 const clamp = (value: number, low: number, high: number): number =>
   Math.min(high, Math.max(low, value));

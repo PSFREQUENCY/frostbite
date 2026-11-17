@@ -1,5 +1,6 @@
 import { eras } from "./calendar.ts";
 import { dashArch, dashCar, dashDesk } from "./course.ts";
+import { insideAt, rooms } from "./rooms.ts";
 import { days, type Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
 import { at, dockWater, helipad, saucerPad } from "./world.ts";
@@ -242,5 +243,45 @@ export const dashSites: readonly Spot[] = [
     label: "The Dash car",
     rank: 0,
     ride: "car",
+  },
+];
+
+// Inside every corner store a freezer by the front window (Cold Harbor Deli's holds the freeze ray, `freeze.ts`), and inside every Gwei
+// Gas station a coin ATM; and the ID kiosk beside the Gwei Gas on The Shaft's north street (`stores.ts`). Listed after the kerbs' rides too.
+export const rayStore = "room-0-0-out";
+export const storeSites: readonly Spot[] = [
+  ...rooms.flatMap((room): Spot[] =>
+    room.kind === "bodega"
+      ? [
+          {
+            ...insideAt(room, 100, 900),
+            id: `freezer-${room.id}`,
+            kind: "talk",
+            label:
+              room.id === rayStore
+                ? "The freezer, frosted over"
+                : "The freezer",
+            node: room.id === rayStore ? "freezer-ray" : "freezer",
+          },
+        ]
+      : room.kind === "gas"
+        ? [
+            {
+              ...insideAt(room, 1_020, 900),
+              id: `atm-${room.id}`,
+              kind: "talk",
+              label: "Coin ATM",
+              node: "atm",
+            },
+          ]
+        : [],
+  ),
+  {
+    id: "id-kiosk",
+    kind: "talk",
+    label: "ID kiosk",
+    node: "id",
+    x: 13_250,
+    z: 23_500,
   },
 ];

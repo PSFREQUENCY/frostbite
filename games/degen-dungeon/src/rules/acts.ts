@@ -14,6 +14,7 @@ import {
 import { board, rideLine, stepOff } from "./boarding.ts";
 import { clinging, onTheRoof } from "./climb.ts";
 import { askAtDesk, startDash, zuriNear } from "./dash.ts";
+import { isFrozen } from "./freeze.ts";
 import { enterWindow } from "./windows.ts";
 import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
@@ -108,7 +109,11 @@ function open(day: Draft, node: string): string | null {
   return null;
 }
 
+// What the freeze ray caught waits out its thaw: a ride cannot be taken, and nobody frozen can be talked to.
+const thawing = "frozen solid: give it half a minute";
 function useSpot(day: Draft, spot: Spot): string | null {
+  if (isFrozen(day, spot.kind === "parked" ? spot.id : `person-${spot.id}`))
+    return thawing;
   switch (spot.kind) {
     case "drop":
       return deliver(day, spot.id);
@@ -195,6 +200,7 @@ export function act(day: Draft): string | null {
       ? [...day.left].reverse().find((ride) => inReach(day, ride))
       : undefined;
   if (mine !== undefined) {
+    if (isFrozen(day, mine.id)) return thawing;
     day.left = day.left.filter((ride) => ride !== mine);
     day.ride = mine.ride;
     day.rideId = mine.id;

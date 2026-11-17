@@ -26,11 +26,12 @@ const halfWidth: Readonly<Record<string, number>> = {
 
 // The hero where the rules put them, facing their heading, and the crew a step behind on either side, all walking at the hero's pace.
 // On a ride each takes a seat (`seats.ts`) and sits, pedals or stands as it says; whoever has no seat runs alongside. On foot the hero
-// crouches, crawls, climbs, hangs or jumps as they are doing, and the crew walk upright on the street, waiting below a hero up a wall.
+// crouches, crawls, climbs, hangs, sits or jumps as they are doing, and the crew walk upright on the street, waiting below a hero up a
+// wall.
 export function placeCast(
   cast: readonly Actor[],
   state: DayState,
-  at: Subject,
+  at: Subject & { readonly ground?: number },
   { air, dt, hop, seconds, way }: Motion,
 ): Actor | undefined {
   const riding = state.ride !== "foot";
@@ -97,11 +98,15 @@ export function placeCast(
   const lead = cast[state.hero];
   if (lead !== undefined) {
     if (riding) board(lead, 0, -1);
+    // On a WAGMI letter's top the hero sits on its front edge, legs over the face.
+    else if (way === "sit") put(lead, 0, at.y - lead.hip(), 0.16, 0, "ledge");
     else put(lead, 0, at.y, 0, going, null, true);
   }
-  // Up a wall the hero has climbed away from the crew, who stay on the street (at the foot of the wall, a step back from it).
-  const ground = way === "climb" || way === "hang" ? 0 : at.y;
-  const back = ground === at.y ? -0.5 : -1.6;
+  // Up a wall the hero has climbed away from the crew, who stay on the ground (at the foot of the wall, a step back from it; under a
+  // letter's seat, on the terrace in front of it).
+  const up = way === "climb" || way === "hang" || way === "sit";
+  const ground = up ? (at.ground ?? 0) : at.y;
+  const back = !up ? -0.5 : way === "sit" ? 2.6 : -1.6;
   state.crew.forEach((hero, slot) => {
     const mate = cast[hero];
     if (mate === undefined) return;

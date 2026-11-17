@@ -11,14 +11,14 @@ import type { DayState } from "./rules/types.ts";
 export type Outcome =
   { readonly ok: true } | { readonly ok: false; readonly reason: string };
 
-// What a player can choose: the one act button, frost vision, a helicopter's climb or drop, a heading to hold, a way to move on foot (0
+// What a player can choose: the one act button, frost vision, the freeze ray's trigger, a helicopter's climb or drop, a heading to hold, a way to move on foot (0
 // walk, 1 run, 2 crouch, 3 crawl), and an answer (0 yes and 1 no to an offer, or one of a talk's answers).
 export type Choice =
   | { readonly by: number; readonly type: "lift" }
   | { readonly choice: number; readonly type: "pick" }
   | { readonly dir: number; readonly type: "move" }
   | { readonly mode: number; readonly type: "gait" }
-  | { readonly type: "act" | "look" };
+  | { readonly type: "act" | "look" | "shoot" };
 
 // One day as the player plays it. The page calls `tick` on its timer and `send` when the player chooses; the rules decide what is legal,
 // and each choice they accept (with the tick it was made on) is written into a run record. Only choices are recorded, never the ticks
@@ -53,6 +53,8 @@ export interface RunSessionOptions {
   readonly dream?: number;
   // Beam-ups with the visitors on earlier days; 0 or left out for none.
   readonly beamups?: number;
+  // A Nakasato ID made on an earlier day (story days only).
+  readonly idCard?: boolean;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -76,6 +78,7 @@ export function createRunSession(options: RunSessionOptions): RunSession {
           ...(boon === 0 ? {} : { boon }),
           ...(dream === 0 ? {} : { dream }),
           ...(beamups === 0 ? {} : { beamups }),
+          ...(options.idCard === true ? { idcard: 1 } : {}),
           ...won,
         };
   const init = degenRules.init(options.seed, config);

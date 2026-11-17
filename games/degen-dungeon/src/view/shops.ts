@@ -12,6 +12,7 @@ import {
 } from "three";
 
 import { rooms, type Room } from "../rules/rooms.ts";
+import { rayStore } from "../rules/sites.ts";
 import { painted } from "./boards.ts";
 import { box } from "./hash.ts";
 import { props, walls } from "./shop-props.ts";
@@ -30,7 +31,7 @@ export interface Shops {
 }
 
 // Where a point of a shop's own frame is in the city (metres), and which way is out of its door.
-const frameOf = (room: Room) => {
+export const frameOf = (room: Room) => {
   const out = room.north ? -1 : 1;
   const back = (room.north ? room.room.z1 : room.room.z0) / 100;
   return {
@@ -40,7 +41,7 @@ const frameOf = (room: Room) => {
   };
 };
 const depth = 11.2;
-const front = 12.6;
+export const front = 12.6;
 
 export function buildShops(): Shops {
   const root = new Group();
@@ -137,7 +138,17 @@ export function buildShops(): Shops {
     put(5.6, depth / 2, 3.58, 1.2, 0.04, 1.2, "#fff1b8", true);
     for (const prop of props[room.kind] ?? []) {
       const [u, w, y, width, height, thick, colour, lit = false] = prop;
-      put(u, w, y, width, height, thick, colour, lit);
+      // Cold Harbor Deli's freezer keeps a case of frost there for the freeze ray (`ray-view.ts`), and nothing else.
+      if (
+        room.id === rayStore &&
+        u < 0.9 &&
+        Math.abs(w - 9) < 0.8 &&
+        height < 0.5
+      )
+        continue;
+      if (lit === "glass")
+        glass.push(box(toX(u), y, toZ(w), width, height, thick));
+      else put(u, w, y, width, height, thick, colour, lit);
     }
     // The flats above, and the name over the door.
     put(depth / 2, front / 2, 3.7 + 3.4, depth + 0.6, 6.8, front, wall);

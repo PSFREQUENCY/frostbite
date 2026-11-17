@@ -10,6 +10,7 @@ import {
   tuxStars,
   vestPace,
 } from "./constants.ts";
+import { isFrozen } from "./freeze.ts";
 import { starsOf } from "./heat.ts";
 import { below } from "./talk.ts";
 import type { Draft, Point } from "./types.ts";
@@ -42,8 +43,9 @@ function frozen(day: Draft): void {
 export function chased(day: Draft): void {
   const stars = starsOf(day.heat);
   const hidden = below(day.talk);
+  // A chaser the freeze ray caught stands where it froze until it thaws.
   if (hidden || stars < copStars || stars >= tuxStars) day.cop = null;
-  else {
+  else if (!(day.cop !== null && isFrozen(day, "cop"))) {
     const cop = step(day.cop ?? beside(day, copGap), day, copPace);
     day.cop = cop;
     if (day.level === 0 && near(cop, day)) {
@@ -53,7 +55,7 @@ export function chased(day: Draft): void {
     }
   }
   if (hidden || stars < tuxStars) day.tux = null;
-  else {
+  else if (!(day.tux !== null && isFrozen(day, "tux"))) {
     const tux = step(day.tux ?? beside(day, tuxGap), day, 6 + 2 * stars);
     day.tux = tux;
     if ((day.level === 0 || stars >= 4) && near(tux, day)) frozen(day);

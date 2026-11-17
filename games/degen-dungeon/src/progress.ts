@@ -25,6 +25,8 @@ export interface Progress {
   readonly dream: number;
   readonly fate: number;
   readonly hero: number;
+  // Whether the player has made a Nakasato ID at the kiosk (`stores.ts`), which every story day after carries.
+  readonly idCard: boolean;
   readonly loops: number;
   // Whether the Time Machine is open: the next day is a trip back to day one.
   readonly machine: boolean;
@@ -43,6 +45,7 @@ export const freshProgress: Progress = {
   dream: 0,
   fate: 0,
   hero: 7,
+  idCard: false,
   loops: 0,
   machine: false,
   seen: false,
@@ -75,6 +78,7 @@ export function restore(saved: unknown): Progress {
     dream: whole(fields.dream, 0, 2, 0),
     fate: whole(fields.fate, -99, 99, 0),
     hero: whole(fields.hero, 0, heroes.length - 1, freshProgress.hero),
+    idCard: fields.idCard === true,
     loops: whole(fields.loops, 0, 99, 0),
     machine: fields.machine === true,
     seen: fields.seen === true,
@@ -119,6 +123,7 @@ export function afterDay(
       fate: trip
         ? Math.max(-99, Math.min(99, progress.fate + day.fate))
         : progress.fate,
+      idCard: progress.idCard || day.idCard,
       loops: Math.min(99, progress.loops + (trip ? 1 : 0)),
       machine: !trip && (progress.machine || won || day.cause === "machine"),
       slip: progress.slip || (eraOf(day.day) === stormEra && day.storm > 0),
@@ -134,7 +139,7 @@ export const choosing = (progress: Progress): boolean =>
   !progress.seen || progress.won;
 
 // The day the first screen begins: a trip back to day one while the Time Machine is open, or the story day the player is on.
-// A story day carries the timeline the trips back have left, as far as the rules take it, and last night's lantern wish.
+// A story day carries the timeline the trips back have left, as far as the rules take it, last night's lantern wish and the player's ID.
 export const nextRun = (
   progress: Progress,
 ): {
@@ -143,6 +148,7 @@ export const nextRun = (
   readonly day: number;
   readonly dream: number;
   readonly fate: number;
+  readonly idCard: boolean;
   readonly loop: number;
   readonly won: boolean;
 } =>
@@ -153,6 +159,7 @@ export const nextRun = (
         day: 1,
         dream: 0,
         fate: 0,
+        idCard: false,
         loop: Math.min(maxLoops, progress.loops + 1),
         won: progress.won,
       }
@@ -162,6 +169,7 @@ export const nextRun = (
         day: progress.day,
         dream: progress.day === lastDay ? progress.dream : 0,
         fate: Math.max(-9, Math.min(9, progress.fate)),
+        idCard: progress.idCard,
         loop: 0,
         won: progress.won,
       };

@@ -23,14 +23,15 @@ const once = (
 // Degen Dungeon 1: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests
 // a day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA
 // Beach and the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, Zuri's Degen Dash (a
-// nine-stage race round the city, from the second day), the lantern night and the moon colony fill the city between the story's quests.
+// nine-stage race round the city, from the second day), the corner stores and gas stations, the freeze ray, Mount WAGMI and its sign,
+// the lantern night and the moon colony fill the city between the story's quests.
 // The milestones are the story's (its quests, the Dash won and Moon Night's lantern), ten top skills and the hidden ones.
 // The title, the words and every milestone are a draft for the owner; a milestone's id is one the game's rules decide
 // (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb the walls of living streets, in at the windows and over the roofs: step into the corner shops, take a parked car, minivan, pickup, motorbike, scooter or bike (it stays where you leave it), and walk into the landmarks: three clubs, a cinema, a VR dome, a skate park, an arcade, a library and a bank. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam, and S's letters lie among the flyers, three a day. In the mania, flying saucers come for the city: bring glow sticks and pizza to make peace, or wake up back at the start; after that they visit as friends, and thirteen beam-ups leave you a saucer to fly. Weather turns from fog to blizzards to storms. From day two, Zuri sells tickets to the Degen Dash, nine stages round the city against the clock: only top skills win its 50,000 DUN, trophy, art and parade, and on Moon Night you must finish it. Then send a lantern up to the crypto gods; on the last morning, your crew's three words open the Genesis Room and the oldest tunnel to SHA Beach. Nine masked statues stand one in each borough, and their masks wake once the story is won. Reach the top and the Ice Runner rises. Milestones for the story, ten top skills and hidden achievements to find. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Hear Frost's speech, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb walls, in at the windows and over the roofs; take a parked car, minivan, pickup, motorbike, scooter or bike, and walk into the shops and landmarks. Nine corner stores sell snacks behind bulletproof glass, and six gas stations sell Fuzzy to anyone with a Nakasato ID. Steal if you must, but every star of heat brings someone: a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam. In the mania, flying saucers come for the city: make peace with glow sticks and pizza, and thirteen beam-ups leave you a saucer to fly. From day two, Zuri sells tickets to the Degen Dash, nine stages round the city against the clock, for 50,000 DUN, a trophy and a parade. Then send a lantern up to the crypto gods; on the last morning your crew's three words open the Genesis Room and the tunnel to SHA Beach. Nine masked statues wake once the story is won, and only a statue's face can take the freeze ray from a deli freezer. Hike the trail up Mount WAGMI, climb any letter of its sign and sit on top over the whole city. Milestones for the story, ten top skills and hidden achievements, each one landing as a spinning medallion. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -225,16 +226,16 @@ export const degenDungeonGame = defineGame({
       "Some statues are only waiting.",
     ),
     once(
-      "met-yourself",
-      "Is that me?",
-      "Hidden: after the statue, look outside your old home.",
-      "Everyone was a newbie once. Some of us twice.",
+      "butterfly-effect",
+      "Butterfly effect",
+      "Hidden: go back, change something, and come home to a different present.",
+      "One small flap of a wing, and your pocket and your look are not what they were.",
     ),
     once(
-      "brighter-timeline",
-      "A brighter timeline",
-      "Hidden: answer the newbie three times and leave the past better than you found it.",
-      "The kind answer is not always the one that helps.",
+      "sub-zero",
+      "Sub-Zero",
+      "Hidden: hold thirty-six frozen at once with the freeze ray.",
+      "Somewhere in a corner store freezer, the cold is waiting for a statue's face.",
     ),
     once(
       "nine-masks",
@@ -291,7 +292,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "2fe873d221006824f87b09522b0024aa67018d70eeb0e1f4eecac3f8d6e27ed2",
+        "3654f0daaffc72aa353dd02dc1448ed3a98f7ea7596481f3f70de4e4e1d8319a",
       version: 1,
     },
   },

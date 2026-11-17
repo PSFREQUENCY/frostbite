@@ -9,6 +9,7 @@ import {
   shore,
   tunnel,
 } from "./constants.ts";
+import { onMountain } from "./mountain.ts";
 import { inRoom } from "./rooms.ts";
 import { inVenue, lawns, outdoors } from "./venues.ts";
 import type { Point } from "./types.ts";
@@ -52,7 +53,7 @@ const inLot = (value: number): boolean => {
   );
 };
 // Where wheels may be: on the island and not in a building, which takes in the plazas round the landmarks and the open lots. Feet may
-// also be inside one of the shops or landmarks you can walk into.
+// also be inside one of the shops or landmarks you can walk into, or on Mount WAGMI's slopes (`mountain.ts`).
 export const onStreet = (x: number, z: number): boolean =>
   x >= bodyRadius &&
   z >= bodyRadius &&
@@ -60,13 +61,14 @@ export const onStreet = (x: number, z: number): boolean =>
   z <= island - bodyRadius &&
   (!(inLot(x) && inLot(z)) || outdoors(x, z));
 export const onLand = (x: number, z: number): boolean =>
-  onStreet(x, z) || inRoom(x, z) || inVenue(x, z);
+  onStreet(x, z) || inRoom(x, z) || inVenue(x, z) || onMountain(x, z);
 // Where a helicopter may be, and a boat (which also keeps off the shore).
 export const inSky = (x: number, z: number): boolean =>
   x >= -sea && z >= -sea && x <= island + sea && z <= island + sea;
 export const onWater = (x: number, z: number): boolean =>
   inSky(x, z) &&
-  (x < -shore || z < -shore || x > island + shore || z > island + shore);
+  (x < -shore || z < -shore || x > island + shore || z > island + shore) &&
+  !onMountain(x, z);
 // The Swap Meet's lot in Meme Market, where the airdrop falls thickest.
 export const inSwapMeet = (x: number, z: number): boolean =>
   x >= 31_000 && x <= 35_000 && z >= 17_000 && z <= 19_000;

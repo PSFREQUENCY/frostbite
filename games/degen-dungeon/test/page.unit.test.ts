@@ -78,6 +78,7 @@ describe("what the platform is asked to remember", () => {
         best: 12,
         day: 3,
         hero: 2,
+        idCard: true,
         seen: true,
         slip: true,
         sound: { effects: false, music: true, volume: 0.5 },
@@ -91,6 +92,7 @@ describe("what the platform is asked to remember", () => {
       dream: 0,
       fate: 0,
       hero: 2,
+      idCard: true,
       loops: 0,
       machine: false,
       seen: true,
@@ -164,6 +166,7 @@ describe("the player's hands", () => {
     look: vi.fn<() => void>(),
     act: vi.fn<() => void>(),
     lift: vi.fn<(by: number) => void>(),
+    shoot: vi.fn<() => void>(),
     move: vi.fn<(dir: number) => void>(),
     no: vi.fn<() => void>(),
     pause: vi.fn<() => void>(),
@@ -220,7 +223,7 @@ describe("the player's hands", () => {
     ).toEqual([0, 1, 1]);
   });
 
-  it("walk on held keys, act, answer, lift, start and pause, and turn the ring only while waiting", () => {
+  it("walk on held keys, act, answer, lift, fire the freeze ray, start and pause, and turn the ring only while waiting", () => {
     const hand = hands();
     let mode: Mode = "waiting";
     const stop = attachControls(document.body, hand, () => mode);
@@ -238,14 +241,22 @@ describe("the player's hands", () => {
     press("KeyD", "keyup");
     press("KeyS", "keyup");
     expect(hand.move.mock.calls).toEqual([[0], [2], [4], [-1]]);
-    for (const code of ["KeyE", "KeyX", "KeyR", "KeyF", "Enter", "KeyP"])
+    for (const code of [
+      "KeyE",
+      "KeyX",
+      "KeyR",
+      "KeyF",
+      "Enter",
+      "KeyP",
+      "KeyG",
+    ])
       press(code);
     press("KeyE", "keyup");
     expect(
-      [hand.act, hand.no, hand.start, hand.pause].map(
+      [hand.act, hand.no, hand.start, hand.pause, hand.shoot].map(
         (called) => called.mock.calls.length,
       ),
-    ).toEqual([1, 1, 1, 1]);
+    ).toEqual([1, 1, 1, 1, 1]);
     expect(hand.lift.mock.calls).toEqual([[1], [-1]]);
     // Space jumps, Shift held runs, C crouches, Z crawls, B and I open the backpack, 5 picks a fifth answer.
     for (const code of [

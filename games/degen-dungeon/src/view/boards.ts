@@ -10,8 +10,8 @@ import {
 
 import { eraOf } from "../rules/calendar.ts";
 
-// The billboards on the rooftops and the sign on the hill. They change with the era, so the skyline tells the mood of the market: the
-// riot morning, the mania, the winter, Launch Day and Moon Night. Words are painted on a canvas where the page has one; elsewhere a board
+// The billboards on the rooftops. They change with the era, so the skyline tells the mood of the market: the riot morning, the mania,
+// the winter, Launch Day and Moon Night (the WAGMI letters on Mount WAGMI are `wagmi.ts`). Words are painted on a canvas where the page has one; elsewhere a board
 // is plain colour. Every line is an original gag, and none names a real person, project or brand.
 export const boardLines: readonly (readonly string[])[] = [
   [
@@ -55,7 +55,6 @@ export const boardLines: readonly (readonly string[])[] = [
     "LOOK AFTER EACH OTHER",
   ],
 ];
-export const hillWords = ["WAGMI", "WAGMI", "NGMI", "WAGMI", "WAGMI"] as const;
 const inks = [
   "#ff3df2",
   "#5beac6",
@@ -117,7 +116,7 @@ export function painted(text: string, ink: string): MeshStandardMaterial {
 
 export interface Boards {
   readonly root: Group;
-  // Paints the boards and the hill sign for a story day.
+  // Paints the boards for a story day.
   era(day: number): void;
 }
 
@@ -125,8 +124,9 @@ export function buildBoards(): Boards {
   const root = new Group();
   root.name = "boards";
   const frames = new MeshStandardMaterial({ color: "#2a2f45", roughness: 0.9 });
-  const faces = spots.map(([x, y, z]) => {
+  const faces = spots.map(([x, y, z], index) => {
     const face = new Mesh(new PlaneGeometry(18, 6.5), frames);
+    face.name = `board-${String(index)}`;
     face.position.set(x, y, z);
     const back = new Mesh(new BoxGeometry(18.6, 7.1, 0.4), frames);
     back.position.set(x, y, z - 0.3);
@@ -135,11 +135,6 @@ export function buildBoards(): Boards {
     root.add(face, back, post);
     return face;
   });
-  const hill = new Mesh(new PlaneGeometry(46, 9), frames);
-  hill.name = "hill-sign";
-  hill.position.set(322, 30, 24);
-  hill.rotation.y = -0.5;
-  root.add(hill);
   const cache = new Map<string, MeshStandardMaterial>();
   const paint = (text: string, ink: string): MeshStandardMaterial => {
     const key = `${text}|${ink}`;
@@ -157,10 +152,6 @@ export function buildBoards(): Boards {
           inks[index % inks.length] ?? "#ffffff",
         );
       });
-      hill.material = paint(
-        hillWords[era - 1] ?? "WAGMI",
-        era === 3 ? "#ff5d5d" : "#ffffff",
-      );
     },
     root,
   };

@@ -1,8 +1,14 @@
 import { clinging, onTheRoof } from "./climb.ts";
-import { fogLine, gaitTenths } from "./constants.ts";
+import { fizzTenths, fogLine, gaitTenths, tankPace } from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
-import { flies, type DayState, type Draft, type Ride } from "./types.ts";
+import {
+  flies,
+  motors,
+  type DayState,
+  type Draft,
+  type Ride,
+} from "./types.ts";
 import {
   dockWater,
   helipad,
@@ -51,9 +57,10 @@ const ridePace: Readonly<Record<Ride, number>> = {
   truck: 24,
   van: 26,
 };
-// On foot the gait changes the pace (running, crouching, crawling); a tuned car is quicker.
+// On foot the gait changes the pace (running, crouching, crawling), and a statue's mask and a Fuzzy's fizz lengthen the stride; a tuned
+// car is quicker, and a full tank makes anything with an engine a little quicker (`stores.ts`).
 export const paceOf = (
-  state: Pick<DayState, "done" | "form" | "gait" | "hero" | "ride">,
+  state: Pick<DayState, "done" | "fizz" | "form" | "gait" | "hero" | "ride">,
 ): number =>
   state.ride === "foot"
     ? Math.max(
@@ -61,12 +68,16 @@ export const paceOf = (
         Math.floor(
           ((ridePace.foot + (heroes[state.hero]?.speed ?? 1)) *
             ((gaitTenths[state.gait] ?? 10) +
-              (state.form >= 0 ? strideTenths : 0))) /
+              (state.form >= 0 ? strideTenths : 0) +
+              (state.fizz > 0 ? fizzTenths : 0))) /
             10,
         ),
       )
     : ridePace[state.ride] +
-      (state.ride === "car" && state.done.includes("tune") ? 8 : 0);
+      (state.ride === "car" && state.done.includes("tune") ? 8 : 0) +
+      (motors.some((ride) => ride === state.ride) && state.done.includes("tank")
+        ? tankPace
+        : 0);
 // Where a body may be: the moon's ground once the shuttle sets down, a boat on the water, a helicopter in the sky, wheels on the streets,
 // and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {

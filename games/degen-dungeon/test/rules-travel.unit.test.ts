@@ -78,7 +78,9 @@ describe("the island", () => {
     expect(onLand(14_000, 14_000)).toBe(false);
     expect(onLand(18_000, 14_000)).toBe(true);
     expect(onLand(10, 6_000)).toBe(false);
-    expect(onLand(island, 6_000)).toBe(false);
+    expect(onLand(island, 18_000)).toBe(false);
+    // Except where The Old Floe's middle street runs on up Mount WAGMI.
+    expect(onLand(island, 6_000)).toBe(true);
     expect(onWater(dockWater.x, dockWater.z)).toBe(true);
     expect(onWater(dockLand.x, dockLand.z)).toBe(false);
     expect(onWater(-sea - 1, 0)).toBe(false);

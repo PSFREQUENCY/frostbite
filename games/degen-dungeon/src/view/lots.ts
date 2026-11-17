@@ -138,34 +138,40 @@ export function ringOf(borough: number, corner: number): readonly Piece[] {
       look.floors[0] + Math.floor(roll * (look.floors[1] - look.floors[0] + 1));
     pieces.push({ box, face, height: floors * floorHeight + 0.6, roll });
   };
-  const shop = rooms.find(
-    (room) => room.id === `room-${String(borough)}-${String(corner)}`,
+  // The lot's walk-in rooms: one on the middle street, and one on its outer side (a corner store or a gas station).
+  const inLot = rooms.filter(
+    (room) => room.borough === borough && room.corner === corner,
   );
-  const gap =
-    shop === undefined
-      ? null
-      : ([shop.room.x0 / 100 - 0.4, shop.room.x1 / 100 + 0.4] as const);
+  const outerFace = street === 2 ? 0 : 2;
   for (const face of [0, 2]) {
     const z = face === 0 ? z0 : z1 - depth;
+    const shop = inLot.find(
+      ({ outer }) =>
+        (face === street && !outer) || (face === outerFace && outer),
+    );
     const runs =
-      gap !== null && face === street
-        ? [
-            [x0, gap[0]],
-            [gap[1], x1],
-          ]
-        : [[x0, x1]];
+      shop === undefined
+        ? [[x0, x1]]
+        : [
+            [x0, shop.room.x0 / 100 - 0.4],
+            [shop.room.x1 / 100 + 0.4, x1],
+          ];
     for (const [from = x0, to = x1] of runs)
       row(from, to, seed * 8 + face, (a, b, roll) =>
         add([a, b, z, z + depth], roll, face),
       );
   }
-  // The rows down the sides stop short of the shop's back wall where the shop is on their side.
-  const near = shop === undefined ? null : shop.room;
+  // The rows down the sides stop short of a room's back wall where the room is on their side.
   for (const face of [1, 3]) {
     const x = face === 3 ? x0 : x1 - depth;
-    const clipped = near !== null && face === (column === 0 ? 3 : 1);
-    const from = clipped && lane === 1 ? near.z1 / 100 + 0.4 : z0 + depth;
-    const to = clipped && lane === 0 ? near.z0 / 100 - 0.4 : z1 - depth;
+    const side = face === (column === 0 ? 3 : 1);
+    let from = z0 + depth;
+    let to = z1 - depth;
+    for (const { room } of side ? inLot : []) {
+      if (room.z1 / 100 < (z0 + z1) / 2)
+        from = Math.max(from, room.z1 / 100 + 0.4);
+      else to = Math.min(to, room.z0 / 100 - 0.4);
+    }
     row(from, to, seed * 8 + face, (a, b, roll) =>
       add([x, x + depth, a, b], roll, face),
     );

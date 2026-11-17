@@ -6,7 +6,8 @@ backpack, the quest beacon, landmarks, day and night with the lantern night, and
 rounded the city, added the moonshot and the cinematic clips. Round five fixed riding (seats, pedalling, a deck to stand on, doors,
 the crew aboard or running alongside), added minivans, motorbikes, pickups and semi cabs and rides that stay where they are left,
 the saucers on day two, weather, money pop-ups with receipts, and frost vision that tops back up. Round six put the credits before the hero ring, laid the game out for phones, carved nine masked
-statues the hero can play as, opened the landmarks' plazas to feet and wheels, and swapped seven easy milestones for new ones. What
+statues the hero can play as, opened the landmarks' plazas to feet and wheels, and swapped seven easy milestones for new ones. Later
+rounds added the Degen Dash, and then corner stores, gas stations, the freeze ray, Mount WAGMI with its sign, and the badge reveal. What
 follows is how it fits together, what was decided along the way (all drafts for the owner), and what is left to
 polish. The plan it follows is the "Degen Dungeon: game plan" doc (Plan, Stories and Lore tabs).
 
@@ -172,6 +173,37 @@ at the start of the very first day and can be skipped.
     backpack and cheers each step.
   - `rules/boarding.ts` took boarding, the Green Line and stepping off out of `acts.ts`, which had grown past 300 lines.
 
+- **Round 12** (corner stores, gas stations, the freeze ray, Mount WAGMI with its sign, the badge reveal):
+  - Places: nine corner stores (two that were already bodegas and seven new rooms) and six Gwei Gas stations, built on the lots' outer
+    faces where the middle streets had no room (`rules/rooms.ts`: `shops` and `outers`; `view/lots.ts` leaves a gap in the ring of
+    buildings for each). Their spots (freezers, ATMs) and the ID kiosk are `storeSites`, listed after the kerbs so the kerbs' ride ids
+    stay put. Prices and what each item does are `rules/stores.ts` (a draft): a Fuzzy, a full tank and the ATM need a Nakasato ID
+    (100 DUN at the kiosk, carried in the save as `idCard`, written into a story day's settings as `idcard: 1`).
+  - The freeze ray (`rules/freeze.ts`): reading the request ("the max you can freeze is 36 / 63, in a closed space") as Sub-Zero at
+    36 frozen at once and 63 the most at once, each thawing after 30 seconds (900 ticks). A shot reaches 12 m along the last heading
+    walked (`facing`), a metre either side, nearest first; 15 ticks between shots. Packed places make 36 possible: the crowds now stand
+    where the rules put them (`rules/crowd.ts`), so the riot, Moon Night's party and a Dash parade can be caught, and so can parked
+    rows. Only a masked hero (a statue come to life) opens the frost and fires. Clerks behind the bulletproof glass, the machines and
+    Zuri cannot be frozen. "Sub-Zero" took "A brighter timeline"'s place, and "Is that me?" became "Butterfly effect" (a trip back
+    that leaves the timeline bent), so there are still forty.
+  - Mount WAGMI (`rules/mountain.ts`): an ellipse of land east of The Old Floe that the Floe's middle street walks onto; the sign's
+    footprint is closed; each letter climbs like a wall from the terrace in front of it, at the seat nearest the climber (a W has
+    three, an M two, the rest one), and its top takes a sitter (`done` gets "wagmi"). The rules have no heights: the view's
+    `hill.ts` is the ground (a ridge just behind the sign, a flat terrace under it, a shore that slopes under the sea), `trail.ts` the
+    switchback trail, `letters.ts` the letters' outlines, tops and the way up each stroke, `wagmi.ts` the letters (white panels, 10.2 m)
+    and their plank scaffold. The camera's new "vista" intent sits over the sitter's shoulder looking down at the city, the haze lifts,
+    and the page hides its overlays (`data-vista`). The old floating hill sign in `boards.ts` is gone.
+  - The look of the ray: `view/ray.ts` (chrome with a painted holographic world to reflect, a nitrogen chamber that sloshes and
+    bubbles, ice rings, circling frost motes), `view/beam.ts` (a white core, an ice-blue glow, glass rings that bend what is behind
+    them, frost lifting off), `view/ice.ts` (a cracked crystal shell round everything frozen, shrinking in its last two seconds),
+    `view/ray-view.ts` (the case in the deli's freezer, the ray in the form's hand, the beam, the ice, the lookout's haze) and
+    `view/aura.ts` (the butterfly effect, worn). The frozen hold still: a crowd member, a person at a place, a chaser.
+  - The badge reveal (`page/badges.ts`, `page/emblems.ts`, `badges.css`, `medal.css`): a medallion in one of four metals with an
+    emblem per badge drops in spinning, glitters and throws confetti, shows the badge's name, then flies to the badge tray in the
+    picture's corner, which counts the badges the platform lists as unlocked plus those earned since. Badges earned together queue.
+    A browser that asks for less motion gets it still.
+  - Controls: G (and a Freeze ray button shown only while the ray is held) fires; the score bar shows how many are frozen.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they
@@ -189,9 +221,11 @@ at the start of the very first day and can be skipped.
 8. The living statues use the code-built body in their stone and mask, not the carved figure's muscles. Hrimm (the big ice model)
    still towers over a bike; Volt, a four-legged model, stands on a deck rather than sitting. The saucer
    abduction is a cut to the moon and a clip, not an authored beam-up.
-9. The next rounds asked for (see PR.md's roadmap): the statues' clues and the clue book, the basketball court, six parks and the WAGMI
-   hill, the ADOR department store and businesses, the Global DEX, three theatres, the hacker and mining lines, car lots, alleys, the
+9. The next rounds asked for (see PR.md's roadmap): the statues' clues and the clue book, the basketball court, six parks, the ADOR department store and businesses, the Global DEX, three theatres, the hacker and mining lines, car lots, alleys, the
    studio apartment and storage, The Fuzzy Spot, the fashion districts, the jeweler to wizard line, the music career and the art gala.
+
+10. The freeze ray is held at the hip, not in a posed hand; the deli's case is best seen from inside the freezer aisle. Mount WAGMI's
+    trail is a guide only (the whole slope can be walked) and the camera only keeps above the ground, it does not look round the hill.
 
 ## Checks, from the repo root unless noted
 
@@ -199,7 +233,7 @@ at the start of the very first day and can be skipped.
 npx prettier --write games/degen-dungeon configs/games/degen-dungeon.ts
 cd games/degen-dungeon && npx tsc --noEmit -p . && npx eslint . --max-warnings 0
 npx vitest run --config vitest.config.ts --coverage
-cd ../../apps/web && npx vitest run --config vitest.config.ts test/games-config.unit.test.ts test/games-verifiers.unit.test.ts test/verifiers.unit.test.ts test/games-conformance.unit.test.ts test/games-layout.unit.test.ts test/verification-levels.unit.test.ts
+cd ../../apps/web && npx vitest run --config vitest.config.ts test/games-config.unit.test.ts test/games-verifiers.unit.test.ts test/games-milestone-art.unit.test.ts test/games-conformance.unit.test.ts test/games-layout.unit.test.ts test/verification-levels.unit.test.ts
 cd ../.. && pnpm repository:check
 ```
 

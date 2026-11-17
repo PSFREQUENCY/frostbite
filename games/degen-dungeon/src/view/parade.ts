@@ -18,23 +18,15 @@ import {
 } from "three";
 
 import { dashArch } from "../rules/course.ts";
-import { dashPar } from "../rules/dash.ts";
+import { paradeOn, paradeTicks } from "../rules/dash.ts";
 import type { DayState } from "../rules/types.ts";
 import type { Subject } from "./camera.ts";
 import { metres } from "./city.ts";
 
-// A champion's parade, for half a minute after a Degen Dash is won (`paradeOn`): confetti over the arch, fireworks above it, the trophy
-// held up over the champion's head, and the street's crowd lining the avenue to cheer (`crowd.ts`). It reads the day and decides
-// nothing.
-export const paradeTicks = 900;
-export const paradeOn = (
-  state: Pick<DayState, "dash" | "dashFrom" | "dashTime" | "done" | "tick">,
-): boolean =>
-  state.dash === 0 &&
-  state.dashTime > 0 &&
-  state.dashTime <= dashPar &&
-  state.done.includes("dash-won") &&
-  state.tick - state.dashFrom < paradeTicks;
+// A champion's parade, for half a minute after a Degen Dash is won (`paradeOn`, in the rules): confetti over the arch, fireworks above
+// it, the trophy held up over the champion's head, and the street's crowd lining the avenue to cheer (`crowd.ts`). It reads the day and
+// decides nothing.
+export { paradeOn, paradeTicks };
 
 const flakes = 420;
 const sparks = 150;

@@ -1,3 +1,5 @@
+import { storeProps } from "./store-props.ts";
+
 // What is inside each kind of shop (`shops.ts` builds it): the props, and the colours of the floor, the walls and the front.
 // A piece of a shop in its own frame: across from the left wall (u), out from the back wall (w), up from the floor; size; colour; glow.
 export type Prop = readonly [
@@ -8,9 +10,11 @@ export type Prop = readonly [
   height: number,
   deep: number,
   colour: string,
-  glow?: boolean,
+  // Lit from inside, or a pane of glass (drawn with the shop windows).
+  glow?: boolean | "glass",
 ];
 export const props: Readonly<Record<string, readonly Prop[]>> = {
+  ...storeProps,
   arcade: [0, 1, 2, 3].flatMap((k): Prop[] => [
     [1.2 + k * 2.6, 6.2, 0.9, 1, 1.8, 0.9, "#2a2350"],
     [
@@ -41,21 +45,6 @@ export const props: Readonly<Record<string, readonly Prop[]>> = {
     [2.5, 6, 0.55, 0.8, 1.1, 0.8, "#d64545"],
     [8.7, 6, 0.55, 0.8, 1.1, 0.8, "#d64545"],
     [5.6, 9.5, 1.6, 6, 1.4, 0.05, "#bfe9ff", true],
-  ],
-  bodega: [
-    ...[0, 1].flatMap((k): Prop[] => [
-      [3 + k * 5, 6.5, 0.9, 3, 1.8, 0.6, "#5d6470"],
-      ...[0, 1, 2, 3, 4, 5].map((j): Prop => [
-        1.8 + k * 5 + j * 0.45,
-        6.2,
-        0.5 + (j % 3) * 0.55,
-        0.35,
-        0.35,
-        0.3,
-        ["#ff5d5d", "#ffd166", "#5beac6", "#ff9ecf"][j % 4] ?? "#ffffff",
-      ]),
-    ]),
-    [0.5, 5, 1, 0.8, 2, 2.4, "#9fd8ff", true],
   ],
   coffee: [
     [4.4, 1.5, 1.35, 0.7, 0.6, 0.5, "#c0c6d0"],
@@ -124,7 +113,8 @@ export const walls: Readonly<
   arcade: ["#1d1b33", "#2a2350", "#14122a"],
   bait: ["#6b5a3a", "#3f6f7a", "#2f4f5a"],
   barber: ["#e8ecf5", "#3a3f47", "#1b1e2a"],
-  bodega: ["#c9c2b0", "#ffd166", "#d64545"],
+  bodega: ["#d9d4c6", "#ffd166", "#d64545"],
+  gas: ["#cfd3da", "#f4f8ff", "#e63946"],
   coffee: ["#8a5a3a", "#f3e3c3", "#2f6f57"],
   gym: ["#2a2f45", "#5d6470", "#11131c"],
   hardware: ["#8a7a5a", "#c9b38a", "#ff8a3c"],

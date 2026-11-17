@@ -1,12 +1,16 @@
 import { Group, type Object3D } from "three";
 import { describe, expect, it } from "vitest";
 
+import { roofLevel } from "../src/rules/climb.ts";
+import { signFace } from "../src/rules/mountain.ts";
 import { rooms } from "../src/rules/rooms.ts";
 import {
   buildingAt,
   createClimber,
   levelHeight,
 } from "../src/view/climbing.ts";
+import { hillAt, terrace } from "../src/view/hill.ts";
+import { letterHeight, seatHeight } from "../src/view/letters.ts";
 import { ringOf, roofAt, shopRoof } from "../src/view/lots.ts";
 import { bendPose, bendSeat, bonesOf } from "../src/view/models/bend.ts";
 import { clipFor } from "../src/view/models/load.ts";
@@ -19,7 +23,14 @@ describe("a climb as it is shown", () => {
   it("rises a storey at a climber's pace, facing the wall and closing in on it, then hangs there", () => {
     const climber = createClimber();
     const ground = climber.follow(wall, 150, 171, 0.3, 0.1);
-    expect(ground).toEqual({ heading: 0.3, hold: null, x: 150, y: 0, z: 171 });
+    expect(ground).toEqual({
+      ground: 0,
+      heading: 0.3,
+      hold: null,
+      x: 150,
+      y: 0,
+      z: 171,
+    });
     const going = climber.follow({ ...wall, level: 1 }, 150, 171, 0.3, 0.5);
     expect(going.y).toBeCloseTo(0.8);
     expect(going.hold).toBe("climbing");
@@ -79,6 +90,56 @@ describe("a climb as it is shown", () => {
     ).toBe(shopRoof);
     expect(roofAt(180, 180)).toBeNull();
     expect(ringOf(1, 2)).toEqual([]);
+  });
+
+  it("climbs a WAGMI letter from the terrace, sits on its top facing the city, and walks the hill on its slope", () => {
+    const climber = createClimber();
+    const seat = 4_450;
+    const face = {
+      level: 2,
+      ride: "foot" as const,
+      x: signFace - 100,
+      z: seat,
+    };
+    let shown = climber.follow(
+      face,
+      (signFace - 100) / 100,
+      seat / 100,
+      0,
+      0.1,
+    );
+    for (let frame = 0; frame < 80; frame += 1)
+      shown = climber.follow(face, (signFace - 100) / 100, seat / 100, 0, 0.1);
+    expect(shown.hold).toBe("hanging");
+    expect(shown.heading).toBeCloseTo(0);
+    expect(shown.ground).toBeCloseTo(terrace);
+    expect(shown.y).toBeCloseTo(terrace + ((seatHeight(seat) - 0.8) * 2) / 3);
+    // Up on top the body glides onto the letter and turns to face the city (west), at the seat's height.
+    const top = { ...face, level: roofLevel, x: signFace + 40 };
+    for (let frame = 0; frame < 80; frame += 1)
+      shown = climber.follow(top, (signFace + 40) / 100, seat / 100, 0, 0.1);
+    expect(shown.hold).toBe("sitting");
+    expect(shown.heading).toBeCloseTo(Math.PI);
+    expect(shown.x).toBeCloseTo((signFace + 40) / 100);
+    expect(shown.y).toBeCloseTo(terrace + seatHeight(seat));
+    // A W's middle is lower than its two outer strokes; the A, G, M and I all sit at their full height.
+    expect(seatHeight(4_450)).toBeLessThan(seatHeight(4_078) - 2);
+    for (const one of [4_078, 4_822, 5_400, 6_250, 6_838, 7_512, 7_875])
+      expect(seatHeight(one)).toBeGreaterThan(letterHeight - 0.1);
+    expect(seatHeight(9_999)).toBe(letterHeight);
+    // On the slope, the body stands on the hill; on the island and the sea there is no hill.
+    const slope = climber.follow(
+      { level: 0, ride: "foot", x: 40_000, z: 6_000 },
+      400,
+      60,
+      0,
+      0.1,
+    );
+    expect(slope.y).toBeCloseTo(hillAt(400, 60));
+    expect(hillAt(400, 60)).toBeGreaterThan(5);
+    expect([hillAt(180, 180), hillAt(358, 60), hillAt(700, 60)]).toEqual([
+      0, 0, 0,
+    ]);
   });
 
   it("shows a helicopter at its level at once, and a hero moved by the story where they now are", () => {

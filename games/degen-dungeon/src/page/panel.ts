@@ -1,4 +1,5 @@
-import { canClimb, clinging, onTheRoof } from "../rules/climb.ts";
+import { canClimb, clinging, onTheRoof, roofLevel } from "../rules/climb.ts";
+import { onLetterTop } from "../rules/mountain.ts";
 import { rankOf } from "../rules/heat.ts";
 import { flies, type DayState } from "../rules/types.ts";
 import { ticksPerSecond } from "../rules/constants.ts";
@@ -10,7 +11,8 @@ import { createToasts } from "./toasts.ts";
 import { goalFor, rankNames, talkOf, weatherNames } from "./words.ts";
 
 // Everything beside the picture that follows the day: the readouts, Pip's line, a cheer for each quest done, the talk with its answer buttons, frost vision's button
-// with the seconds left, and the climb and drop buttons, live in a helicopter and beside or up a building's wall.
+// with the seconds left, the freeze ray's trigger and count, and the climb and drop buttons, live in a helicopter and beside or up a
+// building's wall or a WAGMI letter.
 export function createPanel(hands: {
   readonly answer: (choice: number) => void;
   // A chime as money comes in or goes out.
@@ -31,6 +33,9 @@ export function createPanel(hands: {
   const answers = element("answers", "ol");
   const wish = element("wish-text", "input");
   const look = element("look", "button");
+  const ray = element("ray", "button");
+  const frozen = element("frozen", "strong");
+  const frozenPill = frozen.closest("span") ?? frozen;
   const up = element("up", "button");
   const down = element("down", "button");
   let shown = "";
@@ -60,6 +65,15 @@ export function createPanel(hands: {
       look.disabled = day === null || (left === 0 && !day.looking);
       look.textContent = `${day?.looking === true ? "Vision on" : "Frost vision"}, ${String(left)}s`;
       look.dataset.left = String(left);
+      // The freeze ray: its trigger while a statue come to life holds it, and how many it holds frozen now (`rules/freeze.ts`).
+      ray.hidden = day === null || !day.gun || day.form < 0;
+      frozen.textContent = String(day?.frozen.length ?? 0);
+      frozenPill.hidden = day === null || (!day.gun && day.frozen.length === 0);
+      // Sitting on a WAGMI letter, the picture is cleared for a screenshot (`badges.css`).
+      document.body.dataset.vista =
+        day !== null && day.level === roofLevel && onLetterTop(day.x, day.z)
+          ? "yes"
+          : "no";
       // Climb and drop: always in a helicopter; on foot, up a wall or beside one, as far as the storeys go (looked at only as the hero
       // moves, since finding a wall takes a few dozen looks round).
       const where =

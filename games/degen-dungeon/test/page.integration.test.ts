@@ -157,6 +157,7 @@ describe("the page's keys, pause and sound", () => {
       dream: 0,
       fate: 0,
       hero: 7,
+      idCard: false,
       loops: 0,
       machine: false,
       seen: false,

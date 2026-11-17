@@ -1,5 +1,5 @@
 import { moonNight } from "./calendar.ts";
-import { moments } from "./machine.ts";
+import { subZero } from "./freeze.ts";
 import { masksWorn } from "./statues.ts";
 import { questDone, type Quest } from "./story.ts";
 import type { DayState } from "./types.ts";
@@ -65,11 +65,10 @@ const skills: readonly (readonly [string, (day: DayState) => boolean])[] = [
 // visitors' saucer.
 const hidden: readonly (readonly [string, (day: DayState) => boolean])[] = [
   ["time-machine", (day) => day.cause === "machine"],
-  ["met-yourself", (day) => has(day, ...moments)],
-  [
-    "brighter-timeline",
-    (day) => day.fate >= 3 && moments.every((id) => day.done.includes(id)),
-  ],
+  // A trip back that leaves the present changed: the timeline bent, up or down, which moves the next day's pocket and look.
+  ["butterfly-effect", (day) => day.loop > 0 && day.fate !== 0],
+  // Thirty-six frozen at once with the freeze ray (`freeze.ts`).
+  ["sub-zero", (day) => day.peakFrozen >= subZero],
   ["nine-masks", (day) => masksWorn(day) >= 9],
   ["to-the-moon", (day) => has(day, "moon")],
   ["the-watcher", (day) => has(day, "watcher")],

@@ -22,6 +22,7 @@ import { moverOf } from "./bumps.ts";
 import { buildCrowd, gatheringOf } from "./crowd.ts";
 import { buildLight } from "./era.ts";
 import { buildingAt, createClimber } from "./climbing.ts";
+import { hillAt } from "./hill.ts";
 import { airAt, hopAt } from "./hop.ts";
 import { castFor, placeCast } from "./lead.ts";
 import { wayOf } from "./poses.ts";
@@ -116,12 +117,15 @@ export function createWorldView(
   );
   const loaded = new Map<ModelName, Model>();
   const past = createNewbie(scene, loaded);
-  const people = createPeople(scene, cast);
+  const people = createPeople(scene, cast, forms);
   const spinRing = createRing(cast, shadow);
   void models?.then((all) => dress(cast, all, loaded));
   // The camera keeps out of buildings, but over a roof lower than the hero it is in open sky (`climbing.ts`).
   let above = 0;
-  const rig = createRig(buildingAt(() => above));
+  const rig = createRig(
+    buildingAt(() => above),
+    hillAt,
+  );
   const towers = city.root.getObjectByName("towers");
   const climber = createClimber();
   let heading = Math.PI / 2;
@@ -199,11 +203,8 @@ export function createWorldView(
       );
       city.mark(state, seconds);
       north.show(state.gate > 0, seconds);
-      crowd.show(
-        gatheringOf(state),
-        seconds,
-        moverOf(state, at.x, at.z, heading),
-      );
+      const mover = moverOf(state, at.x, at.z, heading);
+      crowd.show(gatheringOf(state), seconds, mover, state.frozen);
       airdrop.fall(
         storming(state),
         seconds,

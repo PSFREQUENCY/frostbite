@@ -16,9 +16,9 @@ import { element } from "./elements.ts";
 import { sidesOf } from "../sides.ts";
 import { clockText, goalFor, questLineOf } from "./words.ts";
 
-// The backpack, which slides out from the side: today's quests and side quests, what the hero carries (DUN, loot, the freezer), the tools and fits they have,
-// the crew, where the seed paper is, the clues found (S's words and every letter picked up today, to read in full), tonight's lantern, and
-// a moon rock if they brought one home. It reads the day; it changes nothing.
+// The backpack, which slides out from the side: today's quests and side quests, what the hero carries (DUN, loot, the freezer), the tools,
+// fits, ID and freeze ray they have, the crew, where the seed paper is, the clues found (S's words and every letter picked up today, to
+// read in full), tonight's lantern, and a moon rock if they brought one home. It reads the day; it changes nothing.
 const papers = [
   "not written yet",
   "in your pocket",
@@ -135,6 +135,10 @@ export function packOf(
         ...fits.flatMap(([id, name]) => (has(id) ? [name] : [])),
         ...(has("moon") ? ["A space helmet"] : []),
         ...(has("moon-rock") ? ["A moon rock"] : []),
+        ...(day.idCard ? ["Your Nakasato ID"] : []),
+        ...(day.gun
+          ? [`The freeze ray (${String(day.frozen.length)} frozen right now)`]
+          : []),
       ],
     ],
     ["Crew", day.crew.map((hero) => heroes[hero]?.name ?? "")],

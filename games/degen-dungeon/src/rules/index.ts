@@ -12,6 +12,7 @@ import {
   verifierVersion,
 } from "./constants.ts";
 import { advance, startDay } from "./day.ts";
+import { shoot } from "./freeze.ts";
 import { scoreOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { earnedBy } from "./milestones.ts";
@@ -24,11 +25,12 @@ import type { DayState, Draft } from "./types.ts";
 // the Time Machine adds `loop` (1 to 9) and is always to day 1 (see `machine.ts`). A story day may carry the timeline those trips left,
 // `fate` (-9 to 9), which moves the starting pocket a hundred DUN a step, and last night's lantern wish, `boon` (1 to 4), which the seed
 // may answer (see `day.ts`). Once the story has been won (a last day ended on SHA Beach) every day adds `won` (1), which wakes the
-// statues' masks (`statues.ts`).
+// statues' masks (`statues.ts`). A story day may add `idcard` (1) once a Nakasato ID has been made (`stores.ts`).
 // Inputs, each with the `tick` it was made on: `move` `{ dir }` holds a heading (0 to 15, or -1 to stand); `gait` `{ mode }` walks (0),
 // runs (1), crouches (2) or crawls (3); `act` uses the nearest spot; `pick` `{ choice }` answers what is waiting (0 yes and 1 no to an
 // offer, or one of up to five answers to a talk); `lift` `{ by }` takes a helicopter up or down a level, or on foot climbs a wall a storey
-// up or down (1 or -1); `look` turns frost vision on or off; `end` closes the day. Between inputs the day runs on by itself (`advance`). A day that is not closed counts as it
+// up or down (1 or -1); `look` turns frost vision on or off; `shoot` fires the freeze ray along the last heading moved (`freeze.ts`);
+// `end` closes the day. Between inputs the day runs on by itself (`advance`). A day that is not closed counts as it
 // stands at its last input.
 const fieldsFor = new Map<string, readonly string[]>([
   ["act", ["tick"]],
@@ -38,6 +40,7 @@ const fieldsFor = new Map<string, readonly string[]>([
   ["look", ["tick"]],
   ["move", ["dir", "tick"]],
   ["pick", ["choice", "tick"]],
+  ["shoot", ["tick"]],
 ]);
 
 const settings: readonly string[] = [
@@ -47,6 +50,7 @@ const settings: readonly string[] = [
   "dream",
   "fate",
   "hero",
+  "idcard",
   "loop",
   "won",
 ];
@@ -74,8 +78,10 @@ function change(
     const dir = whole(fields.dir, -1, 15);
     if (dir === null) return "dir must be a heading from -1 to 15";
     day.dir = dir;
+    if (dir >= 0) day.facing = dir;
     return null;
   }
+  if (type === "shoot") return shoot(day);
   if (type === "pick") {
     const choice = whole(fields.choice, 0, 4);
     return choice === null ? "choice must be 0 to 4" : pick(day, choice);
@@ -95,7 +101,7 @@ export const degenRules: GameVerifier<DayState> = {
       keys.some((key) => !settings.includes(key))
     )
       return refuse(
-        "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups or won",
+        "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups, idcard or won",
       );
     const hero = whole(config.hero, 0, heroes.length - 1);
     const day = whole(config.day, 1, lastDay);
@@ -108,6 +114,9 @@ export const degenRules: GameVerifier<DayState> = {
     // Beam-ups on earlier days, for the visitors' saucer (`invasion.ts`).
     const beamups = keys.includes("beamups") ? whole(config.beamups, 1, 99) : 0;
     if (beamups === null) return refuse("beamups are 1 to 99");
+    // A Nakasato ID made on an earlier day (`stores.ts`).
+    const idcard = keys.includes("idcard") ? whole(config.idcard, 1, 1) : 0;
+    if (idcard === null) return refuse("idcard is 1 once an ID is made");
     if (won === null) return refuse("won is 1 once the story is won");
     if (hero === null || day === null)
       return refuse("hero must be 0 to 9 and day 1 to 7");
@@ -116,8 +125,11 @@ export const degenRules: GameVerifier<DayState> = {
     if (fate === null) return refuse("fate must be -9 to 9");
     if (loop === null || (loop > 0 && day !== 1))
       return refuse("a trip back is loop 1 to 9, and always to day 1");
-    if (loop > 0 && (keys.includes("fate") || keys.includes("boon")))
-      return refuse("a trip back starts fresh, with no fate and no boon");
+    if (
+      loop > 0 &&
+      (keys.includes("fate") || keys.includes("boon") || idcard > 0)
+    )
+      return refuse("a trip back starts fresh, with no fate, boon or ID");
     return boon === null
       ? refuse("a boon is last night's wish, 1 to 4")
       : {
@@ -126,6 +138,7 @@ export const degenRules: GameVerifier<DayState> = {
             ...startDay(seed, hero, day, loop, fate, boon, won === 1),
             beamups,
             dream,
+            idCard: idcard === 1,
           },
         };
   },

@@ -16,7 +16,6 @@ export const counters: Readonly<Record<string, number>> = {
   arcade: 10,
   bait: 10,
   barber: 60,
-  bodega: 5,
   coffee: 5,
   gym: 20,
   hardware: 30,
@@ -60,7 +59,6 @@ export function counter(day: Draft, kind: string): string | null {
     day.rep += 2;
   }
   if (kind === "pizza") day.vision = Math.min(most, day.vision + 150);
-  if (kind === "bodega") day.vision = Math.min(most, day.vision + 90);
   if (kind === "hardware") day.vision = Math.min(most, day.vision + 150);
   if (kind === "barber") cooled(day, 100);
   if (kind === "laundry") cooled(day, 50);

@@ -120,14 +120,35 @@ of one hero. DUN is in-game credit only.
   jump. Frost Run's models play their own Duck and Hop clips and bend their bones the same way to crawl, climb and hang.
 - **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner lifts off its plinth on a
   column of light. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
-  timeline for better or worse, and the timeline carries into the next playthrough.
+  timeline for better or worse, and the timeline carries into the next playthrough. Come home to a present you changed (your pocket
+  and your look, up or down) and you earn the Butterfly effect badge; a hero with a bent timeline wears it, golden butterflies about
+  them for a brighter one and grey static for a darker one.
+- **Corner stores and gas stations:** nine corner stores, each with a counter behind floor-to-ceiling bulletproof glass, shelves behind
+  the clerk, aisles of snacks and a wall of lit freezers: hot chips (frost vision), a chopped cheese (standing), a juice (calmer), and ice
+  pops and pints from the freezer. Six Gwei Gas stations have a forecourt with pumps and a pole sign, a hot-dog roller and a coin ATM;
+  a Fuzzy (quicker on foot for half a minute), a full tank (rides with an engine a little quicker all day) and the ATM all want a
+  Nakasato ID, made at the ID kiosk for 100 DUN and kept from day to day.
+- **The freeze ray:** in Cold Harbor Deli's freezer, in a case of frost that only a statue's face opens. Wearing a mask, take it, and G
+  (or the Freeze ray button) fires it the way you last walked: everything within twelve metres along that line and a metre either side
+  freezes for thirty seconds (people, rides, the beat cop, the tux), nearest first, up to 63 at once, and the beam bends the light like
+  gravity. Frozen people cannot be talked to, frozen rides cannot be taken, a frozen chaser stands still, and freezing brings heat.
+  Thirty-six frozen at once earns Sub-Zero, so it takes a packed place: the riot, Moon Night's party, a Dash parade, a row of parked
+  cars.
+- **Mount WAGMI:** east of The Old Floe, the Floe's middle street runs on up a hiking trail (timber steps, rope on posts, a sign at the
+  bottom) to a terrace on the ridge, where the WAGMI letters stand ten metres tall, about six heroes, on a scaffold of wooden planks.
+  Climb any letter from the terrace in front of it (you go up at its nearest seat: a W's outer strokes or its middle, an M's stems) and
+  sit on its top: the camera turns to the whole city below and the picture clears for a screenshot.
+- **Badges:** every badge earned lands as a big medallion in the middle of the picture, struck in gold, silver, ice or iridescent metal
+  with its own emblem, spinning with glitter and confetti, then flies up into the badge tray in the corner, which counts your
+  collection.
 
 Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
-answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, R and F climb a wall or fly a helicopter up
-and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: press and hold the drawn stick's edge to walk that
+answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, G fires the freeze ray, R and F climb a wall
+or a letter or fly a helicopter up and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: press and hold the drawn stick's edge to walk that
 way (no slide needed), or put a thumb anywhere else on the left half and slide (the ring jumps under it and the way it slides steers,
 sixteen ways); a tap on the right acts, and round buttons under
-the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds), open the bag, and climb and drop where there is a wall;
+the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds), open the bag, fire the freeze ray while you hold it,
+and climb and drop where there is a wall;
 the goal and the
 talks float over the picture. The camera rides behind your shoulder and swings round as you turn, comes in close in a narrow street or a shop, pulls back
 over a square or on a ride, and cuts in close when you use something. The next place to go glows on the corner map and stands in the
@@ -141,12 +162,14 @@ the status line says so. Headless test browsers are such a case, so the platform
 
 `src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }` (day 1 to 7), with `loop` on a
 trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish, `beamups` for the beam-ups of
-earlier days and, on the last day, `dream` for the dream chosen on Moon Night. Inputs are `move`, `gait`, `act`,
-`pick`, `lift`, `look` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
+earlier days, `idcard` for a Nakasato ID made on an earlier day and, on the last day, `dream` for the dream chosen on Moon Night.
+Inputs are `move`, `gait`, `act`, `pick`, `lift`, `look`, `shoot` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
 replays the record to the same end and decides the milestones from it, forty in all: twenty for the story (its quests from the seed
 paper on, as Frost's speech and finishing the Dash have none, then the Degen Dash won and Moon Night's lantern), ten top skills, and
-the top achievements: nine hidden ones and the saucer pilot (`src/rules/milestones.ts`). The Dash's course and rules are
-`src/rules/course.ts` and `src/rules/dash.ts`. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+the top achievements: nine hidden ones (the Butterfly effect and Sub-Zero among them) and the saucer pilot
+(`src/rules/milestones.ts`). The Dash's course and rules are `src/rules/course.ts` and `src/rules/dash.ts`; the stores, the freeze ray
+and Mount WAGMI are `src/rules/stores.ts`, `src/rules/freeze.ts` (with the crowds it catches, `src/rules/crowd.ts`) and
+`src/rules/mountain.ts`. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
 a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon`, `beamups` and `dream` are the page's word, as
 before.
 
@@ -154,7 +177,8 @@ before.
 
 `npx vitest run --config vitest.config.ts --coverage` from this folder. Bots (`test/support/`) play every hero's every story day to the
 end, and between them earn every milestone; an idle day earns none. The Dash bot (`test/support/dash.ts`) runs the course the quick way:
-about a minute (1,802 to 2,119 ticks, by the hero's speed), against a par of 3,000 ticks.
+about a minute (1,802 to 2,119 ticks, by the hero's speed), against a par of 3,000 ticks. The freeze bot (`test/support/freeze.ts`)
+takes a mask and the ray, then sweeps the riot with nine shots and holds more than thirty-six frozen at once.
 
 ## Ownership
 

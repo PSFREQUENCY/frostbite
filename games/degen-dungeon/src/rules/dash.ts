@@ -195,3 +195,14 @@ export function dashed(day: Draft): void {
   day.zuri = { x: day.x, z: day.z };
   day.done = [...day.done, mark];
 }
+
+// The champion's parade, for half a minute after a Degen Dash is won (the crowd lines the avenue, `crowd.ts`).
+export const paradeTicks = 900;
+export const paradeOn = (
+  day: Pick<DayState, "dash" | "dashFrom" | "dashTime" | "done" | "tick">,
+): boolean =>
+  day.dash === 0 &&
+  day.dashTime > 0 &&
+  day.dashTime <= dashPar &&
+  day.done.includes("dash-won") &&
+  day.tick - day.dashFrom < paradeTicks;

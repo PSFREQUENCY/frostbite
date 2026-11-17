@@ -32,12 +32,14 @@ describe("the Time Machine on the page", () => {
       { ...day, cause: "machine", day: 3, ended: true },
     ).progress;
     expect([entered.machine, entered.day]).toEqual([true, 3]);
-    expect(nextRun(entered)).toEqual({
+    // A trip back is to before any ID was made.
+    expect(nextRun({ ...entered, idCard: true })).toEqual({
       beamups: 0,
       boon: 0,
       day: 1,
       dream: 0,
       fate: 0,
+      idCard: false,
       loop: 1,
       won: false,
     });
@@ -78,6 +80,7 @@ describe("the Time Machine on the page", () => {
       day: 1,
       dream: 0,
       fate: 3,
+      idCard: false,
       loop: 0,
       won: false,
     });
@@ -89,6 +92,7 @@ describe("the Time Machine on the page", () => {
       day: 1,
       dream: 0,
       fate: 0,
+      idCard: false,
       loop: 9,
       won: false,
     });

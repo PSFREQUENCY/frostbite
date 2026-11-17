@@ -125,6 +125,13 @@ export function startDay(
     dashTime: 0,
     tickets: 0,
     zuri: null,
+    facing: 4,
+    gun: false,
+    rayAt: -1_000,
+    frozen: [],
+    peakFrozen: 0,
+    idCard: false,
+    fizz: 0,
     x: home.x,
     z: home.z,
   };

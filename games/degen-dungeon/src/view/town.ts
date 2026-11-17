@@ -5,7 +5,9 @@ import type { DayState } from "../rules/types.ts";
 import { questAt } from "../quest.ts";
 import { buildBeacon } from "./beacon.ts";
 import { moverOf } from "./bumps.ts";
+import { buildFronts } from "./fronts.ts";
 import { buildLanterns } from "./lanterns.ts";
+import { buildMountain } from "./mountain.ts";
 import { buildParked, type Parked } from "./parked.ts";
 import { buildShopMotion } from "./shop-motion.ts";
 import { buildShops } from "./shops.ts";
@@ -14,8 +16,9 @@ import { buildTraffic } from "./traffic.ts";
 import { buildVenues } from "./venues.ts";
 import { buildWalkers } from "./walkers.ts";
 
-// Everything at street level that makes Nakasato feel lived in: the furniture and the notices, the walk-in shops, the parked rides, the
-// people walking and talking, the traffic, the landmarks, the lantern night, and the beacon over where to go next. It also keeps the
+// Everything at street level that makes Nakasato feel lived in: the furniture and the notices, the walk-in shops and the gas stations'
+// forecourts, the parked rides, the people walking and talking, the traffic, the landmarks, the lantern night, the beacon over where to
+// go next, and Mount WAGMI with its trail and its sign. It also keeps the
 // time of day, from the day's clock: the sun crosses the sky until dusk, and after `nightTick` it is night.
 export interface Town {
   // The town between days (the opening and the hero ring): daylight, people and traffic, nobody's quest.
@@ -70,6 +73,8 @@ export function buildTown(): Town {
   root.add(
     street.root,
     shops.root,
+    buildFronts().root,
+    buildMountain().root,
     working.root,
     parked.root,
     walkers.root,

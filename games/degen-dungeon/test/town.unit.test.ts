@@ -41,8 +41,11 @@ const bought = (day: DayState, kind: string): DayState =>
 
 describe("the mom-and-pop shops", () => {
   it("are rooms cut into corner lots, with a doorway onto the street: open to feet, closed to wheels", () => {
-    expect(rooms).toHaveLength(17);
-    expect(new Set(rooms.map(({ id }) => id)).size).toBe(17);
+    // Seventeen on the middle streets, and thirteen on the lots' outer sides: seven corner stores and six gas stations.
+    expect(rooms).toHaveLength(30);
+    expect(new Set(rooms.map(({ id }) => id)).size).toBe(30);
+    expect(rooms.filter(({ kind }) => kind === "bodega")).toHaveLength(9);
+    expect(rooms.filter(({ kind }) => kind === "gas")).toHaveLength(6);
     for (const room of rooms) {
       const { counter, door } = room;
       expect(onStreet(counter.x, counter.z), room.id).toBe(false);

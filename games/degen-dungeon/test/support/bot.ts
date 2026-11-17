@@ -105,6 +105,8 @@ export function createBot(
     inputs,
     lift: (by: number): void => send("lift", { by }),
     look: (): void => send("look"),
+    // Fires the freeze ray along the last heading moved.
+    shoot: (): void => send("shoot"),
     // Yes (0) or no (1), or one of a talk's answers by number.
     pick: (answer: boolean | number): void =>
       send("pick", {

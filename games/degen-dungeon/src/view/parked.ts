@@ -96,7 +96,9 @@ const set = (
 
 // Where a parked ride is drawn (metres): anything with four wheels in the parking lane just past the kerb, a scooter, bike or motorbike
 // on the pavement, along its street (a north-south street when it stands east or west of the borough's middle).
-const drawnAt = (spot: (typeof parked)[number]) => {
+export const drawnAt = (
+  spot: Readonly<{ ride: Wheels; x: number; z: number }>,
+): { readonly turn: number; readonly x: number; readonly z: number } => {
   const local = spot.x % block;
   const northSouth = Math.abs(local - block / 2) === 850;
   const inward = kerbside(spot.ride) ? 0 : spot.ride === "semi" ? 2.2 : 2;

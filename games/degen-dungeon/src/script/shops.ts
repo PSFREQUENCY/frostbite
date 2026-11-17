@@ -31,10 +31,6 @@ export const shopTalks: Readonly<
     answers: ["A fresh fade, 60", "Leave"],
     say: "Take a seat. A new cut, and the street forgets your face for a while.",
   },
-  "shop-bodega": {
-    answers: ["An energy drink, 5", "Leave"],
-    say: "Snacks, batteries, lottery scratchers, and a cat asleep on the counter.",
-  },
   "shop-coffee": {
     answers: ["A cup to calm the nerves, 5", "Leave"],
     say: "Steam, beans, and a chalkboard that just says gm.",

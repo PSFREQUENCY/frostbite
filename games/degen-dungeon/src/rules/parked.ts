@@ -1,6 +1,6 @@
 import type { Wheels } from "./types.ts";
 import { reach } from "./constants.ts";
-import { rooms } from "./rooms.ts";
+import { streetRooms } from "./rooms.ts";
 import type { Spot } from "./spot.ts";
 import type { Point } from "./types.ts";
 import { at, slotOf } from "./world.ts";
@@ -49,7 +49,7 @@ export function parkedRides(taken: readonly Point[]): readonly Spot[] {
   const beats = Array.from({ length: 9 }, (_, borough) =>
     [0, 1, 2, 3].map((lane) => slotOf(borough, lane)),
   ).flat();
-  const doors = rooms.map(({ door }) => ({
+  const doors = streetRooms.map(({ door }) => ({
     x: (door.x0 + door.x1) / 2,
     z: (door.z0 + door.z1) / 2,
   }));

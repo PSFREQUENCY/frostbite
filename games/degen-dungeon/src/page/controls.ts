@@ -6,8 +6,8 @@ import { attachStick } from "./stick.ts";
 
 // What the player's hands can do. Keys: arrows or WASD walk (eight ways, by the screen: up is the way the camera looks), Shift held runs,
 // C crouches and Z crawls (each again to stand), Space jumps (or gives the first answer while one waits), E acts and says yes, X or Escape
-// says no, 1 to 5 pick an answer, B or I opens the backpack, V is frost vision, R and F take a helicopter up and down, Enter starts, P
-// pauses; before a day, left and right turn the hero ring. Fingers: before a day a swipe or a tap on either side turns the ring and a tap
+// says no, 1 to 5 pick an answer, B or I opens the backpack, V is frost vision, G fires the freeze ray, R and F climb (or take a
+// helicopter) up and down, Enter starts, P pauses; before a day, left and right turn the hero ring. Fingers: before a day a swipe or a tap on either side turns the ring and a tap
 // in the middle starts (`ring-touch.ts`); during one a thumb anywhere on the left of the screen is a stick (`stick.ts`, sixteen ways)
 // and a tap on the right acts, or answers yes on the right and no on the left while an offer waits. The buttons do the rest.
 export interface Hands {
@@ -19,6 +19,8 @@ export interface Hands {
   readonly jump: () => void;
   readonly look: () => void;
   readonly lift: (by: number) => void;
+  // The freeze ray's trigger (for a statue come to life holding it).
+  readonly shoot: () => void;
   // A heading by the screen (0 right, 4 down, 8 left, 12 up), or -1 to stand.
   readonly move: (dir: number) => void;
   readonly no: () => void;
@@ -45,6 +47,7 @@ const keys = {
   KeyD: "east",
   KeyE: "act",
   KeyF: "fall",
+  KeyG: "shoot",
   KeyI: "bag",
   KeyR: "rise",
   KeyS: "south",
@@ -123,6 +126,7 @@ export function attachControls(
       action === "look" ||
       action === "no" ||
       action === "pause" ||
+      action === "shoot" ||
       action === "start"
     )
       hands[action]();

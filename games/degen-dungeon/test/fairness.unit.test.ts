@@ -25,6 +25,7 @@ import {
 } from "./support/sky.ts";
 import { replay } from "./support/replay.ts";
 import { tellStory } from "./support/story.ts";
+import { subZeroDay } from "./support/freeze.ts";
 import { machineDay, tripDay } from "./support/trips.ts";
 
 // Every milestone can be earned by a legal day, and none by a day in which nothing is done.
@@ -55,6 +56,7 @@ describe("the milestones", () => {
       roofDay(),
       saucerPilotDay(),
       lanternNight(),
+      subZeroDay(),
       ...[1, 2, 3, 4, 5, 6, 7].map((day) =>
         tellStory(createBot(10 + day, day % 9, day)),
       ),

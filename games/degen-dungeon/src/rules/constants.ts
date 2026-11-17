@@ -123,3 +123,7 @@ export const shotPays = 100;
 export const shotOdds = 30;
 export const shotWindow = 900;
 export const launchpad = { x: 21_700, z: 17_300 } as const;
+// A Fuzzy's fizz (`stores.ts`): how long it lasts and how much longer it makes a stride on foot (tenths); and a full tank's extra pace.
+export const fizzTicks = 900;
+export const fizzTenths = 2;
+export const tankPace = 4;

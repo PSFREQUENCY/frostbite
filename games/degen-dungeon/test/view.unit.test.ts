@@ -8,7 +8,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import { spots } from "../src/rules/places.ts";
-import { boardLines, buildBoards, hillWords } from "../src/view/boards.ts";
+import { boardLines, buildBoards } from "../src/view/boards.ts";
 import { buildLine, onRing } from "../src/view/line.ts";
 import { createRig, poseFor } from "../src/view/camera.ts";
 import { frameOf, opening } from "../src/view/cine.ts";
@@ -59,15 +59,15 @@ describe("the city", () => {
     ]).toEqual([true, false, false]);
   });
 
-  it("paints the boards and the hill sign for each era, and runs the Green Line round its ring", () => {
+  it("paints the boards for each era, and runs the Green Line round its ring", () => {
     const boards = buildBoards();
-    const hill = boards.root.getObjectByName("hill-sign");
+    const board = boards.root.getObjectByName("board-0");
     // Boards go by a story day's era: day three is the mania, day four the winter.
     boards.era(3);
-    const mania = hill instanceof Mesh ? hill.material : null;
+    const mania = board instanceof Mesh ? board.material : null;
     boards.era(4);
-    expect(hill instanceof Mesh ? hill.material : null).not.toBe(mania);
-    expect(hillWords[2]).toBe("NGMI");
+    expect(board instanceof Mesh ? board.material : null).not.toBe(mania);
+    expect(boards.root.getObjectByName("hill-sign")).toBeUndefined();
     expect(boardLines.every((lines) => lines.length >= 6)).toBe(true);
     expect(onRing(0)).toEqual([68, 93, 0]);
     expect(onRing(240)[0]).toBe(308);

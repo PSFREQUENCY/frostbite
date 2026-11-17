@@ -68,6 +68,7 @@ export function handsFor(page: Page): Hands {
     },
     lift: (by) => page.choose({ by, type: "lift" }),
     look: () => page.choose({ type: "look" }),
+    shoot: () => page.choose({ type: "shoot" }),
     move: steer,
     no: () => {
       const day = page.day();
@@ -88,6 +89,7 @@ export function wireButtons(hands: Hands): readonly HTMLButtonElement[] {
     return button;
   };
   press("look", hands.look);
+  press("ray", hands.shoot);
   press("up", () => hands.lift(1));
   press("down", () => hands.lift(-1));
   return [

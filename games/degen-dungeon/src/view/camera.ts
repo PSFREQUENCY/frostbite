@@ -3,15 +3,15 @@ import type { PerspectiveCamera } from "three";
 // The camera, as poses to cut or glide between. While walking it rides behind the hero's shoulder and swings round behind them as they turn
 // (a turn of more than a right angle, toward the camera, leaves it where it is), so what is in front of the hero is in front of the
 // player. It comes in close in a narrow street or a shop and pulls back over a square, on a ride or at a run, and drops low with a crouch.
-// When something matters it cuts in close: a face while an offer waits, hands when a spot is used. A new kind of shot is a new intent
-// here; the scene only says which intent the moment calls for.
+// When something matters it cuts in close: a face while an offer waits, hands when a spot is used. It never goes under the ground (a
+// hillside). A new kind of shot is a new intent here; the scene only says which intent the moment calls for.
 export type Vec = readonly [number, number, number];
 export interface Pose {
   readonly fov: number;
   readonly from: Vec;
   readonly look: Vec;
 }
-export type Intent = "follow" | "hands" | "ride" | "sky" | "talk";
+export type Intent = "follow" | "hands" | "ride" | "sky" | "talk" | "vista";
 // Who the camera is on: where they stand (metres) and the way they face (radians from east toward south).
 export interface Subject {
   readonly heading: number;
@@ -85,6 +85,17 @@ export function poseFor(
         ],
         look: [x, y + 1.3, z],
       };
+    case "vista":
+      // Over the shoulder of someone sitting up high, the whole city spread out ahead and below them.
+      return {
+        fov: 62,
+        from: [
+          x - ahead * 4.6 - aside * 1.6,
+          y + 2.2,
+          z - aside * 4.6 + ahead * 1.6,
+        ],
+        look: [x + ahead * 60, y - 9, z + aside * 60],
+      };
   }
 }
 
@@ -138,6 +149,8 @@ export function pulledIn(
 
 export function createRig(
   inside: (x: number, z: number) => boolean = () => false,
+  // The ground under a point (metres), which the camera keeps above.
+  ground: (x: number, z: number) => number = () => 0,
 ): Rig {
   let now: Pose = { fov: 50, from: [0, 10, 10], look: [0, 0, 0] };
   let last: Intent | null = null;
@@ -149,11 +162,14 @@ export function createRig(
       const turn = turnTo(yaw, subject.heading);
       if (moving && !closeUps.includes(intent) && Math.abs(turn) < 1.75)
         yaw += turn * (1 - Math.exp(-(intent === "follow" ? 1.8 : 2.6) * step));
-      const want = closeUps.includes(intent)
-        ? poseFor(intent, subject, yaw, room)
-        : room.indoors
+      const pose =
+        closeUps.includes(intent) || room.indoors
           ? poseFor(intent, subject, yaw, room)
           : pulledIn(poseFor(intent, subject, yaw, room), inside);
+      const [fx, fy, fz] = pose.from;
+      const floor = ground(fx, fz) + 0.9;
+      const want: Pose =
+        fy >= floor ? pose : { ...pose, from: [fx, floor, fz] };
       const cuts =
         last === null ||
         (intent !== last &&

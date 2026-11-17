@@ -3,7 +3,7 @@ import type { RunView } from "@frostbite/game-sdk/card";
 import { cardFor } from "@frostbite/game-sdk/card";
 import { createGameClient } from "@frostbite/game-sdk/client";
 import { createGuideLayer } from "@frostbite/game-sdk/guide-layer";
-import { createPause, pauseCopy } from "@frostbite/game-sdk/pause";
+import { createPause } from "@frostbite/game-sdk/pause";
 import { type PlatformPlay, sendRun } from "@frostbite/game-sdk/play";
 import { createRunLoop } from "@frostbite/game-sdk/run-loop";
 import { restartDelayMs } from "@frostbite/game-sdk/touch-start";
@@ -18,7 +18,8 @@ import { createClips } from "./page/clips.ts";
 import { join } from "./page/connect.ts";
 import { createCredits } from "./page/credits.ts";
 import { createPick } from "./page/pick.ts";
-import { listEarned, noteFor } from "./page/hud.ts";
+import { createBadges } from "./page/badges.ts";
+import { listEarned, notePauses, noteFor } from "./page/hud.ts";
 import { createPanel } from "./page/panel.ts";
 import {
   afterDay,
@@ -29,6 +30,7 @@ import {
 } from "./progress.ts";
 import { ticksPerSecond } from "./rules/constants.ts";
 import { heroes } from "./rules/heroes.ts";
+import { milestoneIds } from "./rules/milestones.ts";
 import { drawScreen } from "./screen/flat.ts";
 import { resultOf } from "./screen/result.ts";
 import { wakeLine } from "./script/cast.ts";
@@ -59,6 +61,7 @@ const pauseButton = element("pause", "button");
 const context = screen.getContext("2d");
 const world = worldOn(worldCanvas);
 const credits = createCredits(world !== null);
+const badges = createBadges(element("stage", "div"), milestoneIds.length);
 const pick = createPick(turn);
 
 let play: PlatformPlay | null = null;
@@ -67,7 +70,6 @@ let session: RunSession | null = null;
 let view: RunView = { best: 0, newBest: false, phase: "ready", toast: null };
 let runId: string | null = null;
 let titles = new Map<string, string>();
-let heldNote = "";
 let hero = freshProgress.hero;
 // The run's seed, kept from its start until a hero wakes; the clock, and until when the camera stays on the hands or the waking face.
 let seed = 0;
@@ -130,13 +132,7 @@ function setRunning(running: boolean): void {
     button.disabled = !running && button.id !== "act";
 }
 
-pause.subscribe((paused) => {
-  pauseButton.textContent = paused ? pauseCopy.resume : pauseCopy.pause;
-  if (paused) {
-    heldNote = note.textContent;
-    note.textContent = pauseCopy.paused;
-  } else note.textContent = heldNote;
-});
+notePauses(pause, note, pauseButton);
 
 async function finish(finished: RunSession): Promise<void> {
   setRunning(false);
@@ -224,6 +220,7 @@ function wake(): void {
     onEarned: (id) => {
       sound.sfx("milestone");
       play?.report(id);
+      badges.earn(id, titles.get(id) ?? id);
     },
     seed,
   });
@@ -258,6 +255,7 @@ const mode = (): Mode => {
 async function connect(): Promise<void> {
   const joined = await join(client, world !== null);
   ({ play, progress, titles } = joined);
+  badges.collect(joined.collected);
   hero = progress.hero;
   view = { ...view, best: progress.best };
   sound.apply(progress.sound);

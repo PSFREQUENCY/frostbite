@@ -1,7 +1,9 @@
 import { clinging, onTheRoof } from "../rules/climb.ts";
+import { pauseCopy, type Pause } from "@frostbite/game-sdk/pause";
 import { byInput } from "@frostbite/game-sdk/touch";
 
 import { zuriNear } from "../rules/dash.ts";
+import { onLetterTop } from "../rules/mountain.ts";
 import { starsOf } from "../rules/heat.ts";
 import { echoAt, inReach, risen, statue } from "../rules/machine.ts";
 import { sighted, watcherAt } from "../rules/mystery.ts";
@@ -27,6 +29,11 @@ export function noteFor(day: DayState): string {
     return byInput(
       "Flying. R rises, F comes down; land on a street, then E steps out.",
       "Flying. Climb rises, Drop comes down; land on a street, then Act steps out.",
+    );
+  if (onTheRoof(day) && onLetterTop(day.x, day.z))
+    return byInput(
+      "On top of the WAGMI sign, the whole city below. Take your screenshot; F climbs down.",
+      "On top of the WAGMI sign, the whole city below. Take your screenshot; Drop climbs down.",
     );
   if (onTheRoof(day))
     return byInput(
@@ -58,6 +65,11 @@ export function noteFor(day: DayState): string {
     return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
   if (zuriNear(day)) return here("Zuri, with a Degen Dash ticket");
+  if (day.gun && day.form >= 0)
+    return byInput(
+      "The freeze ray is in your hands: G fires it the way you last walked.",
+      "The freeze ray is in your hands: the Freeze ray button fires it the way you last walked.",
+    );
   if (day.parcel !== null)
     return `Carry the parcel to: ${spotNamed(day.parcel)?.label ?? "its door"}`;
   if (day.loop === 0 && risen(day)) return machineLines.risen;
@@ -81,4 +93,20 @@ export function listEarned(
       return item;
     }),
   );
+}
+
+// While paused the note says so and the pause button offers to go on; going on brings the note back.
+export function notePauses(
+  pause: Pause,
+  note: HTMLElement,
+  button: HTMLElement,
+): void {
+  let held = "";
+  pause.subscribe((paused) => {
+    button.textContent = paused ? pauseCopy.resume : pauseCopy.pause;
+    if (paused) {
+      held = note.textContent;
+      note.textContent = pauseCopy.paused;
+    } else note.textContent = held;
+  });
 }

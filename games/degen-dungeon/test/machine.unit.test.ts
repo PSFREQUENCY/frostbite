@@ -108,10 +108,7 @@ describe("the Time Machine", () => {
       5 * gigRep,
     ]);
     expect(kind.state().pocket).toBe(loopPocket - tipDun);
-    expect(degenRules.earned(kind.state())).toEqual([
-      "met-yourself",
-      "brighter-timeline",
-    ]);
+    expect(degenRules.earned(kind.state())).toEqual(["butterfly-effect"]);
     expect(refusal(kind.here(), "act", now(kind.here()))).toBe(
       "you two have talked already",
     );
@@ -125,7 +122,8 @@ describe("the Time Machine", () => {
       1,
       2 * paradoxHeat,
     ]);
-    expect(degenRules.earned(spoiled.state())).toEqual(["met-yourself"]);
+    // Down is still a change: the butterfly flaps either way.
+    expect(degenRules.earned(spoiled.state())).toEqual(["butterfly-effect"]);
 
     const asked = (talk: string, pocket = loopPocket): DayState => ({
       ...startDay(seedWhere(true), 7, 1, 1),
