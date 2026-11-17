@@ -20,6 +20,27 @@
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
+/* On a touch screen the top right corner holds the icons, and on its side the thumb's buttons fill the right edge under them. Upright,
+   the tray sits under the icons, beside the goal; on its side, left of the icons under the readouts, with the goal kept clear of it.
+   Until a hero wakes the hero ring's card needs the room, as the readouts do. */
+@media (pointer: coarse) {
+  :root body:not([data-awake="yes"]) .badges {
+    visibility: hidden;
+  }
+  .badges {
+    margin: calc(max(0.25rem, env(safe-area-inset-top)) + 6.3rem)
+      max(0.75rem, env(safe-area-inset-right)) 0 0;
+  }
+  @media (orientation: landscape) {
+    .badges {
+      margin: calc(max(0.25rem, env(safe-area-inset-top)) + 2.4rem)
+        max(9.8rem, calc(env(safe-area-inset-right) + 9.3rem)) 0 0;
+    }
+    :root body main #goal {
+      max-inline-size: calc(100% - 18rem);
+    }
+  }
+}
 .badges-coin {
   inline-size: 1.4rem;
   block-size: 1.4rem;
