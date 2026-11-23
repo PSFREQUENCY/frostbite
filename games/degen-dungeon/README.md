@@ -157,6 +157,16 @@ of one hero. DUN is in-game credit only.
 - **Walk and drive anywhere outdoors:** the streets and their three-metre pavements, the plazas round every landmark's hall right up to
   its curved wall, the skate park, the green and the Old Floe's three lawns (all open straight from the pavement; sitting still on the
   lawns cools FOMO like the park's middle); inside a hall the floor runs right out to its round wall.
+- **Busy halls:** every landmark is full of people doing what it is for: dancers under the club lights, a packed cinema, readers and
+  browsers in the library, players at the arcade's cabinets, skaters on their boards, visitors at the museum's plinths. The Global
+  DEX is a trading floor behind real security (metal detector arches, turnstiles, glass barriers, guards, cameras on every wall): four
+  trading posts crowned with scrolling tickers and packed with traders shouting with their arms up, a big board of prices, a ticker
+  band round the hall and a bell balcony. ADOR is a two-floor mall: eighteen shops round its walls, a gallery floor with a glass
+  rail, escalators up to it, and shoppers on both floors with their bags. The Underground Bazaar is crowded: rows of stalls under
+  striped canopies heaped with goods, lantern strings across the hall, a keeper at every stall and shoppers in every aisle. Bump into
+  anyone and they stagger out of your way.
+- **Knock it off the shelf:** brush past a corner store's or a station's aisle and what you touch tumbles to the floor (running, you
+  clear more of it). A moment later a stock clerk comes out from the back, picks each thing up and puts it back where it was.
 - **Climb any building's wall:** from the pavement beside one (Climb on a phone, R on a keyboard), a storey at a time up to three, and
   back down with Drop or F. Up a wall nobody walks, uses anything or gets on a ride; the beat cop waits underneath (he only catches feet
   on the ground), but a tux at four stars still reaches. The hero turns to the wall, climbs hand over hand and hangs there. On the

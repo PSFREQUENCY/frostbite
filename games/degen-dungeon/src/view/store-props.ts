@@ -42,12 +42,15 @@ const backShelves: readonly Prop[] = [1.4, 2, 2.6].flatMap((y): Prop[] => [
     tint(k + Math.round(y * 3)),
   ]),
 ]);
-// An aisle of shelves running from near the counter toward the door, with goods facing out on both sides and a lit sign on top.
+// An aisle of shelves running from near the counter toward the door, with a lit sign on top; the goods facing out on both sides are
+// `aisleGoods`, drawn by `knocks.ts`, for a hero who brushes past can knock them off and a clerk puts them back.
 const aisle = (u: number, sign: string): readonly Prop[] => [
   [u, 6.25, 0.8, 1, 1.6, 4.5, "#5d6470"],
   [u, 6.25, 1.68, 1.1, 0.08, 4.6, "#3a3f47"],
   [u, 4, 2, 0.9, 0.35, 0.05, sign, true],
-  ...[-1, 1].flatMap((side) =>
+];
+export const aisleGoods = (u: number): readonly Prop[] =>
+  [-1, 1].flatMap((side) =>
     [0.45, 0.85, 1.25].flatMap((y) =>
       Array.from({ length: 9 }, (_, k): Prop => [
         u + side * 0.55,
@@ -59,8 +62,17 @@ const aisle = (u: number, sign: string): readonly Prop[] => [
         tint(k + side + Math.round(y * 5)),
       ]),
     ),
-  ),
-];
+  );
+// Where each kind of shop's aisles run (across, u) and the colours of their signs.
+export const aisles: Readonly<
+  Record<string, readonly (readonly [number, string])[]>
+> = {
+  bodega: [
+    [3.3, "#ff5d5d"],
+    [7.9, "#5beac6"],
+  ],
+  gas: [[4.2, "#ffd166"]],
+};
 // The wall of freezers down the left side, lit inside, behind glass doors in dark frames.
 const freezers = (light: string): readonly Prop[] => [
   [0.45, 6.7, 1.1, 0.9, 2.2, 7, "#d9dee8"],
@@ -92,8 +104,7 @@ export const storeProps: Readonly<Record<string, readonly Prop[]>> = {
   bodega: [
     ...counterGlass,
     ...backShelves,
-    ...aisle(3.3, "#ff5d5d"),
-    ...aisle(7.9, "#5beac6"),
+    ...(aisles.bodega ?? []).flatMap(([u, sign]) => aisle(u, sign)),
     ...freezers("#c9f0ff"),
     [9.6, 9.4, 0.45, 1.6, 0.9, 0.9, "#f4f8ff"],
     [9.6, 9.4, 0.72, 1.4, 0.3, 0.7, "#c9f0ff", true],
@@ -105,7 +116,7 @@ export const storeProps: Readonly<Record<string, readonly Prop[]>> = {
   gas: [
     ...counterGlass,
     ...backShelves,
-    ...aisle(4.2, "#ffd166"),
+    ...(aisles.gas ?? []).flatMap(([u, sign]) => aisle(u, sign)),
     ...freezers("#d8b6ff"),
     [7, 1.8, 1.24, 0.6, 0.22, 0.45, "#c0c6d0"],
     [7, 1.8, 1.36, 0.5, 0.06, 0.35, "#ff9a3c", true],

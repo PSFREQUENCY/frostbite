@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+import { buildDexFloor } from "../src/view/dex-floor.ts";
 import { buildLofts } from "../src/view/lofts.ts";
 import { started } from "./support/replay.ts";
 
@@ -13,7 +14,9 @@ beforeAll(() => {
       get: (_, key) =>
         key === "fillText"
           ? (text: string) => void written.push(text)
-          : () => undefined,
+          : key === "measureText"
+            ? (text: string) => ({ width: text.length * 20 })
+            : () => undefined,
       set: () => true,
     },
   );
@@ -32,5 +35,17 @@ describe("the shop's laptop", () => {
     expect(written).toHaveLength(2);
     lofts.show({ ...day, tick: 30_000 });
     expect(written.at(-1)).toBe("2,000 DUN");
+  });
+});
+
+describe("the DEX's screens", () => {
+  it("paint the island's coins on the tickers and the big board, and scroll the tickers", () => {
+    written.length = 0;
+    const floor = buildDexFloor();
+    expect(written).toEqual(
+      expect.arrayContaining(["DUN", "▲+2.4%", "MAXX", "▼-1.2%", "-1.2%"]),
+    );
+    floor.show(4);
+    expect(floor.root.children.length).toBeGreaterThan(60);
   });
 });

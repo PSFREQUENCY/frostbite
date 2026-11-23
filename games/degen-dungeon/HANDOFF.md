@@ -270,6 +270,16 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   view lifts the hero (`liftOf`: the lift, the deck at 22.6 m, a beam up to 17 m) through the climber, and the camera goes wide (`sky`).
   `cluesOf` in `quest.ts` lists the clues frost vision lights. The bot's `ride()` and `use("stop-…")` wait out the ride.
 
+- The full halls (view only; numbers and names are drafts): `view/insider-plans.ts` lists every landmark's people by kind in the hall's
+  own frame and `view/bazaar.ts` the bazaar's; `view/insiders.ts` draws them as instanced bodies, heads, legs, arms, bags and boards,
+  only for the places within 52 m of the hero (the bazaar while underground), with `bumps.ts` for the ground floor's people;
+  `view/insider-poses.ts` moves them (rings, lines, escalator rides, standing, trading, sitting, dancing, skating). `view/dex-floor.ts`
+  is the DEX's trading floor and security (the bank kit in `venue-kits.ts` is now just the teller's desk and the gold), its tickers made
+  up coins on canvas textures; `view/mall.ts` is ADOR's shops, gallery floor (a ring drawn from above only) and escalators. The hero
+  stays on ADOR's ground floor: the rules have no upper floor inside a hall. `view/knocks.ts` draws the corner stores' and stations'
+  aisle goods (`aisleGoods`, no longer static props) and knocks those within reach of a moving hero; one stock clerk tidies the shop
+  the hero is in, and a shop the hero leaves is tidied at once.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

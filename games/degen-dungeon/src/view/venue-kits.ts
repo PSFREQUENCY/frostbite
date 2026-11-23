@@ -182,18 +182,9 @@ export function furnish(kind: VenueKind, at: Place, props: Props): Inside {
       lit(put("pill", [0, 0, 1.1], [1.2, 1.2, 0.8], "#fff1b8", true));
       return inside;
     case "bank":
-      for (const [a, b, angle] of around(7, 8, Math.PI * 0.6, Math.PI * 1.4))
-        put("pill", [a, b, 0.6], [3.2, 1.2, 1], "#e8dcc3", false, [
-          0,
-          angle + Math.PI / 2,
-          0,
-        ]);
-      lit(put("ring", [0, -16.8, 3], [6, 6, 6], "#e0b341", true));
-      put("post", [0, -17, 3], [5, 0.6, 5], "#9aa3b5", false, [
-        Math.PI / 2,
-        0,
-        0,
-      ]);
+      // The exchange desk where the teller works (the trading floor itself is `dex-floor.ts`), and gold bars under the big board.
+      put("pill", [0, -8.4, 0.6], [8, 1.2, 1], "#e8dcc3");
+      lit(put("pill", [0, -8.4, 1.25], [7.6, 0.12, 0.9], "#e0b341", true));
       for (let k = 0; k < 6; k += 1)
         put("box", [-2.5 + k, -14, 0.2], [0.8, 0.35, 0.4], "#e0b341", true);
       return inside;

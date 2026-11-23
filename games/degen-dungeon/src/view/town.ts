@@ -11,7 +11,12 @@ import { buildConcert } from "./concert.ts";
 import { buildFood } from "./food.ts";
 import { buildPowers } from "./powers.ts";
 import { buildCaves } from "./caves.ts";
+import { buildBazaar } from "./bazaar.ts";
 import { buildClues } from "./clues.ts";
+import { buildDexFloor } from "./dex-floor.ts";
+import { buildInsiders } from "./insiders.ts";
+import { buildKnocks } from "./knocks.ts";
+import { buildMall } from "./mall.ts";
 import { buildTrain } from "./train.ts";
 import { buildLofts } from "./lofts.ts";
 import { buildMountain } from "./mountain.ts";
@@ -25,7 +30,8 @@ import { buildWalkers } from "./walkers.ts";
 
 // Everything at street level that makes Nakasato feel lived in: the furniture and the notices, the walk-in shops and the gas stations'
 // forecourts, the parked rides, the people walking and talking, the traffic, the landmarks, the lantern night, the beacon over where to
-// go next, the Green Line's stations, the clues frost vision lights, and Mount WAGMI with its trail and its sign. It also keeps the
+// go next, the Green Line's stations, the clues frost vision lights, the people filling the landmarks and the bazaar, the DEX's trading
+// floor, ADOR's two floors of shops, the goods a hero can knock off a shelf, and Mount WAGMI with its trail and its sign. It also keeps the
 // time of day, from the day's clock: the sun crosses the sky until dusk, and after `nightTick` it is night.
 export interface Town {
   // The town between days (the opening and the hero ring): daylight, people and traffic, nobody's quest.
@@ -84,10 +90,19 @@ export function buildTown(): Town {
   const caves = buildCaves();
   const train = buildTrain();
   const clues = buildClues();
+  const insiders = buildInsiders();
+  const dexFloor = buildDexFloor();
+  const bazaar = buildBazaar();
+  const knocks = buildKnocks();
   root.add(
     caves.root,
     train.root,
     clues.root,
+    insiders.root,
+    dexFloor.root,
+    bazaar.root,
+    knocks.root,
+    buildMall().root,
     powers.root,
     lofts.root,
     concert.root,
@@ -122,6 +137,10 @@ export function buildTown(): Town {
       caves.show(null, seconds);
       train.show(null, seconds);
       clues.show(null, seconds);
+      insiders.show(null, null, seconds);
+      dexFloor.show(seconds);
+      bazaar.show(seconds);
+      knocks.show(null, seconds, 0);
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
@@ -149,6 +168,10 @@ export function buildTown(): Town {
       caves.show(day, seconds);
       train.show(day, seconds);
       clues.show(day, seconds);
+      insiders.show(day, moverOf(day, x, z, heading), seconds);
+      dexFloor.show(seconds);
+      bazaar.show(seconds);
+      knocks.show(day, seconds, Math.min(0.1, dt));
     },
     write: (message) => lanterns.write(message),
   };
