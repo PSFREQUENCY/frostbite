@@ -2,10 +2,13 @@ import {
   BoxGeometry,
   Group,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
+  SphereGeometry,
   type Scene,
 } from "three";
 
+import { questAt } from "../quest.ts";
 import { isFrozen } from "../rules/freeze.ts";
 import { openTo, spotNamed, spots } from "../rules/places.ts";
 import type { DayState } from "../rules/types.ts";
@@ -28,7 +31,10 @@ const people = spots.filter(
   (spot) =>
     (spot.kind === "offer" ||
       spot.kind === "talk" ||
-      spot.kind === "recruit") &&
+      spot.kind === "recruit" ||
+      spot.kind === "fence" ||
+      spot.kind === "gig") &&
+    !spot.id.startsWith("till-") &&
     spot.id !== "dash" &&
     spot.id !== "dash-desk" &&
     spot.id !== "wallet" &&
@@ -43,6 +49,38 @@ const people = spots.filter(
       "emitter",
     ].includes(spot.id),
 );
+// Over the head of everyone with something to say today, a speech bubble; over whoever the story wants next, a gold "!" instead.
+const cream = new MeshBasicMaterial({ color: "#f4f8ff" });
+const ink = new MeshBasicMaterial({ color: "#2a2f45" });
+const gold = new MeshBasicMaterial({ color: "#ffd166" });
+const blob = new SphereGeometry(1, 14, 10);
+const dotShape = new SphereGeometry(0.035, 6, 4);
+const barShape = new BoxGeometry(0.1, 0.32, 0.1);
+const knob = new BoxGeometry(0.1, 0.1, 0.1);
+function buildBubbles(): Group {
+  const bubbles = new Group();
+  bubbles.name = "bubbles";
+  const speech = new Group();
+  speech.name = "speech";
+  const cloud = new Mesh(blob, cream);
+  cloud.scale.set(0.3, 0.2, 0.06);
+  speech.add(cloud);
+  for (const x of [-0.11, 0, 0.11]) {
+    const dot = new Mesh(dotShape, ink);
+    dot.position.set(x, 0, 0.06);
+    speech.add(dot);
+  }
+  const bang = new Group();
+  bang.name = "bang";
+  const bar = new Mesh(barShape, gold);
+  bar.position.y = 0.12;
+  const point = new Mesh(knob, gold);
+  point.position.y = -0.14;
+  bang.add(bar, point);
+  bubbles.add(speech, bang);
+  bubbles.position.y = 2.3;
+  return bubbles;
+}
 // The wallet dropped in the riot's crowd (`rules/errands.ts`), lying on the street until it is picked up.
 const dropped = spotNamed("wallet");
 
@@ -80,6 +118,7 @@ export function createPeople(
             })(),
             wear: () => undefined,
           };
+    actor.root.add(buildBubbles());
     made.set(id, actor);
     scene.add(actor.root);
     return actor;
@@ -95,6 +134,7 @@ export function createPeople(
       dash.show(state, at, seconds, dt);
       ray.show(state, at, seconds);
       wallet.visible = dropped !== undefined && openTo(dropped, state);
+      const goal = questAt(state);
       if (dropped !== undefined)
         wallet.position.set(metres(dropped.x), 0.03, metres(dropped.z));
       people.forEach((spot, index) => {
@@ -121,6 +161,17 @@ export function createPeople(
         const actor = someone(spot.id, index);
         actor.root.visible = true;
         actor.root.position.set(x, hillAt(x, z), z);
+        const bubbles = actor.root.getObjectByName("bubbles");
+        const wanted =
+          goal !== null && Math.hypot(goal.x - spot.x, goal.z - spot.z) < 60;
+        if (bubbles !== undefined) {
+          bubbles.visible = state.talk === null;
+          bubbles.position.y = 2.3 + Math.sin(seconds * 3 + index) * 0.05;
+          bubbles.rotation.y = wanted ? seconds * 2 : 0;
+          const [speech, bang] = bubbles.children;
+          if (speech !== undefined) speech.visible = !wanted;
+          if (bang !== undefined) bang.visible = wanted;
+        }
         if (still) return;
         actor.root.rotation.y = Math.atan2(at.x - x, at.z - z);
         actor.move(0, seconds, dt, state.talk === spot.id);

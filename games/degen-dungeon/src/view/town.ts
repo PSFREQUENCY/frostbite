@@ -12,6 +12,7 @@ import { buildFood } from "./food.ts";
 import { buildPowers } from "./powers.ts";
 import { buildCaves } from "./caves.ts";
 import { buildBazaar } from "./bazaar.ts";
+import { buildBeatScenes } from "./beat-scenes.ts";
 import { buildClues } from "./clues.ts";
 import { buildDexFloor } from "./dex-floor.ts";
 import { buildInsiders } from "./insiders.ts";
@@ -24,6 +25,7 @@ import { buildParked, type Parked } from "./parked.ts";
 import { buildShopMotion } from "./shop-motion.ts";
 import { buildShops } from "./shops.ts";
 import { buildStreet } from "./street.ts";
+import { buildThings } from "./things.ts";
 import { buildTraffic } from "./traffic.ts";
 import { buildVenues } from "./venues.ts";
 import { buildWalkers } from "./walkers.ts";
@@ -94,7 +96,11 @@ export function buildTown(): Town {
   const dexFloor = buildDexFloor();
   const bazaar = buildBazaar();
   const knocks = buildKnocks();
+  const things = buildThings();
+  const beats = buildBeatScenes();
   root.add(
+    things.root,
+    beats.root,
     caves.root,
     train.root,
     clues.root,
@@ -141,6 +147,8 @@ export function buildTown(): Town {
       dexFloor.show(seconds);
       bazaar.show(seconds);
       knocks.show(null, seconds, 0);
+      things.show(null, null, seconds);
+      beats.show(null, { x: 0, z: 0 }, seconds, 0);
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
@@ -160,7 +168,10 @@ export function buildTown(): Town {
       traffic.show(seconds, along, dark, x, z);
       venues.show(seconds, dark, x, z);
       lanterns.show(dark, seconds, sent);
-      beacon.show(questAt(day), x, z, seconds);
+      const goal = questAt(day);
+      beacon.show(goal, x, z, seconds);
+      things.show(day, goal, seconds);
+      beats.show(day, { x, z }, seconds, dt);
       lofts.show(day);
       concert.show(day, seconds);
       food.show(day, seconds);

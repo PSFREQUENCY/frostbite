@@ -1,13 +1,6 @@
-import {
-  InstancedMesh,
-  Matrix4,
-  Mesh,
-  PerspectiveCamera,
-  type Scene,
-} from "three";
+import { Mesh, PerspectiveCamera, type Scene } from "three";
 import { describe, expect, it, vi } from "vitest";
 
-import { spots } from "../src/rules/places.ts";
 import { boardLines, buildBoards } from "../src/view/boards.ts";
 import { buildLine, onRing } from "../src/view/line.ts";
 import { createRig, poseFor } from "../src/view/camera.ts";
@@ -18,45 +11,26 @@ import { createWorldView } from "../src/view/world-view.ts";
 import { started } from "./support/replay.ts";
 
 describe("the city", () => {
-  it("has its buildings, a marker for every place, Moon Tower over The Exchange, and shows only what is open today", () => {
+  it("has its buildings, Moon Tower over The Exchange, the beacon over the story's beat and the watcher's steps by frost vision", () => {
     const city = buildCity();
     const towers = city.root.getObjectByName("towers");
-    const marks = city.root.getObjectByName("spots");
     expect(towers?.children.length).toBeGreaterThan(18);
     expect(towers?.getObjectByName("shopfronts")).toBeDefined();
+    // No discs on the ground: the places are their people and things.
+    expect(city.root.getObjectByName("spots")).toBeUndefined();
     city.night(1);
-    expect(marks instanceof InstancedMesh && marks.count).toBe(spots.length);
     expect(city.root.getObjectByName("moon-tower")?.position.toArray()).toEqual(
       [210, 75, 150],
     );
     expect(metres(18_000)).toBe(180);
     const day = started(1, 7, 3);
     city.mark(day, 1);
-    const matrix = new Matrix4();
-    const shown = (id: string): boolean => {
-      if (!(marks instanceof InstancedMesh)) return false;
-      marks.getMatrixAt(
-        spots.findIndex((spot) => spot.id === id),
-        matrix,
-      );
-      return matrix.elements[0] !== 0;
-    };
-    expect([
-      shown("faucet"),
-      shown("letter-1"),
-      shown("letter-7"),
-      shown("frost"),
-    ]).toEqual([true, false, true, true]);
     expect(city.root.getObjectByName("beat")?.visible).toBe(true);
     expect(city.root.getObjectByName("watcher")?.visible).toBe(false);
     city.mark({ ...day, looking: true }, 1);
     expect(city.root.getObjectByName("watcher")?.visible).toBe(true);
     city.mark(null, 1);
-    expect([
-      shown("faucet"),
-      shown("letter-7"),
-      city.root.getObjectByName("beat")?.visible,
-    ]).toEqual([true, false, false]);
+    expect(city.root.getObjectByName("beat")?.visible).toBe(false);
   });
 
   it("paints the boards for each era, and runs the Green Line round its ring", () => {

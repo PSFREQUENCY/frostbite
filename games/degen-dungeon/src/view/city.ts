@@ -1,9 +1,7 @@
 import {
   CapsuleGeometry,
-  Color,
   CylinderGeometry,
   Group,
-  InstancedMesh,
   Mesh,
   MeshStandardMaterial,
   MeshToonMaterial,
@@ -13,45 +11,20 @@ import {
 
 import { island } from "../rules/constants.ts";
 import { watcherAt } from "../rules/mystery.ts";
-import { openTo, spots, type Spot } from "../rules/places.ts";
 import { beatOf } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { buildBlocks } from "./blocks.ts";
 import { streets } from "./prints.ts";
 import { toonSteps } from "./textures.ts";
-import { box } from "./hash.ts";
 
 // Nakasato, built in code from the same numbers the rules walk on: the island and the sea, the buildings of every borough, Moon Tower
-// and the screens of Ticker Square with the hooded mirror statue, and a glowing marker on every place open today: the day's story beat
-// tallest and gold, S's letters white on the ground, the watcher's footprints only by frost vision.
+// and the screens of Ticker Square with the hooded mirror statue, the gold beacon over the day's story beat, and the watcher's
+// footprints only by frost vision.
 export const metres = (centimetres: number): number => centimetres / 100;
 
-const spotTints: Readonly<Record<Spot["kind"], string>> = {
-  drop: "#7be36b",
-  faucet: "#5beac6",
-  fence: "#c9c2ff",
-  freezer: "#9fd8ff",
-  gig: "#7be36b",
-  heroword: "#c9b6ff",
-  home: "#ffffff",
-  letter: "#ffffff",
-  locker: "#ffd166",
-  loot: "#ff5d5d",
-  offer: "#ff9ecf",
-  parked: "#5aa9ff",
-  plug: "#c9b6ff",
-  rebrand: "#ffd166",
-  recruit: "#ffd166",
-  ride: "#5aa9ff",
-  stop: "#22c55e",
-  talk: "#ffb000",
-  statue: "#e8f4ff",
-  tool: "#f4a261",
-  word: "#f7f3d7",
-};
-
 export interface City {
-  // Shows the markers for what is open on this day, where the story's beat is, and the watcher by frost vision.
+  // Shows where the story's beat is, and the watcher by frost vision (the places themselves are their people and things: `npcs.ts`,
+  // `things.ts`, `beat-scenes.ts`).
   mark(day: DayState | null, seconds: number): void;
   // How dark it is (0 day, 1 night): windows and signs light up.
   night(part: number): void;
@@ -168,15 +141,6 @@ export function buildCity(): City {
   root.add(ground, sea);
   const blocks = buildBlocks(root);
   landmarks(root);
-  const markers = new InstancedMesh(
-    new CylinderGeometry(0.35, 0.35, 1, 8),
-    new MeshStandardMaterial({ emissive: "#ffffff", emissiveIntensity: 0.6 }),
-    spots.length,
-  );
-  markers.name = "spots";
-  spots.forEach((spot, index) =>
-    markers.setColorAt(index, new Color(spotTints[spot.kind])),
-  );
   const beacon = new Mesh(
     new CylinderGeometry(0.8, 0.8, 30, 12, 1, true),
     new MeshStandardMaterial({
@@ -197,29 +161,9 @@ export function buildCity(): City {
     }),
   );
   steps.name = "watcher";
-  root.add(markers, beacon, steps);
+  root.add(beacon, steps);
   return {
     mark(day, seconds) {
-      spots.forEach((spot, index) => {
-        const open =
-          spot.kind !== "parked" &&
-          (day === null ? spot.on === undefined : openTo(spot, day));
-        const paper = spot.kind === "letter";
-        const wide = paper ? 1 : 2.2 + 0.25 * Math.sin(seconds * 2 + index);
-        const side = open ? wide : 0;
-        markers.setMatrixAt(
-          index,
-          box(
-            metres(spot.x),
-            0.04,
-            metres(spot.z),
-            side,
-            open ? 0.06 : 0,
-            paper ? side * 0.7 : side,
-          ),
-        );
-      });
-      markers.instanceMatrix.needsUpdate = true;
       const beat = day === null ? null : beatOf(day);
       beacon.visible = beat !== null;
       if (beat !== null) {

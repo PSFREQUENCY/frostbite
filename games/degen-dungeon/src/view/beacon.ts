@@ -5,13 +5,12 @@ import {
   Mesh,
   MeshBasicMaterial,
   OctahedronGeometry,
-  RingGeometry,
 } from "three";
 
 import type { Point } from "../rules/types.ts";
 
-// Where to go next, in the city: a column of light that can be seen over the rooftops, a spinning gem over the place, and a ring that
-// pulses on the ground there. It sits wherever `quest.ts` points, and fades as the hero arrives.
+// Where to go next, in the city: a column of light that can be seen over the rooftops and a spinning gem over the place (whoever or
+// whatever is there is the place itself: no ring on the ground). It sits wherever `quest.ts` points, and fades as the hero arrives.
 export interface Beacon {
   readonly root: Group;
   show(at: Point | null, x: number, z: number, seconds: number): void;
@@ -39,10 +38,7 @@ export function buildBeacon(): Beacon {
     new MeshBasicMaterial({ color: "#ffd166" }),
   );
   gem.name = "beacon-gem";
-  const ring = new Mesh(new RingGeometry(1.6, 2.2, 32), glow("#5beac6", 0.6));
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.y = 0.08;
-  root.add(column, gem, ring);
+  root.add(column, gem);
   return {
     root,
     show(at, x, z, seconds) {
@@ -53,9 +49,6 @@ export function buildBeacon(): Beacon {
       column.material.opacity = Math.min(0.22, near / 120);
       gem.position.y = 3.2 + Math.sin(seconds * 2.4) * 0.3;
       gem.rotation.y = seconds * 1.8;
-      const pulse = 1 + ((seconds * 0.8) % 1) * 0.8;
-      ring.scale.set(pulse, pulse, pulse);
-      ring.material.opacity = 0.7 * (1 - ((seconds * 0.8) % 1));
     },
   };
 }

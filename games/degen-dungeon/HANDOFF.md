@@ -280,6 +280,12 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   aisle goods (`aisleGoods`, no longer static props) and knocks those within reach of a moving hero; one stock clerk tidies the shop
   the hero is in, and a shop the hero leaves is tidied at once.
 
+- Places as people and things (view only): the city's ground discs are gone (`city.ts` keeps the beacon and the watcher's steps; the
+  beacon lost its ground ring). `view/things.ts` draws each pickup kind from small part lists (`pieces`) and the ride stands' kits, with
+  a turning star (gold within 50 cm of `questAt`). `view/npcs.ts` now also stands people at `fence` and `gig` places, never at a loft's
+  laptop, and gives each a speech bubble or the gold "!". `view/beat-scenes.ts` reads a scene from the beat's words (`sceneOf`, a
+  keyword table, "person" when nothing matches) and stands its things and someone at the beat, facing the hero as they first see it.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

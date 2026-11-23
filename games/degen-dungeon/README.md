@@ -165,6 +165,15 @@ of one hero. DUN is in-game credit only.
   rail, escalators up to it, and shoppers on both floors with their bags. The Underground Bazaar is crowded: rows of stalls under
   striped canopies heaped with goods, lantern strings across the hall, a keeper at every stall and shoppers in every aisle. Bump into
   anyone and they stagger out of your way.
+- **People and things, not markers:** every place is someone to talk to or something to use. People who have something to say wear a
+  speech bubble, and the one the story wants next a turning gold "!". S's letters lie sealed on the pavement, scraps of paper and the
+  words scratched in the ice where they fell, the loot in its sack, the courier desks' parcels beside their dispatchers, and the Faucet,
+  the drop boxes, the hideout freezer, the dead locker, the humming basement's door, the Rebrand booth, the magnet and the vacuum stand
+  where they are, each with a small star turning over it (gold where the quest goes). The ride stands show their rides. Each story beat
+  has someone waiting with what it is about: the shiny frame's beat is an auction in the Meme Market, easels of gilt frames under an
+  AUCTION sign; others get an arcade cabinet, a fuse box and a spool of wire, a miner's lamp by a carved rock, a couch, a club's door,
+  a snow pile and a shovel, a notice board, a camera, crates and buckets, a rowboat and a rod, a bench, a pawn window or the
+  Exchange's chart. The beacon's column still shows the way from afar.
 - **Knock it off the shelf:** brush past a corner store's or a station's aisle and what you touch tumbles to the floor (running, you
   clear more of it). A moment later a stock clerk comes out from the back, picks each thing up and puts it back where it was.
 - **Climb any building's wall:** from the pavement beside one (Climb on a phone, R on a keyboard), a storey at a time up to three, and
