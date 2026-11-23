@@ -1,6 +1,7 @@
 // One day in Nakasato, as the rules hold it. Everything is a whole number or a name, so a replay ends exactly where the player did.
 export type Ride =
   | "bike"
+  | "board"
   | "boat"
   | "car"
   | "foot"
@@ -203,6 +204,11 @@ export interface DayState {
   readonly powerAt: number;
   readonly boostUntil: number;
   readonly senseUntil: number;
+  // The hero's own business, the Green Line and the skate park (`business.ts`): the tick the shop's till was last emptied, the train
+  // ride under way, and the ticks skated in the park today.
+  readonly tillAt: number;
+  readonly line: Train | null;
+  readonly skated: number;
   readonly thiefLeg: number;
   readonly frozen: readonly Frost[];
   readonly peakFrozen: number;
@@ -211,6 +217,13 @@ export interface DayState {
   readonly fizz: number;
   readonly x: number;
   readonly z: number;
+}
+
+// A ride on the Green Line: the tick it set off, where the hero boarded, and the borough of the stop it runs to.
+export interface Train {
+  readonly at: number;
+  readonly from: Point;
+  readonly to: number;
 }
 
 // A day being worked on inside one step of the rules, before it is handed back as the next state.

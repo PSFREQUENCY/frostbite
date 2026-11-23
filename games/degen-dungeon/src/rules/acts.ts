@@ -11,7 +11,8 @@ import {
   rebrandCool,
   witnessHeat,
 } from "./constants.ts";
-import { board, rideLine, stepOff } from "./boarding.ts";
+import { board, stepOff } from "./boarding.ts";
+import { boardLine } from "./business.ts";
 import { clinging, onTheRoof } from "./climb.ts";
 import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { isFrozen } from "./freeze.ts";
@@ -180,7 +181,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
     case "statue":
       return wear(day, spot.index);
     case "stop":
-      return rideLine(day, spot.next);
+      return boardLine(day, spot);
     case "talk":
       return open(day, spot.node);
     case "tool":
@@ -192,6 +193,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
 
 export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
+  if (day.line !== null) return "you are on the train";
   if (clinging(day)) return enterWindow(day);
   if (onTheRoof(day)) return "climb down first";
   if (flies(day.ride)) {

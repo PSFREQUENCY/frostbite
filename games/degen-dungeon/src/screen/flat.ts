@@ -3,13 +3,14 @@ import { echoAt, risen, statue } from "../rules/machine.ts";
 import type { DayState } from "../rules/types.ts";
 import { watcherAt } from "../rules/mystery.ts";
 import { openTo, spots } from "../rules/places.ts";
-import { questAt } from "../quest.ts";
+import { cluesOf, questAt } from "../quest.ts";
 import { beatOf } from "../rules/story.ts";
 import { boroughs } from "../rules/world.ts";
 
 // The island from above, drawn on the game screen: the whole picture where the browser has no WebGL, and the corner map where it has.
 export const colour = {
   beat: "#ffb000",
+  clue: "#ffe066",
   cop: "#6aa8ff",
   echo: "#c9b6ff",
   letter: "#ffffff",
@@ -20,6 +21,7 @@ export const colour = {
   spot: "#5beac6",
   statue: "#bfe9ff",
   street: "#141a2e",
+  thief: "#ff2d55",
   tux: "#ff5d5d",
   vests: "#ff9a3c",
 } as const;
@@ -79,14 +81,18 @@ export function drawMap(
   if (echo !== null) square(colour.echo, echo.x, echo.z, 4);
   const beat = beatOf(day);
   if (beat !== null) square(colour.beat, beat.at.x, beat.at.z, 5);
+  // Frost vision shows the watcher's steps, and the clues glow on the map, pulsing.
   if (day.looking) {
     const watcher = watcherAt(day.seed, day.day);
     square(colour.echo, watcher.x, watcher.z, 4);
+    const pulse = 4 + (Math.floor(day.tick / 4) % 3);
+    for (const clue of cluesOf(day)) square(colour.clue, clue.x, clue.z, pulse);
   }
   for (const [chaser, tint] of [
     [day.cop, colour.cop],
     [day.tux, colour.tux],
     [day.vests, colour.vests],
+    [day.thief, colour.thief],
   ] as const)
     if (chaser !== null) square(tint, chaser.x, Math.max(0, chaser.z), 4);
   // Where to go next glows: a ring that swells and a dotted line to it from the hero.

@@ -117,6 +117,14 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
     ["ball", "#fff6c8", [0.16, 0.12, 0.06], [-0.65, 0.95, 2.38]],
     ...wheels(0.98, 0.42, 1.55, 0.42, 0.3),
   ],
+  // A skateboard: a kicked-up deck on two trucks and four urethane wheels.
+  board: [
+    ["pill", "paint", [0.26, 0.05, 0.86], [0, 0.13, 0]],
+    ["box", "#11131c", [0.24, 0.012, 0.8], [0, 0.158, 0]],
+    ["box", "#c9ced6", [0.2, 0.04, 0.05], [0, 0.085, 0.27]],
+    ["box", "#c9ced6", [0.2, 0.04, 0.05], [0, 0.085, -0.27]],
+    ...wheels(0.11, 0.045, 0.27, 0.045, 0.045),
+  ],
   scooter: [
     ["pill", "paint", [0.45, 0.14, 1.4], [0, 0.25, 0]],
     ["box", "#11131c", [0.08, 1, 0.08], [0, 0.75, 0.6]],

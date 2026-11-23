@@ -261,6 +261,15 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   hero walks into the hall without `bazaar-main`, and either answer walks them up. The re-emitter's five places are `beams(hero)`. In the
   words the Time Machine is the Light Re-emitter; the code and the milestone ids keep `machine`.
 
+- The shop, the train and the board (`rules/business.ts`, `view/train.ts`, `view/lift.ts`, `view/clues.ts`; numbers are drafts):
+  `tillAt`, `line` and `skated` on the day, and a new ride, `board`. The till is `tillOf` (day × a DUN a second, capped at `tillCap`,
+  3,000), emptied at `till-<hero>` in the loft (talk `till`, deed `biz-till`, which adds `till` to the day's notes). A stop now starts
+  `line` (from the stop, to the next borough) and `lineTick` carries the hero along over `lineTicks` (150), the lifts `lineLift` (15)
+  each end; aboard, `act` and powers are refused, the chasers lose the hero and no beam takes them; `rides` counts on arrival. The
+  skate park's talk hands a board (`biz-board`); `skateTick` counts ticks rolling inside the park and calls the activity at 150. The
+  view lifts the hero (`liftOf`: the lift, the deck at 22.6 m, a beam up to 17 m) through the climber, and the camera goes wide (`sky`).
+  `cluesOf` in `quest.ts` lists the clues frost vision lights. The bot's `ride()` and `use("stop-…")` wait out the ride.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

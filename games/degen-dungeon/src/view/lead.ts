@@ -19,6 +19,7 @@ export interface Motion {
 // How far each ride reaches out to either side (metres), so anyone running alongside keeps clear of it.
 const halfWidth: Readonly<Record<string, number>> = {
   bike: 0.35,
+  board: 0.25,
   moto: 0.4,
   scooter: 0.3,
   semi: 1.25,
@@ -74,7 +75,10 @@ export function placeCast(
   const board = (actor: Actor, slot: number, crew: number): void => {
     const place = seats[slot];
     if (place !== undefined) {
-      const feet = place.seat === "deck" ? place.y : place.y - actor.hip();
+      const feet =
+        place.seat === "deck" || place.seat === "board"
+          ? place.y
+          : place.y - actor.hip();
       put(actor, place.x, at.y + feet, place.z, going, place.seat);
     } else if (seats.length === 0)
       put(

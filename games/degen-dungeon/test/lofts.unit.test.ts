@@ -15,7 +15,7 @@ import { lofts, roomAt } from "../src/rules/rooms.ts";
 import type { DayState } from "../src/rules/types.ts";
 import { goalFor, talkOf } from "../src/page/words.ts";
 import { afterDay, freshProgress, nextRun, restore } from "../src/progress.ts";
-import { lockedOutLine, rentLine } from "../src/script/lofts.ts";
+import { lockedOutLine, rentLine, tillLine } from "../src/script/lofts.ts";
 import { createBot } from "./support/bot.ts";
 import { refusal, started } from "./support/replay.ts";
 
@@ -99,8 +99,10 @@ describe("the lofts", () => {
     expect(talkOf({ ...kerb, talk: "landlord-out" })?.say).toContain(
       String(rents[0] + lateFee),
     );
-    // A minute before nightfall, Pip reminds the hero of the rent.
-    expect(goalFor({ ...evening, done: ["riot", "speech"] })).toBe(rentLine);
+    // Short of the rent with the shop's till full enough, Pip sends the hero to the laptop; and a minute before nightfall, to the rent.
+    const due = { ...evening, done: ["riot", "speech"] };
+    expect([due.pocket < rents[0], goalFor(due)]).toEqual([true, tillLine]);
+    expect(goalFor({ ...due, pocket: 1_000 })).toBe(rentLine);
   });
 
   it("carry the upgrades from day to day, and wake a hero who left the rent unpaid on the kerb the next morning", () => {

@@ -102,7 +102,7 @@ export function tellStory(bot: Bot, answer = 1): Bot {
     earn(bot, need.pay ?? 0, need.gigs ?? 0);
     if (bot.here().rides < (need.rides ?? 0)) {
       bot.use("stop-7");
-      while (bot.here().rides < (need.rides ?? 0)) bot.act();
+      while (bot.here().rides < (need.rides ?? 0)) bot.ride();
     }
     if (need.traded === true) {
       bot.use("chart");

@@ -40,8 +40,8 @@ export const venueTalks: Readonly<
     say: "Nine pages on a lectern in the middle of the round room. People come here to read them slowly.",
   },
   "do-skate": {
-    answers: ["Skate a run", "Leave"],
-    say: "Drop in, carve the bowl, grind the rail. Fall down, get up, that is the whole sport.",
+    answers: ["Grab a board", "Leave"],
+    say: "Drop in, carve the bowl, grind the rail. Grab a board off the rack and skate five seconds round the park. Fall down, get up, that is the whole sport.",
   },
   "do-track": {
     answers: ["Cut a track, 50", "Leave"],

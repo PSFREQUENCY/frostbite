@@ -1,11 +1,10 @@
-import { borrowHeat, lineCool } from "./constants.ts";
-import { cooled, heated, rankOf } from "./heat.ts";
-import { spotNamed } from "./places.ts";
+import { borrowHeat } from "./constants.ts";
+import { heated, rankOf } from "./heat.ts";
 import { flies, type Draft, type Ride } from "./types.ts";
 import { dockLand, dockWater } from "./world.ts";
 
-// Getting on and off: a ride hired at its stand (borrowed above the hero's rank, which brings heat), the Green Line to the next stop, and
-// stepping off whatever is under the hero.
+// Getting on and off: a ride hired at its stand (borrowed above the hero's rank, which brings heat), and stepping off whatever is under
+// the hero. The Green Line is a ride of its own (`business.ts`).
 export function board(day: Draft, ride: Ride, rank: number): string | null {
   if (day.ride === ride) {
     day.ride = "foot";
@@ -23,23 +22,13 @@ export function board(day: Draft, ride: Ride, rank: number): string | null {
   return null;
 }
 
-export function rideLine(day: Draft, next: string): string | null {
-  const to = spotNamed(next);
-  if (day.ride !== "foot" || to === undefined)
-    return "the train takes people, not rides";
-  day.x = to.x;
-  day.z = to.z;
-  day.rides += 1;
-  cooled(day, lineCool);
-  return null;
-}
-
 // Stepping off a ride: one taken from the kerb stays where it is left (the last six are remembered) and can be taken again.
 export function stepOff(day: Draft): null {
   if (
     day.rideId !== "" &&
     day.ride !== "foot" &&
     day.ride !== "boat" &&
+    day.ride !== "board" &&
     !flies(day.ride)
   )
     day.left = [

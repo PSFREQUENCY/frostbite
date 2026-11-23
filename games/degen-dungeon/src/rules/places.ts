@@ -8,6 +8,7 @@ import { lofts, rooms } from "./rooms.ts";
 import { concertSites } from "./concert.ts";
 import { dogOut, foodSites } from "./food.ts";
 import { caveSites } from "./caves.ts";
+import { tillSites } from "./business.ts";
 import { errandOpen, errandSites } from "./errands.ts";
 import { bedOf, landlordSites, streetOf } from "./lofts.ts";
 import { dashSites, sites, storeSites } from "./sites.ts";
@@ -207,6 +208,7 @@ export const spots: readonly Spot[] = [
     ...concertSites,
     ...foodSites,
     ...caveSites,
+    ...tillSites,
   ]),
   ...dashSites,
   ...storeSites,
@@ -215,6 +217,7 @@ export const spots: readonly Spot[] = [
   ...concertSites,
   ...foodSites,
   ...caveSites,
+  ...tillSites,
 ];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);

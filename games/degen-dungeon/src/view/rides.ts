@@ -26,6 +26,7 @@ export interface Rides {
 
 const kinds: readonly Exclude<Ride, "foot">[] = [
   "bike",
+  "board",
   "boat",
   "car",
   "heli",
@@ -38,6 +39,7 @@ const kinds: readonly Exclude<Ride, "foot">[] = [
 ];
 const standard: Readonly<Record<string, string>> = {
   bike: "#ff5d5d",
+  board: "#ff7a1a",
   car: "#e0b341",
   moto: "#11131c",
   scooter: "#5beac6",

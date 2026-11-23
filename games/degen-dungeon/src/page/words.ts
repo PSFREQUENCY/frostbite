@@ -20,11 +20,19 @@ import {
 import { drivingLine, trialLines } from "../script/dash.ts";
 import { dreams, finale } from "../script/dreams.ts";
 import { questLines, talks, tunnelLine } from "../script/lines.ts";
-import { lockedOutLine, rentLine } from "../script/lofts.ts";
+import {
+  lineLine,
+  lockedOutLine,
+  rentLine,
+  skateLine,
+  tillLine,
+} from "../script/lofts.ts";
+import { boroughs } from "../rules/world.ts";
 import { danceHint } from "../script/concert.ts";
 import { hungryLine } from "../script/food.ts";
 import { starving } from "../rules/food.ts";
 import { stories } from "../script/stories.ts";
+import { skateTicks, tillOf } from "../rules/business.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
 // it offers. None of it changes the rules.
@@ -66,14 +74,19 @@ export function dashLine(day: DayState): string | null {
   return `Degen Dash ${String(day.dash)}/${String(stages.length)} · ${asks} · ${clockText(clockOf(day))} (par ${clockText(dashPar)})`;
 }
 
-// What is urgent before the story: a drain (or a balance that only looks drained), the saucers, the open tunnel, a Degen Dash on, a trip
-// back.
+// What is urgent before the story: the train or the board under the hero, a drain (or a balance that only looks drained), the rent, the
+// saucers, the open tunnel, a Degen Dash on, a trip back.
 function urgentLine(day: DayState): string | null {
+  if (day.line !== null) return lineLine(boroughs[day.line.to] ?? "");
+  if (day.ride === "board" && !day.done.includes("did-skate"))
+    return skateLine(Math.ceil((skateTicks - day.skated) / ticksPerSecond));
   // Locked out, the way to the hideout terminal is through the landlord.
   if (evicted(day)) return lockedOutLine;
   if (day.drain > 0)
     return "Your balance is draining! Race home to the hideout terminal.";
   if (day.fake) return "Check the hideout terminal at home before you panic.";
+  if (rentDue(day) && day.pocket < rentOf(day) && tillOf(day) >= rentOf(day))
+    return tillLine;
   if (rentDue(day) && day.tick >= nightTick - 60 * ticksPerSecond)
     return rentLine;
   if (starving(day)) return hungryLine;
@@ -147,7 +160,8 @@ export function talkOf(
   const rent = (line: string): string =>
     line
       .replace("{rent}", String(rentOf(day)))
-      .replace("{back}", String(rentOf(day) + lateFee));
+      .replace("{back}", String(rentOf(day) + lateFee))
+      .replace("{till}", tillOf(day).toLocaleString("en-US"));
   if (talk !== undefined)
     return {
       answers: talk.answers.map(rent),

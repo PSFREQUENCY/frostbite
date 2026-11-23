@@ -1,6 +1,7 @@
 import type { RunInput } from "@frostbite/game-sdk/run-record";
 
 import { block, island } from "../../src/rules/constants.ts";
+import { lineTicks } from "../../src/rules/business.ts";
 import { advance } from "../../src/rules/day.ts";
 import { degenRules } from "../../src/rules/index.ts";
 import { rentDue, streetOf } from "../../src/rules/lofts.ts";
@@ -91,6 +92,10 @@ export function createBot(
     leg("z", z);
   };
 
+  const arrive = (): void => {
+    now += lineTicks;
+    send("move", { dir: -1 });
+  };
   const rent = (): void => {
     const landlord = spotNamed(`landlord-${String(state.hero)}`);
     if (!rentDue(state) || landlord === undefined) return;
@@ -130,6 +135,13 @@ export function createBot(
       if (spot === undefined) throw new Error(`no spot named ${id}`);
       go(spot.x, spot.z);
       send("act");
+      // The Green Line takes a few seconds to the next stop.
+      if (spot.kind === "stop") arrive();
+    },
+    // From the stop the bot stands at, the Green Line to the next one.
+    ride(): void {
+      send("act");
+      arrive();
     },
     // Pays the rent to the landlord at the loft's door, if it is owed (and the late fee if locked out).
     rent,

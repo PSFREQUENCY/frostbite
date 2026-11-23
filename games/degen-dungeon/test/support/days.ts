@@ -42,7 +42,7 @@ export function busyDay(): Bot {
   bot.rent();
   bot.use("freezer");
   bot.use("stop-3");
-  for (let ride = 1; ride < 8; ride += 1) bot.act();
+  for (let ride = 1; ride < 8; ride += 1) bot.ride();
   lookAt(bot, "heroword-0");
   bot.sleep();
   return bot;

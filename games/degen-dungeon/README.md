@@ -17,7 +17,9 @@ of one hero. DUN is in-game credit only.
   unpaid at nightfall, your bed, freezer and boxes go out on the kerb, and a seed paper hidden in the bed or the freezer is found and
   drains your wallet. Pay the rent and a 100 DUN late fee to get back in. Sleep with the rent unpaid and you wake on the kerb the next
   morning. Once it is paid, the landlord sells upgrades in turn, kept from day to day: a patio by the door (500), a balcony (1,500) and
-  the top floor with the view of the city (5,000).
+  the top floor with the view of the city (5,000). Your own online shop runs from the laptop on the desk by the door and sells while
+  you are out: a DUN a second on day one, a DUN more a second each day after, up to a 3,000 DUN till; its screen shows the till live.
+  Short of the rent, Pip and the beacon send you to the laptop first, and in the last two minutes before nightfall the rent comes first.
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
 - **The seven days.** The FREE FROST riot morning, a first day of honest hustle, the mania, the winter (it opens on the morning of the
@@ -28,7 +30,7 @@ of one hero. DUN is in-game credit only.
   - Day 1: wake in your loft and walk out into the FREE FROST riot packed in front of the Global DEX, a fortress of a stock exchange on a
     granite podium, and hear Frost's speech from its steps. Pick up the wallet the crowd left in the gutter and give it back to Pearl in
     ADOR, the department store across the street; as you step back out, a thief snatches Rosa's purse at the door. Run him down on foot
-    and give Rosa her purse (a side quest). Then take your first DUN at the Faucet and decide where your seed paper lives. A paper in a
+    and give Rosa her purse (a side quest): he glows red, with a red arrow over his head, and the beacon and the map follow him. Then take your first DUN at the Faucet and decide where your seed paper lives. A paper in a
     pocket or on a phone gets found, and the pocket drains live until the hideout terminal stops it.
   - Day 2: finish an honest gig, ride the Green Line, buy some of the coin of the day on the Exchange floor.
   - Days 3 to 5 follow the hero's own story, three beats a day. Some beats need the right crewmate, frost vision, DUN or a trade; some ask
@@ -41,7 +43,9 @@ of one hero. DUN is in-game credit only.
   the day (the riot on the first morning, the saucers in the mania, the storm in the winter, a moonshot, a rooftop and the lantern on
   Moon Night...).
   The backpack lists the day's quests and side quests with ✓ for done and → for the one you are on.
-- **The city:** honest gigs, a crew of three, the Green Line Express, the Exchange floor's coin, MAXX (twenty a day, until the winter),
+- **The city:** honest gigs, a crew of three, the Green Line Express (a glass lift up to the station at each stop, five seconds on an
+  open car along the elevated rails to the next stop, the lift down; the ride counts), the skate park (grab a board off the rack and
+  skate five seconds round the park for the day's skate, with an ollie every few seconds), the Exchange floor's coin, MAXX (twenty a day, until the winter),
   the fit shop, the realtor and the garage, a scooter, a car, a yacht and a helicopter, and the scams: Kiki, the famous face, the
   recovery expert, the dream job, the fake Fed, the permission slip, the sticker on the meter and the honeypot coin.
 - **Heat:** stealing earns stars. Two bring a beat cop who fines you; three bring a tux who freezes what he touches; at four even the
@@ -73,7 +77,9 @@ of one hero. DUN is in-game credit only.
   the other seats; whoever has no seat runs alongside. Step off anywhere (act again) and the ride stays where you left it, the last six
   of them, to be taken again.
 - **The saucers:** in the mania (day 3), a quarter of the way in, flying saucers come down over four street crossings with their beams
-  on the ground, and more circle the sky. Stand still in a beam and you are taken up. Glow sticks from the hardware store and a pizza
+  on the ground, and more circle the sky; townspeople float up every beam, one after another. Stand still in a beam and you float up
+  too. Frost vision lights the clues: the glow sticks, the pizza, the magnet and the vacuum glow in columns of gold seen through walls,
+  and pulse on the map. Glow sticks from the hardware store and a pizza
   make peace (standing, and frost vision); a bag of the Exchange's meme coin can be traded for three times what the market pays. Go up
   with nothing to offer, or go quietly, and you pass out, see the moon go by, and wake in your own bed on the first morning of the story
   again. The first peace or trade ends the alarm and that saucer flies home; the other three stay, and on every day after the mania

@@ -182,26 +182,26 @@ describe("the sky", () => {
     const down = { ...day, tick: invasionTick };
     saucers.show(down, 10, false);
     saucers.show(down, 15, false);
-    // Four hovering, four beams, eight circling in the alarm.
-    expect(visible()).toBe(16);
+    // Four hovering, four beams with someone floating up each, eight circling in the alarm.
+    expect(visible()).toBe(20);
     saucers.show(down, 15, true);
     expect(saucers.root.visible).toBe(false);
     const home = { ...down, done: [...down.done, "contact", "beamup-0"] };
     saucers.show(home, 16, false);
-    expect(visible()).toBe(15);
+    expect(visible()).toBe(18);
     saucers.show(home, 30, false);
-    expect(visible()).toBe(6);
+    expect(visible()).toBe(9);
     // A later day: the visitors come back without the circling fleet.
     const later = { ...started(1, 7, 5), tick: invasionTick };
     saucers.show(later, 40, false);
     saucers.show(later, 45, false);
-    expect(visible()).toBe(8);
+    expect(visible()).toBe(12);
     // Thirteen beam-ups park a saucer on the Old Floe lawn, until it is flown.
     const mine = { ...later, beamups: 13 };
     saucers.show(mine, 46, false);
-    expect(visible()).toBe(9);
+    expect(visible()).toBe(13);
     saucers.show({ ...mine, ride: "saucer" }, 47, false);
-    expect(visible()).toBe(8);
+    expect(visible()).toBe(12);
   });
 
   it("snows, storms, blows and burns round the hero, and closes the fog in", () => {

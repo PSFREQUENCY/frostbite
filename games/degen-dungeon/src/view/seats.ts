@@ -26,6 +26,7 @@ export const seatsOf: Readonly<
   Record<Exclude<Ride, "foot">, readonly Place[]>
 > = {
   bike: [sit(0, 0.95, -0.2, "pedal")],
+  board: [sit(0, 0.16, 0, "board")],
   boat: [],
   car: [...pair(0.56, 0.15), ...pair(0.56, -0.8)],
   heli: [],

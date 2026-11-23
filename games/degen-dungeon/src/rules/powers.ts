@@ -90,7 +90,7 @@ export const letterNear = (day: DayState): Point | null =>
 
 export function usePower(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
-  if (day.ride !== "foot" || day.level !== 0)
+  if (day.ride !== "foot" || day.level !== 0 || day.line !== null)
     return "your power needs your own feet on the ground";
   if (!powerReady(day)) return "your power is still charging";
   const level = powerLevel(day);

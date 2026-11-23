@@ -53,6 +53,7 @@ export const units = [
 // Centimetres a tick: on foot it is the hero's own speed, on a ride the ride's.
 const ridePace: Readonly<Record<Ride, number>> = {
   bike: 18,
+  board: 20,
   boat: 28,
   car: 32,
   foot: 10,
@@ -106,7 +107,7 @@ function free(day: Draft): (x: number, z: number) => boolean {
 // toward SHA Beach is back where it set out from.
 export function moved(day: Draft): void {
   const unit = units[day.dir];
-  if (unit === undefined || day.talk !== null) return;
+  if (unit === undefined || day.talk !== null || day.line !== null) return;
   if (flies(day.ride) ? day.level === 0 : clinging(day)) return;
   const pace = paceOf(day);
   const open = free(day);

@@ -28,6 +28,7 @@ import { rentTick } from "./lofts.ts";
 import { masteryTick } from "./mastery.ts";
 import { foodTick } from "./food.ts";
 import { caveTick } from "./caves.ts";
+import { lineTick, skateTick } from "./business.ts";
 
 // Everything a tick does besides moving and chasing: the riot on the first morning, heat fading (fast under the city), FOMO rising in
 // the good times and falling in the park, a drained pocket emptying, the seed paper's test, MAXX interest, frost vision running down,
@@ -101,6 +102,8 @@ export function ticked(day: Draft): void {
   masteryTick(day);
   foodTick(day);
   caveTick(day);
+  lineTick(day);
+  skateTick(day);
   if (day.fizz > 0) day.fizz -= 1;
   // Frost vision comes back every thirty seconds.
   if (day.tick % visionEvery === 0)

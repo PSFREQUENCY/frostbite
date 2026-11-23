@@ -1,15 +1,19 @@
 import {
   BoxGeometry,
+  CanvasTexture,
   ConeGeometry,
   Group,
   Mesh,
   MeshBasicMaterial,
   MeshToonMaterial,
+  PlaneGeometry,
   SphereGeometry,
+  SRGBColorSpace,
   type BufferGeometry,
   type Material,
 } from "three";
 
+import { tillCap, tillOf } from "../rules/business.ts";
 import { evicted } from "../rules/lofts.ts";
 import { lofts, type Room } from "../rules/rooms.ts";
 import type { DayState } from "../rules/types.ts";
@@ -20,7 +24,8 @@ import { toonSteps } from "./textures.ts";
 // facing the door and the freezer by the kitchen counter, or, once the landlord has put them out, the mattress, the freezer, the lamp and
 // a stack of boxes on the pavement by the door. The upgrades bought stand where they belong: a patio of decking, chairs and a sunshade
 // under string lights beside the door, a balcony with a glass rail and a lit window on the floor above, and on the roof the top floor's
-// glass room with the view of the city.
+// glass room with the view of the city. On the desk by the door, the laptop that runs the hero's shop shows what is in its till, live,
+// with a bar that fills toward a full till.
 export interface Lofts {
   readonly root: Group;
   show(day: DayState | null): void;
@@ -100,6 +105,42 @@ export function buildLofts(): Lofts {
     transparent: true,
   });
   let built: Room | null = null;
+  // The laptop's screen, drawn again whenever the till's number changes.
+  const canvas =
+    typeof document === "undefined" ? null : document.createElement("canvas");
+  const pen = canvas?.getContext("2d") ?? null;
+  const screen = new Mesh(
+    new PlaneGeometry(0.46, 0.29),
+    new MeshBasicMaterial({ color: "#0b0d18" }),
+  );
+  screen.name = "till-screen";
+  if (canvas !== null) {
+    canvas.width = 256;
+    canvas.height = 160;
+    const texture = new CanvasTexture(canvas);
+    texture.colorSpace = SRGBColorSpace;
+    screen.material.map = texture;
+    screen.material.color.set("#ffffff");
+  }
+  root.add(screen);
+  let drawn = -1;
+  const draw = (till: number): void => {
+    if (till === drawn || pen === null || canvas === null) return;
+    drawn = till;
+    pen.fillStyle = "#0b0d18";
+    pen.fillRect(0, 0, 256, 160);
+    pen.fillStyle = "#5beac6";
+    pen.font = "bold 26px sans-serif";
+    pen.fillText("MY SHOP · SALES", 14, 36);
+    pen.fillStyle = "#ffd166";
+    pen.font = "bold 46px sans-serif";
+    pen.fillText(`${till.toLocaleString("en-US")} DUN`, 14, 96);
+    pen.fillStyle = "#22304d";
+    pen.fillRect(14, 120, 228, 22);
+    pen.fillStyle = "#3fae6b";
+    pen.fillRect(14, 120, Math.round((228 * till) / tillCap), 22);
+    if (screen.material.map !== null) screen.material.map.needsUpdate = true;
+  };
   const groups = ["bed", "pile", "patio", "balcony", "view"].map((name) => {
     const group = new Group();
     group.name = `loft-${name}`;
@@ -135,6 +176,9 @@ export function buildLofts(): Lofts {
     fill(terrace, patio);
     fill(upstairs, balcony);
     fill(top, view);
+    // Over the desk's glowing screen, facing the chair.
+    screen.position.set(toX(9.9), 0.93, toZ(9.4));
+    screen.rotation.y = room.north ? 0 : Math.PI;
     // The patio's sunshade, and a telescope on the top floor's terrace.
     const shade = new Mesh(new ConeGeometry(1.5, 0.7, 12), toon("#ff5d5d"));
     shade.position.set(toX(9), 2.8, toZ(front + 1.5));
@@ -151,6 +195,7 @@ export function buildLofts(): Lofts {
       root.visible = day !== null && room !== undefined;
       if (day === null || room === undefined) return;
       if (built !== room) furnish(room);
+      draw(tillOf(day));
       const out = evicted(day);
       for (const [group, shown] of [
         [inside, !out],

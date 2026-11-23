@@ -1,8 +1,10 @@
-import { waterline } from "./rules/constants.ts";
+import { nightTick, ticksPerSecond, waterline } from "./rules/constants.ts";
 import { dashCar } from "./rules/course.ts";
 import { stageOf } from "./rules/dash.ts";
 import { beams, invading, peaceable } from "./rules/invasion.ts";
-import { evicted, rentDue } from "./rules/lofts.ts";
+import { tillOf } from "./rules/business.ts";
+import { eraOf, invasionEra } from "./rules/calendar.ts";
+import { evicted, lateFee, rentDue, rentOf } from "./rules/lofts.ts";
 import { echoAt } from "./rules/machine.ts";
 import { openTo, spotNamed, spots, type Spot } from "./rules/places.ts";
 import { beatOf, questOf, tunnelMouth, type Quest } from "./rules/story.ts";
@@ -86,13 +88,21 @@ function questPlace(day: DayState, quest: Quest): Point | null {
 
 export function questAt(day: DayState): Point | null {
   if (day.ended) return null;
-  // Home is the bed, or the landlord first while the hero is locked out or owes the rent.
+  // The purse snatcher, while he runs.
+  if (day.thief !== null) return day.thief;
+  // Home is the bed, or the landlord first while the hero is locked out or owes the rent (the shop's till first, if the pocket is short
+  // and the shop has sold something).
   const landlord = spotNamed(`landlord-${String(day.hero)}`) ?? null;
   const bed = spotNamed(`home-${String(day.hero)}`) ?? null;
-  const home = evicted(day) || rentDue(day) ? landlord : bed;
+  const owed = rentOf(day) + (evicted(day) ? lateFee : 0);
+  const short = day.pocket < owed && tillOf(day) > 0;
+  const till = spotNamed(`till-${String(day.hero)}`) ?? null;
+  const home = evicted(day) || rentDue(day) ? (short ? till : landlord) : bed;
   if (day.drain > 0 || day.fake) return evicted(day) ? landlord : bed;
   if (invading(day)) return saucerGoal(day) ?? home;
   if (day.gate > 0) return { x: tunnelMouth.x, z: waterline };
+  // In the last two minutes before nightfall, unpaid rent comes before the story.
+  if (rentDue(day) && day.tick >= nightTick - 120 * ticksPerSecond) return home;
   const stage = stageOf(day);
   if (stage !== null)
     return stage.trial === "car" && !motors.some((ride) => ride === day.ride)
@@ -104,4 +114,33 @@ export function questAt(day: DayState): Point | null {
   }
   const quest = questOf(day);
   return quest === null ? home : (questPlace(day, quest) ?? home);
+}
+
+// The clues frost vision lights up, in the city and on the map: the gifts for the saucers' visitors (glow sticks at the hardware store
+// and a pizza, from the mania on, until bought that day), and the magnet and the vacuum for the Great Airdrop until they are picked up.
+export interface Clue extends Point {
+  readonly kind: "glow" | "magnet" | "pizza" | "vacuum";
+}
+const counterOf = (node: string): Spot | undefined =>
+  spots.find((spot) => spot.kind === "talk" && spot.node === node);
+export function cluesOf(day: DayState): readonly Clue[] {
+  const gifts = day.loop === 0 && eraOf(day.day) >= invasionEra;
+  const found: Clue[] = [];
+  const add = (kind: Clue["kind"], spot: Spot | undefined, want: boolean) => {
+    if (spot !== undefined && want && openTo(spot, day))
+      found.push({ kind, x: spot.x, z: spot.z });
+  };
+  add(
+    "glow",
+    counterOf("shop-hardware"),
+    gifts && !day.done.includes("item-glow"),
+  );
+  add(
+    "pizza",
+    counterOf("shop-pizza"),
+    gifts && !day.done.includes("item-pizza"),
+  );
+  add("magnet", spotNamed("tool-magnet"), (day.tools & 1) === 0);
+  add("vacuum", spotNamed("tool-vacuum"), (day.tools & 2) === 0);
+  return found;
 }

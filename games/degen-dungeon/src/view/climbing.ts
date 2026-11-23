@@ -4,6 +4,7 @@ import type { DayState } from "../rules/types.ts";
 import { onLand, wallBeside } from "../rules/world.ts";
 import { turnTo } from "./camera.ts";
 import { hillAt } from "./hill.ts";
+import { liftOf, ollieOf } from "./lift.ts";
 import { roofAt } from "./lots.ts";
 import { climbAcross, seatHeight } from "./letters.ts";
 
@@ -33,10 +34,14 @@ export interface Shown {
   readonly z: number;
 }
 
+// What can carry the hero or lift their board (`lift.ts`), where the rules say.
+type Carried = Partial<
+  Pick<DayState, "beamed" | "dir" | "line" | "talk" | "tick">
+>;
 export interface Climber {
   // The hero's place and heading as shown (metres and radians), for the place and heading the rules give, a frame's time later.
   follow(
-    state: Pick<DayState, "level" | "ride" | "x" | "z">,
+    state: Pick<DayState, "level" | "ride" | "x" | "z"> & Carried,
     x: number,
     z: number,
     heading: number,
@@ -46,6 +51,7 @@ export interface Climber {
 
 export function createClimber(): Climber {
   let shown = 0;
+  let carried = 0;
   let last: Shown | null = null;
   // Up and down a letter the body glides to where the rules put it, turning as it goes; anywhere else it is simply there.
   const glide = (to: Shown, dt: number, letter: boolean): Shown => {
@@ -69,6 +75,18 @@ export function createClimber(): Climber {
     follow(state, x, z, heading, dt) {
       const foot = state.ride === "foot";
       const ground = hillAt(x, z);
+      // Carried up a lift, along the Green Line or into a saucer's beam, the body rises and comes down at a lift's pace (`lift.ts`).
+      const rise = 50 * dt;
+      carried += Math.max(
+        -rise,
+        Math.min(rise, (liftOf(state) ?? 0) - carried),
+      );
+      if (carried > 0.02)
+        return glide(
+          { ground, heading, hold: null, x, y: ground + carried, z },
+          dt,
+          false,
+        );
       const letter =
         foot && state.level <= storeys && letterAt(state.x, state.z) >= 0;
       if (foot && state.level === roofLevel && onLetterTop(state.x, state.z)) {
@@ -118,7 +136,11 @@ export function createClimber(): Climber {
       shown += Math.max(-step, Math.min(step, target - shown));
       const y = ground + shown;
       if (wall === null || shown <= 0)
-        return glide({ ground, heading, hold: null, x, y, z }, dt, letter);
+        return glide(
+          { ground, heading, hold: null, x, y: y + ollieOf(state), z },
+          dt,
+          letter,
+        );
       const reach = (wall.gap / 100 - hugGap) * Math.min(1, shown / hugBy);
       // Up a letter, the body keeps to the stroke it climbs.
       const across =

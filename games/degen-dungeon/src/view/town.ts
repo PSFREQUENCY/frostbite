@@ -11,6 +11,8 @@ import { buildConcert } from "./concert.ts";
 import { buildFood } from "./food.ts";
 import { buildPowers } from "./powers.ts";
 import { buildCaves } from "./caves.ts";
+import { buildClues } from "./clues.ts";
+import { buildTrain } from "./train.ts";
 import { buildLofts } from "./lofts.ts";
 import { buildMountain } from "./mountain.ts";
 import { buildParked, type Parked } from "./parked.ts";
@@ -23,7 +25,7 @@ import { buildWalkers } from "./walkers.ts";
 
 // Everything at street level that makes Nakasato feel lived in: the furniture and the notices, the walk-in shops and the gas stations'
 // forecourts, the parked rides, the people walking and talking, the traffic, the landmarks, the lantern night, the beacon over where to
-// go next, and Mount WAGMI with its trail and its sign. It also keeps the
+// go next, the Green Line's stations, the clues frost vision lights, and Mount WAGMI with its trail and its sign. It also keeps the
 // time of day, from the day's clock: the sun crosses the sky until dusk, and after `nightTick` it is night.
 export interface Town {
   // The town between days (the opening and the hero ring): daylight, people and traffic, nobody's quest.
@@ -80,8 +82,12 @@ export function buildTown(): Town {
   const food = buildFood();
   const powers = buildPowers();
   const caves = buildCaves();
+  const train = buildTrain();
+  const clues = buildClues();
   root.add(
     caves.root,
+    train.root,
+    clues.root,
     powers.root,
     lofts.root,
     concert.root,
@@ -114,6 +120,8 @@ export function buildTown(): Town {
       food.show(null, seconds);
       powers.show(null);
       caves.show(null, seconds);
+      train.show(null, seconds);
+      clues.show(null, seconds);
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
@@ -139,6 +147,8 @@ export function buildTown(): Town {
       food.show(day, seconds);
       powers.show(day);
       caves.show(day, seconds);
+      train.show(day, seconds);
+      clues.show(day, seconds);
     },
     write: (message) => lanterns.write(message),
   };
