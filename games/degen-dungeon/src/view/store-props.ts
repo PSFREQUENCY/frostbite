@@ -1,6 +1,6 @@
 import type { Prop } from "./shop-props.ts";
 
-// Inside a corner store and a Gwei Gas station (`shop-props.ts` keeps the other kinds): the counter's bulletproof glass, floor to
+// Inside a corner store and a Silky station (`shop-props.ts` keeps the other kinds): the counter's bulletproof glass, floor to
 // ceiling, with its tray and speaking grille; shelves of goods behind the clerk; aisles of snacks down the middle; a wall of glass-door
 // freezers lit from inside, full of colour; a chest freezer by the window; and an OPEN sign. A gas station has one aisle, a hot-dog
 // roller on its counter, a cooler of Fuzzy lit purple and a coin ATM by the window. In each shop's own frame (`shop-props.ts`).

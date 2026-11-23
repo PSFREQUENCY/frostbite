@@ -4,7 +4,7 @@ import type { Point } from "./types.ts";
 
 // The mom-and-pop shops you can walk into: a room cut into a lot beside the street, with a doorway through its front wall and a counter at
 // the back. Each borough has one or two on its middle street, and the outer rooms stand on the far side of their lots, facing the streets
-// between boroughs (or the shore): the corner stores and the Gwei Gas stations. Feet may be in a room or its doorway as well as on the
+// between boroughs (or the shore): the corner stores and the Silky stations. Feet may be in a room or its doorway as well as on the
 // street (`world.ts`); the walls are the lot itself. The kind of shop decides what its counter sells (`talk.ts`, `stores.ts`).
 export interface Box {
   readonly x0: number;
@@ -49,19 +49,21 @@ const shops: readonly Shop[] = [
   [8, 3, "pawn", "Gig Street Pawn"],
 ];
 // The outer rooms: seven more corner stores, so there is one in every borough (Cold Harbor Deli keeps the freeze ray in its freezer),
-// and six Gwei Gas stations.
+// and six Silky stations.
 const outers: readonly Shop[] = [
   [0, 0, "bodega", "Cold Harbor Deli"],
-  [0, 3, "gas", "Gwei Gas"],
+  [0, 3, "gas", "Silky"],
   [1, 3, "bodega", "Marina Mini Mart"],
   [2, 3, "bodega", "Floe Corner Store"],
-  [3, 0, "gas", "Gwei Gas"],
+  [3, 0, "gas", "Silky"],
   [3, 3, "bodega", "Neon Bodega"],
-  [0, 2, "gas", "Gwei Gas"],
+  [0, 2, "gas", "Silky"],
   [5, 0, "bodega", "Meme Market Deli"],
-  [5, 3, "gas", "Gwei Gas"],
-  [6, 0, "gas", "Gwei Gas"],
-  [7, 0, "gas", "Gwei Gas"],
+  [5, 3, "gas", "Silky"],
+  [6, 0, "gas", "Silky"],
+  [7, 0, "gas", "Silky"],
+  // Diamond Hands, the seafront restaurant (`food.ts`).
+  [1, 0, "restaurant", "Diamond Hands"],
   [7, 3, "bodega", "Shaft Stop and Shop"],
   [8, 0, "bodega", "Gig Street Grocery"],
 ];

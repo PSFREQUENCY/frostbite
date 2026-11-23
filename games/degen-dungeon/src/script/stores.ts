@@ -1,4 +1,4 @@
-// The words of the corner stores, the Gwei Gas stations and the ID kiosk (`rules/stores.ts`), in the order of the rules' answers. Each
+// The words of the corner stores, the Silky stations and the ID kiosk (`rules/stores.ts`), in the order of the rules' answers. Each
 // line is written once. A draft for the owner.
 export const storeTalks: Readonly<
   Record<string, { readonly answers: readonly string[]; readonly say: string }>
@@ -29,6 +29,6 @@ export const storeTalks: Readonly<
   },
   "shop-gas": {
     answers: ["Snacks, 6", "A Fuzzy, 25 (ID)", "Fill the tank, 40", "Leave"],
-    say: "Gwei Gas: fees in gwei on the sign outside, snacks at the window, and a clerk behind bulletproof glass who checks every ID twice.",
+    say: "Silky: fees in gwei on the sign outside, snacks at the window, and a clerk behind bulletproof glass who checks every ID twice.",
   },
 };

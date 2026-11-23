@@ -194,6 +194,11 @@ export interface DayState {
   readonly rayAt: number;
   // The purse snatcher on the first morning while he runs (`errands.ts`), and which leg of his way out he is on.
   readonly thief: Point | null;
+  // Food (`food.ts`): the tick of the last meal, when a stream from The Dome VR began (-1 off air), and the Diamond Hands gang beside the
+  // hero, if they have walked up.
+  readonly ateAt: number;
+  readonly streamFrom: number;
+  readonly gang: Point | null;
   readonly thiefLeg: number;
   readonly frozen: readonly Frost[];
   readonly peakFrozen: number;

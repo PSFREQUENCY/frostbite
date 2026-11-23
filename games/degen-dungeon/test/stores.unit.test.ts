@@ -97,7 +97,7 @@ describe("the corner stores and the gas stations", () => {
   it("sell a Fuzzy and trade the coin only on sight of an ID, which the kiosk makes once and the save keeps", () => {
     expect(
       refusal({ ...day, talk: "shop-gas" }, "pick", { choice: 1, tick: 600 }),
-    ).toBe("ID first: the kiosk by The Shaft's Gwei Gas makes one");
+    ).toBe("ID first: the kiosk by The Shaft's Silky makes one");
     expect(
       refusal({ ...day, talk: "atm" }, "pick", { choice: 0, tick: 600 }),
     ).toContain("ID first");

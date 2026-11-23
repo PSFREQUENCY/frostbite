@@ -20,7 +20,7 @@ import { box } from "./hash.ts";
 import { frameOf, front } from "./shops.ts";
 import { toonSteps } from "./textures.ts";
 
-// What stands in front of the shops: at every Gwei Gas a forecourt over the pavement, its canopy on two columns with a lit red edge and
+// What stands in front of the shops: at every Silky a forecourt over the pavement, its canopy on two columns with a lit red edge and
 // lights underneath, two pumps on an island with their screens and hoses, and a pole sign with the day's gas in gwei; and the ID kiosk,
 // a photo booth with a curtain, a lit sign and a flash. They read nothing and decide nothing.
 export interface Fronts {

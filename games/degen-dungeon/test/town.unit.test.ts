@@ -43,8 +43,9 @@ describe("the mom-and-pop shops", () => {
   it("are rooms cut into corner lots, with a doorway onto the street: open to feet, closed to wheels", () => {
     // Seventeen shops on the middle streets, thirteen on the lots' outer sides (seven corner stores and six gas stations), and a loft
     // for each of the ten heroes.
-    expect(rooms).toHaveLength(40);
-    expect(new Set(rooms.map(({ id }) => id)).size).toBe(40);
+    // And Diamond Hands, the seafront restaurant.
+    expect(rooms).toHaveLength(41);
+    expect(new Set(rooms.map(({ id }) => id)).size).toBe(41);
     expect(rooms.filter(({ kind }) => kind === "loft")).toHaveLength(10);
     expect(rooms.filter(({ kind }) => kind === "bodega")).toHaveLength(9);
     expect(rooms.filter(({ kind }) => kind === "gas")).toHaveLength(6);
@@ -59,13 +60,17 @@ describe("the mom-and-pop shops", () => {
       const outside = room.north ? door.z0 : door.z1;
       expect(onStreet(counter.x, outside), room.id).toBe(true);
       expect(onLand(room.room.x0 - 100, counter.z)).toBe(false);
-      // A shop's counter, or the bed in a loft.
+      // A shop's counter, the bed in a loft, or Ms. Opal at Diamond Hands.
       expect(
-        spotNamed(room.id) ?? spotNamed(`home-${room.id.replace("loft-", "")}`),
+        spotNamed(room.id) ??
+          spotNamed(`home-${room.id.replace("loft-", "")}`) ??
+          spotNamed("diamond-hands"),
       ).toMatchObject(
         room.kind === "loft"
           ? { kind: "home", ...counter }
-          : { kind: "talk", node: `shop-${room.kind}` },
+          : room.kind === "restaurant"
+            ? { node: "opal", ...counter }
+            : { kind: "talk", node: `shop-${room.kind}` },
       );
     }
     const shop = rooms[0];

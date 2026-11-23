@@ -3,7 +3,7 @@ import { takeRay } from "./freeze.ts";
 import { buy, sell } from "./market.ts";
 import type { Draft } from "./types.ts";
 
-// The corner stores and the Gwei Gas stations (`rooms.ts`), and the ID kiosk (`sites.ts`). A corner store's counter, behind bulletproof
+// The corner stores and the Silky stations (`rooms.ts`), and the ID kiosk (`sites.ts`). A corner store's counter, behind bulletproof
 // glass, sells hot chips (frost vision), a chopped cheese (the block respects a regular) and a juice (calmer), and its freezer ice pops
 // and pints (cooler still); Cold Harbor Deli's freezer also holds the freeze ray (`freeze.ts`). A gas station's counter sells snacks, a
 // Fuzzy (an extra-fizzy soda, sold only on sight of an ID: quicker on foot for half a minute) and a full tank (anything with an engine a
@@ -47,7 +47,7 @@ export const storeNodes: Readonly<Record<string, readonly Answer[]>> = {
   ],
 };
 
-const noId = "ID first: the kiosk by The Shaft's Gwei Gas makes one";
+const noId = "ID first: the kiosk by The Shaft's Silky makes one";
 
 // The coin ATM: the Exchange floor's own trade, ID first, for a flat fee in and a tenth of what comes out.
 function atm(day: Draft, buying: boolean, locked: boolean): string | null {

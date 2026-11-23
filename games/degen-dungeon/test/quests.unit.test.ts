@@ -23,25 +23,16 @@ const finishing: readonly Partial<DayState>[] = [
   },
   { done: ["did-dance", "item-glow", "contact"], maxx: 50, spotted: 1 },
   {
-    done: ["did-skate", "washer-room-1-3-0", "stash", "window-1-1-1"],
+    done: ["did-skate", "washer-room-1-3-0", "stash", "dog-returned"],
     storm: 9,
   },
   {
-    done: ["did-vr", "fit-shades", "home-studio", `recruit-${String(bit)}`],
+    done: ["did-vr", "fit-shades", "drive-thru", `recruit-${String(bit)}`],
     warned: 1,
   },
   { done: ["did-film", "staked", "roof", "did-track", "lantern"] },
   {
-    done: [
-      "did-exhibits",
-      "semi-2",
-      "bike-1",
-      "car-2",
-      "moto-3",
-      "scooter-4",
-      "van-5",
-      "did-print",
-    ],
+    done: ["did-exhibits", "semi-2", "dined-diamond", "did-print"],
     grass: true,
   },
 ];

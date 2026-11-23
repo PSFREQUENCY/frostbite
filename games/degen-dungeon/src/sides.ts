@@ -25,14 +25,6 @@ const begins =
 const counted =
   (of: (day: DayState) => number, needed: number): Check =>
   (day) => [Math.min(of(day), needed), needed];
-const ridesTaken = (day: DayState): number =>
-  new Set(
-    day.done.flatMap((id) => {
-      const kind = /^(bike|car|moto|scooter|truck|van)-\d+$/u.exec(id)?.[1];
-      return kind === undefined ? [] : [kind];
-    }),
-  ).size;
-
 const checks: readonly (readonly Check[])[] = [
   [
     has("riot"),
@@ -60,12 +52,12 @@ const checks: readonly (readonly Check[])[] = [
     begins("washer-"),
     has("stash"),
     (day) => day.storm > 0,
-    begins("window-"),
+    has("dog-returned"),
   ],
   [
     has("did-vr"),
     has("fit-gloves", "fit-shades", "fit-parka"),
-    has("home-studio", "home-rowhouse", "home-yard"),
+    has("drive-thru"),
     has(`recruit-${String(bit)}`),
     (day) => day.warned > 0,
   ],
@@ -80,7 +72,7 @@ const checks: readonly (readonly Check[])[] = [
     has("did-exhibits"),
     begins("semi-"),
     (day) => day.grass,
-    counted(ridesTaken, 5),
+    has("dined-diamond"),
     has("did-print"),
   ],
 ];

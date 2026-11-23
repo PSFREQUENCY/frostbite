@@ -28,12 +28,12 @@ export const sideLabels: readonly (readonly string[])[] = [
     "Run a washer at a laundromat",
     "Stash your pocket in the hideout freezer",
     "Catch DUN in the Great Airdrop",
-    "Climb in at somebody's window",
+    "Find Biscuit, the Crypto Shack waitress's lost dog, and bring her home",
   ],
   [
     "Plug into a pod at The Dome VR",
     "Get a fresh fit at the Fit shop",
-    "Move up to a new home",
+    "Order a Satoshi Burger through a Crypto Shack's drive-through, at the wheel",
     "Ask Bit, the robot with questions, to join your crew",
     "Report a scam to Frost",
   ],
@@ -48,7 +48,7 @@ export const sideLabels: readonly (readonly string[])[] = [
     "See the exhibits at the Museum of Genesis",
     "Climb into a semi truck's cab",
     "Let FOMO climb, then sit it off in the Old Floe",
-    "Take five kinds of ride from the kerb",
+    "Dine on the Diamond Plate at Diamond Hands",
     "Collect a print at Pixel Vault Gallery",
   ],
 ];

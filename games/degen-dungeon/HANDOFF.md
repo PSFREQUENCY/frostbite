@@ -240,6 +240,14 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   its floor; `partner-0` to `-2`, right moves 0, 1, 2; `danced-mirinda`, +10 rep). Day two's Green Line and street-words side quests
   gave way to the show and the dance. Lux is an original singer: black hair in two buns, a pink top, a black skirt.
 
+- Food (`rules/food.ts`, `view/food.ts`, words in `script/food.ts`; names and prices are drafts): `ateAt`, `streamFrom` and `gang` on
+  the day; hunger is `hungerOf` (full at 9,000 ticks), never blocking anything but the stream, and Pip's line shows it (after the rent
+  warning). Spots: three shacks, the Floe Food Court on lawn (2, 2), Biscuit beside it (open between `dog-asked` and `dog-found`), the
+  stream pod in The Dome VR, and Ms. Opal at Diamond Hands' counter (an outer room on Clipstream's north-west lot; it has no shop
+  counter). The gang walks up once when `made` reaches 50,000 on foot outside a run and leaves if the hero walks 24 m off; refusing adds
+  `heatPerStar`. Side quests swapped: day four's window for Biscuit, day five's new home for the drive-through, the last day's five rides
+  for the Diamond Plate. Gwei Gas is Silky in every word; the spinning signs are view-only.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

@@ -6,6 +6,7 @@ import { parkedRides } from "./parked.ts";
 import { statueId, statues } from "./statues.ts";
 import { lofts, rooms } from "./rooms.ts";
 import { concertSites } from "./concert.ts";
+import { dogOut, foodSites } from "./food.ts";
 import { errandOpen, errandSites } from "./errands.ts";
 import { bedOf, landlordSites, streetOf } from "./lofts.ts";
 import { dashSites, sites, storeSites } from "./sites.ts";
@@ -110,7 +111,7 @@ const letters: Spot[] = avenue.map(([x, z, day], index) => ({
 
 // The shops' counters, and the lantern ground in the Old Floe park (open every day, used after dark).
 const counters: Spot[] = rooms
-  .filter(({ kind }) => kind !== "loft")
+  .filter(({ kind }) => kind !== "loft" && kind !== "restaurant")
   .map((room) => ({
     ...room.counter,
     id: room.id,
@@ -199,12 +200,13 @@ const fixed: readonly Spot[] = [
 ];
 export const spots: readonly Spot[] = [
   ...fixed,
-  ...parkedRides([...fixed, ...landlordSites, ...concertSites]),
+  ...parkedRides([...fixed, ...landlordSites, ...concertSites, ...foodSites]),
   ...dashSites,
   ...storeSites,
   ...errandSites,
   ...landlordSites,
   ...concertSites,
+  ...foodSites,
 ];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);
@@ -219,7 +221,8 @@ export const openTo = (
   (spot.hidden !== true || day.looking) &&
   (spot.saucer !== true || saucerOpen(day)) &&
   (spot.dash !== true || day.dash > 0) &&
-  (spot.errand === undefined || errandOpen(spot.errand, day));
+  (spot.errand === undefined || errandOpen(spot.errand, day)) &&
+  (spot.id !== "dog" || dogOut(day));
 
 // The open place within reach, the nearest if there are several.
 export function nearest(

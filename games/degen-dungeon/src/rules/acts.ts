@@ -17,6 +17,7 @@ import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { isFrozen } from "./freeze.ts";
 import { landlordNode, lockedOut } from "./lofts.ts";
 import { concertNode, concertRefusal, concertTalks } from "./concert.ts";
+import { gangNear } from "./food.ts";
 import { enterWindow } from "./windows.ts";
 import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
@@ -218,6 +219,10 @@ export function act(day: Draft): string | null {
   }
   if (spot !== null) return useSpot(day, spot);
   // Miss Mirinda, waiting beside the hero with a Degen Dash ticket.
+  if (gangNear(day)) {
+    day.talk = "gang";
+    return null;
+  }
   if (zuriNear(day)) {
     day.talk = "zuri";
     return null;

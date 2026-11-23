@@ -22,6 +22,8 @@ import { dreams, finale } from "../script/dreams.ts";
 import { questLines, talks, tunnelLine } from "../script/lines.ts";
 import { lockedOutLine, rentLine } from "../script/lofts.ts";
 import { danceHint } from "../script/concert.ts";
+import { hungryLine } from "../script/food.ts";
+import { starving } from "../rules/food.ts";
 import { stories } from "../script/stories.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
@@ -74,6 +76,7 @@ function urgentLine(day: DayState): string | null {
   if (day.fake) return "Check the hideout terminal at home before you panic.";
   if (rentDue(day) && day.tick >= nightTick - 60 * ticksPerSecond)
     return rentLine;
+  if (starving(day)) return hungryLine;
   if (invading(day))
     return peaceable(day) || day.bag > 0
       ? "Saucers over the city! Stand still in a beam and get taken up."

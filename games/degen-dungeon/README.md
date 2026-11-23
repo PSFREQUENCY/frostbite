@@ -110,6 +110,15 @@ of one hero. DUN is in-game credit only.
   sweeping (a side quest). After it, Miss Mirinda dances at The Long Game (the dance studio that was Block Party): three moves on their
   counts, a wrong one starts again, and three right impress her (a side quest). Lux's show teaches the moves. Day two's other side
   quests: go live, play a cabinet, three gigs.
+- **Food and hunger:** hunger builds from your last meal to starving in five minutes, and Pip nags until you eat. Three Crypto Shacks
+  sell a Satoshi Burger (15 DUN) at the counter, or through the drive-through if you pull up at the wheel (a day-five side quest); the
+  first shack's waitress has lost her dog Biscuit, who is sniffing round the Floe Food Court's stalls (noodles, tacos, smoothies) on
+  the Old Floe's south-west lawn: bring her home for 100 DUN and a free meal (a day-four side quest). Streaming live from the pod in The
+  Dome VR pays 50 DUN every ten seconds, but only when fed and only for a minute: then the stream cuts and you are starving until you
+  eat. Diamond Hands, the seafront restaurant, serves the Diamond Plate (500 DUN, a last-day side quest); its owner Ms. Opal, in
+  turquoise, runs the Diamond Hands gang, who walk up to anyone who has made 50,000 DUN today with a diamond NFT "for protection"
+  (5,000 DUN). Turn them down and they tip off the tuxes: a star of heat. The gas stations are Silky now, each with a sign that spins
+  on a pole by day and glows neon after nightfall.
 - **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
   cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
 - **The moonshot and the moon:** stake 1,000, 5,000 or 10,000 DUN at the Moonshot Launchpad under Moon Tower; it rides the next launch
@@ -145,7 +154,7 @@ of one hero. DUN is in-game credit only.
   them for a brighter one and grey static for a darker one.
 - **Corner stores and gas stations:** nine corner stores, each with a counter behind floor-to-ceiling bulletproof glass, shelves behind
   the clerk, aisles of snacks and a wall of lit freezers: hot chips (frost vision), a chopped cheese (standing), a juice (calmer), and ice
-  pops and pints from the freezer. Six Gwei Gas stations have a forecourt with pumps and a pole sign, a hot-dog roller and a coin ATM;
+  pops and pints from the freezer. Six Silky stations have a forecourt with pumps and a pole sign, a hot-dog roller and a coin ATM;
   a Fuzzy (quicker on foot for half a minute), a full tank (rides with an engine a little quicker all day) and the ATM all want a
   Nakasato ID, made at the ID kiosk for 100 DUN and kept from day to day.
 - **The freeze ray:** in Cold Harbor Deli's freezer, in a case of frost that only a statue's face opens. Wearing a mask, take it, and G

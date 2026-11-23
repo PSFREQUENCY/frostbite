@@ -113,6 +113,19 @@ export const props: Readonly<Record<string, readonly Prop[]>> = {
     [9.9, 9.45, 0.92, 0.5, 0.32, 0.04, "#ffd166", true],
     [0.6, 10.4, 0.6, 0.5, 1.2, 0.5, "#3fae6b"],
   ],
+  // Diamond Hands: tables under white cloths, gold chairs, a glowing diamond over the room, and a turquoise bar.
+  restaurant: [
+    [2.6, 5, 0.75, 1.6, 0.08, 1.6, "#ffffff"],
+    [8.6, 5, 0.75, 1.6, 0.08, 1.6, "#ffffff"],
+    [2.6, 9, 0.75, 1.6, 0.08, 1.6, "#ffffff"],
+    [8.6, 9, 0.75, 1.6, 0.08, 1.6, "#ffffff"],
+    [1.5, 5, 0.45, 0.5, 0.9, 0.5, "#ffd166"],
+    [9.7, 5, 0.45, 0.5, 0.9, 0.5, "#ffd166"],
+    [1.5, 9, 0.45, 0.5, 0.9, 0.5, "#ffd166"],
+    [9.7, 9, 0.45, 0.5, 0.9, 0.5, "#ffd166"],
+    [5.6, 7, 3.1, 0.9, 0.9, 0.9, "#bff4ff", true],
+    [5.6, 1.4, 0.55, 6, 1.1, 0.8, "#18c4b4"],
+  ],
   pizza: [
     [2, 1, 0.9, 1.8, 1.6, 1.4, "#b0603e"],
     [2, 1.72, 0.7, 0.9, 0.5, 0.05, "#ff9a3c", true],
@@ -135,4 +148,5 @@ export const walls: Readonly<
   pawn: ["#3a3346", "#5a4a6a", "#c98a4b"],
   pizza: ["#d9c7a3", "#f7f3d7", "#3fae6b"],
   loft: ["#b48a6a", "#efe6da", "#7a8fa6"],
+  restaurant: ["#2a2f45", "#11131c", "#18c4b4"],
 };

@@ -248,8 +248,8 @@ export const dashSites: readonly Spot[] = [
   },
 ];
 
-// Inside every corner store a freezer by the front window (Cold Harbor Deli's holds the freeze ray, `freeze.ts`), and inside every Gwei Gas
-// station a coin ATM; and the ID kiosk beside the Gwei Gas on The Shaft's north street (`stores.ts`). Listed after the kerbs' rides too.
+// Inside every corner store a freezer by the front window (Cold Harbor Deli's holds the freeze ray, `freeze.ts`), and inside every Silky
+// station a coin ATM; and the ID kiosk beside the Silky on The Shaft's north street (`stores.ts`). Listed after the kerbs' rides too.
 export const rayStore = "room-0-0-out";
 export const storeSites: readonly Spot[] = [
   ...rooms.flatMap((room): Spot[] =>

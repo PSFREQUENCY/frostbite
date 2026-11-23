@@ -124,6 +124,13 @@ export const luxLook = look(
   ["#f1c9a5", "#ff6fb5", "#15151c", "#111111"],
   { hair: "#111111" },
 );
+// The Diamond Hands gang: turquoise suits, gold trim.
+export const gangLook = look(
+  "person",
+  1.84,
+  ["#8a5a3a", "#18c4b4", "#15151c", "#ffd166"],
+  { hair: "#111111" },
+);
 export const bandLooks: readonly Look[] = [
   look("person", 1.8, ["#c99a73", "#2a2f45", "#15151c", "#2a1d14"], {
     hair: "#2a1d14",
@@ -153,6 +160,11 @@ export const placeLooks: Readonly<Record<string, Look>> = {
   "concert-gate": person("#ffd23a", "#111111", "#c99a73"),
   "stage-door": person("#1b1b22", "#5a3a2a", "#e0b08a"),
   "omi-omy": person("#ff6fb5", "#111111", "#f1c9a5"),
+  // The food places (`view/food.ts`): the Crypto Shacks' waitresses in red, and Ms. Opal of Diamond Hands in turquoise.
+  "shack-1": person("#e63946", "#2a1d14", "#c99a73"),
+  "shack-2": person("#e63946", "#111111", "#f1c9a5"),
+  "shack-3": person("#e63946", "#8a5a3a", "#e0b08a"),
+  "diamond-hands": person("#18c4b4", "#111111", "#5a3a2a"),
   // Every loft's landlord (`rules/lofts.ts`): a cardigan the colour of old keys, grey hair.
   ...Object.fromEntries(
     Array.from({ length: 10 }, (_, hero) => [
