@@ -18,6 +18,7 @@ import { buildBeatScenes } from "./beat-scenes.ts";
 import { buildClues } from "./clues.ts";
 import { buildDexFloor } from "./dex-floor.ts";
 import { buildForecourts } from "./forecourts.ts";
+import { buildGalleryArt } from "./gallery-art.ts";
 import { buildInsiders } from "./insiders.ts";
 import { buildKnocks } from "./knocks.ts";
 import { buildMall } from "./mall.ts";
@@ -30,14 +31,16 @@ import { buildShops } from "./shops.ts";
 import { buildStreet } from "./street.ts";
 import { buildThings } from "./things.ts";
 import { buildTraffic } from "./traffic.ts";
+import { buildUnderglow } from "./underglow.ts";
 import { buildVenues } from "./venues.ts";
 import { buildWalkers } from "./walkers.ts";
 
 // Everything at street level that makes Nakasato feel lived in: the furniture and the notices, the walk-in shops and the gas stations'
 // forecourts, the parked rides, the people walking and talking, the traffic, the landmarks, the lantern night, the beacon over where to
 // go next, the Green Line's stations, the clues frost vision lights, the people filling the landmarks and the bazaar, the DEX's trading
-// floor, ADOR's two floors of shops, the goods a hero can knock off a shelf, and Mount WAGMI with its trail and its sign. It also keeps the
-// time of day, from the day's clock: the sun crosses the sky until dusk, and after `nightTick` it is night.
+// floor, ADOR's two floors of shops, the Pixel Vault's neon art, the light under the rides at the kerbs, the goods a hero can knock off a
+// shelf, and Mount WAGMI with its trail and its sign. It also keeps the time of day, from the day's clock: the sun crosses the sky until
+// dusk, and after `nightTick` it is night.
 export interface Town {
   // The town between days (the opening and the hero ring): daylight, people and traffic, nobody's quest.
   idle(seconds: number): void;
@@ -111,7 +114,11 @@ export function buildTown(): Town {
   const mall = buildMall();
   const forecourts = buildForecourts();
   const beats = buildBeatScenes();
+  const gallery = buildGalleryArt();
+  const underglow = buildUnderglow();
   root.add(
+    gallery.root,
+    underglow.root,
     things.root,
     beats.root,
     caves.root,
@@ -160,6 +167,7 @@ export function buildTown(): Town {
       insiders.show(null, null, seconds);
       dexFloor.show(seconds);
       bazaar.show(seconds);
+      gallery.show(null, seconds);
       knocks.show(null, seconds, 0);
       things.show(null, null, seconds);
       forecourts.show(null, seconds);
@@ -199,6 +207,9 @@ export function buildTown(): Town {
       // The halls' insides are drawn only near them, and the bazaar only underground.
       dexFloor.root.visible = near(x, z, "bank");
       mall.root.visible = near(x, z, "store");
+      gallery.root.visible = near(x, z, "gallery");
+      if (gallery.root.visible) gallery.show(day, seconds);
+      underglow.show(day, x, z, seconds, dark);
       bazaar.root.visible = underground(day.x, day.z);
       dexFloor.show(seconds);
       bazaar.show(seconds);

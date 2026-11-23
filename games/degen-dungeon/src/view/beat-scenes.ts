@@ -15,7 +15,8 @@ import { painted } from "./boards.ts";
 import { hash } from "./hash.ts";
 import { hillAt } from "./hill.ts";
 import { clerkLooks, thiefLook } from "./looks.ts";
-import { build, type Piece } from "./things.ts";
+import { addNeon, type Neon } from "./neon.ts";
+import { build, type Piece } from "./pieces.ts";
 
 // Where the story's next beat is done, someone is waiting, with the things the beat is about: an auction's easels with gilt frames
 // under an AUCTION sign for the shiny frame, the Exchange's chart on a kiosk, an arcade cabinet, a spool of wire and a fuse box, a miner's
@@ -197,6 +198,7 @@ export function buildBeatScenes(): BeatScenes {
   // Each beat's scene faces the hero the moment it is first shown, and stays put.
   let key = "";
   let facing = 0;
+  let shiny: Neon | null = null;
   return {
     root,
     show(state, hero, seconds, dt) {
@@ -224,11 +226,20 @@ export function buildBeatScenes(): BeatScenes {
           if (scene === "auction") {
             sign.position.set(0, 2.4, 0);
             group.add(sign);
+            // The shiny frame up for auction glows gold, sparkles circling it.
+            shiny = addNeon(group, {
+              at: [0.6, 1.35, 0.06],
+              colour: "#ffd166",
+              halo: 1.9,
+              ring: 0.75,
+              sparkles: 8,
+            });
           }
           props.set(scene, group);
           root.add(group);
         }
         group.visible = true;
+        if (scene === "auction") shiny?.show(seconds);
         group.position.set(x, ground, z);
         group.rotation.y = facing;
       }

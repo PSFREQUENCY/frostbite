@@ -131,18 +131,8 @@ export function furnish(kind: VenueKind, at: Place, props: Props): Inside {
       put("post", [0, -12, 1.4], [3, 2.8, 3], "#9fd8ff");
       return inside;
     case "gallery":
-      for (const [a, b, angle] of around(12, 17.4, 0.6, Math.PI * 2 - 0.6))
-        lit(
-          put(
-            "box",
-            [a, b, 3.2],
-            [3, 2.4, 0.15],
-            tint(Math.round(angle * 3)),
-            true,
-            [0, angle, 0],
-          ),
-        );
-      for (const [a, b] of around(5, 7)) {
+      // The art on the walls and the easel at the back are `gallery-art.ts`'s; four plinths with glowing sculptures stand clear of the easel.
+      for (const [a, b] of around(4, 7)) {
         put("post", [a, b, 0.6], [1.2, 1.2, 1.2], "#f4f8ff");
         lit(put("ball", [a, b, 1.8], [0.9, 0.9, 0.9], "#ff3df2", true));
       }

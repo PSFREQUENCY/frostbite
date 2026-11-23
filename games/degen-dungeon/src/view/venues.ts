@@ -56,7 +56,7 @@ const walls: Readonly<Record<string, string>> = {
   cinema: "#3a1d5c",
   club: "#2a2350",
   dome: "#2a2350",
-  gallery: "#f4f8ff",
+  gallery: "#181c3a",
   library: "#e8dcc3",
   museum: "#f2efe6",
   records: "#1d1b33",

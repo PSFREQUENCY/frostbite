@@ -105,6 +105,13 @@ const things: Readonly<Record<Clue["kind"], () => readonly Mesh[]>> = {
   ],
 };
 
+// One clue's thing, as its own group: the magnet and the vacuum stand on their pallets like this too (`things.ts`).
+export const clueShape = (kind: Clue["kind"]): Group => {
+  const group = new Group();
+  group.add(...things[kind]());
+  return group;
+};
+
 export function buildClues(): Clues {
   const root = new Group();
   root.name = "clues";

@@ -168,6 +168,12 @@ of one hero. DUN is in-game credit only.
   rail, escalators up to it, and shoppers on both floors with their bags. The Underground Bazaar is crowded: rows of stalls under
   striped canopies heaped with goods, lantern strings across the hall, a keeper at every stall and shoppers in every aisle. Bump into
   anyone and they stagger out of your way.
+- **Neon pickups:** whatever can be picked up, bought or borrowed glows. The dropped wallet lies in a lime beam with gold sparkles; S's
+  letters, the loot and the couriers' parcels shine; the magnet and the vacuum float over their pallets in red and violet light; the
+  rides on their stands are lit along their paint with a pool of light under them, and every ride parked at a kerb has its own
+  underglow, faint by day and bright after dark. The Pixel Vault Gallery is vault-dark inside now, hung with twelve original pixel-art
+  pieces in pulsing neon frames, and the piece of the day waits on an easel at the back, lit gold until a print is bought (then a red
+  dot, as galleries mark what has sold). The Meme Market's shiny frame glows gold at its auction.
 - **Neon meters:** over the picture's top-left corner, every goal at a glance: today's quests as lit units, the side quests, the rent
   against the pocket (red while short, pulsing in the last two minutes), the power charging with its level, how full the hero is, the
   shop's till, the skills mastered as units, and the way to the next rank; and while they last, the flight, the board, a live stream,

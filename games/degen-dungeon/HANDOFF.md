@@ -307,6 +307,14 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   them, things beyond 120 m are not drawn, and `stage.ts` steps the pixel ratio to the frame time (`nextRatio`, between 1 and the
   screen's, a phone starting at 1.5).
 
+- Neon (`view/neon.ts`): `addNeon(thing, look)` wraps chosen meshes in a lit hull (seen from behind, additive, `edge` metres all
+  round whatever the mesh's scale), and adds a halo sprite (`glowMap`), sparkles (one instanced draw), a beam (`beamMap`) and a pool on
+  the road (`poolMap`); `show(seconds, strength)` pulses them. `things.ts` uses it (its shapes moved to `pieces.ts`; the magnet and the
+  vacuum are the clues' own shapes, `clueShape`), as do `wallet.ts` (out of `npcs.ts`), `beat-scenes.ts` (the auction's frame) and
+  `gallery-art.ts`. `underglow.ts` lights the kerbs' rides in one instanced draw within `glowSight`. `gallery-art.ts` paints its pieces
+  (`pixel-art.ts`) into one 64-pixel atlas and merges canvases, frames (vertex colours pulsed per piece), glows and plates into four
+  draws; the easel stands at b -7.8 (the plinths moved clear), and its red dot shows `did-print`.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they
