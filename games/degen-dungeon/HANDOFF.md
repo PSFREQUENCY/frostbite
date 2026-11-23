@@ -248,6 +248,12 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   `heatPerStar`. Side quests swapped: day four's window for Biscuit, day five's new home for the drive-through, the last day's five rides
   for the Diamond Plate. Gwei Gas is Silky in every word; the spinning signs are view-only.
 
+- Powers (`rules/powers.ts`, `view/powers.ts`, names in `script/powers.ts`; a draft): a new `power` input (Q and a Power button),
+  `powerAt`, `boostUntil` and `senseUntil` on the day, `powerCooldown` and `boostPace` in `constants.ts` (so `move.ts` and `day.ts`
+  need not import the powers). Levels come from today's `mastered-` notes. Leaps land only on open street; the breath freezes for ten
+  seconds and the bear's hold lasts five seconds a level, both on the freeze ray's list without its heat. The ram's "sense Satoshi" is
+  read as S's letters (S signs as Satoshi in the story).
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

@@ -127,3 +127,7 @@ export const launchpad = { x: 21_700, z: 17_300 } as const;
 export const fizzTicks = 900;
 export const fizzTenths = 2;
 export const tankPace = 4;
+// How long a hero's power cools after it is used (`powers.ts`), in ticks.
+export const powerCooldown = 600;
+// How much a charge quickens the pace, cm a tick (`powers.ts`).
+export const boostPace = 12;

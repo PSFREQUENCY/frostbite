@@ -19,8 +19,9 @@ export interface Hands {
   readonly jump: () => void;
   readonly look: () => void;
   readonly lift: (by: number) => void;
-  // The freeze ray's trigger (for a statue come to life holding it).
+  // The freeze ray's trigger (for a statue come to life holding it), and the hero's own power (`rules/powers.ts`).
   readonly shoot: () => void;
+  readonly power: () => void;
   // A heading by the screen (0 right, 4 down, 8 left, 12 up), or -1 to stand.
   readonly move: (dir: number) => void;
   readonly no: () => void;
@@ -49,6 +50,7 @@ const keys = {
   KeyF: "fall",
   KeyG: "shoot",
   KeyI: "bag",
+  KeyQ: "power",
   KeyR: "rise",
   KeyS: "south",
   Digit1: "answer0",
@@ -126,6 +128,7 @@ export function attachControls(
       action === "look" ||
       action === "no" ||
       action === "pause" ||
+      action === "power" ||
       action === "shoot" ||
       action === "start"
     )

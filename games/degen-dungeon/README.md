@@ -110,6 +110,12 @@ of one hero. DUN is in-game credit only.
   sweeping (a side quest). After it, Miss Mirinda dances at The Long Game (the dance studio that was Block Party): three moves on their
   counts, a wrong one starts again, and three right impress her (a side quest). Lux's show teaches the moves. Day two's other side
   quests: go live, play a cabinet, three gigs.
+- **Powers (Q, or the Power button):** every hero has their own, which cools for twenty seconds after each use and grows a level
+  (to three) for each top skill mastered that day. The ram charges and senses S's nearest letter (a gold beam points the way); the
+  dragon flies a block in one leap; the miner digs anywhere and now and then turns up DUN or a gem; the ice giant breathes frost that
+  freezes whoever is close ahead; the wizard blinks a few metres; the dog sniffs and the cat sees with frost vision (the cat for
+  longer); the bull charges; the bear's strength stops the tux and the beat cop round it; and the unicorn's shimmer cools a star of
+  heat.
 - **Food and hunger:** hunger builds from your last meal to starving in five minutes, and Pip nags until you eat. Three Crypto Shacks
   sell a Satoshi Burger (15 DUN) at the counter, or through the drive-through if you pull up at the wheel (a day-five side quest); the
   first shack's waitress has lost her dog Biscuit, who is sniffing round the Floe Food Court's stalls (noodles, tacos, smoothies) on

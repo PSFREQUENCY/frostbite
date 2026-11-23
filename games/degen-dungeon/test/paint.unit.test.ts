@@ -192,6 +192,7 @@ describe("the hands", () => {
       "duck",
       "crawl",
       "pack",
+      "power",
     ]);
     for (const id of [
       "look",
@@ -202,6 +203,7 @@ describe("the hands", () => {
       "run",
       "duck",
       "crawl",
+      "power",
     ]) {
       const button = document.getElementById(id);
       button?.removeAttribute("disabled");
@@ -215,6 +217,7 @@ describe("the hands", () => {
       { mode: 1, type: "gait" },
       { mode: 2, type: "gait" },
       { mode: 3, type: "gait" },
+      { type: "power" },
     ]);
     expect(jumps).toBe(2);
   });

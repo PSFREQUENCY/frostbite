@@ -4,6 +4,8 @@ import { rankOf } from "../rules/heat.ts";
 import { flies, type DayState } from "../rules/types.ts";
 import { ticksPerSecond } from "../rules/constants.ts";
 import { statusOf } from "../rules/status.ts";
+import { powerLevel, powerOf, powerReady } from "../rules/powers.ts";
+import { powerNames } from "../script/powers.ts";
 import { element } from "./elements.ts";
 import { starsText } from "./hud.ts";
 import { createReceipts } from "./receipts.ts";
@@ -34,6 +36,7 @@ export function createPanel(hands: {
   const wish = element("wish-text", "input");
   const look = element("look", "button");
   const ray = element("ray", "button");
+  const power = element("power", "button");
   const frozen = element("frozen", "strong");
   const frozenPill = frozen.closest("span") ?? frozen;
   const up = element("up", "button");
@@ -67,6 +70,9 @@ export function createPanel(hands: {
       look.dataset.left = String(left);
       // The freeze ray: its trigger while a statue come to life holds it, and how many it holds frozen now (`rules/freeze.ts`).
       ray.hidden = day === null || !day.gun || day.form < 0;
+      // The hero's power, its level, and whether it is still cooling.
+      if (day !== null)
+        power.textContent = `${powerNames[powerOf(day.hero)]} ${String(powerLevel(day))}${powerReady(day) ? "" : " (cooling)"}`;
       frozen.textContent = String(day?.frozen.length ?? 0);
       frozenPill.hidden = day === null || (!day.gun && day.frozen.length === 0);
       // Sitting on a WAGMI letter, the picture is cleared for a screenshot (`badges.css`).

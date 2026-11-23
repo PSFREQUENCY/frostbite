@@ -16,6 +16,7 @@ import { shoot } from "./freeze.ts";
 import { scoreOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
 import { kerbOf, topLoft } from "./lofts.ts";
+import { usePower } from "./powers.ts";
 import { earnedBy } from "./milestones.ts";
 import type { DayState, Draft } from "./types.ts";
 
@@ -42,6 +43,7 @@ const fieldsFor = new Map<string, readonly string[]>([
   ["move", ["dir", "tick"]],
   ["pick", ["choice", "tick"]],
   ["shoot", ["tick"]],
+  ["power", ["tick"]],
 ]);
 
 const settings: readonly string[] = [
@@ -85,6 +87,7 @@ function change(
     return null;
   }
   if (type === "shoot") return shoot(day);
+  if (type === "power") return usePower(day);
   if (type === "pick") {
     const choice = whole(fields.choice, 0, 4);
     return choice === null ? "choice must be 0 to 4" : pick(day, choice);

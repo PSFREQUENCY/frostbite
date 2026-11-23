@@ -171,6 +171,7 @@ describe("the player's hands", () => {
     act: vi.fn<() => void>(),
     lift: vi.fn<(by: number) => void>(),
     shoot: vi.fn<() => void>(),
+    power: vi.fn<() => void>(),
     move: vi.fn<(dir: number) => void>(),
     no: vi.fn<() => void>(),
     pause: vi.fn<() => void>(),
@@ -253,14 +254,15 @@ describe("the player's hands", () => {
       "Enter",
       "KeyP",
       "KeyG",
+      "KeyQ",
     ])
       press(code);
     press("KeyE", "keyup");
     expect(
-      [hand.act, hand.no, hand.start, hand.pause, hand.shoot].map(
+      [hand.act, hand.no, hand.start, hand.pause, hand.shoot, hand.power].map(
         (called) => called.mock.calls.length,
       ),
-    ).toEqual([1, 1, 1, 1, 1]);
+    ).toEqual([1, 1, 1, 1, 1, 1]);
     expect(hand.lift.mock.calls).toEqual([[1], [-1]]);
     // Space jumps, Shift held runs, C crouches, Z crawls, B and I open the backpack, 5 picks a fifth answer.
     for (const code of [

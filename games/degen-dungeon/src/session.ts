@@ -18,7 +18,7 @@ export type Choice =
   | { readonly choice: number; readonly type: "pick" }
   | { readonly dir: number; readonly type: "move" }
   | { readonly mode: number; readonly type: "gait" }
-  | { readonly type: "act" | "look" | "shoot" };
+  | { readonly type: "act" | "look" | "power" | "shoot" };
 
 // One day as the player plays it. The page calls `tick` on its timer and `send` when the player chooses; the rules decide what is legal,
 // and each choice they accept (with the tick it was made on) is written into a run record. Only choices are recorded, never the ticks

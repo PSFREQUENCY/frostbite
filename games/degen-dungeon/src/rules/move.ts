@@ -1,5 +1,11 @@
 import { clinging, onTheRoof } from "./climb.ts";
-import { fizzTenths, fogLine, gaitTenths, tankPace } from "./constants.ts";
+import {
+  boostPace,
+  fizzTenths,
+  fogLine,
+  gaitTenths,
+  tankPace,
+} from "./constants.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
 import {
@@ -60,7 +66,10 @@ const ridePace: Readonly<Record<Ride, number>> = {
 // On foot the gait changes the pace (running, crouching, crawling), and a statue's mask and a Fuzzy's fizz lengthen the stride; a tuned
 // car is quicker, and a full tank makes anything with an engine a little quicker (`stores.ts`).
 export const paceOf = (
-  state: Pick<DayState, "done" | "fizz" | "form" | "gait" | "hero" | "ride">,
+  state: Pick<
+    DayState,
+    "boostUntil" | "done" | "fizz" | "form" | "gait" | "hero" | "ride" | "tick"
+  >,
 ): number =>
   state.ride === "foot"
     ? Math.max(
@@ -72,7 +81,7 @@ export const paceOf = (
               (state.fizz > 0 ? fizzTenths : 0))) /
             10,
         ),
-      )
+      ) + (state.tick < state.boostUntil ? boostPace : 0)
     : ridePace[state.ride] +
       (state.ride === "car" && state.done.includes("tune") ? 8 : 0) +
       (motors.some((ride) => ride === state.ride) && state.done.includes("tank")

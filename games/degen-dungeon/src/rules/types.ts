@@ -199,6 +199,10 @@ export interface DayState {
   readonly ateAt: number;
   readonly streamFrom: number;
   readonly gang: Point | null;
+  // The hero's power (`powers.ts`): when it was last used, and until when a charge quickens the pace and the ram senses S's letter.
+  readonly powerAt: number;
+  readonly boostUntil: number;
+  readonly senseUntil: number;
   readonly thiefLeg: number;
   readonly frozen: readonly Frost[];
   readonly peakFrozen: number;
