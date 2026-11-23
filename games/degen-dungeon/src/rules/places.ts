@@ -5,6 +5,7 @@ import { saucerOpen } from "./invasion.ts";
 import { parkedRides } from "./parked.ts";
 import { statueId, statues } from "./statues.ts";
 import { lofts, rooms } from "./rooms.ts";
+import { concertSites } from "./concert.ts";
 import { errandOpen, errandSites } from "./errands.ts";
 import { bedOf, landlordSites, streetOf } from "./lofts.ts";
 import { dashSites, sites, storeSites } from "./sites.ts";
@@ -198,11 +199,12 @@ const fixed: readonly Spot[] = [
 ];
 export const spots: readonly Spot[] = [
   ...fixed,
-  ...parkedRides([...fixed, ...landlordSites]),
+  ...parkedRides([...fixed, ...landlordSites, ...concertSites]),
   ...dashSites,
   ...storeSites,
   ...errandSites,
   ...landlordSites,
+  ...concertSites,
 ];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);

@@ -21,6 +21,7 @@ import { drivingLine, trialLines } from "../script/dash.ts";
 import { dreams, finale } from "../script/dreams.ts";
 import { questLines, talks, tunnelLine } from "../script/lines.ts";
 import { lockedOutLine, rentLine } from "../script/lofts.ts";
+import { danceHint } from "../script/concert.ts";
 import { stories } from "../script/stories.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
@@ -148,6 +149,7 @@ export function talkOf(
     return {
       answers: talk.answers.map(rent),
       say: rent(talk.say)
+        .replace("{hint}", day.done.includes("concert-show") ? danceHint : "")
         .replace("{price}", String(priceAt(day.seed, day.day, day.tick)))
         .replace("{time}", clockText(day.dashTime))
         .replace("{par}", clockText(dashPar)),

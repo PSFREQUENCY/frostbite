@@ -16,6 +16,7 @@ import { clinging, onTheRoof } from "./climb.ts";
 import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { isFrozen } from "./freeze.ts";
 import { landlordNode, lockedOut } from "./lofts.ts";
+import { concertNode, concertRefusal, concertTalks } from "./concert.ts";
 import { enterWindow } from "./windows.ts";
 import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
@@ -100,6 +101,12 @@ function open(day: Draft, node: string): string | null {
   if (node === "quiz") return askAtDesk(day);
   if (node === "lantern" && day.tick < nightTick)
     return "the lanterns go up after dark";
+  if (concertTalks.has(node)) {
+    const refused = concertRefusal(node, day);
+    if (refused !== null) return refused;
+    day.talk = concertNode(node, day);
+    return null;
+  }
   if (node === "frost")
     day.talk =
       day.day === 1 && !day.done.includes("speech") ? "speech" : "frost";

@@ -13,8 +13,8 @@ export const sideLabels: readonly (readonly string[])[] = [
     "Go live at Clipstream Studios",
     "Play a cabinet at an arcade",
     "Finish three gigs",
-    "Ride the whole Green Line loop",
-    "Find three street words",
+    "Get the singer her spirit625 from Omi Omy, and see the show",
+    "Dance with Miss Mirinda at The Long Game, and impress her",
   ],
   [
     "Dance at one of the three clubs",

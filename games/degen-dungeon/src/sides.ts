@@ -45,8 +45,8 @@ const checks: readonly (readonly Check[])[] = [
     has("did-live"),
     begins("game-"),
     counted((day) => day.gigs, 3),
-    counted((day) => day.rides, 8),
-    counted((day) => day.words, 3),
+    has("concert-show"),
+    has("danced-mirinda"),
   ],
   [
     has("did-dance"),

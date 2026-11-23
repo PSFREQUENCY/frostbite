@@ -233,6 +233,13 @@ at the start of the very first day and can be skipped.
     the corner that keeps to the streets; the wall to roof to frost mark hops cut straight), the leg to the next gate pulsing gold, and
     about 300 instanced spectators on both sides, every fourth with a sign, bouncing. Three draw calls for the crowd, one for the ribbon.
 
+- The concert (`rules/concert.ts`, `view/concert.ts`, words in `script/concert.ts`; names, prices and times are drafts): the flyer crew
+  (day two, The Exchange's middle street), the stadium gate (a flyer is the pass), the stage door from `showTick` (10,800), Omi Omy in
+  ADOR (spirit625, 25 DUN, alcohol free), the show (`concert-show`, +20 rep, a 30-second clip whose camera cuts round the stage, `view/
+clips.ts`; the view keeps its own 30-second clock as the day waits), and The Long Game (Block Party renamed; Miss Mirinda's model on
+  its floor; `partner-0` to `-2`, right moves 0, 1, 2; `danced-mirinda`, +10 rep). Day two's Green Line and street-words side quests
+  gave way to the show and the dance. Lux is an original singer: black hair in two buns, a pink top, a black skirt.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

@@ -22,7 +22,7 @@ const clip = (key: string, title?: string): Clip | null => {
   const [kind, named, line] = words;
   return {
     kind,
-    length: kind === "sky" ? 4 : 2.6,
+    length: kind === "sky" ? 4 : kind === "show" ? 30 : 2.6,
     line,
     title: title ?? named,
   };

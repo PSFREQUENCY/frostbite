@@ -72,6 +72,9 @@ function actorOf(look: Look, name: string): Actor {
   };
 }
 
+// Anyone else with a look of their own (the band, the singer).
+export const buildLooked = (look: Look, name: string): Actor =>
+  actorOf(look, name);
 // A hero by number (10 is Bit, the robot).
 export const buildActor = (hero: number): Actor =>
   actorOf(heroLooks[hero] ?? bitLook, `hero-${String(hero)}`);

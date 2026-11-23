@@ -1,6 +1,6 @@
 // The titles and lines of the short cinematic clips that start or finish a task, by what happened. Each line is written once. A draft
 // for the owner.
-export type ClipKind = "crane" | "orbit" | "push" | "sky" | "spin";
+export type ClipKind = "crane" | "orbit" | "push" | "show" | "sky" | "spin";
 export const clipWords: Readonly<
   Record<string, readonly [kind: ClipKind, title: string, line: string]>
 > = {
@@ -10,6 +10,17 @@ export const clipWords: Readonly<
     "Lights, a hum, the moon going by... and then your own ceiling.",
   ],
   bike: ["orbit", "ON TWO WHEELS", "Somebody left the lock open."],
+  // Lux's show at the Floe Amphitheater (thirty seconds, `view/clips.ts`), and the dance that impresses Miss Mirinda.
+  "concert-show": [
+    "show",
+    "LUX, LIVE AT THE FLOE",
+    "The lights drop, the band kicks in, and she owns the night. Watch the moves: step, spin, freeze.",
+  ],
+  "danced-mirinda": [
+    "spin",
+    "SHE IS IMPRESSED",
+    "Step, spin, freeze: Miss Mirinda bows to you.",
+  ],
   car: [
     "push",
     "JOYRIDE",

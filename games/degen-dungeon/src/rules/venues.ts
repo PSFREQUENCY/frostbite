@@ -50,7 +50,7 @@ const table: readonly (readonly [number, 1 | 2, VenueKind, string])[] = [
   [6, 2, "club", "Club Halving"],
   [7, 1, "dome", "The Dome VR"],
   [7, 2, "arcade", "Mega Arcade"],
-  [8, 1, "club", "Block Party"],
+  [8, 1, "club", "The Long Game"],
   [8, 2, "park", "Gig Street Green"],
 ];
 // Half the width of the square a hall's doorway reaches into; the hall's floor is round, inside the round wall the city draws (18.5

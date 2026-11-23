@@ -17,7 +17,10 @@ import { started } from "./support/replay.ts";
 // What finishes every side quest of each day but the letters, as a day's state.
 const finishing: readonly Partial<DayState>[] = [
   { done: ["riot", "did-read", "purse-returned", "heroword-7", "wall"] },
-  { done: ["did-live", "game-claw"], gigs: 3, rides: 8, words: 3 },
+  {
+    done: ["did-live", "game-claw", "concert-show", "danced-mirinda"],
+    gigs: 3,
+  },
   { done: ["did-dance", "item-glow", "contact"], maxx: 50, spotted: 1 },
   {
     done: ["did-skate", "washer-room-1-3-0", "stash", "window-1-1-1"],
@@ -89,11 +92,11 @@ describe("the side quests", () => {
         `day ${String(index + 1)}`,
       ).toEqual([true, true, true, true, true, true]);
     });
-    const half = sidesOf({ ...started(1, 7, 2), gigs: 2, rides: 9 });
+    const half = sidesOf({ ...started(1, 7, 2), gigs: 2 });
     expect([half[3]?.count, half[3]?.done, half[4]?.count]).toEqual([
       [2, 3],
       false,
-      [8, 8],
+      undefined,
     ]);
   });
 });

@@ -116,6 +116,28 @@ export const vestLook = look("person", 1.8, [
 ]);
 
 // The people who wait at the island's places: Frost, Kiki the idol, Scruff in his trench coat, and the town's clerks and hustlers.
+// Lux, the concert's headliner (an original singer): black hair (the two buns are `concert.ts`'s), a pink top and a black skirt; and her
+// band.
+export const luxLook = look(
+  "person",
+  1.66,
+  ["#f1c9a5", "#ff6fb5", "#15151c", "#111111"],
+  { hair: "#111111" },
+);
+export const bandLooks: readonly Look[] = [
+  look("person", 1.8, ["#c99a73", "#2a2f45", "#15151c", "#2a1d14"], {
+    hair: "#2a1d14",
+  }),
+  look("person", 1.76, ["#8a5a3a", "#5beac6", "#15151c", "#111111"], {
+    hair: "#111111",
+  }),
+  look("person", 1.82, ["#e0b08a", "#ffd166", "#15151c", "#8a5a3a"], {
+    hair: "#8a5a3a",
+  }),
+  look("person", 1.7, ["#5a3a2a", "#c9b6ff", "#15151c", "#111111"], {
+    hair: "#111111",
+  }),
+];
 const person = (body: string, hair: string, coat = "#e0b08a"): Look =>
   look("person", 1.75, [coat, body, "#2a2f45", "#ffd166"], { hair });
 export const placeLooks: Readonly<Record<string, Look>> = {
@@ -125,6 +147,12 @@ export const placeLooks: Readonly<Record<string, Look>> = {
   // The first morning's errands (`rules/errands.ts`): Pearl, shopping in ADOR, and Rosa, at its door.
   pearl: person("#7a4fa8", "#d8d8d8", "#8a5a3a"),
   rosa: person("#ff6f91", "#2a1d14", "#c99a73"),
+  // The concert's people (`view/concert.ts`): the flyer crew in hi-vis, the gate's guards in yellow, the manager in black with a
+  // headset, and Omi Omy's bartender in pink.
+  flyers: person("#d8ff3a", "#2a1d14", "#8a5a3a"),
+  "concert-gate": person("#ffd23a", "#111111", "#c99a73"),
+  "stage-door": person("#1b1b22", "#5a3a2a", "#e0b08a"),
+  "omi-omy": person("#ff6fb5", "#111111", "#f1c9a5"),
   // Every loft's landlord (`rules/lofts.ts`): a cardigan the colour of old keys, grey hair.
   ...Object.fromEntries(
     Array.from({ length: 10 }, (_, hero) => [

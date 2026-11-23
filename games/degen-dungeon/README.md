@@ -103,6 +103,13 @@ of one hero. DUN is in-game credit only.
   Under par (1:40) and with no heat is a win: 50,000 DUN (once a day), the trophy and a champion's print in the backpack, and a parade
   (confetti, fireworks over the arch, the trophy held up over your head, and the street lining the avenue to cheer). Slower is a
   finish and a finisher's medal (1,000 DUN once a day). After six minutes the course closes. Finishing it is Moon Night's second quest.
+- **Day two's concert:** a crew pastes LUX LIVE TONIGHT posters on The Exchange's middle street and hands out flyers, and a flyer is
+  the pass at the Floe Amphitheater's stadium gate (turnstiles, guards and walk-through metal detectors) on the Old Floe's north-east
+  lawn. Late in the day the manager at the stage door says the show is off without Lux's spirit625, an alcohol-free fizz from Omi Omy,
+  ADOR's drinks bar. Bring one and the show goes on: thirty seconds of close-ups, the band, her dance and the crowd, with the lights
+  sweeping (a side quest). After it, Miss Mirinda dances at The Long Game (the dance studio that was Block Party): three moves on their
+  counts, a wrong one starts again, and three right impress her (a side quest). Lux's show teaches the moves. Day two's other side
+  quests: go live, play a cabinet, three gigs.
 - **The lantern night:** after dark the lantern ground in The Old Floe opens. Write a message, pick a wish (clear sight, respect, a
   cold freezer or a full pocket) and send it up among thousands; the next story day, the crypto gods may answer.
 - **The moonshot and the moon:** stake 1,000, 5,000 or 10,000 DUN at the Moonshot Launchpad under Moon Tower; it rides the next launch
