@@ -8,14 +8,15 @@ import type { DayState, Point } from "./types.ts";
 // (`view/crowd.ts`), bumped about a little, and the Launch Day robots are the view's alone.
 export type Gathering = "parade" | "party" | "riot";
 export const crowdSize = 160;
-// The middle of each crowd and how far along its two streets it spreads (cm); everyone stands within eight metres of a street's middle.
-const spreads: Readonly<Record<Gathering, readonly [number, number, number]>> =
-  {
-    parade: [18_000, 17_300, 3_000],
-    party: [18_000, 16_000, 2_600],
-    riot: [18_000, 18_000, 4_000],
-  };
-const across = 800;
+// The middle of each crowd, how far along its streets it spreads and how far across (cm), and whether it fills both streets of a
+// crossing or only the east-west one: the riot packs the street in front of the Global DEX's steps, where Frost speaks.
+const spreads: Readonly<
+  Record<Gathering, readonly [number, number, number, number, boolean]>
+> = {
+  parade: [18_000, 17_300, 3_000, 800, true],
+  party: [18_000, 16_000, 2_600, 800, true],
+  riot: [15_800, 17_900, 3_000, 600, false],
+};
 
 export const gatheringAt = (
   day: Pick<
@@ -39,12 +40,13 @@ const scatter = (index: number, salt: number): number => {
   return (mixed >>> 0) % 10_000;
 };
 
-// Where one of a crowd's people stands: half along the north-south street, half along the east-west one.
+// Where one of a crowd's people stands: at a crossing half along the north-south street and half along the east-west one, else all along
+// the east-west street.
 export function crowdAt(kind: Gathering, index: number): Point {
-  const [x, z, spread] = spreads[kind];
+  const [x, z, spread, across, crossing] = spreads[kind];
   const along = Math.trunc(((scatter(index, 9) - 5_000) * 2 * spread) / 10_000);
   const aside = Math.trunc(((scatter(index, 1) - 5_000) * 2 * across) / 10_000);
-  return index % 2 === 0
+  return crossing && index % 2 === 0
     ? { x: x + aside, z: z + along }
     : { x: x + along, z: z + aside };
 }

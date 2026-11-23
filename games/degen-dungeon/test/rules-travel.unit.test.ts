@@ -36,8 +36,9 @@ describe("the island", () => {
     };
     expect(nearest({ ...open, x: 18_000, z: 18_000 })).toBeNull();
     expect(nearest({ ...open, x: 17_100, z: 18_050 })?.id).toBe("faucet");
-    expect(nearest({ ...open, x: 18_900, z: 15_500 })).toBeNull();
-    expect(nearest({ ...open, looking: true, x: 18_900, z: 15_500 })?.id).toBe(
+    // Rally's word, on the street beside the loft's door.
+    expect(nearest({ ...open, x: 14_560, z: 17_300 })).toBeNull();
+    expect(nearest({ ...open, looking: true, x: 14_560, z: 17_300 })?.id).toBe(
       "heroword-7",
     );
   });
@@ -91,7 +92,8 @@ describe("the island", () => {
 
 describe("walking", () => {
   it("covers the hero's pace a tick, the same in one step or in two, and stops at a wall", () => {
-    const day = { ...started(1, 7, 1), dir: 4 };
+    // On the avenue north of The Exchange's crossing.
+    const day = { ...started(1, 7, 1), dir: 4, x: 18_000, z: 15_500 };
     const pace = paceOf(day);
     expect(pace).toBe(13);
     expect(advance(day, 10).z).toBe(15_500 + 10 * pace);
@@ -103,11 +105,13 @@ describe("walking", () => {
   });
 
   it("slides along a wall on a slant, stops at the shore, and waits while an offer is open", () => {
-    const slant = advance({ ...started(1, 7, 1), dir: 10 }, 200);
+    const avenue = { ...started(1, 7, 1), x: 18_000, z: 15_500 };
+    const slant = advance({ ...avenue, dir: 10 }, 200);
     expect(slant.x).toBeGreaterThan(17_040);
     expect(slant.z).toBeLessThan(15_500 - 1_000);
-    expect(advance({ ...started(1, 6, 1), dir: 12 }, 2_000).z).toBeLessThan(60);
-    const asked = { ...started(1, 7, 1), dir: 4, talk: "offer-kiki" };
+    const north = { ...started(1, 6, 1), dir: 12, x: 18_000, z: 3_500 };
+    expect(advance(north, 2_000).z).toBeLessThan(60);
+    const asked = { ...avenue, dir: 4, talk: "offer-kiki" };
     expect(advance(asked, 50).z).toBe(asked.z);
   });
 });
@@ -192,7 +196,8 @@ describe("rides", () => {
     expect(refusal(bot.state(), "act", { tick: bot.state().tick })).toBe(
       "land before stepping out",
     );
-    bot.hold(12, 100);
+    // North over ADOR's hall (a floor, so land) and on to the rooftops past it.
+    bot.hold(12, 195);
     expect(onLand(bot.here().x, bot.here().z)).toBe(false);
     expect(refusal(bot.here(), "lift", { by: -1, tick: bot.here().tick })).toBe(
       "nowhere to land here",

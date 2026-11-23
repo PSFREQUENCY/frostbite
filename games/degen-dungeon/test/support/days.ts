@@ -15,9 +15,11 @@ const lookAt = (bot: Bot, id: string): void => {
 
 // The first morning done properly, then a long day of honest work: the riot, Frost's speech, the Faucet and the seed paper in the
 // freezer, the hero's own word, three gigs, a crew of three, three street words and the dead locker, an honest offer, a letter, the
-// freezer, the whole Green Line, and sleep.
+// rent, the freezer, the whole Green Line, and sleep.
 export function busyDay(): Bot {
   const bot = createBot(1, 0, 1);
+  // At a run between the far places, so a day this full fits in.
+  bot.gait(1);
   bot.use("gig-neon");
   bot.use("drop-exchange");
   bot.use("frost");
@@ -36,6 +38,8 @@ export function busyDay(): Bot {
   bot.use("offer-scruff");
   bot.pick(true);
   bot.use("letter-3");
+  // The rent, before the rest goes into the freezer.
+  bot.rent();
   bot.use("freezer");
   bot.use("stop-3");
   for (let ride = 1; ride < 8; ride += 1) bot.act();

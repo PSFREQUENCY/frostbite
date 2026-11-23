@@ -81,6 +81,8 @@ export interface DayState {
   readonly drain: number;
   // The dream chosen on the last day: 0 not yet, 1 or 2.
   readonly dream: number;
+  // The loft's upgrades bought so far (`lofts.ts`): 0, then the patio, the balcony and the view of the city.
+  readonly loft: number;
   readonly ended: boolean;
   // The morning of the drain: the freezer and the rank look gone until the hideout terminal shows otherwise.
   readonly fake: boolean;
@@ -190,6 +192,9 @@ export interface DayState {
   // frozen at once today.
   readonly gun: boolean;
   readonly rayAt: number;
+  // The purse snatcher on the first morning while he runs (`errands.ts`), and which leg of his way out he is on.
+  readonly thief: Point | null;
+  readonly thiefLeg: number;
   readonly frozen: readonly Frost[];
   readonly peakFrozen: number;
   // A Nakasato ID, carried from day to day once made (`stores.ts`), and a Fuzzy's fizz left (ticks).

@@ -138,24 +138,24 @@ export function ringOf(borough: number, corner: number): readonly Piece[] {
       look.floors[0] + Math.floor(roll * (look.floors[1] - look.floors[0] + 1));
     pieces.push({ box, face, height: floors * floorHeight + 0.6, roll });
   };
-  // The lot's walk-in rooms: one on the middle street, and one on its outer side (a corner store or a gas station).
+  // The lot's walk-in rooms: shops and lofts on the middle street, and a corner store, a gas station or a loft on its outer side.
   const inLot = rooms.filter(
     (room) => room.borough === borough && room.corner === corner,
   );
   const outerFace = street === 2 ? 0 : 2;
   for (const face of [0, 2]) {
     const z = face === 0 ? z0 : z1 - depth;
-    const shop = inLot.find(
-      ({ outer }) =>
-        (face === street && !outer) || (face === outerFace && outer),
-    );
-    const runs =
-      shop === undefined
-        ? [[x0, x1]]
-        : [
-            [x0, shop.room.x0 / 100 - 0.4],
-            [shop.room.x1 / 100 + 0.4, x1],
-          ];
+    const cuts = inLot
+      .filter(
+        ({ outer }) =>
+          (face === street && !outer) || (face === outerFace && outer),
+      )
+      .map(({ room }) => [room.x0 / 100 - 0.4, room.x1 / 100 + 0.4] as const)
+      .sort(([one], [other]) => one - other);
+    const runs = [
+      ...cuts.map(([west], index) => [cuts[index - 1]?.[1] ?? x0, west]),
+      [cuts.at(-1)?.[1] ?? x0, x1],
+    ];
     for (const [from = x0, to = x1] of runs)
       row(from, to, seed * 8 + face, (a, b, roll) =>
         add([a, b, z, z + depth], roll, face),

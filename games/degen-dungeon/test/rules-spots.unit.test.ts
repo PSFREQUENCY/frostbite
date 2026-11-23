@@ -1,3 +1,4 @@
+import { spotNamed } from "../src/rules/places.ts";
 import { describe, expect, it } from "vitest";
 
 import { faucetDun } from "../src/rules/constants.ts";
@@ -46,7 +47,9 @@ describe("spots", () => {
       bot.state().made,
       bot.state().rep,
     ]).toEqual([1, 198, 198, 10]);
-    bot.go(18_000, 15_500);
+    // Rally's bed, in Rally's loft.
+    const rally = spotNamed("home-7");
+    bot.go(rally?.x ?? 0, rally?.z ?? 0);
     expect(refusal(bot.here(), "act", now(bot))).toBe("this is not your place");
   });
 

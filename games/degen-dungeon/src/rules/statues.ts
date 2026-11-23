@@ -9,7 +9,7 @@ export const statues: readonly (Point & { readonly label: string })[] = [
   { label: "The Ice Runner", x: 32_500, z: 6_000 },
   { label: "The Neon Ghost", x: 2_800, z: 18_000 },
   { label: "The Golden Bull", x: 20_300, z: 18_000 },
-  { label: "The Grinner", x: 27_500, z: 17_300 },
+  { label: "The Grinner", x: 27_500, z: 18_700 },
   { label: "The Weaver", x: 2_800, z: 30_000 },
   { label: "The Digger", x: 14_800, z: 30_000 },
   { label: "The Sunburst", x: 26_800, z: 30_000 },

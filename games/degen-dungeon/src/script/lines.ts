@@ -1,6 +1,8 @@
 import { dashTalks } from "./dash.ts";
 import { shopTalks } from "./shops.ts";
 import { storeTalks } from "./stores.ts";
+import { errandTalks } from "./errands.ts";
+import { loftTalks } from "./lofts.ts";
 import { venueTalks } from "./venues.ts";
 
 // What the talks say and the answers they offer, in the order of the rules' `nodes`, and the words for the day's goals. Each line is
@@ -23,7 +25,7 @@ export const talks: Readonly<
   },
   frost: {
     answers: ["Report a scam you spotted", "Ask about S", "Leave"],
-    say: "Frost, on his bench in Ticker Square: seen anything I should know about?",
+    say: "Frost, on the steps of the Global DEX: seen anything I should know about?",
   },
   garage: {
     answers: ["Tune the engine, 500", "New paint, 200", "Walk away"],
@@ -70,7 +72,7 @@ export const talks: Readonly<
   },
   speech: {
     answers: ["Listen"],
-    say: "Frost, thawed, on the steps of Ticker Square: first, keep your own keys.",
+    say: "Frost, thawed, on the steps of the Global DEX, the crowd hushed below: first, keep your own keys.",
   },
   "speech-2": {
     answers: ["Keep listening"],
@@ -84,6 +86,8 @@ export const talks: Readonly<
   ...venueTalks,
   ...dashTalks,
   ...storeTalks,
+  ...errandTalks,
+  ...loftTalks,
 };
 
 // What Frost says about S, a different hint each day.
@@ -103,8 +107,10 @@ export const questLines: Readonly<Record<string, string>> = {
   home: "Go home and sleep. Tomorrow the hustle starts.",
   paper: "Get your first DUN at the Faucet and write down your words.",
   ride: "Ride the Green Line Express to the next stop.",
-  speech: "Hear Frost's speech in Ticker Square.",
+  speech: "Hear Frost's speech on the steps of the Global DEX.",
   trade: "Buy some of the coin of the day on the Exchange floor.",
+  wallet:
+    "Find the wallet dropped where the riot stood, and give it back to Pearl in ADOR, across the street.",
 };
 
 // After the Genesis Room: the oldest tunnel, and the beach at its end.

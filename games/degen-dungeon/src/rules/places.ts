@@ -4,7 +4,9 @@ import { heroes } from "./heroes.ts";
 import { saucerOpen } from "./invasion.ts";
 import { parkedRides } from "./parked.ts";
 import { statueId, statues } from "./statues.ts";
-import { rooms } from "./rooms.ts";
+import { lofts, rooms } from "./rooms.ts";
+import { errandOpen, errandSites } from "./errands.ts";
+import { bedOf, landlordSites, streetOf } from "./lofts.ts";
 import { dashSites, sites, storeSites } from "./sites.ts";
 import { bit, days, type Spot } from "./spot.ts";
 import type { DayState, Point } from "./types.ts";
@@ -16,23 +18,30 @@ export { bit, days, type Spot };
 // Every place where something can be done. Each stands on a street or an avenue, so anyone can walk to it, and no two that can be open
 // on the same day are within reach of each other. `on` is the days a place is open (bit 1 is day one), `hidden` needs frost vision, and
 // `only` is for one hero. Adding a place to the game is adding a row here; a new kind of place is a case in `acts.ts`.
-const homes: Spot[] = heroes.map((hero, id) => ({
-  ...at(hero.borough, hero.hidden ? 2_500 : 0, hero.hidden ? 0 : -2_500),
-  hero: id,
-  id: `home-${String(id)}`,
-  kind: "home",
-  label: `${hero.name}'s place`,
-}));
-// Each hero's own word from the first morning, beside their door, seen only by frost vision.
-const heroWords: Spot[] = homes.map((home, id) => ({
+// Each hero's bed, at the back of their loft (`lofts.ts`).
+const homes: Spot[] = heroes.flatMap((hero, id) => {
+  const loft = lofts[id];
+  return loft === undefined
+    ? []
+    : [
+        {
+          ...bedOf(loft),
+          hero: id,
+          id: `home-${String(id)}`,
+          kind: "home" as const,
+          label: `${hero.name}'s place`,
+        },
+      ];
+});
+// Each hero's own word from the first morning, on the street beside their door, seen only by frost vision.
+const heroWords: Spot[] = lofts.map((loft, id) => ({
+  ...streetOf(loft, -900),
   hidden: true,
   id: `heroword-${String(id)}`,
   kind: "heroword",
   label: "Something scratched in the ice",
   on: days(1),
   only: id,
-  x: home.x + (heroes[id]?.hidden === true ? 0 : 900),
-  z: home.z + (heroes[id]?.hidden === true ? 900 : 0),
 }));
 const recruits: Spot[] = [
   ...heroes.flatMap((hero, id) =>
@@ -83,7 +92,7 @@ const avenue: readonly (readonly [number, number, number])[] = [
   [24_000, 27_000, 5],
   [12_000, 21_000, 5],
   [33_000, 12_000, 6],
-  [27_000, 12_000, 6],
+  [25_600, 12_000, 6],
   [9_000, 24_000, 6],
   [24_000, 15_000, 7],
   [12_000, 33_000, 7],
@@ -99,13 +108,15 @@ const letters: Spot[] = avenue.map(([x, z, day], index) => ({
 }));
 
 // The shops' counters, and the lantern ground in the Old Floe park (open every day, used after dark).
-const counters: Spot[] = rooms.map((room) => ({
-  ...room.counter,
-  id: room.id,
-  kind: "talk",
-  label: room.label,
-  node: `shop-${room.kind}`,
-}));
+const counters: Spot[] = rooms
+  .filter(({ kind }) => kind !== "loft")
+  .map((room) => ({
+    ...room.counter,
+    id: room.id,
+    kind: "talk",
+    label: room.label,
+    node: `shop-${room.kind}`,
+  }));
 const lanterns: Spot = {
   id: "lanterns",
   kind: "talk",
@@ -187,9 +198,11 @@ const fixed: readonly Spot[] = [
 ];
 export const spots: readonly Spot[] = [
   ...fixed,
-  ...parkedRides(fixed),
+  ...parkedRides([...fixed, ...landlordSites]),
   ...dashSites,
   ...storeSites,
+  ...errandSites,
+  ...landlordSites,
 ];
 const named = new Map(spots.map((spot) => [spot.id, spot]));
 export const spotNamed = (id: string): Spot | undefined => named.get(id);
@@ -203,7 +216,8 @@ export const openTo = (
   (spot.only === undefined || spot.only === day.hero) &&
   (spot.hidden !== true || day.looking) &&
   (spot.saucer !== true || saucerOpen(day)) &&
-  (spot.dash !== true || day.dash > 0);
+  (spot.dash !== true || day.dash > 0) &&
+  (spot.errand === undefined || errandOpen(spot.errand, day));
 
 // The open place within reach, the nearest if there are several.
 export function nearest(

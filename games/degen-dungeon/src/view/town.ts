@@ -7,6 +7,7 @@ import { buildBeacon } from "./beacon.ts";
 import { moverOf } from "./bumps.ts";
 import { buildFronts } from "./fronts.ts";
 import { buildLanterns } from "./lanterns.ts";
+import { buildLofts } from "./lofts.ts";
 import { buildMountain } from "./mountain.ts";
 import { buildParked, type Parked } from "./parked.ts";
 import { buildShopMotion } from "./shop-motion.ts";
@@ -70,7 +71,9 @@ export function buildTown(): Town {
   const venues = buildVenues();
   const lanterns = buildLanterns();
   const beacon = buildBeacon();
+  const lofts = buildLofts();
   root.add(
+    lofts.root,
     street.root,
     shops.root,
     buildFronts().root,
@@ -94,6 +97,7 @@ export function buildTown(): Town {
       venues.show(seconds, 0);
       lanterns.show(0, seconds, null);
       beacon.show(null, 0, 0, seconds);
+      lofts.show(null);
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
@@ -114,6 +118,7 @@ export function buildTown(): Town {
       venues.show(seconds, dark, x, z);
       lanterns.show(dark, seconds, sent);
       beacon.show(questAt(day), x, z, seconds);
+      lofts.show(day);
     },
     write: (message) => lanterns.write(message),
   };

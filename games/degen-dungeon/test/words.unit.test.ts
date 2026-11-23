@@ -50,9 +50,12 @@ describe("Pip's line", () => {
     ]);
     const trip = started(2, 6, 1);
     expect(goalFor({ ...trip, loop: 1 })).toContain("Find your newbie self");
-    expect(goalFor({ ...trip, done: ["speech"], paper: 1 })).toBe(
-      `2/2 · ${questLines.home ?? ""}`,
+    expect(goalFor({ ...trip, done: ["speech"] })).toBe(
+      `2/3 · ${questLines.wallet ?? ""}`,
     );
+    expect(
+      goalFor({ ...trip, done: ["speech", "wallet-returned"], paper: 1 }),
+    ).toBe(`3/3 · ${questLines.home ?? ""}`);
     expect(goalFor(started(2, 6, 2))).toBe(`1/3 · ${questLines.gig ?? ""}`);
   });
 

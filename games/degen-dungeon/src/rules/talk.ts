@@ -2,6 +2,8 @@ import { eraOf } from "./calendar.ts";
 import { heatPerStar } from "./constants.ts";
 import { counter, counters, games, lunar, play } from "./counters.ts";
 import { dashDeed, dashNodes } from "./dash.ts";
+import { errandDeed, errandNodes } from "./errands.ts";
+import { loftDeed, loftNodes } from "./lofts.ts";
 import { storeDeed, storeNodes } from "./stores.ts";
 import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
@@ -108,6 +110,8 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   shuttle: [{ does: "fly" }, leave],
   ...dashNodes,
   ...storeNodes,
+  ...errandNodes,
+  ...loftNodes,
   speech: [{ to: "speech-2" }],
   "speech-2": [{ to: "speech-3" }],
   "speech-3": [{ does: "heard" }],
@@ -206,6 +210,8 @@ function deed(day: Draft, name: string): string | null {
   if (name.startsWith("shot-")) return stake(day, Number(name.slice(5)));
   if (name.startsWith("dash-")) return dashDeed(day, name);
   if (name.startsWith("store-")) return storeDeed(day, name, locked(day));
+  if (name.startsWith("errand-")) return errandDeed(day, name);
+  if (name.startsWith("loft-")) return loftDeed(day, name);
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
   if (name === "peace" || name === "trade" || name === "quietly")

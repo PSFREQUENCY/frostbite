@@ -51,10 +51,11 @@ describe("the island from above", () => {
     expect(empty.fills.some(([tint]) => tint === colour.hero)).toBe(false);
     const played = surface();
     drawMap(played.context, day, { size: 360, x: 0, y: 0 });
+    // Rally in bed, in the loft on The Exchange's middle street.
     expect(played.fills.find(([tint]) => tint === colour.hero)).toEqual([
       colour.hero,
-      178,
       153,
+      158,
       4,
       4,
     ]);

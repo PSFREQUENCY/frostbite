@@ -5,7 +5,7 @@ export const sideLabels: readonly (readonly string[])[] = [
   [
     "Make it through the FREE FROST riot in The Exchange",
     "Read the whitepaper at Whitepaper Library",
-    "Grab two slices at a pizza counter",
+    "Catch the purse snatcher and give Rosa her purse back",
     "Find your own word by your door, with frost vision",
     "Climb a building's wall",
   ],

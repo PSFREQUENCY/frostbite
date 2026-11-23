@@ -166,7 +166,8 @@ export const sites: readonly Spot[] = [
     kind: "rebrand",
     label: "Rebrand booth",
   },
-  talk(at(4, 0, 1_500), "frost", "Frost", eras(1, 2, 3, 4)),
+  // Frost speaks from the Global DEX's steps, beside its vault door.
+  talk(at(4, -3_800, 850), "frost", "Frost", eras(1, 2, 3, 4)),
   talk(at(4, 0, -3_500), "chart", "The Exchange floor"),
   talk(at(4, 0, 4_000), "maxx", "MAXX window", eras(2, 3, 4, 5)),
   talk(at(3, 4_500, 0), "fits", "Fit shop"),

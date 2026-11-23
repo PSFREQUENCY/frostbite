@@ -33,7 +33,7 @@ const pick = (day: DayState, talk: string, choice: number): DayState =>
 
 describe("the landmarks you can walk into", () => {
   it("have a floor behind a doorway from the street (or an open lot), feet only, with something to do on each", () => {
-    expect(venues).toHaveLength(14);
+    expect(venues).toHaveLength(15);
     for (const venue of venues) {
       const { door, middle, out } = venue;
       expect([

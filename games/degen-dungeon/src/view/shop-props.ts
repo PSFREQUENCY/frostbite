@@ -101,6 +101,18 @@ export const props: Readonly<Record<string, readonly Prop[]>> = {
       "#c98a4b",
     ]),
   ],
+  // A loft's living room (its bed and freezer are `lofts.ts`'s, for the landlord can put them out): a sofa on a rug facing a glowing
+  // screen on the wall, a kitchen counter by the freezer, a desk with a laptop and a plant.
+  loft: [
+    [1.6, 6.4, 0.35, 1, 0.7, 2.8, "#2f6f57"],
+    [1.15, 6.4, 0.85, 0.25, 0.9, 2.8, "#2f6f57"],
+    [4.6, 6.4, 0.02, 3.6, 0.03, 2.8, "#d64545"],
+    [11.05, 6.4, 1.7, 0.06, 1, 1.8, "#5beac6", true],
+    [8.2, 0.45, 0.45, 2.4, 0.9, 0.7, "#c9b38a"],
+    [9.9, 9.6, 0.75, 1.6, 0.06, 0.8, "#8a5a3a"],
+    [9.9, 9.45, 0.92, 0.5, 0.32, 0.04, "#ffd166", true],
+    [0.6, 10.4, 0.6, 0.5, 1.2, 0.5, "#3fae6b"],
+  ],
   pizza: [
     [2, 1, 0.9, 1.8, 1.6, 1.4, "#b0603e"],
     [2, 1.72, 0.7, 0.9, 0.5, 0.05, "#ff9a3c", true],
@@ -122,4 +134,5 @@ export const walls: Readonly<
   noodles: ["#5e3a2f", "#e8c9a0", "#a12f2f"],
   pawn: ["#3a3346", "#5a4a6a", "#c98a4b"],
   pizza: ["#d9c7a3", "#f7f3d7", "#3fae6b"],
+  loft: ["#b48a6a", "#efe6da", "#7a8fa6"],
 };

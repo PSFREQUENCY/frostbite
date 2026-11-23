@@ -16,7 +16,7 @@ import { started } from "./support/replay.ts";
 
 // What finishes every side quest of each day but the letters, as a day's state.
 const finishing: readonly Partial<DayState>[] = [
-  { done: ["riot", "did-read", "item-pizza", "heroword-7", "wall"] },
+  { done: ["riot", "did-read", "purse-returned", "heroword-7", "wall"] },
   { done: ["did-live", "game-claw"], gigs: 3, rides: 8, words: 3 },
   { done: ["did-dance", "item-glow", "contact"], maxx: 50, spotted: 1 },
   {
@@ -122,17 +122,17 @@ describe("the quest log and the cheers", () => {
     toasts.show({ ...morning, done: ["riot", "speech"], tick: 30 }, 100);
     expect([card.hidden, card.textContent]).toEqual([
       false,
-      "QUEST 1 OF 2 DONEHear Frost's speech in Ticker Square.",
+      "QUEST 1 OF 3 DONEHear Frost's speech on the steps of the Global DEX.",
     ]);
     toasts.show(
-      { ...morning, done: ["riot", "speech", "item-pizza"], tick: 60 },
+      { ...morning, done: ["riot", "speech", "purse-returned"], tick: 60 },
       200,
     );
     expect(card.querySelector(".head")?.textContent).toBe(
       "SIDE QUEST 2 OF 6 DONE",
     );
     toasts.show(
-      { ...morning, done: ["riot", "speech", "item-pizza"], tick: 90 },
+      { ...morning, done: ["riot", "speech", "purse-returned"], tick: 90 },
       9_000,
     );
     expect(card.hidden).toBe(true);

@@ -5,7 +5,11 @@ export const venueTalks: Readonly<
 > = {
   bank: {
     answers: ["Freeze 1,000 DUN", "Thaw 1,000 DUN", "Leave"],
-    say: "A teller behind curved glass: she moves DUN between your pocket and your freezer, a thousand at a time.",
+    say: "The Global DEX's vault desk, under the gold dome, the great door open behind it: a clerk moves DUN between your pocket and your freezer, a thousand at a time.",
+  },
+  "do-browse": {
+    answers: ["Browse the floors", "Leave"],
+    say: "ADOR, three floors of glass: perfume, fashion, phones, laptops and a 3D printer, and Omi Omy's drinks bar glowing at the back.",
   },
   "do-dance": {
     answers: ["Dance, 20", "Leave"],

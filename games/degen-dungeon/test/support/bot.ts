@@ -3,10 +3,11 @@ import type { RunInput } from "@frostbite/game-sdk/run-record";
 import { block, island } from "../../src/rules/constants.ts";
 import { advance } from "../../src/rules/day.ts";
 import { degenRules } from "../../src/rules/index.ts";
+import { rentDue, streetOf } from "../../src/rules/lofts.ts";
 import { paceOf } from "../../src/rules/move.ts";
 import type { DayState } from "../../src/rules/types.ts";
 import { spotNamed } from "../../src/rules/places.ts";
-import { roomAt } from "../../src/rules/rooms.ts";
+import { lofts, roomAt } from "../../src/rules/rooms.ts";
 import { centreOf } from "../../src/rules/world.ts";
 
 // A player for the tests: it walks the streets (every spot stands on one), uses spots by name and answers offers, by legal inputs only.
@@ -90,6 +91,14 @@ export function createBot(
     leg("z", z);
   };
 
+  const rent = (): void => {
+    const landlord = spotNamed(`landlord-${String(state.hero)}`);
+    if (!rentDue(state) || landlord === undefined) return;
+    go(landlord.x, landlord.z);
+    send("act");
+    send("pick", { choice: 0 });
+  };
+
   return {
     act: (): void => send("act"),
     end: (): void => send("end"),
@@ -122,10 +131,20 @@ export function createBot(
       go(spot.x, spot.z);
       send("act");
     },
-    // Goes home and sleeps.
+    // Pays the rent to the landlord at the loft's door, if it is owed (and the late fee if locked out).
+    rent,
+    // Pays the rent if it is owed, then goes home and sleeps.
     sleep(): void {
+      rent();
       const home = spotNamed(`home-${String(state.hero)}`);
       if (home === undefined) throw new Error("no home");
+      // A loft is for feet: a ride is left at its door.
+      const loft = lofts[state.hero];
+      if (state.ride !== "foot" && loft !== undefined) {
+        const door = streetOf(loft, 0);
+        go(door.x, door.z);
+        send("act");
+      }
       go(home.x, home.z);
       send("act");
       send("pick", { choice: 0 });

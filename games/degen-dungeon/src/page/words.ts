@@ -1,9 +1,10 @@
-import { ticksPerSecond } from "../rules/constants.ts";
 import { stages } from "../rules/course.ts";
 import { clockOf, dashPar, stageOf } from "../rules/dash.ts";
 import { invading, peaceable } from "../rules/invasion.ts";
 import { heroes } from "../rules/heroes.ts";
 import { echoAt, recklessOn } from "../rules/machine.ts";
+import { evicted, lateFee, rentDue, rentOf } from "../rules/lofts.ts";
+import { nightTick, ticksPerSecond } from "../rules/constants.ts";
 import { priceAt } from "../rules/market.ts";
 import { spotNamed } from "../rules/places.ts";
 import { lastDay, moonNight } from "../rules/calendar.ts";
@@ -19,6 +20,7 @@ import {
 import { drivingLine, trialLines } from "../script/dash.ts";
 import { dreams, finale } from "../script/dreams.ts";
 import { questLines, talks, tunnelLine } from "../script/lines.ts";
+import { lockedOutLine, rentLine } from "../script/lofts.ts";
 import { stories } from "../script/stories.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
@@ -64,9 +66,13 @@ export function dashLine(day: DayState): string | null {
 // What is urgent before the story: a drain (or a balance that only looks drained), the saucers, the open tunnel, a Degen Dash on, a trip
 // back.
 function urgentLine(day: DayState): string | null {
+  // Locked out, the way to the hideout terminal is through the landlord.
+  if (evicted(day)) return lockedOutLine;
   if (day.drain > 0)
     return "Your balance is draining! Race home to the hideout terminal.";
   if (day.fake) return "Check the hideout terminal at home before you panic.";
+  if (rentDue(day) && day.tick >= nightTick - 60 * ticksPerSecond)
+    return rentLine;
   if (invading(day))
     return peaceable(day) || day.bag > 0
       ? "Saucers over the city! Stand still in a beam and get taken up."
@@ -134,10 +140,14 @@ export function talkOf(
       : { answers: words.answers, say: words.line };
   }
   const talk = talks[id];
+  const rent = (line: string): string =>
+    line
+      .replace("{rent}", String(rentOf(day)))
+      .replace("{back}", String(rentOf(day) + lateFee));
   if (talk !== undefined)
     return {
-      answers: talk.answers,
-      say: talk.say
+      answers: talk.answers.map(rent),
+      say: rent(talk.say)
         .replace("{price}", String(priceAt(day.seed, day.day, day.tick)))
         .replace("{time}", clockText(day.dashTime))
         .replace("{par}", clockText(dashPar)),

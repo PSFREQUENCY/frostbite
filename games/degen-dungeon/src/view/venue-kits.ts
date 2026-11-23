@@ -1,4 +1,5 @@
 import type { Venue, VenueKind } from "../rules/venues.ts";
+import { furnishAdor } from "./ador.ts";
 import type { Handle, Props } from "./props.ts";
 
 // What is inside each landmark, placed round its middle (metres): `a` across the floor, `b` toward the doorway, `y` up. Everything is
@@ -195,6 +196,9 @@ export function furnish(kind: VenueKind, at: Place, props: Props): Inside {
       ]);
       for (let k = 0; k < 6; k += 1)
         put("box", [-2.5 + k, -14, 0.2], [0.8, 0.35, 0.4], "#e0b341", true);
+      return inside;
+    case "store":
+      furnishAdor(put, lit);
       return inside;
     case "records":
       put("pill", [0, -12, 1.6], [3.2, 3.2, 3.2], "#9fd8ff", false, [

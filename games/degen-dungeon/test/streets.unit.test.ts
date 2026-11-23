@@ -31,8 +31,20 @@ describe("where to go next", () => {
     const morning = started(1, 7, 1);
     expect(questAt(morning)).toEqual(spotNamed("frost"));
     const heard = { ...morning, done: ["speech"] };
-    expect(questAt(heard)).toEqual(spotNamed("faucet"));
-    expect(questAt({ ...heard, paper: 1 })).toEqual(spotNamed("home-7"));
+    expect(questAt(heard)).toEqual(spotNamed("wallet"));
+    const found = { ...morning, done: ["speech", "wallet-found"] };
+    expect(questAt(found)).toEqual(spotNamed("pearl"));
+    const given = { ...morning, done: [...found.done, "wallet-returned"] };
+    expect(questAt(given)).toEqual(spotNamed("faucet"));
+    // Home to bed once the rent is paid, the landlord first while it is owed or the hero is locked out.
+    expect(questAt({ ...given, paper: 1 })).toEqual(spotNamed("landlord-7"));
+    const paid = { ...given, done: [...given.done, "rent-paid"], paper: 1 };
+    expect(questAt(paid)).toEqual(spotNamed("home-7"));
+    const out = { ...given, done: [...given.done, "evicted"], paper: 1 };
+    expect(questAt(out)).toEqual(spotNamed("landlord-7"));
+    expect(questAt({ ...out, drain: 4 })).toEqual(spotNamed("landlord-7"));
+    const back = { ...out, done: [...out.done, "rent-paid", "back-in"] };
+    expect(questAt(back)).toEqual(spotNamed("home-7"));
     const gig = started(1, 7, 2);
     expect(questAt(gig)).toMatchObject({ kind: "gig" });
     expect(questAt({ ...gig, parcel: "faucet" })).toEqual(spotNamed("faucet"));

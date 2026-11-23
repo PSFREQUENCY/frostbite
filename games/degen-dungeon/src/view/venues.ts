@@ -22,6 +22,7 @@ import { murals } from "./prints.ts";
 import { createProps, type Handle } from "./props.ts";
 import { toonSteps } from "./textures.ts";
 import { furnish, openAir, tint } from "./venue-kits.ts";
+import { buildDex, podium } from "./dex.ts";
 import { crowns } from "./venue-lots.ts";
 import { buildMovie, type Movie } from "./movie.ts";
 
@@ -50,6 +51,7 @@ const domed: readonly string[] = [
 ];
 const walls: Readonly<Record<string, string>> = {
   arcade: "#2a2350",
+  store: "#cfe3f7",
   bank: "#e8dcc3",
   cinema: "#3a1d5c",
   club: "#2a2350",
@@ -72,7 +74,12 @@ const toon = (colour: string): MeshToonMaterial =>
 // pavement, the floor, and the name over the door. The record label's tower rises behind its hall.
 function hall(venue: Venue, group: Group): void {
   const [cx, cz] = [venue.middle.x / 100, venue.middle.z / 100];
-  const height = venue.kind === "club" || venue.kind === "cinema" ? 10 : 8;
+  const height =
+    venue.kind === "store"
+      ? 14
+      : venue.kind === "club" || venue.kind === "cinema"
+        ? 10
+        : 8;
   const door = venue.out === 1 ? 0 : Math.PI;
   const gap = 0.28;
   const wall = new Mesh(
@@ -129,7 +136,19 @@ function hall(venue: Venue, group: Group): void {
   );
   sign.position.set(cx, height + 1.2, cz + venue.out * (radius + 0.4));
   sign.rotation.y = venue.out === 1 ? 0 : Math.PI;
-  group.add(wall, roof, rim, arch, canopy, floor, sign);
+  group.add(wall, roof, rim, floor);
+  // The Global DEX has its own portico (`dex.ts`) where the others have a canopy and a sign; ADOR's three floors show as bands of glass.
+  if (venue.kind !== "bank") group.add(arch, canopy, sign);
+  if (venue.kind === "store")
+    for (const level of [4.6, 9.3]) {
+      const band = new Mesh(
+        new TorusGeometry(radius + 0.15, 0.35, 8, 96),
+        new MeshBasicMaterial({ color: "#ff8fd8" }),
+      );
+      band.rotation.x = Math.PI / 2;
+      band.position.set(cx, level, cz);
+      group.add(band);
+    }
   if (venue.kind !== "records") return;
   const tower = new Mesh(new CylinderGeometry(8, 9, 60, 32), toon("#1d1b33"));
   tower.position.set(cx, height + 30, cz - venue.out * 4);
@@ -153,10 +172,15 @@ export function buildVenues(): Venues {
     group.name = `venue-${venue.kind}`;
     const [cx, cz] = [venue.middle.x / 100, venue.middle.z / 100];
     const out = venue.out;
-    // `a` across and `b` toward the doorway; for a doorway to the north, both turn round.
+    // `a` across and `b` toward the doorway; for a doorway to the north, both turn round. The Global DEX stands on its podium.
+    const lift = venue.kind === "bank" ? podium : 0;
     const place = (a: number, b: number, y: number) =>
-      [cx + a * out, y, cz + b * out] as const;
+      [cx + a * out, y + lift, cz + b * out] as const;
     if (!openAir(venue)) hall(venue, group);
+    if (venue.kind === "bank") {
+      group.children.forEach((part) => (part.position.y += lift));
+      root.add(buildDex());
+    }
     lights.push(...furnish(venue.kind, place, props).lights);
     // The cinema's screen plays its films (`movie.ts`), facing the seats and the doorway.
     if (venue.kind === "cinema") {

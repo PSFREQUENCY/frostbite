@@ -15,6 +15,7 @@ import { advance, startDay } from "./day.ts";
 import { shoot } from "./freeze.ts";
 import { scoreOf } from "./heat.ts";
 import { heroes } from "./heroes.ts";
+import { kerbOf, topLoft } from "./lofts.ts";
 import { earnedBy } from "./milestones.ts";
 import type { DayState, Draft } from "./types.ts";
 
@@ -51,7 +52,9 @@ const settings: readonly string[] = [
   "fate",
   "hero",
   "idcard",
+  "loft",
   "loop",
+  "owed",
   "won",
 ];
 
@@ -101,7 +104,7 @@ export const degenRules: GameVerifier<DayState> = {
       keys.some((key) => !settings.includes(key))
     )
       return refuse(
-        "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups, idcard or won",
+        "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups, idcard, loft, owed or won",
       );
     const hero = whole(config.hero, 0, heroes.length - 1);
     const day = whole(config.day, 1, lastDay);
@@ -117,6 +120,13 @@ export const degenRules: GameVerifier<DayState> = {
     // A Nakasato ID made on an earlier day (`stores.ts`).
     const idcard = keys.includes("idcard") ? whole(config.idcard, 1, 1) : 0;
     if (idcard === null) return refuse("idcard is 1 once an ID is made");
+    // The loft's upgrades bought on earlier days (`lofts.ts`).
+    const loft = keys.includes("loft") ? whole(config.loft, 1, topLoft) : 0;
+    if (loft === null) return refuse("loft is 1 to 3, the upgrades bought");
+    // Yesterday's rent, unpaid: the hero wakes on the kerb (`lofts.ts`).
+    const owed = keys.includes("owed") ? whole(config.owed, 1, 1) : 0;
+    if (owed === null || (owed > 0 && (day === null || day < 2)))
+      return refuse("owed is 1, from the second day on");
     if (won === null) return refuse("won is 1 once the story is won");
     if (hero === null || day === null)
       return refuse("hero must be 0 to 9 and day 1 to 7");
@@ -127,9 +137,13 @@ export const degenRules: GameVerifier<DayState> = {
       return refuse("a trip back is loop 1 to 9, and always to day 1");
     if (
       loop > 0 &&
-      (keys.includes("fate") || keys.includes("boon") || idcard > 0)
+      (keys.includes("fate") ||
+        keys.includes("boon") ||
+        idcard + loft + owed > 0)
     )
-      return refuse("a trip back starts fresh, with no fate, boon or ID");
+      return refuse(
+        "a trip back starts fresh, with no fate, boon, ID, loft or rent owed",
+      );
     return boon === null
       ? refuse("a boon is last night's wish, 1 to 4")
       : {
@@ -139,6 +153,8 @@ export const degenRules: GameVerifier<DayState> = {
             beamups,
             dream,
             idCard: idcard === 1,
+            loft,
+            ...(owed > 0 ? kerbOf(hero) : {}),
           },
         };
   },

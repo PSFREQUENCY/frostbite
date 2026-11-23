@@ -8,6 +8,7 @@ import { eraOf, lastDay, moonNight, stormEra } from "./rules/calendar.ts";
 import { maxLoops } from "./rules/constants.ts";
 import { beamupsToday } from "./rules/invasion.ts";
 import { scoreOf } from "./rules/heat.ts";
+import { rentDue, topLoft } from "./rules/lofts.ts";
 import { storyTold } from "./rules/story.ts";
 import { heroes } from "./rules/heroes.ts";
 import type { DayState } from "./rules/types.ts";
@@ -27,9 +28,13 @@ export interface Progress {
   readonly hero: number;
   // Whether the player has made a Nakasato ID at the kiosk (`stores.ts`), which every story day after carries.
   readonly idCard: boolean;
+  // The loft's upgrades bought so far (`rules/lofts.ts`), which every story day after carries.
+  readonly loft: number;
   readonly loops: number;
   // Whether the Time Machine is open: the next day is a trip back to day one.
   readonly machine: boolean;
+  // Whether the last story day ended with its rent unpaid, so the next one wakes on the kerb.
+  readonly owed: boolean;
   readonly seen: boolean;
   readonly slip: boolean;
   readonly sound: SoundSettings;
@@ -46,8 +51,10 @@ export const freshProgress: Progress = {
   fate: 0,
   hero: 7,
   idCard: false,
+  loft: 0,
   loops: 0,
   machine: false,
+  owed: false,
   seen: false,
   slip: false,
   sound: defaultSound,
@@ -79,8 +86,10 @@ export function restore(saved: unknown): Progress {
     fate: whole(fields.fate, -99, 99, 0),
     hero: whole(fields.hero, 0, heroes.length - 1, freshProgress.hero),
     idCard: fields.idCard === true,
+    loft: whole(fields.loft, 0, topLoft, 0),
     loops: whole(fields.loops, 0, 99, 0),
     machine: fields.machine === true,
+    owed: fields.owed === true,
     seen: fields.seen === true,
     slip: fields.slip === true,
     sound: parseSound(fields.sound),
@@ -101,18 +110,19 @@ export function afterDay(
   const won = day.cause === "beach";
   // A story day opens the next one when its three quests are done and it is slept on.
   const told = day.cause === "home" && storyTold(day);
+  const next =
+    trip || day.cause === "abducted"
+      ? 1
+      : told && day.day === progress.day
+        ? Math.min(lastDay, progress.day + 1)
+        : progress.day;
   return {
     newBest: score > progress.best,
     progress: {
       ...progress,
       best: Math.max(progress.best, score),
       // Taken up by the saucers, the hero wakes at the start of the story again.
-      day:
-        trip || day.cause === "abducted"
-          ? 1
-          : told && day.day === progress.day
-            ? Math.min(lastDay, progress.day + 1)
-            : progress.day,
+      day: next,
       beamups: Math.min(99, progress.beamups + beamupsToday(day)),
       dream:
         trip || day.cause === "abducted"
@@ -124,6 +134,9 @@ export function afterDay(
         ? Math.max(-99, Math.min(99, progress.fate + day.fate))
         : progress.fate,
       idCard: progress.idCard || day.idCard,
+      loft: trip ? progress.loft : Math.max(progress.loft, day.loft),
+      // Rent left unpaid is owed on the next story day, from the second on; a trip back starts the story again, with nothing owed.
+      owed: !trip && next > 1 && rentDue(day),
       loops: Math.min(99, progress.loops + (trip ? 1 : 0)),
       machine: !trip && (progress.machine || won || day.cause === "machine"),
       slip: progress.slip || (eraOf(day.day) === stormEra && day.storm > 0),
@@ -149,7 +162,9 @@ export const nextRun = (
   readonly dream: number;
   readonly fate: number;
   readonly idCard: boolean;
+  readonly loft: number;
   readonly loop: number;
+  readonly owed: boolean;
   readonly won: boolean;
 } =>
   progress.machine
@@ -160,7 +175,9 @@ export const nextRun = (
         dream: 0,
         fate: 0,
         idCard: false,
+        loft: 0,
         loop: Math.min(maxLoops, progress.loops + 1),
+        owed: false,
         won: progress.won,
       }
     : {
@@ -170,6 +187,8 @@ export const nextRun = (
         dream: progress.day === lastDay ? progress.dream : 0,
         fate: Math.max(-9, Math.min(9, progress.fate)),
         idCard: progress.idCard,
+        loft: progress.loft,
         loop: 0,
+        owed: progress.owed && progress.day > 1,
         won: progress.won,
       };

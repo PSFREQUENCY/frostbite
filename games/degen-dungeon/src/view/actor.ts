@@ -7,6 +7,7 @@ import {
   copLook,
   formLooks,
   heroLooks,
+  thiefLook,
   tuxLook,
   vestLook,
   type Look,
@@ -77,6 +78,7 @@ export const buildActor = (hero: number): Actor =>
 export const buildTux = (): Actor => actorOf(tuxLook, "tux");
 export const buildCop = (): Actor => actorOf(copLook, "cop");
 export const buildVest = (): Actor => actorOf(vestLook, "vest");
+export const buildThief = (): Actor => actorOf(thiefLook, "thief");
 // A statue come to life, for a hero wearing its mask.
 export const buildForm = (statue: number): Actor =>
   actorOf(formLooks[statue] ?? vestLook, `form-${String(statue)}`);

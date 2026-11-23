@@ -15,6 +15,7 @@ import { board, rideLine, stepOff } from "./boarding.ts";
 import { clinging, onTheRoof } from "./climb.ts";
 import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { isFrozen } from "./freeze.ts";
+import { landlordNode, lockedOut } from "./lofts.ts";
 import { enterWindow } from "./windows.ts";
 import { cooled, heated } from "./heat.ts";
 import { heroes } from "./heroes.ts";
@@ -102,6 +103,7 @@ function open(day: Draft, node: string): string | null {
   if (node === "frost")
     day.talk =
       day.day === 1 && !day.done.includes("speech") ? "speech" : "frost";
+  else if (node === "landlord") day.talk = landlordNode(day);
   else if (node === "maxx" && eraOf(day.day) > 3)
     return "MAXX is back after maintenance";
   else if (locked(day) && node !== "maxx") return "your wallet is locked";
@@ -140,6 +142,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
       });
     case "home":
       if (spot.hero !== day.hero) return "this is not your place";
+      if (lockedOut(day) !== null) return lockedOut(day);
       day.talk = "home";
       return null;
     case "locker":

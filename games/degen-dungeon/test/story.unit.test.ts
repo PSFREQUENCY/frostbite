@@ -19,7 +19,7 @@ import { dreams } from "../src/script/dreams.ts";
 import { stories } from "../src/script/stories.ts";
 import { createBot } from "./support/bot.ts";
 import { refusal, replay, started } from "./support/replay.ts";
-import { tellStory } from "./support/story.ts";
+import { returnWallet, tellStory } from "./support/story.ts";
 
 const at = (day: DayState) => ({ tick: day.tick });
 const beside = (day: DayState): DayState => {
@@ -29,11 +29,9 @@ const beside = (day: DayState): DayState => {
 };
 
 describe("the story", () => {
-  it("has two quests on the first morning and three every day after it, words for every beat of every hero, and a dream with two endings for each", () => {
+  it("has three quests every day, words for every beat of every hero, and a dream with two endings for each", () => {
     for (let day = 1; day <= lastDay; day += 1)
-      expect(questsOn(day), `day ${String(day)}`).toHaveLength(
-        day === 1 ? 2 : 3,
-      );
+      expect(questsOn(day), `day ${String(day)}`).toHaveLength(3);
     expect(questsOn(lastDay + 1)).toEqual([]);
     heroes.forEach((_, hero) => {
       for (const day of [3, 4, 5])
@@ -80,7 +78,7 @@ describe("the story", () => {
     });
   });
 
-  it("runs the first two days as quests read from the day: the speech and the paper, then a gig, a ride and a trade", () => {
+  it("runs the first two days as quests read from the day: the speech, the wallet and the paper, then a gig, a ride and a trade", () => {
     const bot = createBot(1, 0, 1);
     expect(questOf(bot.here())).toBe("speech");
     bot.go(18_000, 17_000);
@@ -90,6 +88,8 @@ describe("the story", () => {
     ]);
     bot.use("frost");
     for (let line = 0; line < 3; line += 1) bot.pick(0);
+    expect(questOf(bot.state())).toBe("wallet");
+    returnWallet(bot);
     expect(questOf(bot.state())).toBe("paper");
     bot.use("faucet");
     bot.pick(2);

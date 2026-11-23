@@ -1,4 +1,5 @@
 import { waterline } from "../../src/rules/constants.ts";
+import { spotNamed } from "../../src/rules/places.ts";
 import { beatOf, questOf, type Quest } from "../../src/rules/story.ts";
 import { createBot } from "./bot.ts";
 import { runDash } from "./dash.ts";
@@ -32,13 +33,30 @@ function recruit(bot: Bot, from: readonly number[]): void {
   bot.pick(true);
 }
 
-// The first two days' quests, done the plain way: the speech heard and the paper in the freezer; a gig, a stop on the Green Line, a buy
-// on the Exchange floor.
+// The first morning's errand: the wallet off the street, in at ADOR's door to Pearl, and back out onto the street.
+export const adorDoor = { x: 21_100, z: 17_500 };
+export function returnWallet(bot: Bot): void {
+  bot.use("wallet");
+  bot.pick(0);
+  const pearl = spotNamed("pearl");
+  if (pearl === undefined) throw new Error("no Pearl");
+  bot.go(adorDoor.x, adorDoor.z);
+  bot.leg("z", pearl.z);
+  bot.leg("x", pearl.x);
+  bot.act();
+  bot.pick(0);
+  bot.leg("x", adorDoor.x);
+  bot.leg("z", adorDoor.z);
+}
+
+// The first two days' quests, done the plain way: the speech heard, the wallet given back and the paper in the freezer; a gig, a stop on
+// the Green Line, a buy on the Exchange floor.
 function street(bot: Bot, quest: Quest): void {
   if (quest === "speech") {
     bot.use("frost");
     for (let line = 0; line < 3; line += 1) bot.pick(0);
   }
+  if (quest === "wallet") returnWallet(bot);
   if (quest === "paper") {
     bot.use("faucet");
     bot.pick(3);

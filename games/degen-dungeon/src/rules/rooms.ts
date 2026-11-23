@@ -1,4 +1,5 @@
 import { block } from "./constants.ts";
+import { heroes } from "./heroes.ts";
 import type { Point } from "./types.ts";
 
 // The mom-and-pop shops you can walk into: a room cut into a lot beside the street, with a doorway through its front wall and a counter at
@@ -56,7 +57,7 @@ const outers: readonly Shop[] = [
   [2, 3, "bodega", "Floe Corner Store"],
   [3, 0, "gas", "Gwei Gas"],
   [3, 3, "bodega", "Neon Bodega"],
-  [4, 1, "gas", "Gwei Gas"],
+  [0, 2, "gas", "Gwei Gas"],
   [5, 0, "bodega", "Meme Market Deli"],
   [5, 3, "gas", "Gwei Gas"],
   [6, 0, "gas", "Gwei Gas"],
@@ -66,11 +67,15 @@ const outers: readonly Shop[] = [
 ];
 
 // A room 11.2 m square, its front wall 1.4 m inside its lot's edge on a street: the middle street is south of a lot's upper half and
-// north of its lower half, and an outer room faces the other way. The counter stands 2.6 m off the back wall.
-function roomOf([borough, corner, kind, label]: Shop, outer: boolean): Room {
+// north of its lower half, and an outer room faces the other way. The counter stands 2.6 m off the back wall. A shop stands at its lot's
+// far end from the avenue; `west` puts a room elsewhere along the lot.
+function roomOf(
+  [borough, corner, kind, label]: Shop,
+  outer: boolean,
+  west = corner % 2 === 0 ? 1_540 : 9_340,
+): Room {
   const bx = block * (borough % 3);
   const bz = block * Math.floor(borough / 3);
-  const west = corner % 2 === 0 ? 1_540 : 9_340;
   const lower = corner >= 2;
   const north = lower !== outer;
   const front = bz + (outer ? (lower ? 11_060 : 940) : lower ? 7_140 : 4_860);
@@ -96,13 +101,29 @@ function roomOf([borough, corner, kind, label]: Shop, outer: boolean): Room {
   };
 }
 
+// Each hero's loft (`lofts.ts`), where they wake on a story day: on their borough's middle street in the north-west lot, between its shop
+// and the avenue, or in the south-east lot where Mount WAGMI's lawns fill the others (Slip's is on the outer side of Nib's lot).
+export const lofts: readonly Room[] = heroes.map((hero, id) => {
+  const [corner, west] = hero.borough === 2 ? [3, 8_000] : [0, 2_900];
+  return {
+    ...roomOf(
+      [hero.borough, corner, "loft", `${hero.name}'s loft`],
+      hero.hidden,
+      west,
+    ),
+    id: `loft-${String(id)}`,
+  };
+});
+
 // The middle street's rooms (whose doorways the kerbs' parked rides keep clear of), then the outer rooms.
-export const streetRooms: readonly Room[] = shops.map((shop) =>
-  roomOf(shop, false),
-);
+export const streetRooms: readonly Room[] = [
+  ...shops.map((shop) => roomOf(shop, false)),
+  ...lofts.filter(({ outer }) => !outer),
+];
 export const rooms: readonly Room[] = [
   ...streetRooms,
   ...outers.map((shop) => roomOf(shop, true)),
+  ...lofts.filter(({ outer }) => outer),
 ];
 
 // A point of a room in its own frame, in centimetres: across from its west wall, and out from its back wall toward the door.

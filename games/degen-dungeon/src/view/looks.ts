@@ -101,6 +101,13 @@ export const copLook = look("cap", 1.8, [
   "#1d2f57",
   "#ffd166",
 ]);
+// The purse snatcher on the first morning: a grey hoodie, up.
+export const thiefLook = look("cap", 1.75, [
+  "#c99a73",
+  "#5a5f6e",
+  "#2a2f45",
+  "#3a3f4a",
+]);
 export const vestLook = look("person", 1.8, [
   "#e0b08a",
   "#ff9a3c",
@@ -115,6 +122,16 @@ export const placeLooks: Readonly<Record<string, Look>> = {
   frost: person("#2a4b8d", "#f5fbff", "#bfe9ff"),
   "offer-kiki": person("#c9b6ff", "#ff6fb5", "#ffe0ec"),
   "offer-scruff": person("#6b5a3a", "#5a5a5a"),
+  // The first morning's errands (`rules/errands.ts`): Pearl, shopping in ADOR, and Rosa, at its door.
+  pearl: person("#7a4fa8", "#d8d8d8", "#8a5a3a"),
+  rosa: person("#ff6f91", "#2a1d14", "#c99a73"),
+  // Every loft's landlord (`rules/lofts.ts`): a cardigan the colour of old keys, grey hair.
+  ...Object.fromEntries(
+    Array.from({ length: 10 }, (_, hero) => [
+      `landlord-${String(hero)}`,
+      person("#8a6d3b", "#b8b8b8", "#d9b38c"),
+    ]),
+  ),
 };
 export const clerkLooks: readonly Look[] = [
   person("#3fae6b", "#3a2a20"),

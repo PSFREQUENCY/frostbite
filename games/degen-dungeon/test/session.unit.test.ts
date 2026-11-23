@@ -29,9 +29,10 @@ describe("a day as it is played", () => {
       onEarned: (id) => told.push(id),
       seed: 4,
     });
-    walk(session, 4, 193);
+    // Out of the loft's door, across the street and east to the Faucet.
+    walk(session, 4, 158);
     expect(session.send({ dir: -1, type: "move" })).toEqual({ ok: true });
-    walk(session, 8, 77);
+    walk(session, 0, 126);
     expect(session.send({ type: "act" })).toEqual({ ok: true });
     expect(session.send({ type: "act" })).toEqual({
       ok: false,
@@ -48,7 +49,7 @@ describe("a day as it is played", () => {
       session.state().pocket,
       told,
       session.earned(),
-    ]).toEqual([270, 100, ["seed-paper"], ["seed-paper"]]);
+    ]).toEqual([284, 100, ["seed-paper"], ["seed-paper"]]);
     const record = session.record();
     expect(record.inputs.map(({ type }) => type)).toEqual([
       "move",
@@ -71,7 +72,7 @@ describe("a day as it is played", () => {
       reason: "the day has ended",
     });
     session.tick();
-    expect(session.clock()).toBe(270);
+    expect(session.clock()).toBe(284);
   });
 
   it("needs no closing input when a choice ends the day, and writes one when the clock or a tux does", () => {

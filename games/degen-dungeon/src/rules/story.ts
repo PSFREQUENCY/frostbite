@@ -14,7 +14,8 @@ import { inReach } from "./places.ts";
 import type { DayState, Draft } from "./types.ts";
 
 // The story: up to three quests a day for seven days, done in order. The first two days are the same for everyone and are read from the
-// day itself: the riot morning (hear Frost's speech, write the seed paper; crossing the riot itself is a side quest), then a first day of
+// day itself: the riot morning (hear Frost's speech on the Global DEX steps, give the wallet dropped in the crowd back to its owner in
+// ADOR (`errands.ts`), write the seed paper; crossing the riot itself is a side quest), then a first day of
 // honest hustle (a gig, a ride on the Green Line, a trade on the Exchange floor). Days three to five are each hero's own beats
 // (`chapters.ts`). Moon Night opens on the hero's dream, then the Degen Dash run to the finish (`dash.ts`), then the party under Moon
 // Tower. On the last day a crew is gathered, the crew's three words open the Genesis Room, and the oldest tunnel runs to SHA Beach.
@@ -30,10 +31,11 @@ export type Quest =
   | "paper"
   | "ride"
   | "speech"
-  | "trade";
+  | "trade"
+  | "wallet";
 const beats: readonly Quest[] = ["beat-0", "beat-1", "beat-2"];
 const plans: readonly (readonly Quest[])[] = [
-  ["speech", "paper"],
+  ["speech", "wallet", "paper"],
   ["gig", "ride", "trade"],
   beats,
   beats,
@@ -56,6 +58,7 @@ const met: Readonly<Record<Quest, (day: DayState) => boolean>> = {
   ride: (day) => day.rides > 0,
   speech: (day) => day.done.includes("speech"),
   trade: (day) => day.bag > 0 || day.sells > 0,
+  wallet: (day) => day.done.includes("wallet-returned"),
 };
 export const questDone = (day: DayState, quest: Quest): boolean =>
   met[quest](day);

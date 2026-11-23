@@ -11,7 +11,8 @@ describe("the sample day the verifier is shown with", () => {
     const day = replay(sample);
     expect(day.cause).toBe("home");
     expect(degenRules.earned(day)).toEqual(sample.claims);
-    expect(day.pocket).toBe(340);
+    // What the day made, less the rent.
+    expect(day.pocket).toBe(240);
   });
 
   it("scores what the day made, once it has ended, and nothing before", () => {

@@ -122,7 +122,7 @@ at the start of the very first day and can be skipped.
     (places open by `eras(...)`, the coin's lean, gig pay, FOMO, MAXX, the saucers, the storm, the fake drain, billboards, sky and snow);
     the story, the letters (three a day), the watcher and the weather's seed go by the day itself. Each day's pocket and freezer are in
     `dayPockets`/`dayFreezers` (seven each).
-  - Quests (`rules/story.ts`): `questsOn(day)` lists a day's quests (two on the first morning, three after), `questOf` the one the hero
+  - Quests (`rules/story.ts`): `questsOn(day)` lists a day's quests (three every day), `questOf` the one the hero
     is on, `storyTold` whether all are done. The street days' quests read the day (speech, paper; gig, ride, trade), days 3 to 5 are the
     hero's beats, Moon Night is the dream, the party and a lantern (after dark; round 11 made it the Degen Dash and the party), the last day a crew of two, the Genesis Room and SHA
     Beach. Moon Night's dream is saved (`progress.dream`) and carried into the last day as the `dream` setting.
@@ -203,6 +203,26 @@ at the start of the very first day and can be skipped.
     picture's corner, which counts the badges the platform lists as unlocked plus those earned since. Badges earned together queue.
     A browser that asks for less motion gets it still.
   - Controls: G (and a Freeze ray button shown only while the ray is held) fires; the score bar shows how many are frozen.
+- The first morning and the lofts (all names and numbers are drafts for the owner):
+  - The Global DEX (`view/dex.ts`, the bank landmark relabelled): a granite podium a metre up with quarter-metre steps (`podiumAt`, which
+    `hillAt` uses for everyone who walks there), eight columns, a pediment, a gold GLOBAL DEX sign and an open vault door. The riot
+    (`rules/crowd.ts`) now packs the street in front of it, 60 m along and 12 across, and Frost speaks from its steps.
+  - ADOR (`rules/venues.ts` kind `store`, `view/ador.ts`): a department store across the street with a perfume counter, fashion racks,
+    an electronics table, mannequins and the Omi Omy drinks bar. Gwei Gas moved from its lot to Cold Harbor's south-west lot.
+  - The errands (`rules/errands.ts`, words in `script/errands.ts`): day one has three quests now: the speech, the wallet (found where the
+    riot stood, given back to Pearl at ADOR's perfume counter, +200 DUN), and the seed paper. Stepping back out of ADOR starts the
+    snatch: a thief in a grey hoodie runs east and then south at 15 cm a tick (quicker than a walk, slower than a run); a hero on foot
+    within 1.5 m catches him, and Rosa's purse back is day one's second side quest (+300 DUN; it replaces the pizza).
+  - The lofts (`rules/rooms.ts` `lofts`, `rules/lofts.ts`, `view/lofts.ts`, words in `script/lofts.ts`): a room per hero in their
+    borough's north-west lot between its shop and the avenue (Hrimm's in Floe's south-east lot, as the lawns fill the others; Slip's on
+    the outer side of Nib's lot). The bed is where the hero wakes. Rent (100, 150, 200, 250, 400, 600 and nothing on the last day) is
+    paid to the landlord on the street by the door; unpaid at nightfall, the bed, the freezer and boxes go on the kerb, a seed paper in
+    the bed or the freezer is found (the drain), and the bed is refused until the rent and a 100 DUN late fee are paid. Sleeping with
+    the rent unpaid is allowed, but the next story day starts on the kerb (`owed`, a new setting, story days from the second on). The
+    upgrades (patio 500, balcony 1,500, top floor 5,000) are bought in turn once the rent is paid and carried as `loft` (1 to 3). Pip
+    warns a minute before nightfall, and the beacon points at the landlord while rent is owed. The Grinner statue and one of S's
+    letters moved a few metres to keep the Meme Market lofts' doorsteps clear. The verifier was re-pinned; the sample day now pays the
+    rent and goes to bed in the loft.
 
 ## What is left to polish
 

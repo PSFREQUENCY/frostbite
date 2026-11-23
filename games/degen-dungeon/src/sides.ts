@@ -37,7 +37,7 @@ const checks: readonly (readonly Check[])[] = [
   [
     has("riot"),
     has("did-read"),
-    has("item-pizza"),
+    has("purse-returned"),
     begins("heroword-"),
     has("wall"),
   ],

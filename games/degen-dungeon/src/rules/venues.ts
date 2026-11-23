@@ -19,6 +19,7 @@ export type VenueKind =
   | "park"
   | "records"
   | "skate"
+  | "store"
   | "studio";
 export interface Venue {
   // The square round the hall's walkable floor (centimetres), or for an open venue the whole lot, and the lot the landmark stands on.
@@ -41,7 +42,8 @@ const table: readonly (readonly [number, 1 | 2, VenueKind, string])[] = [
   [1, 2, "cinema", "Starlight Cinema"],
   [3, 1, "records", "Bassline Records"],
   [3, 2, "club", "The Mempool"],
-  [4, 2, "bank", "First Block Bank"],
+  [4, 1, "store", "ADOR"],
+  [4, 2, "bank", "The Global DEX"],
   [5, 1, "gallery", "Pixel Vault Gallery"],
   [5, 2, "skate", "Meme Market Skate Park"],
   [6, 1, "museum", "Museum of Genesis"],
@@ -161,6 +163,7 @@ const doing = (
   pays = 0,
 ): Activity => ({ calm, cool, cost, pays, rep, vision });
 export const activities: Readonly<Record<string, Activity>> = {
+  browse: doing(0, 10, 2),
   dance: doing(20, 30, 4),
   exhibits: doing(5, 10, 8),
   film: doing(15, 40, 0, 0, 40),
@@ -185,6 +188,7 @@ export const nodeOf: Readonly<Record<VenueKind, string>> = {
   park: "do-grass",
   records: "do-track",
   skate: "do-skate",
+  store: "do-browse",
   studio: "do-live",
 };
 

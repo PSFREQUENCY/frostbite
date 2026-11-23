@@ -2,6 +2,7 @@ import { waterline } from "./rules/constants.ts";
 import { dashCar } from "./rules/course.ts";
 import { stageOf } from "./rules/dash.ts";
 import { beams, invading, peaceable } from "./rules/invasion.ts";
+import { evicted, rentDue } from "./rules/lofts.ts";
 import { echoAt } from "./rules/machine.ts";
 import { openTo, spotNamed, spots, type Spot } from "./rules/places.ts";
 import { beatOf, questOf, tunnelMouth, type Quest } from "./rules/story.ts";
@@ -51,6 +52,11 @@ function questPlace(day: DayState, quest: Quest): Point | null {
   switch (quest) {
     case "speech":
       return spotNamed("frost") ?? null;
+    case "wallet":
+      return (
+        spotNamed(day.done.includes("wallet-found") ? "pearl" : "wallet") ??
+        null
+      );
     case "paper":
       return spotNamed("faucet") ?? null;
     case "gig":
@@ -80,8 +86,11 @@ function questPlace(day: DayState, quest: Quest): Point | null {
 
 export function questAt(day: DayState): Point | null {
   if (day.ended) return null;
-  const home = spotNamed(`home-${String(day.hero)}`) ?? null;
-  if (day.drain > 0 || day.fake) return home;
+  // Home is the bed, or the landlord first while the hero is locked out or owes the rent.
+  const landlord = spotNamed(`landlord-${String(day.hero)}`) ?? null;
+  const bed = spotNamed(`home-${String(day.hero)}`) ?? null;
+  const home = evicted(day) || rentDue(day) ? landlord : bed;
+  if (day.drain > 0 || day.fake) return evicted(day) ? landlord : bed;
   if (invading(day)) return saucerGoal(day) ?? home;
   if (day.gate > 0) return { x: tunnelMouth.x, z: waterline };
   const stage = stageOf(day);

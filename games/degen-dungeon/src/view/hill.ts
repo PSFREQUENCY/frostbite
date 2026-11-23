@@ -1,4 +1,5 @@
 import { halfLong, halfWide, letters, peak } from "../rules/mountain.ts";
+import { podiumAt } from "./dex.ts";
 
 // The lie of Mount WAGMI's land (`rules/mountain.ts` keeps where it can be walked, and has no heights): from the end of The Old Floe's
 // middle street the ground rises to a ridge just behind the sign, where the letters stand on a flat terrace, and past the ridge it falls
@@ -53,6 +54,7 @@ export function landAt(x: number, z: number): number {
   );
   return shore + terrace + (natural(x, z) - terrace) * flat;
 }
-// The ground under a point anyone can stand on: the hill's surface on Mount WAGMI, and the street (or the sea) everywhere else.
+// The ground under a point anyone can stand on: the hill's surface on Mount WAGMI, the Global DEX's steps and podium (`dex.ts`), and
+// the street (or the sea) everywhere else.
 export const hillAt = (x: number, z: number): number =>
-  x <= foot || outOf(x, z) >= 1 ? 0 : landAt(x, z);
+  podiumAt(x, z) ?? (x <= foot || outOf(x, z) >= 1 ? 0 : landAt(x, z));

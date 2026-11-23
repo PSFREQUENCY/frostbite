@@ -55,6 +55,10 @@ export interface RunSessionOptions {
   readonly beamups?: number;
   // A Nakasato ID made on an earlier day (story days only).
   readonly idCard?: boolean;
+  // The loft's upgrades bought on earlier days, 0 to 3 (story days only).
+  readonly loft?: number;
+  // Yesterday's rent left unpaid (story days from the second on).
+  readonly owed?: boolean;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -79,6 +83,8 @@ export function createRunSession(options: RunSessionOptions): RunSession {
           ...(dream === 0 ? {} : { dream }),
           ...(beamups === 0 ? {} : { beamups }),
           ...(options.idCard === true ? { idcard: 1 } : {}),
+          ...((options.loft ?? 0) > 0 ? { loft: options.loft ?? 0 } : {}),
+          ...(options.owed === true ? { owed: 1 } : {}),
           ...won,
         };
   const init = degenRules.init(options.seed, config);

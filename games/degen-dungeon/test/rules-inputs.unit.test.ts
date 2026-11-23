@@ -1,3 +1,4 @@
+import { spotNamed } from "../src/rules/places.ts";
 import { describe, expect, it } from "vitest";
 
 import { dayPockets, maxInputs, maxTicks } from "../src/rules/constants.ts";
@@ -16,7 +17,7 @@ describe("starting a day", () => {
       expect(degenRules.init(1, config)).toEqual({
         ok: false,
         reason:
-          "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups, idcard or won",
+          "a day takes a day and a hero, and may add loop, fate, boon, dream, beamups, idcard, loft, owed or won",
       });
     const wrong: Readonly<Record<string, number | string>>[] = [
       { day: 0, hero: 1 },
@@ -44,13 +45,15 @@ describe("starting a day", () => {
   it("is the same for the same seed, wakes the hero at home with that day's pocket, and lets the seed decide today's scam", () => {
     expect(started(11, 7, 1)).toEqual(started(11, 7, 1));
     const day = started(11, 7, 4);
+    // In bed, in the loft.
+    const bed = spotNamed("home-7");
     expect([day.x, day.z, day.pocket, day.tick]).toEqual([
-      18_000,
-      15_500,
+      bed?.x,
+      bed?.z,
       dayPockets[3],
       0,
     ]);
-    expect(started(11, 0, 1).x).toBe(6_000);
+    expect(started(11, 0, 1).x).toBe(spotNamed("home-0")?.x);
     const scams = new Set(
       [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => started(seed, 7, 1).crooked),
     );

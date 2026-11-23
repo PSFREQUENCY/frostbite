@@ -133,8 +133,11 @@ export function buildShops(): Shops {
       1.8,
       ["#ff5d5d", "#5beac6", "#ffd166"][room.counter.x % 3] ?? "#ff5d5d",
     );
-    put(5.6, 1.6, 0.52, 4, 1.05, 0.8, "#5a3a2f");
-    put(5.6, 2.02, 1.07, 4.1, 0.06, 0.95, "#c9b38a");
+    // A shop's counter (a loft has none).
+    if (room.kind !== "loft") {
+      put(5.6, 1.6, 0.52, 4, 1.05, 0.8, "#5a3a2f");
+      put(5.6, 2.02, 1.07, 4.1, 0.06, 0.95, "#c9b38a");
+    }
     put(5.6, depth / 2, 3.58, 1.2, 0.04, 1.2, "#fff1b8", true);
     for (const prop of props[room.kind] ?? []) {
       const [u, w, y, width, height, thick, colour, lit = false] = prop;

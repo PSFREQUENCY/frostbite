@@ -12,6 +12,12 @@ of one hero. DUN is in-game credit only.
   in the middle; the day starts then. **The whole game is played with that hero:** later days skip the ring and wake them straight
   after the cinematic (or at once). Once the story is won the ring is offered at the start of every day. The hero goes into each day's
   record, as before.
+- **Your loft.** Every hero has a loft on their borough's middle street: you wake in bed there each story day, with a sofa, a screen, a
+  kitchen and the freezer. Your landlord waits on the street by the door. Rent is due by nightfall (100 DUN on day one, rising to 600);
+  unpaid at nightfall, your bed, freezer and boxes go out on the kerb, and a seed paper hidden in the bed or the freezer is found and
+  drains your wallet. Pay the rent and a 100 DUN late fee to get back in. Sleep with the rent unpaid and you wake on the kerb the next
+  morning. Once it is paid, the landlord sells upgrades in turn, kept from day to day: a patio by the door (500), a balcony (1,500) and
+  the top floor with the view of the city (5,000).
 - **Pick a hero** on the 3D ring: ten of them, each with five stats and a story of their own. Volt, Nib, Lumen and Hrimm are Frost Run's
   own models; Omen, Chip, Mint, Rally, Dip and Slip (hidden until the Great Airdrop) are built in code.
 - **The seven days.** The FREE FROST riot morning, a first day of honest hustle, the mania, the winter (it opens on the morning of the
@@ -19,8 +25,11 @@ of one hero. DUN is in-game credit only.
   each era (the riot morning and the hustle share one, and so do Moon Night and its morning after).
 - **Quests.** Pip's line says which quest you are on ("2/3") and what it asks; the next place glows as a gold beacon, and a cheer comes
   over the picture as each quest or side quest is done. Sleeping at home once a day's quests are done opens the next day.
-  - Day 1: hear Frost's speech, then take your first DUN at the Faucet and decide where your seed paper lives. A paper in a pocket or on
-    a phone gets found, and the pocket drains live until the hideout terminal stops it.
+  - Day 1: wake in your loft and walk out into the FREE FROST riot packed in front of the Global DEX, a fortress of a stock exchange on a
+    granite podium, and hear Frost's speech from its steps. Pick up the wallet the crowd left in the gutter and give it back to Pearl in
+    ADOR, the department store across the street; as you step back out, a thief snatches Rosa's purse at the door. Run him down on foot
+    and give Rosa her purse (a side quest). Then take your first DUN at the Faucet and decide where your seed paper lives. A paper in a
+    pocket or on a phone gets found, and the pocket drains live until the hideout terminal stops it.
   - Day 2: finish an honest gig, ride the Green Line, buy some of the coin of the day on the Exchange floor.
   - Days 3 to 5 follow the hero's own story, three beats a day. Some beats need the right crewmate, frost vision, DUN or a trade; some ask
     a question with two answers.
@@ -178,7 +187,8 @@ before.
 `npx vitest run --config vitest.config.ts --coverage` from this folder. Bots (`test/support/`) play every hero's every story day to the
 end, and between them earn every milestone; an idle day earns none. The Dash bot (`test/support/dash.ts`) runs the course the quick way:
 about a minute (1,802 to 2,119 ticks, by the hero's speed), against a par of 3,000 ticks. The freeze bot (`test/support/freeze.ts`)
-takes a mask and the ray, then sweeps the riot with nine shots and holds more than thirty-six frozen at once.
+takes a mask and the ray, then sweeps the riot in front of the Global DEX with seven shots and holds more than thirty-six frozen at once.
+The bots pay the landlord before they go to bed, and leave any ride at the loft's door.
 
 ## Ownership
 

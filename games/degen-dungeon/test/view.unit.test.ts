@@ -169,6 +169,9 @@ describe("the scene", () => {
       crew: [0, 6],
       dir: 0,
       tux: { x: 15_000, z: 15_500 },
+      // Out on the avenue north of The Exchange's crossing.
+      x: 18_000,
+      z: 15_500,
     };
     view.day(day, 1, 0.016, false);
     expect(part("hero-7")?.visible).toBe(true);

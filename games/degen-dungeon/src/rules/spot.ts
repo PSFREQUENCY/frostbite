@@ -1,3 +1,4 @@
+import type { Errand } from "./errands.ts";
 import type { Point, Ride, Wheels } from "./types.ts";
 
 // What a place is. `on` is the days it is open (bit 1 is day one), `hidden` needs frost vision, and `only` is for one hero.
@@ -11,6 +12,8 @@ interface Base extends Point {
   readonly saucer?: boolean;
   // Only while a Degen Dash is run (`dash.ts`).
   readonly dash?: boolean;
+  // One of the first morning's errands, there only while it is under way (`errands.ts`).
+  readonly errand?: Errand;
 }
 export type Spot = Base &
   (

@@ -42,7 +42,9 @@ describe("the words beside the picture", () => {
     );
     expect(talkOf({ ...day, talk: "home" })?.answers).toHaveLength(3);
     expect(talkOf(day)).toBeNull();
-    expect(goalFor(day)).toBe("1/2 · Hear Frost's speech in Ticker Square.");
+    expect(goalFor(day)).toBe(
+      "1/3 · Hear Frost's speech on the steps of the Global DEX.",
+    );
     expect(goalFor({ ...day, drain: 4 })).toContain("draining");
     expect(noteFor(day)).toBe("E: Rally's place");
     const street = { ...day, x: 18_000, z: 18_000 };
@@ -93,8 +95,10 @@ describe("what the platform is asked to remember", () => {
       fate: 0,
       hero: 2,
       idCard: true,
+      loft: 0,
       loops: 0,
       machine: false,
+      owed: false,
       seen: true,
       slip: true,
       sound: { effects: false, music: true, volume: 0.5 },
@@ -121,7 +125,7 @@ describe("what the platform is asked to remember", () => {
     const home = afterDay(freshProgress, {
       ...day,
       cause: "home",
-      done: ["riot", "speech"],
+      done: ["riot", "speech", "wallet-found", "wallet-returned"],
       made: 300,
       paper: 4,
     });

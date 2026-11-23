@@ -41,9 +41,11 @@ const bought = (day: DayState, kind: string): DayState =>
 
 describe("the mom-and-pop shops", () => {
   it("are rooms cut into corner lots, with a doorway onto the street: open to feet, closed to wheels", () => {
-    // Seventeen on the middle streets, and thirteen on the lots' outer sides: seven corner stores and six gas stations.
-    expect(rooms).toHaveLength(30);
-    expect(new Set(rooms.map(({ id }) => id)).size).toBe(30);
+    // Seventeen shops on the middle streets, thirteen on the lots' outer sides (seven corner stores and six gas stations), and a loft
+    // for each of the ten heroes.
+    expect(rooms).toHaveLength(40);
+    expect(new Set(rooms.map(({ id }) => id)).size).toBe(40);
+    expect(rooms.filter(({ kind }) => kind === "loft")).toHaveLength(10);
     expect(rooms.filter(({ kind }) => kind === "bodega")).toHaveLength(9);
     expect(rooms.filter(({ kind }) => kind === "gas")).toHaveLength(6);
     for (const room of rooms) {
@@ -57,10 +59,14 @@ describe("the mom-and-pop shops", () => {
       const outside = room.north ? door.z0 : door.z1;
       expect(onStreet(counter.x, outside), room.id).toBe(true);
       expect(onLand(room.room.x0 - 100, counter.z)).toBe(false);
-      expect(spotNamed(room.id)).toMatchObject({
-        kind: "talk",
-        node: `shop-${room.kind}`,
-      });
+      // A shop's counter, or the bed in a loft.
+      expect(
+        spotNamed(room.id) ?? spotNamed(`home-${room.id.replace("loft-", "")}`),
+      ).toMatchObject(
+        room.kind === "loft"
+          ? { kind: "home", ...counter }
+          : { kind: "talk", node: `shop-${room.kind}` },
+      );
     }
     const shop = rooms[0];
     if (shop === undefined) throw new Error("no shops");

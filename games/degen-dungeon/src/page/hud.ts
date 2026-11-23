@@ -65,6 +65,11 @@ export function noteFor(day: DayState): string {
     return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
   if (zuriNear(day)) return here("Zuri, with a Degen Dash ticket");
+  if (day.thief !== null)
+    return byInput(
+      "Stop, thief! Run after the grey hoodie (Shift runs) and catch him.",
+      "Stop, thief! Run after the grey hoodie (RUN) and catch him.",
+    );
   if (day.gun && day.form >= 0)
     return byInput(
       "The freeze ray is in your hands: G fires it the way you last walked.",

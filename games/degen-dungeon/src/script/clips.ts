@@ -46,6 +46,27 @@ export const clipWords: Readonly<
     "They pay over the odds for your meme coins and fly off delighted.",
   ],
   truck: ["push", "PICKUP", "High cab, heavy door, and a bed full of nothing."],
+  // The first morning's errands (`rules/errands.ts`).
+  "wallet-returned": [
+    "orbit",
+    "GOOD AS GOLD",
+    "Pearl hugs her wallet, then you, and presses 200 DUN into your hand.",
+  ],
+  snatch: [
+    "push",
+    "STOP, THIEF!",
+    "A grey hoodie snatches Rosa's purse at ADOR's door and bolts east. She looks straight at you.",
+  ],
+  "purse-caught": [
+    "orbit",
+    "GOT HIM",
+    "A hand on his hood, the purse hits the pavement, and he runs off without it.",
+  ],
+  "purse-returned": [
+    "orbit",
+    "HERO OF THE MORNING",
+    "Rosa holds her purse to her heart. The whole street saw what you did.",
+  ],
   van: ["push", "MINIVAN", "Seats for the whole crew and a cup holder each."],
   colony: [
     "orbit",

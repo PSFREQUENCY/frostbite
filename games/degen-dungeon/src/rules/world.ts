@@ -135,14 +135,15 @@ export function onRoof(x: number, z: number): boolean {
   return Math.min(across, along) <= roofDepth;
 }
 
-// The Old Floe's park (its middle and its lawns), where sitting still cools FOMO; the riot across The Exchange on the first morning.
+// The Old Floe's park (its middle and its lawns), where sitting still cools FOMO; the riot on the street in front of the Global DEX on the
+// first morning.
 export const inPark = (x: number, z: number): boolean =>
   (Math.abs(x - 30_000) <= 3_000 && Math.abs(z - 6_000) <= 3_000) ||
   lawns.some(
     (lawn) => x >= lawn.x0 && x <= lawn.x1 && z >= lawn.z0 && z <= lawn.z1,
   );
 export const inRiot = (x: number, z: number): boolean =>
-  Math.abs(x - 18_000) <= 4_000 && Math.abs(z - 18_000) <= 4_000;
+  Math.abs(x - 15_800) <= 3_000 && Math.abs(z - 17_900) <= 1_100;
 // The oldest tunnel and SHA Beach, open only once the Genesis Room is.
 export const inTunnel = (x: number, z: number): boolean =>
   x >= tunnel.x0 && x <= tunnel.x1 && z >= tunnel.z0 && z <= tunnel.z1;

@@ -27,24 +27,25 @@ export function armed(seed = 21, hero = 7, day = 1): Bot {
   return bot;
 }
 
-// The riot morning, armed: a sweep of nine shots through the crowd in The Exchange, close enough together that more than thirty-six
-// stand frozen at once before the first of them thaw.
+// The riot morning, armed: seven shots east along the street packed in front of the Global DEX, walked west to east in short steps, each
+// down a line where the crowd stands thick, so that more than thirty-six stand frozen at once before the first of them thaw.
 const sweep = [
-  [18_000, 15_000, 1],
-  [17_500, 18_000, 1],
-  [17_500, 18_000, 4],
-  [18_000, 18_000, 15],
-  [18_000, 18_000, 9],
-  [18_000, 18_000, 11],
-  [18_000, 17_500, 0],
-  [18_000, 18_500, 2],
-  [17_500, 18_000, 9],
+  [12_800, 17_400],
+  [13_500, 17_900],
+  [14_200, 17_700],
+  [14_800, 17_900],
+  [14_900, 18_200],
+  [15_300, 17_500],
+  [15_400, 17_750],
 ] as const;
 export function subZeroDay(): Bot {
   const bot = armed();
-  for (const [x, z, dir] of sweep) {
-    bot.go(x, z);
-    bot.head(dir);
+  const [first] = sweep;
+  bot.go(first[0], first[1]);
+  for (const [x, z] of sweep) {
+    bot.leg("z", z);
+    bot.leg("x", x);
+    bot.head(0);
     bot.head(-1);
     bot.shoot();
     bot.wait(rayCooldown);
