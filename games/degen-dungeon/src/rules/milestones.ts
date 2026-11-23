@@ -49,7 +49,10 @@ const more: readonly (readonly [string, (day: DayState) => boolean])[] = [
   ],
 ];
 // The top skills: working, running, reading the market and the street, keeping calm, driving and climbing.
-const skills: readonly (readonly [string, (day: DayState) => boolean])[] = [
+export const skills: readonly (readonly [
+  string,
+  (day: DayState) => boolean,
+])[] = [
   ["grinder", (day) => day.gigs >= 3],
   ["shook-the-tuxes", (day) => day.shook],
   ["storm-funnel", (day) => day.storm >= 100_000],

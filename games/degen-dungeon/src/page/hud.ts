@@ -64,7 +64,7 @@ export function noteFor(day: DayState): string {
   if (spot?.kind === "statue" && !day.won)
     return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
-  if (zuriNear(day)) return here("Zuri, with a Degen Dash ticket");
+  if (zuriNear(day)) return here("Miss Mirinda, with a Degen Dash ticket");
   if (day.thief !== null)
     return byInput(
       "Stop, thief! Run after the grey hoodie (Shift runs) and catch him.",

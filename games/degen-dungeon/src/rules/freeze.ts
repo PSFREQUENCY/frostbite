@@ -33,7 +33,7 @@ export interface Target extends Point {
 export const isFrozen = (day: Pick<DayState, "frozen">, id: string): boolean =>
   day.frozen.some((frost) => frost.id === id);
 
-// Who stands at a place: not the freezers, ATMs and kiosk, not Zuri (the Dash runs on), and not a clerk behind bulletproof glass.
+// Who stands at a place: not the freezers, ATMs and kiosk, not Miss Mirinda (the Dash runs on), and not a clerk behind bulletproof glass.
 const behindGlass = new Set(["shop-bodega", "shop-gas"]);
 const machines = new Set([
   "atm",

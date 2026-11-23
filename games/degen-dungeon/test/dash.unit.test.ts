@@ -42,7 +42,7 @@ const atArch = (day: number): DayState => ({
 const quiet = { x: 18_000, z: 16_200 };
 
 describe("the Degen Dash", () => {
-  it("sells a ticket at Zuri's arch from the second day, and starts the clock with one, on foot", () => {
+  it("sells a ticket at Miss Mirinda's arch from the second day, and starts the clock with one, on foot", () => {
     expect(
       refusal({ ...started(3, 4, 1), ...dashArch }, "act", { tick: 0 }),
     ).toBe("nothing to do here");
@@ -137,11 +137,17 @@ describe("the Degen Dash", () => {
     expect(won.dashTime).toBeLessThanOrEqual(dashPar);
     const start = started(3, 4, 2);
     expect(won.pocket).toBe(start.pocket - ticketPrice + dashPrize);
-    // Again the same day: a ticket bought from the arch, a win, and no second prize.
+    // Again the same day, on the ticket the roof's gate earned (rooftop running mastered, `mastery.ts`): a win, and no second prize.
+    expect([won.done.includes("mastered-rooftop-runner"), won.tickets]).toEqual(
+      [true, 1],
+    );
     const again = createBot(3, 4, 2);
     again.skipTo(300);
     runDash(again);
     const before = again.here().pocket;
+    runDash(again);
+    expect([again.here().pocket, again.here().tickets]).toEqual([before, 0]);
+    // A third time, a ticket bought at the arch.
     runDash(again);
     expect(again.here().pocket).toBe(before - ticketPrice);
     const slow = dashDay(true).state();
@@ -174,7 +180,7 @@ describe("the Degen Dash", () => {
     expect([shut.dash, shut.talk, shut.dashTime]).toEqual([0, "dash-out", 0]);
   });
 
-  it("brings Zuri to a hero on foot in the street at her hours, with a ticket to sell, until they walk off", () => {
+  it("brings Miss Mirinda to a hero on foot in the street at her hours, with a ticket to sell, until they walk off", () => {
     const [first = 0, second = 0] = zuriTicks;
     const street = { ...started(3, 4, 2), ...quiet, tick: first - 1 };
     const met = advance(street, first);

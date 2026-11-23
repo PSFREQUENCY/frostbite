@@ -94,7 +94,7 @@ function loot(day: Draft, spot: Spot & { readonly kind: "loot" }): void {
 // Opening a talk: Frost gives the speech on the first morning, the floor and the shops need an unlocked wallet, and MAXX is shut after the
 // winter.
 function open(day: Draft, node: string): string | null {
-  // At Zuri's arch a ride is left first (the Dash starts on foot, and may finish on wheels).
+  // At Miss Mirinda's arch a ride is left first (the Dash starts on foot, and may finish on wheels).
   if (node === "dash")
     return day.ride === "foot" ? startDash(day) : stepOff(day);
   if (node === "quiz") return askAtDesk(day);
@@ -210,7 +210,7 @@ export function act(day: Draft): string | null {
     return null;
   }
   if (spot !== null) return useSpot(day, spot);
-  // Zuri, waiting beside the hero with a Degen Dash ticket.
+  // Miss Mirinda, waiting beside the hero with a Degen Dash ticket.
   if (zuriNear(day)) {
     day.talk = "zuri";
     return null;

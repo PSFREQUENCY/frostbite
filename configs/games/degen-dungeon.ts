@@ -20,18 +20,17 @@ const once = (
     verification: "replay-verified",
   }) as const;
 
-// Degen Dungeon 1: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests
-// a day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA
-// Beach and the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, Zuri's Degen Dash (a
-// nine-stage race round the city, from the second day), the corner stores and gas stations, the freeze ray, Mount WAGMI and its sign,
-// the lantern night and the moon colony fill the city between the story's quests.
-// The milestones are the story's (its quests, the Dash won and Moon Night's lantern), ten top skills and the hidden ones.
-// The title, the words and every milestone are a draft for the owner; a milestone's id is one the game's rules decide
-// (`games/degen-dungeon/src/rules/milestones.ts`).
+// Degen Dungeon 1: one open island city, Nakasato, where a broke newbie wakes up to a mess and climbs over seven story days (three quests a
+// day at most, and six side quests beside them) by honest gigs, a crew, the market and staying ahead of the tuxes, to Moon Night, SHA Beach
+// and the Time Machine. A run is one day of one hero. Walk-in shops, parked rides, the saucers, the weather, Miss Mirinda's Degen Dash (a
+// nine-stage race round the city, from the second day), the corner stores and gas stations, the freeze ray, Mount WAGMI and its sign, the
+// lantern night and the moon colony fill the city between the story's quests. The milestones are the story's (its quests, the Dash won and
+// Moon Night's lantern), ten top skills and the hidden ones. The title, the words and every milestone are a draft for the owner; a
+// milestone's id is one the game's rules decide (`games/degen-dungeon/src/rules/milestones.ts`).
 export const degenDungeonGame = defineGame({
   capabilities: ["milestone:claim", "run:submit"],
   description:
-    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Wake in your own loft, pay the landlord by nightfall or find your things on the kerb, and save up for a patio, a balcony and the top floor's view. Hear Frost's speech on the steps of the Global DEX, give a lost wallet back in ADOR, chase down a purse snatcher, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb walls, in at the windows and over the roofs; take a parked car, minivan, pickup, motorbike, scooter or bike, and walk into the shops and landmarks. Corner stores sell snacks behind bulletproof glass; gas stations sell Fuzzy to anyone with a Nakasato ID. Every star of heat brings a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam. In the mania, flying saucers come for the city: make peace with glow sticks and pizza, and thirteen beam-ups leave you a saucer to fly. From day two, Zuri sells tickets to the Degen Dash, nine stages round the city against the clock, for 50,000 DUN, a trophy and a parade. Then send a lantern up to the crypto gods; on the last morning your crew's three words open the Genesis Room and the tunnel to SHA Beach. Nine masked statues wake once the story is won, and only a statue's face can take the freeze ray from a deli freezer. Hike up Mount WAGMI and sit on top of its sign over the whole city. Milestones for the story, ten top skills and hidden achievements, each one landing as a spinning medallion. DUN is in-game credit only. Every milestone is checked by replaying your day.",
+    "Wake up broke in Nakasato, an island city of nine boroughs, and climb from Newbie to Whale in seven days, with up to three story quests and six side quests every day: the FREE FROST riot morning, a first day of honest hustle, the mania, the winter and its Great Airdrop, Launch Day, Moon Night and the morning after. Pick one of ten heroes, each with their own story, and play the whole game as them. Wake in your own loft, pay the landlord by nightfall or find your things on the kerb, and save up for a patio, a balcony and the top floor's view. Hear Frost's speech on the steps of the Global DEX, give a lost wallet back in ADOR, chase down a purse snatcher, write down your seed words, hustle honest gigs, ride the Green Line, trade the coin of the day, crew up, and spot the scams before they drain you. Walk, run, duck, crawl and climb walls, in at the windows and over the roofs; take a parked car, minivan, pickup, motorbike, scooter or bike, and walk into the shops and landmarks. Corner stores sell snacks behind bulletproof glass; gas stations sell Fuzzy to anyone with a Nakasato ID. Every star of heat brings a beat cop, then the tuxes. Frost vision shows hidden words and the tells of a scam. In the mania, flying saucers come for the city: make peace with glow sticks and pizza, and thirteen beam-ups leave you a saucer to fly. Master a skill for a free ticket, or buy one, and Miss Mirinda lights the Degen Dash's route through a cheering city: nine stages against the clock for 50,000 DUN, a trophy and a parade. Then send a lantern up to the crypto gods; on the last morning your crew's three words open the Genesis Room and the tunnel to SHA Beach. Nine masked statues wake once the story is won, and only a statue's face can take the freeze ray from a deli freezer. Hike up Mount WAGMI and sit on top of its sign over the whole city. Milestones land as spinning medallions. DUN is in-game credit only. Every milestone is checked by replaying your day.",
   id: "degen-dungeon",
   launch: { mode: "embedded" },
   milestones: [
@@ -148,7 +147,7 @@ export const degenDungeonGame = defineGame({
     once(
       "degen-dash",
       "Degen Dash champion",
-      "Win the Degen Dash: clear all nine stages round the city under par, with no heat. Zuri sells tickets from day 2; on Moon Night, finishing it is quest 2.",
+      "Win the Degen Dash: clear all nine stages round the city under par, with no heat. Miss Mirinda sells tickets from day 2; on Moon Night, finishing it is quest 2.",
       "Run, duck, crawl, climb, look, drive and know your stuff. The prize: 50,000 DUN, a trophy, art and a parade.",
     ),
     once(
@@ -292,7 +291,7 @@ export const degenDungeonGame = defineGame({
     replay: {
       id: "degen-dungeon",
       sha256:
-        "6e412218abccc5d367ca82a5a8b8b0a868277705efa3e965bd1fe626c9438cd3",
+        "cff52a090ae180351c6e6b2b423a1d5c8f4919b77e16ec695c4ac056cc145fa5",
       version: 1,
     },
   },

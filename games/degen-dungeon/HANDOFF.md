@@ -147,7 +147,7 @@ at the start of the very first day and can be skipped.
 
 - **Round 11** (the official name, and the Degen Dash):
   - The official name is Degen Dungeon 1 (the id stays `degen-dungeon`).
-  - The Degen Dash (`rules/course.ts` the places, `rules/dash.ts` the rules, words in `script/dash.ts`): from day 2, Zuri's arch
+  - The Degen Dash (`rules/course.ts` the places, `rules/dash.ts` the rules, words in `script/dash.ts`): from day 2, Miss Mirinda's arch
     (`dash`, a talk spot whose act starts a run or opens her `zuri` talk; a ride is stepped off there first) and, while a run is on
     (`dash` > 0 opens spots marked `dash: true`), her desk (`dash-desk`, node `quiz`) and the Dash car (`ride-dash`, a hired car of
     rank 0, so no heat). These three are listed after the kerbs' parked rides so that the kerbs stay where they were. The day gained
@@ -156,14 +156,14 @@ at the start of the very first day and can be skipped.
     and 3, the top storey, the roof, frost vision, any engine, the desk's right answer, then the arch on anything), closes the course
     after `dashMax` (six minutes), and pays at the line: under `dashPar` (3,000 ticks) with no star of heat is a win (`dash-won`,
     50,000 DUN once a day, counted as made), else a finish (`dash-finished`, 1,000 DUN once a day). A wrong answer adds
-    `quizPenalty` (300 ticks) and asks again; four questions, one a day by the seed. Zuri walks up at `zuriTicks` (or as soon after as
+    `quizPenalty` (300 ticks) and asks again; four questions, one a day by the seed. Miss Mirinda walks up at `zuriTicks` (or as soon after as
     the hero is free: on foot in the street, no ticket, no talk, no drain, not on the moon) and waits until the hero is 9 m off; act
     beside her, with no place in reach, opens her talk (`zuri-N` marks each hour as served). She never stops the hero.
   - Story and badges: Moon Night's plan is the dream, `dash` (finished, won or not) and the party, which now needs the Dash finished.
     The lantern is a Moon Night side quest (in place of painting a ride) and keeps its badge, now earned by a lantern on Moon Night.
     Frost's speech is still day 1's first quest but has no badge; "degen-dash" (the Dash won, on any day) took "heard-frost"'s place,
     so the story's set is still twenty. The sample day claims only "seed-paper". The verifier was re-pinned.
-  - The view: Zuri (`view/zuri.ts`) is the town's jointed body (`body.ts` now names its hips, spine, head and forearms) dressed in a
+  - The view: Miss Mirinda (`view/zuri.ts`) is the town's jointed body (`body.ts` now names its hips, spine, head and forearms) dressed in a
     turquoise halter crop top and a long high-waisted skirt with a high split, gold hoops, choker, bangles and chain belt, a gold ticket,
     and an Afro-hawk of 520 instanced coils over cropped sides. `view/dash-view.ts` stands her at the arch, at the desk on a run, or
     walks her up from behind the hero; `view/dash-course.ts` draws the arch (sign, neon, chequered line), each gate's obstacle, a ring
@@ -184,7 +184,7 @@ at the start of the very first day and can be skipped.
     walked (`facing`), a metre either side, nearest first; 15 ticks between shots. Packed places make 36 possible: the crowds now stand
     where the rules put them (`rules/crowd.ts`), so the riot, Moon Night's party and a Dash parade can be caught, and so can parked
     rows. Only a masked hero (a statue come to life) opens the frost and fires. Clerks behind the bulletproof glass, the machines and
-    Zuri cannot be frozen. "Sub-Zero" took "A brighter timeline"'s place, and "Is that me?" became "Butterfly effect" (a trip back
+    Miss Mirinda cannot be frozen. "Sub-Zero" took "A brighter timeline"'s place, and "Is that me?" became "Butterfly effect" (a trip back
     that leaves the timeline bent), so there are still forty.
   - Mount WAGMI (`rules/mountain.ts`): an ellipse of land east of The Old Floe that the Floe's middle street walks onto; the sign's
     footprint is closed; each letter climbs like a wall from the terrace in front of it, at the seat nearest the climber (a W has
@@ -223,6 +223,15 @@ at the start of the very first day and can be skipped.
     warns a minute before nightfall, and the beacon points at the landlord while rent is owed. The Grinner statue and one of S's
     letters moved a few metres to keep the Meme Market lofts' doorsteps clear. The verifier was re-pinned; the sample day now pays the
     rent and goes to bed in the loft.
+
+- Miss Mirinda and the lit Dash (drafts for the owner):
+  - Zuri is now Miss Mirinda in every word (the code keeps `zuri` in its ids, the talk node `zuri` and `view/zuri.ts`).
+  - Mastery (`rules/mastery.ts`): from the second day, the first time a top skill's milestone condition holds today, the hero is handed
+    a Degen Dash ticket (at most three held) and `mastered-` plus the skill's id is noted; the page cheers it with the teacher's name
+    (`script/dash.ts` `masters`). The Dash bot's second run of a day now runs on the ticket its first run's roof earned.
+  - The lit route (`view/dash-route.ts`): while a run is on, about 250 tiles of light along the streets from gate to gate (`legOf` picks
+    the corner that keeps to the streets; the wall to roof to frost mark hops cut straight), the leg to the next gate pulsing gold, and
+    about 300 instanced spectators on both sides, every fourth with a sign, bouncing. Three draw calls for the crowd, one for the ribbon.
 
 ## What is left to polish
 

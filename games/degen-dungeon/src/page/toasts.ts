@@ -3,7 +3,7 @@ import { saucerBeamups } from "../rules/invasion.ts";
 import { questDone, questsOn } from "../rules/story.ts";
 import type { DayState } from "../rules/types.ts";
 import { sidesOf } from "../sides.ts";
-import { dashCheers } from "../script/dash.ts";
+import { dashCheers, masteryLine, masters } from "../script/dash.ts";
 import { dashLine, questLineOf } from "./words.ts";
 
 // A cheer over the picture when a quest or a side quest is done: which one, and how many of today's are done, for a few seconds. The
@@ -59,7 +59,14 @@ function finished(
             ],
       ]);
     });
-  return new Map([...cheers, ...dashCheered(day)]);
+  // Each skill mastered today, and the Dash ticket its teacher hands over (`rules/mastery.ts`).
+  const mastered = day.done
+    .filter((id) => id.startsWith("mastered-"))
+    .map((id): Cheer => [
+      id,
+      ["SKILL MASTERED", masteryLine(masters[id.slice(9)] ?? "A master")],
+    ]);
+  return new Map([...cheers, ...dashCheered(day), ...mastered]);
 }
 
 // The Degen Dash: a ticket in hand, the clock started, each gate cleared on a run, and the finish (a win cheered over the finish).

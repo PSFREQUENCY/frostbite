@@ -29,7 +29,7 @@ const won: DayState = {
 };
 
 describe("the Degen Dash in the city", () => {
-  it("dresses Zuri: a ridge of coils from brow to nape, the two-piece, gold, and a ticket in her hand", () => {
+  it("dresses Miss Mirinda: a ridge of coils from brow to nape, the two-piece, gold, and a ticket in her hand", () => {
     const zuri = buildZuri();
     const hawk = named(zuri.root, "afro-hawk");
     if (!(hawk instanceof InstancedMesh)) throw new Error("no coils");
@@ -51,7 +51,7 @@ describe("the Degen Dash in the city", () => {
     expect(() => zuri.pose(7, 1, true)).not.toThrow();
   });
 
-  it("stands Zuri by her arch from the second day, at her desk on a run, and walks her up to a hero she has a ticket for", () => {
+  it("stands Miss Mirinda by her arch from the second day, at her desk on a run, and walks her up to a hero she has a ticket for", () => {
     const scene = new Scene();
     const view = createDashView(scene);
     const zuri = named(scene, "zuri");

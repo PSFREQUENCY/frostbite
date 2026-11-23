@@ -47,7 +47,7 @@ describe("the island", () => {
     // Every story day, with the visitors' saucer parked on its lawn.
     for (const day of [1, 2, 3, 4, 5, 6, 7])
       for (const hero of [0, 7, 9]) {
-        // A Degen Dash on, so that Zuri's desk and the Dash car are open too.
+        // A Degen Dash on, so that Miss Mirinda's desk and the Dash car are open too.
         const seen = {
           beamups: 13,
           dash: 1,

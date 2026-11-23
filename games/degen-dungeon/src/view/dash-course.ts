@@ -23,10 +23,10 @@ import { buildKit, kits } from "./kits.ts";
 import { roofAt } from "./lots.ts";
 import { toonSteps } from "./textures.ts";
 
-// The Degen Dash's course in the city: Zuri's arch (the start and the finish) with its sign and a chequered line, and while a run is on
-// each gate's obstacle in turquoise and gold, with a ring of light on the ground at the next one: a sprint gate, a low bar, a crawl net,
-// a banner at the top of a wall, a flag on the roof, a mark on the ground only frost vision shows, a checkpoint for the car and Zuri's
-// desk. The Dash car waits at the kerb until it is taken. It reads the day and decides nothing.
+// The Degen Dash's course in the city: Miss Mirinda's arch (the start and the finish) with its sign and a chequered line, and while a run
+// is on each gate's obstacle in turquoise and gold, with a ring of light on the ground at the next one: a sprint gate, a low bar, a crawl
+// net, a banner at the top of a wall, a flag on the roof, a mark on the ground only frost vision shows, a checkpoint for the car and Miss
+// Mirinda's desk. The Dash car waits at the kerb until it is taken. It reads the day and decides nothing.
 const turquoise = "#18c4b4";
 const gold = "#f2c14e";
 const solid = (colour: string): MeshToonMaterial =>

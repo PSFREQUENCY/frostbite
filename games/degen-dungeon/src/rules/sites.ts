@@ -217,8 +217,9 @@ export const sites: readonly Spot[] = [
   },
 ];
 
-// The Degen Dash (`dash.ts`): Zuri's arch from the second day on, and her desk and the Dash car while a run is on. They are listed after
-// the rides parked at the kerbs, which keep clear of the places above, so that the kerbs stay as they were before the Dash came to town.
+// The Degen Dash (`dash.ts`): Miss Mirinda's arch from the second day on, and her desk and the Dash car while a run is on. They are listed
+// after the rides parked at the kerbs, which keep clear of the places above, so that the kerbs stay as they were before the Dash came to
+// town.
 export const dashSites: readonly Spot[] = [
   {
     ...dashArch,
@@ -233,7 +234,7 @@ export const dashSites: readonly Spot[] = [
     dash: true,
     id: "dash-desk",
     kind: "talk",
-    label: "Zuri's desk",
+    label: "Miss Mirinda's desk",
     node: "quiz",
   },
   {
@@ -247,8 +248,8 @@ export const dashSites: readonly Spot[] = [
   },
 ];
 
-// Inside every corner store a freezer by the front window (Cold Harbor Deli's holds the freeze ray, `freeze.ts`), and inside every Gwei
-// Gas station a coin ATM; and the ID kiosk beside the Gwei Gas on The Shaft's north street (`stores.ts`). Listed after the kerbs' rides too.
+// Inside every corner store a freezer by the front window (Cold Harbor Deli's holds the freeze ray, `freeze.ts`), and inside every Gwei Gas
+// station a coin ATM; and the ID kiosk beside the Gwei Gas on The Shaft's north street (`stores.ts`). Listed after the kerbs' rides too.
 export const rayStore = "room-0-0-out";
 export const storeSites: readonly Spot[] = [
   ...rooms.flatMap((room): Spot[] =>

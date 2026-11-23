@@ -16,12 +16,12 @@ function stepIn(bot: Bot, gait: number): void {
   bot.gait(1);
 }
 
-// The Degen Dash, run the quick way from Zuri's arch: a ticket bought, then every gate on the shortest streets, running between them, the
-// right gait (or climb, or look) at each, the Dash car from the sixth to the desk (with `dawdle` ticks spent there), the right answer
-// (after `wrong` wrong ones) and back to the arch.
+// The Degen Dash, run the quick way from Miss Mirinda's arch: a ticket bought, then every gate on the shortest streets, running between
+// them, the right gait (or climb, or look) at each, the Dash car from the sixth to the desk (with `dawdle` ticks spent there), the right
+// answer (after `wrong` wrong ones) and back to the arch.
 export function runDash(bot: Bot, wrong = 0, dawdle = 0): Bot {
   bot.use("dash");
-  // Off a ride first (the Dash car, after a run before), then Zuri's ticket.
+  // Off a ride first (the Dash car, after a run before), then Miss Mirinda's ticket.
   if (bot.here().talk === null && bot.here().dash === 0) bot.act();
   if (bot.here().talk === "zuri") {
     bot.pick(0);

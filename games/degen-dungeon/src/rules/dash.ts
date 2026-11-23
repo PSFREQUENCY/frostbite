@@ -8,13 +8,13 @@ import { roomAt } from "./rooms.ts";
 import { motors, type DayState, type Draft, type Point } from "./types.ts";
 import { onMoon } from "./world.ts";
 
-// The Degen Dash, from the second day on: Zuri, its host, sells a ticket (`ticketPrice`) at her arch, and now and then walks up to a hero
-// on foot without one (`zuriTicks`) and waits beside them until they take her up on it or walk off. With a ticket, acting at the arch
-// starts the clock, and each of the course's stages (`course.ts`) is cleared by reaching its gate the right way: running, crouching,
+// The Degen Dash, from the second day on: Miss Mirinda, its host, sells a ticket (`ticketPrice`) at her arch, and now and then walks up to
+// a hero on foot without one (`zuriTicks`) and waits beside them until they take her up on it or walk off. With a ticket, acting at the
+// arch starts the clock, and each of the course's stages (`course.ts`) is cleared by reaching its gate the right way: running, crouching,
 // crawling, at the top of a wall, on the roof, with frost vision on, in anything with an engine, with the right answer to the question at
 // the desk (a wrong one adds `quizPenalty` to the clock), and back at the arch. Under par (`dashPar`) and with no heat is a win: the top
-// prize (`dashPrize`) once a day, the trophy, the champion's print and a parade. Slower is a finish and a medal; past `dashMax` the
-// course closes.
+// prize (`dashPrize`) once a day, the trophy, the champion's print and a parade. Slower is a finish and a medal; past `dashMax` the course
+// closes.
 export const ticketPrice = 250;
 export const dashPrize = 50_000;
 export const medalPrize = 1_000;
@@ -23,7 +23,7 @@ export const dashMax = 10_800;
 export const quizPenalty = 300;
 export const quizRight: readonly number[] = [0, 1, 2, 0];
 export const zuriTicks: readonly number[] = [2_700, 8_100, 13_500];
-// How far off a hero can walk before Zuri gives up on them.
+// How far off a hero can walk before Miss Mirinda gives up on them.
 const zuriGone = 900;
 
 const near = (from: Point, to: Point, gap: number): boolean =>
@@ -35,7 +35,7 @@ export const quizOf = (day: Pick<DayState, "day" | "seed">): number =>
   roll(day.seed, 0x0d_a5 + day.day, quizRight.length);
 export const clockOf = (day: Pick<DayState, "dashFrom" | "tick">): number =>
   day.tick - day.dashFrom;
-// Zuri is beside the hero, near enough to talk to.
+// Miss Mirinda is beside the hero, near enough to talk to.
 export const zuriNear = (
   day: Pick<DayState, "level" | "ride" | "x" | "z" | "zuri">,
 ): boolean =>
@@ -70,7 +70,7 @@ export function clears(day: DayState, stage: Stage): boolean {
   }
 }
 
-// Acting at the arch on foot: with a ticket the clock starts; without one Zuri sells one.
+// Acting at the arch on foot: with a ticket the clock starts; without one Miss Mirinda sells one.
 export function startDash(day: Draft): string | null {
   if (day.dash > 0) return "the Dash is on: make for the next gate";
   if (day.tickets === 0) {
@@ -91,7 +91,7 @@ export function askAtDesk(day: Draft): string | null {
   return null;
 }
 
-// The Dash's answers: Zuri's ticket bought or turned down, and the question answered right or wrong.
+// The Dash's answers: Miss Mirinda's ticket bought or turned down, and the question answered right or wrong.
 export function dashDeed(day: Draft, name: string): string | null {
   if (name === "dash-ticket") {
     if (day.tickets > 0) return "you have a ticket already";
@@ -111,7 +111,7 @@ export function dashDeed(day: Draft, name: string): string | null {
   return null;
 }
 
-// The Dash's talks, for `talk.ts`: Zuri's ticket, the questions (a wrong answer asks again) and what the clock said.
+// The Dash's talks, for `talk.ts`: Miss Mirinda's ticket, the questions (a wrong answer asks again) and what the clock said.
 export const dashNodes: Readonly<
   Record<string, readonly { readonly does?: string; readonly to?: string }[]>
 > = {
@@ -153,7 +153,7 @@ function finish(day: Draft): void {
   if (day.talk === null) day.talk = won ? "dash-won" : "dash-done";
 }
 
-// Whether Zuri may walk up: a hero on foot in the street with no ticket and nothing else going on, on a story day from the second.
+// Whether Miss Mirinda may walk up: a hero on foot in the street with no ticket and nothing else going on, on a story day from the second.
 const free = (day: DayState): boolean =>
   day.day >= 2 &&
   day.loop === 0 &&
@@ -171,8 +171,8 @@ const free = (day: DayState): boolean =>
   roomAt(day.x, day.z) === null &&
   !onMoon(day.x, day.z);
 
-// Each tick: a run's clock and its gates; with no run on, Zuri walking up at her hours (the last one passed, if the hero was busy) and
-// walking off once the hero is out of sight.
+// Each tick: a run's clock and its gates; with no run on, Miss Mirinda walking up at her hours (the last one passed, if the hero was busy)
+// and walking off once the hero is out of sight.
 export function dashed(day: Draft): void {
   const stage = stageOf(day);
   if (stage !== null) {

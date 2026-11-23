@@ -89,12 +89,16 @@ of one hero. DUN is in-game credit only.
   make FOMO climb twice as fast. A player of good standing sees calmer skies.
 - **Money on the move:** every DUN in or out floats up beside the readout (green in, red out) with a chime and a digital receipt: the
   amount, the new balance, the block and a transaction id.
-- **The Degen Dash:** from the second day, Zuri, the Dash's host (an Afro-hawk, a turquoise two-piece and a lot of gold), sells tickets
+- **The Degen Dash:** from the second day, Miss Mirinda, the Dash's host (an Afro-hawk, a turquoise two-piece and a lot of gold), sells tickets
   (250 DUN) at her arch on the avenue north of Ticker Square, and now and then walks up to a hero on foot who has none and waits beside
-  them (act to talk to her). With a ticket, act at the arch to start the clock, then clear nine stages in order round the Exchange's
+  them (act to talk to her). Mastering one of the ten top skills on a Dash day earns a free ticket from whoever taught it (the courier
+  desk for a third gig, the park keeper for grass touched, a rooftop runner for a roof crossed, and so on; three at most). Hand a ticket
+  to Miss Mirinda at her arch and the city lights the way: a ribbon of light runs along the streets from gate to gate, the leg to the
+  next gate pulsing gold, and the city's people pack both sides of it like a marathon, cheering with signs held high. With a ticket,
+  act at the arch to start the clock, then clear nine stages in order round the Exchange's
   borough, each its own way: sprint through the first gate (running), duck under a low bar (crouching), crawl under a net, climb the
   wall to its top storey, cross the roof to the flag, find a mark only frost vision shows, take the Dash car (it waits by the north
-  street) through the checkpoint on the east street, answer Zuri's crypto-safety question at her desk (a wrong answer adds ten
+  street) through the checkpoint on the east street, answer Miss Mirinda's crypto-safety question at her desk (a wrong answer adds ten
   seconds), and get back to the arch. Pip's line shows the stage, what it asks and the clock; the beacon points at the next gate.
   Under par (1:40) and with no heat is a win: 50,000 DUN (once a day), the trophy and a champion's print in the backpack, and a parade
   (confetti, fireworks over the arch, the trophy held up over your head, and the street lining the avenue to cheer). Slower is a

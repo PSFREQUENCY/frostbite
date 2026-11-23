@@ -6,11 +6,12 @@ import type { DayState } from "../rules/types.ts";
 import type { Subject } from "./camera.ts";
 import { metres } from "./city.ts";
 import { buildCourse } from "./dash-course.ts";
+import { buildDashRoute } from "./dash-route.ts";
 import { buildParade, paradeOn } from "./parade.ts";
 import { buildZuri } from "./zuri.ts";
 
-// The Degen Dash in the city: its course (`dash-course.ts`), a champion's parade (`parade.ts`), and Zuri herself: beside her arch, at
-// her desk while a run is on (until its question is answered), or walking up to a hero with a ticket from down the street they came
+// The Degen Dash in the city: its course (`dash-course.ts`), a champion's parade (`parade.ts`), and Miss Mirinda herself: beside her arch,
+// at her desk while a run is on (until its question is answered), or walking up to a hero with a ticket from down the street they came
 // along, and waiting beside them. She walks at a stroll, faces whoever she is talking to, and is shown only near the hero.
 const sight = 70;
 const stroll = 2.2;
@@ -25,7 +26,8 @@ export function createDashView(scene: Scene): DashView {
   const course = buildCourse();
   const parade = buildParade();
   const zuri = buildZuri();
-  scene.add(course.root, parade.root, zuri.root);
+  const route = buildDashRoute();
+  scene.add(course.root, parade.root, zuri.root, route.root);
   const arch = spotNamed("dash");
   let x = metres(dashArch.x);
   let z = metres(dashArch.z);
@@ -45,11 +47,13 @@ export function createDashView(scene: Scene): DashView {
       course.root.visible = false;
       parade.root.visible = false;
       zuri.root.visible = false;
+      route.show(0, 0);
     },
     show(state, at, seconds, dt) {
       course.root.visible = true;
       course.show(state, seconds);
       parade.show(state, at, seconds);
+      route.show(state.dash, seconds);
       const goal = goalOf(state);
       const key =
         state.zuri === null

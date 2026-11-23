@@ -40,7 +40,7 @@ describe("the Degen Dash on the page", () => {
     expect(goalFor(run(3, { drain: 1 }))).toContain("draining");
   });
 
-  it("says Zuri's words, the desk's questions with three answers, and the run's time when it ends", () => {
+  it("says Miss Mirinda's words, the desk's questions with three answers, and the run's time when it ends", () => {
     expect(talkOf({ ...day, talk: "zuri" })?.answers).toEqual([
       "Buy a ticket, 250",
       "Not today",
@@ -76,12 +76,12 @@ describe("the Degen Dash on the page", () => {
     ).toEqual([dashPack.medal, "Last time over the line: 2:00"]);
   });
 
-  it("says when Zuri is beside the hero, and cheers a ticket, the start, each gate and the finish", () => {
+  it("says when Miss Mirinda is beside the hero, and cheers a ticket, the start, each gate and the finish", () => {
     const quiet = { ...day, x: 18_000, z: 16_200 };
     expect(noteFor({ ...quiet, zuri: { x: 18_000, z: 16_200 } })).toContain(
-      "Zuri, with a Degen Dash ticket",
+      "Miss Mirinda, with a Degen Dash ticket",
     );
-    expect(noteFor(quiet)).not.toContain("Zuri");
+    expect(noteFor(quiet)).not.toContain("Miss Mirinda");
     const card = document.createElement("aside");
     const toasts = createToasts(card);
     const cheer = (state: DayState, at: number): string => {

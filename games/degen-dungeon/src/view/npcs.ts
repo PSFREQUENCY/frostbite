@@ -21,8 +21,8 @@ import { standAt } from "./stand.ts";
 
 // The people at the island's places, near the hero: every hero who could join stands at their recruit spot (the cast's own bodies, so a
 // Frost Run model shows there too), and Frost, Kiki, Scruff, the clerks and the hustlers wait at their talks and offers. Only those within
-// sight are shown, each turned to face the hero, except one the freeze ray caught, who stands stock still in their ice. Zuri, at the
-// Degen Dash's arch and desk, is the Dash's own (`dash-view.ts`); the freeze ray and its ice are the ray's (`ray-view.ts`).
+// sight are shown, each turned to face the hero, except one the freeze ray caught, who stands stock still in their ice. Miss Mirinda, at
+// the Degen Dash's arch and desk, is the Dash's own (`dash-view.ts`); the freeze ray and its ice are the ray's (`ray-view.ts`).
 const sight = 70;
 const people = spots.filter(
   (spot) =>

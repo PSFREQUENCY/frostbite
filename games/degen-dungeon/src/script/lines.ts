@@ -102,7 +102,7 @@ export const frostOnS: readonly string[] = [
 // are done, home to sleep.
 export const questLines: Readonly<Record<string, string>> = {
   crew: "Gather two of your crew: with yours, their words make three.",
-  dash: "Get a ticket from Zuri at the Degen Dash arch, north of Ticker Square, and run all nine stages to the finish.",
+  dash: "Get a ticket from Miss Mirinda at the Degen Dash arch, north of Ticker Square, and run all nine stages to the finish.",
   gig: "Take one honest gig and deliver it.",
   home: "Go home and sleep. Tomorrow the hustle starts.",
   paper: "Get your first DUN at the Faucet and write down your words.",

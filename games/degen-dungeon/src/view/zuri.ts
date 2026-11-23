@@ -18,8 +18,8 @@ import {
 import { buildBody, type Body } from "./body.ts";
 import type { Look } from "./looks.ts";
 
-// Zuri, the Degen Dash's host: tall and poised, with deep brown skin, an Afro-hawk (a tall ridge of tight coils from brow to nape over
-// close-cropped sides), a turquoise two-piece (a halter crop top and a long, high-waisted skirt with a high split up one side), gold
+// Miss Mirinda, the Degen Dash's host: tall and poised, with deep brown skin, an Afro-hawk (a tall ridge of tight coils from brow to nape
+// over close-cropped sides), a turquoise two-piece (a halter crop top and a long, high-waisted skirt with a high split up one side), gold
 // hoops, a choker, bangles and a gold chain belt, and a gold ticket in her hand. Built on the town's jointed body, with her clothes and
 // hair added to its named joints so they move with her. An original design, and a draft for the owner.
 const skin = "#5a3824";

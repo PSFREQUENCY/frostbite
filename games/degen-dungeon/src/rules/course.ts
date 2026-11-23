@@ -1,8 +1,8 @@
 import type { Point } from "./types.ts";
 
-// The Degen Dash's course, round the Exchange's borough: Zuri's arch (the start and the finish) on the avenue north of Ticker Square,
-// then eight gates, each won by a skill, in order. The Dash car waits for the seventh, and her desk is the eighth. Only places: the rules
-// of a run are in `dash.ts`.
+// The Degen Dash's course, round the Exchange's borough: Miss Mirinda's arch (the start and the finish) on the avenue north of Ticker
+// Square, then eight gates, each won by a skill, in order. The Dash car waits for the seventh, and her desk is the eighth. Only places: the
+// rules of a run are in `dash.ts`.
 export type Trial =
   | "car"
   | "crawl"
