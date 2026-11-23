@@ -15,6 +15,7 @@ import {
 
 import { venues } from "../rules/venues.ts";
 import { podium } from "./dex.ts";
+import { settle } from "./settle.ts";
 
 // The Global DEX's trading floor, built like the island's grandest stock exchange and guarded like a vault. Through the doorway: two
 // metal detector arches with their lights, turnstiles, glass barriers, guards; cameras on every wall. Inside: four round trading posts,
@@ -104,14 +105,22 @@ export function buildDexFloor(): DexFloor {
     root.add(mesh);
     return mesh;
   };
-  const standard = (color: string, glow = false): MeshStandardMaterial =>
-    new MeshStandardMaterial({
+  // One material for each colour, so `settle` can join the meshes that share it.
+  const made = new Map<string, MeshStandardMaterial>();
+  const standard = (color: string, glow = false): MeshStandardMaterial => {
+    const key = `${color}${glow ? "!" : ""}`;
+    const known = made.get(key);
+    if (known !== undefined) return known;
+    const material = new MeshStandardMaterial({
       color,
       emissive: glow ? color : "#000000",
       emissiveIntensity: glow ? 0.8 : 0,
       metalness: 0.3,
       roughness: 0.5,
     });
+    made.set(key, material);
+    return material;
+  };
   const steel = standard("#9aa3b5");
   const gold = standard("#e0b341");
   const black = standard("#11131c");
@@ -274,6 +283,8 @@ export function buildDexFloor(): DexFloor {
       ),
     );
   }
+  // Everything but the blinking lights is joined by material.
+  settle(root, (mesh) => lights.includes(mesh));
   return {
     root,
     show(seconds) {

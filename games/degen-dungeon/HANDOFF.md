@@ -296,6 +296,17 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   model's knees through its Run clip (the ram); built bodies have ankles with feet and wrists with hands (`seat-pose.ts` now holds the
   seat angles).
 
+- Meters, roofs, life and speed: `page/meters.ts` (`metersOf` is pure; the classes are `neon-*` because the platform's phone styles
+  own `.meter`) with `meters.css`; `page/skills.ts` measures each top skill (`kindsTaken` is now exported from `milestones.ts`) and
+  the backpack draws a gauge under any line ending "(n/m)" and any title with "n of m". `flyHigh` on the day: set at take-off from
+  level two or from a roof (`onTheRoof`, which the power now allows for the dragon), it picks the sky, and the view lifts a high flight
+  to clear `roofAt` plus 2.5 m. `view/shop-plans.ts` adds the shops', the pumps' (`when` windows, beat shared with
+  `view/forecourts.ts`) and the streets' people (only lanes that are street all the way); `insiders.ts` keys each place to an anchor
+  and draws only the near ones' people, packed into the first instances each frame. `view/settle.ts` joins static meshes by material
+  (the DEX floor, the mall, the stations) and stops their matrix updates; the DEX floor, the mall and the bazaar are hidden away from
+  them, things beyond 120 m are not drawn, and `stage.ts` steps the pixel ratio to the frame time (`nextRatio`, between 1 and the
+  screen's, a phone starting at 1.5).
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

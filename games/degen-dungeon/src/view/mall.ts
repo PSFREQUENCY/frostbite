@@ -12,6 +12,7 @@ import {
 
 import { venues } from "../rules/venues.ts";
 import { painted } from "./boards.ts";
+import { settle } from "./settle.ts";
 import { tint } from "./venue-kits.ts";
 
 // ADOR as a real mall, on two floors: a ring of shops round the ground floor's wall, each with its lit window and its name over it; a
@@ -62,13 +63,21 @@ export function buildMall(): Mall {
   // Built in the hall's own frame (`a` across is x, `b` toward the doorway is z), then turned to face the hall's doorway.
   root.position.set(ador.middle.x / 100, 0, ador.middle.z / 100);
   root.rotation.y = ador.out === 1 ? 0 : Math.PI;
-  const solid = (color: string, glow = false): MeshStandardMaterial =>
-    new MeshStandardMaterial({
+  // One material for each colour, so `settle` can join the meshes that share it.
+  const made = new Map<string, MeshStandardMaterial>();
+  const solid = (color: string, glow = false): MeshStandardMaterial => {
+    const key = `${color}${glow ? "!" : ""}`;
+    const known = made.get(key);
+    if (known !== undefined) return known;
+    const material = new MeshStandardMaterial({
       color,
       emissive: glow ? color : "#000000",
       emissiveIntensity: glow ? 0.55 : 0,
       roughness: 0.6,
     });
+    made.set(key, material);
+    return material;
+  };
   const glass = new MeshBasicMaterial({
     color: "#cfefff",
     depthWrite: false,
@@ -206,5 +215,6 @@ export function buildMall(): Mall {
       Math.cos(angle) * 10,
     );
   }
+  settle(root);
   return { root };
 }

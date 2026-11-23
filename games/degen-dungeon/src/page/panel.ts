@@ -8,6 +8,7 @@ import { powerLevel, powerOf, powerReady } from "../rules/powers.ts";
 import { powerNames } from "../script/powers.ts";
 import { element } from "./elements.ts";
 import { starsText } from "./hud.ts";
+import { createMeters } from "./meters.ts";
 import { createReceipts } from "./receipts.ts";
 import { createToasts } from "./toasts.ts";
 import { goalFor, rankNames, talkOf, weatherNames } from "./words.ts";
@@ -44,6 +45,7 @@ export function createPanel(hands: {
   let shown = "";
   let placed = "-";
   const toasts = createToasts(element("toast", "aside"));
+  const meters = createMeters(element("meters", "div"));
   const receipts = createReceipts(
     outs.score.closest("p") ?? outs.score,
     element("receipt", "aside"),
@@ -63,6 +65,7 @@ export function createPanel(hands: {
       outs.weather.textContent = weatherNames[day?.weather ?? "clear"];
       receipts.show(day, performance.now());
       toasts.show(day, performance.now());
+      meters.render(day);
       goal.textContent = day === null ? "" : goalFor(day);
       const left = Math.ceil((day?.vision ?? 0) / ticksPerSecond);
       look.disabled = day === null || (left === 0 && !day.looking);

@@ -52,13 +52,17 @@ describe("the places as people and things", () => {
     const things = buildThings();
     expect(Object.keys(pieces).length).toBeGreaterThanOrEqual(12);
     const named = (id: string) => things.root.getObjectByName(`thing-${id}`);
-    const day = started(1, 7, 2);
+    const stand = spotNamed("ride-scooter");
     const faucet = spotNamed("faucet");
-    things.show(day, faucet ?? null, 1);
-    expect([named("faucet")?.visible, named("ride-scooter")?.visible]).toEqual([
+    const day = { ...started(1, 7, 2), x: stand?.x ?? 0, z: stand?.z ?? 0 };
+    things.show(day, stand ?? null, 1);
+    // Near the stand its scooter shows; the Faucet, across the city, is not drawn from here.
+    expect([named("ride-scooter")?.visible, named("faucet")?.visible]).toEqual([
       true,
-      true,
+      false,
     ]);
+    things.show({ ...day, x: faucet?.x ?? 0, z: faucet?.z ?? 0 }, null, 1);
+    expect(named("faucet")?.visible).toBe(true);
     expect(spots.filter(({ kind }) => kind === "letter").length).toBe(
       things.root.children.filter(({ name }) => name.startsWith("thing-letter"))
         .length,

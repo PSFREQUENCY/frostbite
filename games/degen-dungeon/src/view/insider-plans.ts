@@ -25,8 +25,10 @@ export interface Plan {
   readonly coat: string;
   readonly skin: string;
   readonly bag: boolean;
-  // Which place they are in: a landmark's index in `venues`, or -1 for the bazaar.
+  // Which place they are in: a landmark's index in `venues`, -1 for the bazaar, or a shop's or a borough's streets' (`shop-plans.ts`).
   readonly place: number;
+  // Only between these seconds of every pump's turn (`shop-plans.ts`): a driver while their car fills up.
+  readonly when?: readonly [number, number];
 }
 
 export const coats = [
@@ -158,39 +160,34 @@ function inHall(venue: Venue, place: number): Plan[] {
       break;
     }
     case "store": {
-      // ADOR: shoppers on both floors, some with bags; browsers at the shop windows; people looking down from the balcony; riders on the
+      // ADOR, packed: shoppers walking both floors with their bags, browsing every window, leaning on the gallery's rail, riding the
       // escalators.
-      ring(24, 13.4, 1.1, { bag: true });
-      round(8, 0, 0, 16.4, "stand", true, {}, 0.7, Math.PI * 2 - 0.7);
-      ring(16, 13.6, 1, { y: gallery + 0.05 });
-      round(
-        5,
-        0,
-        0,
-        12.5,
-        "stand",
-        false,
-        { y: gallery + 0.05 },
-        0.6,
-        Math.PI * 2 - 0.6,
-      );
+      ring(44, 13.4, 1.1, { bag: true });
+      round(16, 0, 0, 16.4, "stand", true, {}, 0.7, Math.PI * 2 - 0.7);
+      ring(30, 13.6, 1, { bag: true, y: gallery + 0.05 });
+      const upstairs = { y: gallery + 0.05 };
+      round(12, 0, 0, 16.6, "stand", true, upstairs, 0.7, Math.PI * 2 - 0.7);
+      round(8, 0, 0, 12.5, "stand", false, upstairs, 0.6, Math.PI * 2 - 0.6);
       for (const { bottom, top } of escalators)
-        for (let k = 0; k < 2; k += 1)
+        for (let k = 0; k < 4; k += 1)
           add("ride", bottom[0], bottom[1], {
             pace: 0.45,
-            phase: k * 0.5,
+            phase: k * 0.25,
             rise: gallery,
             to: [cx + top[0] * out, cz + top[1] * out],
           });
       break;
     }
     case "club":
-      for (let k = 0; k < 24; k += 1)
-        add("dance", -4.2 + (k % 6) * 1.7, -4 + Math.floor(k / 6) * 2.1, {
+      // A packed floor: forty-eight dancing shoulder to shoulder, more round its edge, the DJ, and the seats round the wall full.
+      for (let k = 0; k < 48; k += 1)
+        add("dance", -5.6 + (k % 8) * 1.6, -5 + Math.floor(k / 8) * 1.7, {
           face: hash(k, place, 5) * Math.PI * 2,
         });
+      round(14, 0, -0.8, 8.4, "dance", false, {}, 0.5, Math.PI * 2 - 0.5);
       add("stand", 0, -12.3, { face: toward(0, -12.3, 0, 0) });
-      round(6, 0, 0, 14.3, "sit", false, {}, 1.2, Math.PI * 2 - 1.2);
+      round(10, 0, 0, 14.3, "sit", false, {}, 1.2, Math.PI * 2 - 1.2);
+      ring(6, 11.4, 0.8);
       break;
     case "cinema":
       for (let k = 0; k < 45; k += 1)

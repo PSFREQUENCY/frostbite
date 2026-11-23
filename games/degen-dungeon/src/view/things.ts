@@ -193,9 +193,14 @@ export function buildThings(): Things {
       root.visible = state !== null;
       if (state === null) return;
       for (const { kind, look, marker, spot } of placed) {
-        const open = openTo(spot, state);
-        // A ride on display is hidden while the hero rides that kind.
-        look.visible = open && (kind === undefined || state.ride !== kind);
+        // Only what is near enough to see, open today; a ride on display is hidden while the hero rides that kind.
+        const far =
+          Math.abs(spot.x - state.x) > 12_000 ||
+          Math.abs(spot.z - state.z) > 12_000;
+        look.visible =
+          !far &&
+          openTo(spot, state) &&
+          (kind === undefined || state.ride !== kind);
         marker.visible = look.visible;
         if (!marker.visible) continue;
         const next =

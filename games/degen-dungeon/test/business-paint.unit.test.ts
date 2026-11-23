@@ -46,6 +46,7 @@ describe("the DEX's screens", () => {
       expect.arrayContaining(["DUN", "▲+2.4%", "MAXX", "▼-1.2%", "-1.2%"]),
     );
     floor.show(4);
-    expect(floor.root.children.length).toBeGreaterThan(60);
+    // Joined by material: a few dozen draws for the whole floor.
+    expect(floor.root.children.length).toBeLessThan(40);
   });
 });

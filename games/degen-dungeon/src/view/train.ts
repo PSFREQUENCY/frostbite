@@ -14,6 +14,7 @@ import type { DayState } from "../rules/types.ts";
 import { boroughs, loop } from "../rules/world.ts";
 import { painted } from "./boards.ts";
 import { deckHeight } from "./lift.ts";
+import { settle } from "./settle.ts";
 
 // The Green Line's stations and the hero's own ride on it (`rules/business.ts`): at every stop a glass lift tube from the pavement up to a
 // glass station round the rails, with the line's name and the borough's on a sign by its door; and while the hero rides, a car of
@@ -99,6 +100,7 @@ function buildCar(): Group {
 export function buildTrain(): Train {
   const root = new Group();
   root.name = "train";
+  const platforms = new Group();
   const stations = loop.map((borough) => {
     const station = buildStation(borough);
     const at = stopAt(borough);
@@ -107,9 +109,12 @@ export function buildTrain(): Train {
     const next = stopAt(nextStop(borough));
     const across = Math.abs(next.x - at.x) > Math.abs(next.z - at.z);
     station.rotation.y = across ? Math.PI / 2 : 0;
-    root.add(station);
+    platforms.add(station);
     return station;
   });
+  root.add(platforms);
+  // The stations never move but for their lift cabs: joined by material.
+  settle(platforms);
   const car = buildCar();
   root.add(car);
   return {

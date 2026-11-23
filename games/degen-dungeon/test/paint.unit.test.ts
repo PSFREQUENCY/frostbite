@@ -102,9 +102,13 @@ describe("the backpack", () => {
       bag.isOpen(),
       document.getElementById("bag")?.classList.contains("open"),
     ]).toEqual([true, true]);
-    expect(
-      document.getElementById("bag-items")?.querySelectorAll("section"),
-    ).toHaveLength(8);
+    const items = document.getElementById("bag-items");
+    // The quests, the side quests and the top skills, each lit: units under a title's count, a bar under a line's.
+    expect(items?.querySelectorAll("section")).toHaveLength(9);
+    expect(pack["Top skills"]).toHaveLength(10);
+    expect(pack["Top skills"]?.[8]).toBe("○ Road trip (0/5)");
+    expect(items?.querySelectorAll(".neon-units").length).toBeGreaterThan(1);
+    expect(items?.querySelectorAll("li .neon-track").length).toBeGreaterThan(9);
     bag.toggle();
     expect(document.getElementById("bag")?.getAttribute("aria-hidden")).toBe(
       "true",

@@ -14,7 +14,7 @@ export function placeOf(
   readonly z: number;
 } {
   const { doing, pace, phase } = plan;
-  if (doing === "ring" || doing === "skate") {
+  if (doing === "ring" || (doing === "skate" && plan.r > 0)) {
     const angle = phase + (pace * seconds) / Math.max(1, plan.r);
     return {
       face: Math.atan2(
@@ -27,7 +27,7 @@ export function placeOf(
       z: plan.z + Math.cos(angle) * plan.r,
     };
   }
-  if (doing === "line" || doing === "ride") {
+  if (doing === "line" || doing === "ride" || doing === "skate") {
     const [tx, tz] = plan.to;
     const length = Math.max(1, Math.hypot(tx - plan.x, tz - plan.z));
     const run = (phase + (pace * seconds) / length) % 2;
@@ -126,3 +126,15 @@ export function poseOf(
       };
   }
 }
+
+// Whether someone who is only there for a while (a driver at a pump) is there just now.
+export const there = (plan: Plan, seconds: number, period: number): boolean => {
+  if (plan.when === undefined) return true;
+  const now = ((seconds % period) + period) % period;
+  const [from, to] = plan.when.map((at) => ((at % period) + period) % period);
+  return from === undefined || to === undefined
+    ? true
+    : from <= to
+      ? now >= from && now < to
+      : now >= from || now < to;
+};

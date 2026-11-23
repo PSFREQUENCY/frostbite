@@ -8,7 +8,9 @@ import {
 import { degenRules } from "../src/rules/index.ts";
 import { advance } from "../src/rules/day.ts";
 import { flightPace, flightTicks, flying, skyOf } from "../src/rules/flight.ts";
+import { roofLevel } from "../src/rules/climb.ts";
 import { paceOf } from "../src/rules/move.ts";
+import { onRoof } from "../src/rules/world.ts";
 import {
   letterNear,
   powerLevel,
@@ -36,6 +38,13 @@ const use = (day: DayState): DayState => {
   });
   if (!stepped.ok) throw new Error(stepped.reason);
   return stepped.state;
+};
+
+// A point on the rooftops, the first found walking east along a borough's middle.
+const findRoof = (): { readonly x: number; readonly z: number } => {
+  for (let x = 13_000; x < 24_000; x += 100)
+    if (onRoof(x, 15_000)) return { x, z: 15_000 };
+  return { x: 0, z: 0 };
 };
 
 describe("the heroes' powers", () => {
@@ -82,10 +91,25 @@ describe("the heroes' powers", () => {
     expect(dragon.flyUntil).toBe(dragon.tick + flightTicks);
     expect(paceOf(dragon)).toBe(flightPace(dragon));
     // Low, a building is in the way; high, it flies over.
-    expect(skyOf(dragon)(15_000, 17_000)).toBe(false);
+    expect([dragon.flyHigh, skyOf(dragon)(15_000, 17_000)]).toEqual([
+      false,
+      false,
+    ]);
     const high = { done: ["mastered-a", "mastered-b"] };
-    expect(skyOf(high)(15_000, 17_000)).toBe(true);
-    expect(use(out(1, high)).flyUntil).toBe(1_000 + flightTicks * 3);
+    const higher = use(out(1, high));
+    expect([higher.flyHigh, skyOf(higher)(15_000, 17_000)]).toEqual([
+      true,
+      true,
+    ]);
+    expect(higher.flyUntil).toBe(1_000 + flightTicks * 3);
+    // Off a roof, even at level one, it flies high; nobody else's power works up there.
+    const roof = findRoof();
+    expect(onRoof(roof.x, roof.z)).toBe(true);
+    const off = use(out(1, { level: roofLevel, ...roof }));
+    expect([flying(off), off.flyHigh, off.level]).toEqual([true, true, 0]);
+    expect(
+      refusal(out(7, { level: roofLevel, ...roof }), "power", { tick: 1_000 }),
+    ).toBe("your power needs your own feet on the ground");
     // Aloft, nothing is used and nobody reaches it; its power again brings it down.
     expect(refusal(dragon, "act", { tick: dragon.tick })).toBe(
       "land first: use your power again",

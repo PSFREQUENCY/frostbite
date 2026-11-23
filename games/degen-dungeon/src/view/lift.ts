@@ -2,6 +2,7 @@ import { lineLift, lineTicks } from "../rules/business.ts";
 import { flying, powerLevel } from "../rules/flight.ts";
 import { beamWait } from "../rules/invasion.ts";
 import type { DayState } from "../rules/types.ts";
+import { roofAt } from "./lots.ts";
 
 // How high above the ground something carries the hero, in metres: the Green Line's lift up to the platform and the train along the
 // rails (`view/train.ts`), a saucer's beam, which takes a hero standing in it up toward the saucer and holds them under it while they
@@ -14,11 +15,28 @@ const smooth = (part: number): number => part * part * (3 - 2 * part);
 
 export function liftOf(
   state: Partial<
-    Pick<DayState, "beamed" | "done" | "flyUntil" | "line" | "talk" | "tick">
+    Pick<
+      DayState,
+      | "beamed"
+      | "done"
+      | "flyHigh"
+      | "flyUntil"
+      | "line"
+      | "talk"
+      | "tick"
+      | "x"
+      | "z"
+    >
   >,
 ): number | null {
-  if (flying({ flyUntil: state.flyUntil ?? 0, tick: state.tick ?? 0 }))
-    return flightHeights[powerLevel({ done: state.done ?? [] }) - 1] ?? 3;
+  if (flying({ flyUntil: state.flyUntil ?? 0, tick: state.tick ?? 0 })) {
+    // Flying high, the dragon rises over the roofs it crosses.
+    const level =
+      flightHeights[powerLevel({ done: state.done ?? [] }) - 1] ?? 3;
+    if (state.flyHigh !== true) return level;
+    const roof = roofAt((state.x ?? 0) / 100, (state.z ?? 0) / 100) ?? 0;
+    return Math.max(level, flightHeights[1], roof + 2.5);
+  }
   const line = state.line ?? null;
   if (line !== null) {
     const ridden = (state.tick ?? line.at) - line.at;

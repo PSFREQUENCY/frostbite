@@ -1,4 +1,4 @@
-import { InstancedMesh, Matrix4, Vector3 } from "three";
+import { InstancedMesh } from "three";
 import { describe, expect, it } from "vitest";
 
 import { caveSites } from "../src/rules/caves.ts";
@@ -11,6 +11,7 @@ import { hallPlans, type Plan } from "../src/view/insider-plans.ts";
 import { placeOf, poseOf } from "../src/view/insider-poses.ts";
 import { buildInsiders, people } from "../src/view/insiders.ts";
 import { buildKnocks, goods, pickFor, restFor } from "../src/view/knocks.ts";
+import { shopPlans, streetPlans } from "../src/view/shop-plans.ts";
 import { buildMall, escalators, gallery, shopNames } from "../src/view/mall.ts";
 import { started } from "./support/replay.ts";
 
@@ -47,9 +48,15 @@ describe("the people inside", () => {
       ({ place }) => place === placeOfKind("store"),
     );
     expect(ador.filter(({ y }) => y > gallery).length).toBeGreaterThan(15);
-    expect(ador.filter(({ doing }) => doing === "ride")).toHaveLength(4);
+    expect(ador.filter(({ doing }) => doing === "ride")).toHaveLength(8);
+    expect(ador.length).toBeGreaterThan(100);
     expect(bazaarPlans.length).toBeGreaterThan(60);
-    expect(people.length).toBe(hallPlans.length + bazaarPlans.length);
+    expect(people.length).toBe(
+      hallPlans.length +
+        bazaarPlans.length +
+        shopPlans.length +
+        streetPlans.length,
+    );
   });
 
   it("walk rings and lines, ride escalators up, and stand, trade, sit, dance and skate where they are", () => {
@@ -76,25 +83,22 @@ describe("the people inside", () => {
   it("are drawn only near the hero, and cleared from a place the hero has left", () => {
     const insiders = buildInsiders();
     const bodies = insiders.root.getObjectByName("insider-bodies");
-    const matrix = new Matrix4();
-    const drawn = (index: number): boolean => {
-      if (!(bodies instanceof InstancedMesh)) return false;
-      bodies.getMatrixAt(index, matrix);
-      return new Vector3().setFromMatrixScale(matrix).x > 0;
-    };
+    const drawn = (): number =>
+      bodies instanceof InstancedMesh ? bodies.count : -1;
     const dex = venues.find(({ kind }) => kind === "bank");
-    const first = people.findIndex(
-      ({ place }) => place === placeOfKind("bank"),
-    );
     const inside: DayState = {
       ...started(1, 7, 2),
       x: dex?.middle.x ?? 0,
       z: dex?.middle.z ?? 0,
     };
     insiders.show(inside, null, 1);
-    expect(drawn(first)).toBe(true);
-    insiders.show({ ...inside, x: 0, z: 0 }, null, 2);
-    expect(drawn(first)).toBe(false);
+    const traders = hallPlans.filter(
+      ({ place }) => place === placeOfKind("bank"),
+    ).length;
+    expect(drawn()).toBeGreaterThanOrEqual(traders);
+    // Out at sea, nobody is drawn at all.
+    insiders.show({ ...inside, x: 100, z: -50_000 }, null, 2);
+    expect(drawn()).toBe(0);
     insiders.show(null, null, 3);
     expect(insiders.root.visible).toBe(false);
   });
@@ -103,7 +107,7 @@ describe("the people inside", () => {
 describe("the landmarks filled", () => {
   it("give the DEX its trading posts, big board, ticker band, balcony, metal detectors and cameras", () => {
     const floor = buildDexFloor();
-    expect(floor.root.children.length).toBeGreaterThan(60);
+    expect(floor.root.children.length).toBeGreaterThan(10);
     floor.show(1);
     floor.show(2);
     expect(floor.root.children.some(({ visible }) => !visible)).toBe(true);

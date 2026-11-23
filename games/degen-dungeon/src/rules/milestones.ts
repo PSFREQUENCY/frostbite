@@ -11,7 +11,7 @@ import type { DayState } from "./types.ts";
 const has = (day: DayState, ...names: readonly string[]): boolean =>
   names.some((name) => day.done.includes(name));
 // How many kinds of ride the hero took from the kerb today, not counting a semi's cab.
-const kindsTaken = (day: DayState): number =>
+export const kindsTaken = (day: DayState): number =>
   new Set(
     day.done.flatMap((id) => {
       const kind = /^(bike|car|moto|scooter|truck|van)-\d+$/u.exec(id)?.[1];

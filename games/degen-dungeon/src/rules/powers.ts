@@ -1,6 +1,7 @@
 import { roll } from "./coin.ts";
 import { heatPerStar, powerCooldown } from "./constants.ts";
 import { isFrozen, mostFrozen, targetsOf, thawTicks } from "./freeze.ts";
+import { onTheRoof } from "./climb.ts";
 import { flying, land, powerLevel, takeOff } from "./flight.ts";
 import { units } from "./move.ts";
 import { openTo, spots } from "./places.ts";
@@ -95,11 +96,16 @@ export function usePower(day: Draft): string | null {
     land(day);
     return null;
   }
-  if (day.ride !== "foot" || day.level !== 0 || day.line !== null)
+  const power = powerOf(day.hero);
+  // The dragon may take off from a roof too.
+  const fromRoof = power === "fly" && onTheRoof(day);
+  if (
+    !fromRoof &&
+    (day.ride !== "foot" || day.level !== 0 || day.line !== null)
+  )
     return "your power needs your own feet on the ground";
   if (!powerReady(day)) return "your power is still charging";
   const level = powerLevel(day);
-  const power = powerOf(day.hero);
   const missed =
     power === "fly"
       ? takeOff(day)

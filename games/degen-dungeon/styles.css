@@ -7,6 +7,7 @@
 @import "pick.css";
 @import "badges.css";
 @import "medal.css";
+@import "meters.css";
 
 :root {
   color-scheme: dark;

@@ -70,9 +70,18 @@ describe("the hero carried", () => {
 describe("the scenery of the shop, the train, the beams and the clues", () => {
   it("has a station at every stop, and the hero's own car running along the rails while they ride", () => {
     const train = buildTrain();
-    expect(
-      train.root.children.filter(({ name }) => name.startsWith("station-")),
-    ).toHaveLength(8);
+    const stations: string[] = [];
+    train.root.traverse(({ name }) => {
+      if (name.startsWith("station-")) stations.push(name);
+    });
+    expect(stations).toHaveLength(8);
+    // Joined by material, the eight stations are a handful of draws, their lift cabs apart.
+    const meshes: string[] = [];
+    train.root.traverse((part) => {
+      if (part.type === "Mesh") meshes.push(part.name);
+    });
+    expect(meshes.filter((name) => name === "lift-cab")).toHaveLength(8);
+    expect(meshes.length).toBeLessThan(8 * 3 + 12);
     const car = train.root.getObjectByName("rider-car");
     train.show(null, 1);
     expect(car?.visible).toBe(false);

@@ -10,11 +10,14 @@ import { buildLanterns } from "./lanterns.ts";
 import { buildConcert } from "./concert.ts";
 import { buildFood } from "./food.ts";
 import { buildPowers } from "./powers.ts";
+import { underground } from "../rules/caves.ts";
+import { venues } from "../rules/venues.ts";
 import { buildCaves } from "./caves.ts";
 import { buildBazaar } from "./bazaar.ts";
 import { buildBeatScenes } from "./beat-scenes.ts";
 import { buildClues } from "./clues.ts";
 import { buildDexFloor } from "./dex-floor.ts";
+import { buildForecourts } from "./forecourts.ts";
 import { buildInsiders } from "./insiders.ts";
 import { buildKnocks } from "./knocks.ts";
 import { buildMall } from "./mall.ts";
@@ -73,6 +76,14 @@ export const timeOf = (
 // How long the camera follows the hero's lantern up after the wish (seconds).
 export const lanternShot = 7;
 
+// Whether the hero is near enough to a hall of a kind to see in (metres).
+const near = (x: number, z: number, kind: string): boolean =>
+  venues.some(
+    (venue) =>
+      venue.kind === kind &&
+      Math.hypot(venue.middle.x / 100 - x, venue.middle.z / 100 - z) < 90,
+  );
+
 export function buildTown(): Town {
   const root = new Group();
   root.name = "town";
@@ -97,6 +108,8 @@ export function buildTown(): Town {
   const bazaar = buildBazaar();
   const knocks = buildKnocks();
   const things = buildThings();
+  const mall = buildMall();
+  const forecourts = buildForecourts();
   const beats = buildBeatScenes();
   root.add(
     things.root,
@@ -108,7 +121,8 @@ export function buildTown(): Town {
     dexFloor.root,
     bazaar.root,
     knocks.root,
-    buildMall().root,
+    mall.root,
+    forecourts.root,
     powers.root,
     lofts.root,
     concert.root,
@@ -148,6 +162,7 @@ export function buildTown(): Town {
       bazaar.show(seconds);
       knocks.show(null, seconds, 0);
       things.show(null, null, seconds);
+      forecourts.show(null, seconds);
       beats.show(null, { x: 0, z: 0 }, seconds, 0);
     },
     lantern: (seconds) =>
@@ -171,6 +186,7 @@ export function buildTown(): Town {
       const goal = questAt(day);
       beacon.show(goal, x, z, seconds);
       things.show(day, goal, seconds);
+      forecourts.show(day, seconds);
       beats.show(day, { x, z }, seconds, dt);
       lofts.show(day);
       concert.show(day, seconds);
@@ -180,6 +196,10 @@ export function buildTown(): Town {
       train.show(day, seconds);
       clues.show(day, seconds);
       insiders.show(day, moverOf(day, x, z, heading), seconds);
+      // The halls' insides are drawn only near them, and the bazaar only underground.
+      dexFloor.root.visible = near(x, z, "bank");
+      mall.root.visible = near(x, z, "store");
+      bazaar.root.visible = underground(day.x, day.z);
       dexFloor.show(seconds);
       bazaar.show(seconds);
       knocks.show(day, seconds, Math.min(0.1, dt));

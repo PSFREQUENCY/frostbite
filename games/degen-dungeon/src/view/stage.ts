@@ -29,6 +29,16 @@ export const fovFor = (fov: number, shape: number): number =>
           Math.PI,
       );
 
+// How sharp the picture is drawn (its pixel ratio), stepped to the frame time measured: down a quarter while frames take longer than a
+// smooth 40 a second allows, up a quarter while they come in well under a smooth 60, between one and the screen's own (at most two; a
+// phone starts at one and a half). So a slow phone stays smooth and a fast one stays sharp.
+export const nextRatio = (ratio: number, ms: number, most: number): number =>
+  ms > 25
+    ? Math.max(1, ratio - 0.25)
+    : ms < 12
+      ? Math.min(most, ratio + 0.25)
+      : ratio;
+
 // A browser drawing without a graphics card (a software rasteriser) draws the city a frame or two a second and has no time left for the
 // page itself, so there the island is drawn flat, as it is with no WebGL 2 at all. The browser is asked to say so itself, and the
 // renderer it names is checked as well, since not every software one is owned up to.
@@ -63,13 +73,34 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
   renderer.outputColorSpace = SRGBColorSpace;
   const camera = new PerspectiveCamera(50, aspect, 0.3, 1_200);
   let fitted = "";
+  const most = Math.min(2, globalThis.devicePixelRatio || 1);
+  let sharp =
+    globalThis.matchMedia?.("(pointer: coarse)").matches === true
+      ? Math.min(most, 1.5)
+      : most;
+  let last = 0;
+  let spent = 0;
+  let frames = 0;
   return {
     camera,
     draw(scene) {
+      // Every forty frames or so, the time they took sets how sharp the next ones are (a pause or a hidden tab is not counted).
+      const now = performance.now();
+      const gap = now - last;
+      last = now;
+      if (gap > 0 && gap < 250) {
+        spent += gap;
+        frames += 1;
+      }
+      if (frames >= 40) {
+        sharp = nextRatio(sharp, spent / frames, most);
+        spent = 0;
+        frames = 0;
+      }
       // The picture fills the canvas's box, whatever its shape; the game screen's map is drawn over its top.
       const width = canvas.clientWidth > 0 ? canvas.clientWidth : 960;
       const height = canvas.clientHeight > 0 ? canvas.clientHeight : 540;
-      const ratio = Math.min(2, globalThis.devicePixelRatio || 1);
+      const ratio = sharp;
       const size = `${String(width)}x${String(height)}@${String(ratio)}`;
       if (size !== fitted) {
         renderer.setPixelRatio(ratio);

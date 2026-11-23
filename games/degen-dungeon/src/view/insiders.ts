@@ -13,14 +13,17 @@ import {
 
 import { underground } from "../rules/caves.ts";
 import type { DayState } from "../rules/types.ts";
+import { rooms } from "../rules/rooms.ts";
 import { venues } from "../rules/venues.ts";
+import { centreOf } from "../rules/world.ts";
 import { bazaarPlans } from "./bazaar.ts";
 import { createBumps, type Mover } from "./bumps.ts";
 import { hallPlans, type Plan } from "./insider-plans.ts";
-import { placeOf, poseOf } from "./insider-poses.ts";
+import { placeOf, poseOf, there } from "./insider-poses.ts";
+import { pumpPeriod, shopPlans, streetPlans } from "./shop-plans.ts";
 
-// The people inside the landmarks and the Underground Bazaar (`insider-plans.ts` and `bazaar.ts` say who and where), drawn only in the
-// places near the hero: each a body, a head, two legs and two arms that swing as they walk, rise as they cheer and trade, bend to sit,
+// The people inside the landmarks, the Underground Bazaar, the walk-in shops and on the streets (`insider-plans.ts`, `bazaar.ts` and
+// `shop-plans.ts` say who and where), drawn only in the places near the hero: each a body, a head, two legs and two arms that swing as they walk, rise as they cheer and trade, bend to sit,
 // and bounce to the music; a shopping bag in a shopper's hand; a board under a skater. Walked into, they stagger out of the way like the
 // street's people (`bumps.ts`). Nothing here touches the rules.
 export interface Insiders {
@@ -28,8 +31,36 @@ export interface Insiders {
   show(state: DayState | null, mover: Mover | null, seconds: number): void;
 }
 
-export const people: readonly Plan[] = [...hallPlans, ...bazaarPlans];
-const near = 52;
+export const people: readonly Plan[] = [
+  ...hallPlans,
+  ...bazaarPlans,
+  ...shopPlans,
+  ...streetPlans,
+];
+// Where a place is (metres) and how near the hero must be for its people to be drawn: a landmark, a walk-in shop, a borough's streets.
+// The bazaar's are drawn while the hero is underground.
+export function anchorOf(place: number): readonly [number, number, number] {
+  if (place >= 2_000) {
+    const { x, z } = centreOf(place - 2_000);
+    return [x / 100, z / 100, 75];
+  }
+  if (place >= 1_000) {
+    const room = rooms[place - 1_000]?.room;
+    return room === undefined
+      ? [0, 0, 0]
+      : [(room.x0 + room.x1) / 200, (room.z0 + room.z1) / 200, 40];
+  }
+  const venue = venues[place];
+  return venue === undefined
+    ? [0, 0, 0]
+    : [venue.middle.x / 100, venue.middle.z / 100, 52];
+}
+const anchors = new Map(
+  [...new Set(people.map(({ place }) => place))].map((place) => [
+    place,
+    anchorOf(place),
+  ]),
+);
 const hips = 0.9;
 const shoulders = 1.48;
 
@@ -41,7 +72,6 @@ const tip = new Quaternion();
 const axis = new Vector3();
 const at = new Vector3();
 const one = new Vector3(1, 1, 1);
-const none = new Matrix4().makeScale(0, 0, 0);
 
 export function buildInsiders(): Insiders {
   const root = new Group();
@@ -83,34 +113,18 @@ export function buildInsiders(): Insiders {
     "insider-boards",
   );
   const paint = new Color();
-  people.forEach((plan, index) => {
-    bodies.setColorAt(index, paint.set(plan.coat));
-    heads.setColorAt(index, paint.set(plan.skin));
+  const placed = createBumps(count);
+  // Only the people of places near the hero are drawn, packed into the first slots each frame (with their colours), so the far ones cost
+  // the picture nothing; bags and boards fill their own slots.
+  const dress = (slot: number, plan: Plan): void => {
+    bodies.setColorAt(slot, paint.set(plan.coat));
+    heads.setColorAt(slot, paint.set(plan.skin));
     for (const side of [0, 1]) {
       legs.setColorAt(
-        index * 2 + side,
+        slot * 2 + side,
         paint.set(plan.doing === "trade" ? "#2a2f45" : "#3a3f4d"),
       );
-      arms.setColorAt(index * 2 + side, paint.set(plan.coat));
-    }
-    bags.setColorAt(
-      index,
-      paint.set(["#ff3df2", "#ffd166", "#5beac6"][index % 3] ?? "#ffd166"),
-    );
-    boards.setColorAt(index, paint.set("#ff7a1a"));
-  });
-  const all = [bodies, heads, legs, arms, bags, boards];
-  for (const each of all)
-    for (let k = 0; k < each.count; k += 1) each.setMatrixAt(k, none);
-  const placed = createBumps(count);
-  // Which places were drawn last time, to clear the people of one the hero has left.
-  let shown = new Set<number>();
-  const hide = (index: number): void => {
-    for (const each of [bodies, heads, bags, boards])
-      each.setMatrixAt(index, none);
-    for (const side of [0, 1]) {
-      legs.setMatrixAt(index * 2 + side, none);
-      arms.setMatrixAt(index * 2 + side, none);
+      arms.setColorAt(slot * 2 + side, paint.set(plan.coat));
     }
   };
   // A limb from its joint (in the body's frame), swung forward or back and spread out, hanging its length below the joint.
@@ -142,18 +156,16 @@ export function buildInsiders(): Insiders {
       const active = new Set<number>(
         below
           ? [-1]
-          : venues.flatMap((venue, index) =>
-              Math.hypot(venue.middle.x / 100 - hx, venue.middle.z / 100 - hz) <
-              near
-                ? [index]
-                : [],
+          : [...anchors].flatMap(([place, [ax, az, reach]]) =>
+              place >= 0 && Math.hypot(ax - hx, az - hz) < reach ? [place] : [],
             ),
       );
+      let slot = 0;
+      let bagged = 0;
+      let boarded = 0;
       people.forEach((plan, index) => {
-        if (!active.has(plan.place)) {
-          if (shown.has(plan.place)) hide(index);
+        if (!active.has(plan.place) || !there(plan, seconds, pumpPeriod))
           return;
-        }
         const where = placeOf(plan, seconds);
         const pose = poseOf(plan, where.stride, seconds);
         // Only people on the hero's floor can be bumped into.
@@ -181,15 +193,16 @@ export function buildInsiders(): Insiders {
         );
         const skating = plan.doing === "skate";
         const lift = skating ? 0.1 : 0;
+        dress(slot, plan);
         part.makeTranslation(0, 1.18 + lift, 0);
-        bodies.setMatrixAt(index, turn.multiplyMatrices(matrix, part));
+        bodies.setMatrixAt(slot, turn.multiplyMatrices(matrix, part));
         part.makeTranslation(0, 1.66 + lift, 0);
-        heads.setMatrixAt(index, turn.multiplyMatrices(matrix, part));
-        limb(legs, index * 2, -0.1, hips + lift, pose.legs[0], 0, 0.43);
-        limb(legs, index * 2 + 1, 0.1, hips + lift, pose.legs[1], 0, 0.43);
+        heads.setMatrixAt(slot, turn.multiplyMatrices(matrix, part));
+        limb(legs, slot * 2, -0.1, hips + lift, pose.legs[0], 0, 0.43);
+        limb(legs, slot * 2 + 1, 0.1, hips + lift, pose.legs[1], 0, 0.43);
         limb(
           arms,
-          index * 2,
+          slot * 2,
           -0.25,
           shoulders + lift,
           pose.arms[0],
@@ -198,24 +211,44 @@ export function buildInsiders(): Insiders {
         );
         limb(
           arms,
-          index * 2 + 1,
+          slot * 2 + 1,
           0.25,
           shoulders + lift,
           pose.arms[1],
           pose.spread,
           0.3,
         );
+        slot += 1;
         if (plan.bag) {
           part.makeTranslation(0.36, 0.78, 0.05);
-          bags.setMatrixAt(index, turn.multiplyMatrices(matrix, part));
+          bags.setMatrixAt(bagged, turn.multiplyMatrices(matrix, part));
+          bags.setColorAt(
+            bagged,
+            paint.set(
+              ["#ff3df2", "#ffd166", "#5beac6"][index % 3] ?? "#ffd166",
+            ),
+          );
+          bagged += 1;
         }
         if (skating) {
           part.makeTranslation(0, 0.08, 0);
-          boards.setMatrixAt(index, turn.multiplyMatrices(matrix, part));
+          boards.setMatrixAt(boarded, turn.multiplyMatrices(matrix, part));
+          boards.setColorAt(boarded, paint.set("#ff7a1a"));
+          boarded += 1;
         }
       });
-      shown = active;
-      for (const each of all) each.instanceMatrix.needsUpdate = true;
+      for (const [each, drawn] of [
+        [bodies, slot],
+        [heads, slot],
+        [legs, slot * 2],
+        [arms, slot * 2],
+        [bags, bagged],
+        [boards, boarded],
+      ] as const) {
+        each.count = drawn;
+        each.instanceMatrix.needsUpdate = true;
+        if (each.instanceColor !== null) each.instanceColor.needsUpdate = true;
+      }
     },
   };
 }

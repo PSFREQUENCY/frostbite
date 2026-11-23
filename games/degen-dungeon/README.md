@@ -119,7 +119,8 @@ of one hero. DUN is in-game credit only.
 - **Powers (Q, or the Power button):** every hero has their own, which cools for twenty seconds after each use and grows a level
   (to three) for each top skill mastered that day. The ram charges and senses S's nearest letter (a gold beam points the way); the
   dragon takes off and flies, ten seconds a level and quicker than running: low over the streets and the sea at level one, high over
-  every rooftop from level two (Pip counts the seconds; the power again lands it, and it comes down on open ground); the miner digs
+  every rooftop from level two or from a roof (climb a building, or the WAGMI sign, and take off from the top), rising over the roofs
+  it crosses (Pip counts the seconds; the power again lands it, and it comes down on open ground); the miner digs
   anywhere and now and then turns up DUN or a gem, which spins up out of the hole; the ice giant breathes frost that freezes whoever
   is close ahead; the wizard blinks a few metres in a puff of sparks; the dog sniffs and the cat sees with frost vision (the cat for
   longer); the bull charges in streaks of speed; the bear's stamp kicks up dust and stops the tux and the beat cop round it; and the
@@ -167,6 +168,15 @@ of one hero. DUN is in-game credit only.
   rail, escalators up to it, and shoppers on both floors with their bags. The Underground Bazaar is crowded: rows of stalls under
   striped canopies heaped with goods, lantern strings across the hall, a keeper at every stall and shoppers in every aisle. Bump into
   anyone and they stagger out of your way.
+- **Neon meters:** over the picture's top-left corner, every goal at a glance: today's quests as lit units, the side quests, the rent
+  against the pocket (red while short, pulsing in the last two minutes), the power charging with its level, how full the hero is, the
+  shop's till, the skills mastered as units, and the way to the next rank; and while they last, the flight, the board, a live stream,
+  a saucer's beam and a Degen Dash's stages, on top. A phone shows the five that matter most. The backpack lights every count the same
+  way: a bar under each side quest and each of the ten top skills (its own new section), and units under each count in a title.
+- **Alive:** the clubs are packed (sixty on the floor, the seats full), ADOR is packed on both floors with its escalators full, every
+  walk-in shop has its customers (browsing the aisles, waiting at the counter, eating at the noodle bars, coffee shops and Diamond
+  Hands, at the laundromat's machines, in the barber's chair, working out at the gym), each Silky pump has a car pulling in, filling up
+  with its driver at the hose and pulling out, and every borough's middle streets have skaters rolling by and shoppers with their bags.
 - **People and things, not markers:** every place is someone to talk to or something to use. People who have something to say wear a
   speech bubble, and the one the story wants next a turning gold "!". S's letters lie sealed on the pavement, scraps of paper and the
   words scratched in the ice where they fell, the loot in its sack, the courier desks' parcels beside their dispatchers, and the Faucet,

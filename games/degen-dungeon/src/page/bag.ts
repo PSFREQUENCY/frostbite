@@ -13,6 +13,8 @@ import type { DayState } from "../rules/types.ts";
 import { dashPack } from "../script/dash.ts";
 import { letters } from "../script/letters.ts";
 import { element } from "./elements.ts";
+import { gauge } from "./meters.ts";
+import { skillLines } from "./skills.ts";
 import { sidesOf } from "../sides.ts";
 import { clockText, goalFor, questLineOf } from "./words.ts";
 
@@ -98,6 +100,7 @@ function questLog(
     ],
     ...visitorsLog(day),
     ...dashLog(day),
+    ...(day.day < 2 ? [] : [["Top skills", skillLines(day)] as const]),
     [
       `Side quests: ${String(sidesDone)} of ${String(sides.length)}`,
       sides.map(
@@ -155,6 +158,9 @@ export function packOf(
   ];
 }
 
+const numberOf = (text: string | undefined): number =>
+  Number((text ?? "0").replaceAll(",", ""));
+
 export function createBag() {
   const panel = element("bag", "aside");
   const items = element("bag-items", "div");
@@ -174,6 +180,8 @@ export function createBag() {
           const section = document.createElement("section");
           const heading = document.createElement("h3");
           heading.textContent = title;
+          // A count in the title ("2 of 6") gets its own lit units or bar under it.
+          const counted = /(\d+) of (\d+)/u.exec(title);
           const list = document.createElement("ul");
           // A quest log's lines carry their own marks (done, on it, still to do) instead of bullets.
           if (lines.length > 0 && lines.every((line) => /^[✓→○] /u.test(line)))
@@ -181,9 +189,28 @@ export function createBag() {
           for (const line of lines.length === 0 ? ["Nothing yet"] : lines) {
             const item = document.createElement("li");
             item.textContent = line;
+            // A line that ends with its count ("(2/3)") gets a neon bar.
+            const count = /\(([\d,]+)\/([\d,]+)\)$/u.exec(line);
+            if (count !== null)
+              item.append(
+                gauge(document, {
+                  have: numberOf(count[1]),
+                  need: numberOf(count[2]),
+                  units: false,
+                }),
+              );
             list.append(item);
           }
-          section.append(heading, list);
+          section.append(heading);
+          if (counted !== null)
+            section.append(
+              gauge(document, {
+                have: numberOf(counted[1]),
+                need: numberOf(counted[2]),
+                units: true,
+              }),
+            );
+          section.append(list);
           return section;
         }),
       );
