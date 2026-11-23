@@ -254,6 +254,13 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   seconds and the bear's hold lasts five seconds a level, both on the freeze ray's list without its heat. The ram's "sense Satoshi" is
   read as S's letters (S signs as Satoshi in the story).
 
+- Underground (`rules/caves.ts`, `view/caves.ts`, words in `script/caves.ts`; a draft): like the moon, far off the map (x 1,200 m and
+  up): the way is four boxes (`caveWay`) and the bazaar's hall, walkable by `move.ts` while the hero is in them; `hillAt` steps the view
+  down to -8 m. Spots: the cave mouth (34,800, 35,400), the climb out, the bazaar's stairs on The Shaft's street (9,800, 30,300), the
+  stairs up, three traders, and the Light Re-emitter (31,800, 6,000). The guard's talk opens by itself (`caveTick`) the first time the
+  hero walks into the hall without `bazaar-main`, and either answer walks them up. The re-emitter's five places are `beams(hero)`. In the
+  words the Time Machine is the Light Re-emitter; the code and the milestone ids keep `machine`.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

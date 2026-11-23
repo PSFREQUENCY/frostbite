@@ -117,9 +117,9 @@ export const echoPlaces: Readonly<Record<string, string>> = {
 
 export const machineLines = {
   asleep: "The Ice Runner sleeps in the ice. Reach the top and it will rise.",
-  cooling: "The Time Machine is cooling down behind you.",
+  cooling: "The Light Re-emitter is cooling down behind you.",
   risen:
-    "The Ice Runner has risen in The Old Floe, and the Time Machine is open.",
+    "The Ice Runner has risen in The Old Floe, and the Light Re-emitter is open.",
 } as const;
 
 // How a trip back left the timeline, for the card after it.

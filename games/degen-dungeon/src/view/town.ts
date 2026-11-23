@@ -10,6 +10,7 @@ import { buildLanterns } from "./lanterns.ts";
 import { buildConcert } from "./concert.ts";
 import { buildFood } from "./food.ts";
 import { buildPowers } from "./powers.ts";
+import { buildCaves } from "./caves.ts";
 import { buildLofts } from "./lofts.ts";
 import { buildMountain } from "./mountain.ts";
 import { buildParked, type Parked } from "./parked.ts";
@@ -78,7 +79,9 @@ export function buildTown(): Town {
   const concert = buildConcert();
   const food = buildFood();
   const powers = buildPowers();
+  const caves = buildCaves();
   root.add(
+    caves.root,
     powers.root,
     lofts.root,
     concert.root,
@@ -110,6 +113,7 @@ export function buildTown(): Town {
       concert.show(null, seconds);
       food.show(null, seconds);
       powers.show(null);
+      caves.show(null, seconds);
     },
     lantern: (seconds) =>
       sent !== null && seconds - sent < lanternShot ? lanterns.where() : null,
@@ -134,6 +138,7 @@ export function buildTown(): Town {
       concert.show(day, seconds);
       food.show(day, seconds);
       powers.show(day);
+      caves.show(day, seconds);
     },
     write: (message) => lanterns.write(message),
   };

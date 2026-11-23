@@ -34,7 +34,14 @@ const people = spots.filter(
     spot.id !== "wallet" &&
     spot.id !== "partner" &&
     spot.id !== "dog" &&
-    spot.id !== "vr-stream",
+    spot.id !== "vr-stream" &&
+    ![
+      "cave-mouth",
+      "cave-out",
+      "bazaar-stairs",
+      "bazaar-up",
+      "emitter",
+    ].includes(spot.id),
 );
 // The wallet dropped in the riot's crowd (`rules/errands.ts`), lying on the street until it is picked up.
 const dropped = spotNamed("wallet");

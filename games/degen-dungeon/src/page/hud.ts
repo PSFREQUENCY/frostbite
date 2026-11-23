@@ -45,7 +45,7 @@ export function noteFor(day: DayState): string {
   if (inReach(day, statue)) {
     if (day.loop > 0) return machineLines.cooling;
     return risen(day)
-      ? here("step into the Time Machine")
+      ? here("step into the Light Re-emitter")
       : machineLines.asleep;
   }
   const echo = echoAt(day);

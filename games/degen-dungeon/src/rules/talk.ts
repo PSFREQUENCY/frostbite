@@ -6,6 +6,7 @@ import { errandDeed, errandNodes } from "./errands.ts";
 import { loftDeed, loftNodes } from "./lofts.ts";
 import { concertDeed, concertNodes } from "./concert.ts";
 import { foodDeed, foodNodes } from "./food.ts";
+import { caveDeed, caveNodes } from "./caves.ts";
 import { storeDeed, storeNodes } from "./stores.ts";
 import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
@@ -116,6 +117,7 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   ...loftNodes,
   ...concertNodes,
   ...foodNodes,
+  ...caveNodes,
   speech: [{ to: "speech-2" }],
   "speech-2": [{ to: "speech-3" }],
   "speech-3": [{ does: "heard" }],
@@ -218,6 +220,7 @@ function deed(day: Draft, name: string): string | null {
   if (name.startsWith("loft-")) return loftDeed(day, name);
   if (name.startsWith("concert-")) return concertDeed(day, name);
   if (name.startsWith("food-")) return foodDeed(day, name);
+  if (name.startsWith("cave-")) return caveDeed(day, name);
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
   if (name === "peace" || name === "trade" || name === "quietly")

@@ -56,5 +56,10 @@ export function landAt(x: number, z: number): number {
 }
 // The ground under a point anyone can stand on: the hill's surface on Mount WAGMI, the Global DEX's steps and podium (`dex.ts`), and
 // the street (or the sea) everywhere else.
+// Underground (`rules/caves.ts`), the floor goes down a metre every twenty, east from the caves' mouth, to the bazaar eight metres down.
+export const caveFloor = (x: number): number =>
+  -Math.min(8, Math.max(0, (x - 1_200) / 20));
 export const hillAt = (x: number, z: number): number =>
-  podiumAt(x, z) ?? (x <= foot || outOf(x, z) >= 1 ? 0 : landAt(x, z));
+  x >= 1_200 && x <= 1_420
+    ? caveFloor(x)
+    : (podiumAt(x, z) ?? (x <= foot || outOf(x, z) >= 1 ? 0 : landAt(x, z)));

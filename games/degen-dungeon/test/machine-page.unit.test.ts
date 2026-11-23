@@ -126,7 +126,7 @@ describe("the Time Machine on the page", () => {
     const beside = { ...day, ...statue };
     expect(noteFor(beside)).toBe(machineLines.asleep);
     expect(noteFor({ ...beside, pocket: 100_000 })).toContain(
-      "step into the Time Machine",
+      "step into the Light Re-emitter",
     );
     expect(noteFor({ ...day, ...street, pocket: 100_000 })).toBe(
       machineLines.risen,

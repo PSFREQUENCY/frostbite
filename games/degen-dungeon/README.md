@@ -116,6 +116,14 @@ of one hero. DUN is in-game credit only.
   freezes whoever is close ahead; the wizard blinks a few metres; the dog sniffs and the cat sees with frost vision (the cat for
   longer); the bull charges; the bear's strength stops the tux and the beat cop round it; and the unicorn's shimmer cools a star of
   heat.
+- **The crystal caves and the Underground Bazaar:** a crack in the rocks in the island's south-east corner opens into caves that wind
+  east and down, eight metres in all, past walls of shining quartz, diamond, amethyst, emerald and rose crystal on a glossy floor, to a
+  back door of the Underground Bazaar. Come in that way without having taken the main stairs (on The Shaft's street) today, and heads
+  turn all down the stalls while the guard walks you up to the main door. Through the main door, three honest traders: one buys the
+  gems a miner digs up (300 DUN each), one sells crystal shards, one tells the phrase of the day.
+- **The Light Re-emitter:** the Time Machine is the Light Re-emitter now. The trip back to day one still opens when a statue rises, and
+  its ring of light beside the Ice Runner in The Old Floe sends your light to your loft, the Global DEX, the Floe Amphitheater, the
+  crystal caves or the bazaar's stairs, any day.
 - **Food and hunger:** hunger builds from your last meal to starving in five minutes, and Pip nags until you eat. Three Crypto Shacks
   sell a Satoshi Burger (15 DUN) at the counter, or through the drive-through if you pull up at the wheel (a day-five side quest); the
   first shack's waitress has lost her dog Biscuit, who is sniffing round the Floe Food Court's stalls (noodles, tacos, smoothies) on

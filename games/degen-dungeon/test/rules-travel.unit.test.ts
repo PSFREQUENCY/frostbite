@@ -1,3 +1,4 @@
+import { underground } from "../src/rules/caves.ts";
 import { describe, expect, it } from "vitest";
 
 import { borrowHeat, fogLine, island, sea } from "../src/rules/constants.ts";
@@ -22,9 +23,12 @@ describe("the island", () => {
     for (const [x, z] of units)
       expect(Math.abs(Math.hypot(x, z) - 1_024)).toBeLessThan(2);
     for (const spot of spots.filter(({ id }) => id !== "ride-boat"))
-      expect(onLand(spot.x, spot.z) || onMoon(spot.x, spot.z), spot.id).toBe(
-        true,
-      );
+      expect(
+        onLand(spot.x, spot.z) ||
+          onMoon(spot.x, spot.z) ||
+          underground(spot.x, spot.z),
+        spot.id,
+      ).toBe(true);
     expect(new Set(spots.map(({ id }) => id)).size).toBe(spots.length);
     const open = {
       beamups: 0,

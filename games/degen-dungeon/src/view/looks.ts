@@ -165,6 +165,10 @@ export const placeLooks: Readonly<Record<string, Look>> = {
   "shack-2": person("#e63946", "#111111", "#f1c9a5"),
   "shack-3": person("#e63946", "#8a5a3a", "#e0b08a"),
   "diamond-hands": person("#18c4b4", "#111111", "#5a3a2a"),
+  // The Underground Bazaar's traders (`view/caves.ts`).
+  "trader-gems": person("#5beac6", "#c9c9c9", "#c99a73"),
+  "trader-crystals": person("#b48cff", "#111111", "#f1c9a5"),
+  "trader-words": person("#ffd166", "#ffffff", "#8a5a3a"),
   // Every loft's landlord (`rules/lofts.ts`): a cardigan the colour of old keys, grey hair.
   ...Object.fromEntries(
     Array.from({ length: 10 }, (_, hero) => [

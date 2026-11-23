@@ -1,3 +1,4 @@
+import { underground } from "./caves.ts";
 import { clinging, onTheRoof } from "./climb.ts";
 import {
   boostPace,
@@ -91,6 +92,7 @@ export const paceOf = (
 // and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {
   if (onMoon(day.x, day.z)) return onMoon;
+  if (underground(day.x, day.z)) return underground;
   if (onTheRoof(day)) return onRoof;
   if (day.ride === "boat") return onWater;
   if (flies(day.ride)) return inSky;
