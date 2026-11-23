@@ -5,6 +5,7 @@ import type { Seat } from "./body.ts";
 import type { Subject } from "./camera.ts";
 import type { Way } from "./poses.ts";
 import { seatsOf } from "./seats.ts";
+import { flying } from "../rules/flight.ts";
 
 // How the hero moves this frame: the clock and the frame's time (seconds), how high a jump has them (metres) and how far through it
 // they are (-1 on the ground), and what they are doing on foot (`poses.ts`).
@@ -33,8 +34,10 @@ export function placeCast(
   cast: readonly Actor[],
   state: DayState,
   at: Subject & { readonly ground?: number },
-  { air, dt, hop, seconds, way }: Motion,
+  { air, dt, hop, seconds, way: given }: Motion,
 ): Actor | undefined {
+  // The dragon in the air flies (`rules/flight.ts`): its model's hover, its wings beating.
+  const way = flying(state) ? "fly" : given;
   const riding = state.ride !== "foot";
   const seats = state.ride === "foot" ? [] : seatsOf[state.ride];
   const going = state.dir >= 0 && state.talk === null ? paceOf(state) : 0;

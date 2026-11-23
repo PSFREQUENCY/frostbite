@@ -3,7 +3,8 @@
 // Angles are radians in the code-built body's own sense (`body.ts`): a leg or an arm turned negative swings forward, a knee bends
 // positive and an elbow negative, the spine leans forward positive, and the neck looks down positive. The models bend their bones by the
 // same numbers (`models/bend.ts`).
-export type Way = "climb" | "crawl" | "crouch" | "hang" | "sit" | "upright";
+export type Way =
+  "climb" | "crawl" | "crouch" | "fly" | "hang" | "sit" | "upright";
 
 export interface Leg {
   readonly hip: number;

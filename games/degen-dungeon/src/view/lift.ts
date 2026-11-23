@@ -1,17 +1,24 @@
 import { lineLift, lineTicks } from "../rules/business.ts";
+import { flying, powerLevel } from "../rules/flight.ts";
 import { beamWait } from "../rules/invasion.ts";
 import type { DayState } from "../rules/types.ts";
 
 // How high above the ground something carries the hero, in metres: the Green Line's lift up to the platform and the train along the
-// rails (`view/train.ts`), and a saucer's beam, which takes a hero standing in it up toward the saucer and holds them under it while they
-// are aboard. Null with nothing carrying them. On a skateboard rolling along, an ollie every two and a half seconds.
+// rails (`view/train.ts`), a saucer's beam, which takes a hero standing in it up toward the saucer and holds them under it while they
+// are aboard, and the dragon's own wings, low at the power's first level and higher at each one after (`rules/flight.ts`). Null with
+// nothing carrying them. On a skateboard rolling along, an ollie every two and a half seconds.
+export const flightHeights = [3, 10, 20] as const;
 export const deckHeight = 22.6;
 export const beamTop = 17;
 const smooth = (part: number): number => part * part * (3 - 2 * part);
 
 export function liftOf(
-  state: Partial<Pick<DayState, "beamed" | "line" | "talk" | "tick">>,
+  state: Partial<
+    Pick<DayState, "beamed" | "done" | "flyUntil" | "line" | "talk" | "tick">
+  >,
 ): number | null {
+  if (flying({ flyUntil: state.flyUntil ?? 0, tick: state.tick ?? 0 }))
+    return flightHeights[powerLevel({ done: state.done ?? [] }) - 1] ?? 3;
   const line = state.line ?? null;
   if (line !== null) {
     const ridden = (state.tick ?? line.at) - line.at;

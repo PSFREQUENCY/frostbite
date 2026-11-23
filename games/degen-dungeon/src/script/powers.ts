@@ -13,3 +13,6 @@ export const powerNames: Readonly<Record<Power, string>> = {
   strength: "Bear strength",
   vision: "Sniff out",
 };
+// Pip's line while the dragon flies (`rules/flight.ts`).
+export const flyingLine = (left: number): string =>
+  `Flying! ${String(left)} seconds left in the air: use your power again to land.`;

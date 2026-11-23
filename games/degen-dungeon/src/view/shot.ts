@@ -1,4 +1,5 @@
 import { roofLevel } from "../rules/climb.ts";
+import { flying } from "../rules/flight.ts";
 import { onLetterTop } from "../rules/mountain.ts";
 import { roomAt } from "../rules/rooms.ts";
 import { venueAt } from "../rules/venues.ts";
@@ -12,7 +13,10 @@ export const intentFor = (state: DayState, closeUp: boolean): Intent =>
     ? "talk"
     : closeUp
       ? "hands"
-      : flies(state.ride) || state.line !== null || state.beamed > 0
+      : flies(state.ride) ||
+          state.line !== null ||
+          state.beamed > 0 ||
+          flying(state)
         ? "sky"
         : state.ride !== "foot" || state.gate > 0
           ? "ride"

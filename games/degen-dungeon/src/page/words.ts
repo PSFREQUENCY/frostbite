@@ -28,6 +28,8 @@ import {
   tillLine,
 } from "../script/lofts.ts";
 import { boroughs } from "../rules/world.ts";
+import { flying } from "../rules/flight.ts";
+import { flyingLine } from "../script/powers.ts";
 import { danceHint } from "../script/concert.ts";
 import { hungryLine } from "../script/food.ts";
 import { starving } from "../rules/food.ts";
@@ -78,6 +80,8 @@ export function dashLine(day: DayState): string | null {
 // saucers, the open tunnel, a Degen Dash on, a trip back.
 function urgentLine(day: DayState): string | null {
   if (day.line !== null) return lineLine(boroughs[day.line.to] ?? "");
+  if (flying(day))
+    return flyingLine(Math.ceil((day.flyUntil - day.tick) / ticksPerSecond));
   if (day.ride === "board" && !day.done.includes("did-skate"))
     return skateLine(Math.ceil((skateTicks - day.skated) / ticksPerSecond));
   // Locked out, the way to the hideout terminal is through the landlord.

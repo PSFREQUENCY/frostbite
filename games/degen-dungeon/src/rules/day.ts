@@ -137,6 +137,7 @@ export function startDay(
     powerAt: -powerCooldown,
     boostUntil: 0,
     senseUntil: 0,
+    flyUntil: 0,
     tillAt: 0,
     line: null,
     skated: 0,

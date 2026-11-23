@@ -1,6 +1,7 @@
 import { roll } from "./coin.ts";
 import { heatPerStar, powerCooldown } from "./constants.ts";
 import { isFrozen, mostFrozen, targetsOf, thawTicks } from "./freeze.ts";
+import { flying, land, powerLevel, takeOff } from "./flight.ts";
 import { units } from "./move.ts";
 import { openTo, spots } from "./places.ts";
 import type { DayState, Draft, Point } from "./types.ts";
@@ -8,7 +9,7 @@ import { onStreet } from "./world.ts";
 
 // Every hero's own power (`view/powers.ts`), used with one button and then cooling for twenty seconds, stronger at each level: level one
 // to start, then one more for each top skill mastered today, up to three (`mastery.ts`). The ram charges and senses S's nearest letter
-// (S, who signs as Satoshi); the dragon flies a block in one leap; the miner digs anywhere and now and then turns up a gem; the ice giant
+// (S, who signs as Satoshi); the dragon flies, low at first and then high, longer at each level (`flight.ts`); the miner digs anywhere and now and then turns up a gem; the ice giant
 // breathes frost that freezes whoever is close ahead; the wizard blinks a few metres; the dog and the cat see with frost vision, the cat
 // for longer; the bull charges; the bear's strength stops the tux and the beat cop in their tracks; and the unicorn's shimmer cools a
 // star of heat. A draft for the owner.
@@ -37,8 +38,7 @@ export const powers: readonly Power[] = [
 ];
 
 export const powerOf = (hero: number): Power => powers[hero] ?? "vision";
-export const powerLevel = (day: Pick<DayState, "done">): number =>
-  1 + Math.min(2, day.done.filter((id) => id.startsWith("mastered-")).length);
+export { powerLevel };
 export const powerReady = (day: Pick<DayState, "powerAt" | "tick">): boolean =>
   day.tick - day.powerAt >= powerCooldown;
 
@@ -90,15 +90,23 @@ export const letterNear = (day: DayState): Point | null =>
 
 export function usePower(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
+  // In the air, the power again brings the dragon down.
+  if (flying(day)) {
+    land(day);
+    return null;
+  }
   if (day.ride !== "foot" || day.level !== 0 || day.line !== null)
     return "your power needs your own feet on the ground";
   if (!powerReady(day)) return "your power is still charging";
   const level = powerLevel(day);
   const power = powerOf(day.hero);
-  if (power === "fly" || power === "blink") {
-    const missed = leap(day, (power === "fly" ? 1_200 : 500) * level);
-    if (missed !== null) return missed;
-  }
+  const missed =
+    power === "fly"
+      ? takeOff(day)
+      : power === "blink"
+        ? leap(day, 500 * level)
+        : null;
+  if (missed !== null) return missed;
   day.powerAt = day.tick;
   switch (power) {
     case "sense":

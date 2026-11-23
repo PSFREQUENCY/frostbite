@@ -13,6 +13,7 @@ import {
 } from "./constants.ts";
 import { board, stepOff } from "./boarding.ts";
 import { boardLine } from "./business.ts";
+import { flying } from "./flight.ts";
 import { clinging, onTheRoof } from "./climb.ts";
 import { askAtDesk, startDash, zuriNear } from "./dash.ts";
 import { isFrozen } from "./freeze.ts";
@@ -194,6 +195,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
 export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
   if (day.line !== null) return "you are on the train";
+  if (flying(day)) return "land first: use your power again";
   if (clinging(day)) return enterWindow(day);
   if (onTheRoof(day)) return "climb down first";
   if (flies(day.ride)) {

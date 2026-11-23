@@ -286,6 +286,16 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   laptop, and gives each a speech bubble or the gold "!". `view/beat-scenes.ts` reads a scene from the beat's words (`sceneOf`, a
   keyword table, "person" when nothing matches) and stands its things and someone at the beat, facing the hero as they first see it.
 
+- Flight and the powers at work (`rules/flight.ts`, `view/power-fx.ts`; numbers are drafts): `flyUntil` on the day. The dragon's power
+  starts a flight (`flightTicks`, 300, a level) instead of a leap, never under a roof, underground or on the moon; `powerLevel` moved to
+  `flight.ts` (re-exported by `powers.ts`) so `move.ts` can pace and bound a flight without a cycle. Level one flies over streets, open
+  lots and the sea (`onStreet || onWater`), higher levels anywhere in the sky; `land` (the power again, or the end) puts the hero on the
+  nearest `onStreet` point, searched a metre further out at a time in eight directions. Aloft, `act` is refused and the chasers and the
+  beams cannot reach. The view lifts the hero 3, 10 or 20 m (`flightHeights`), plays the model's Hover clip (a new way, `fly`) and goes
+  wide. `power-fx.ts` adds the glow, the sparks, the dig's mound and gem, and the flight's trail. `bendStride` bends a four-legged
+  model's knees through its Run clip (the ram); built bodies have ankles with feet and wrists with hands (`seat-pose.ts` now holds the
+  seat angles).
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

@@ -6,6 +6,8 @@ import {
   powerCooldown,
 } from "../src/rules/constants.ts";
 import { degenRules } from "../src/rules/index.ts";
+import { advance } from "../src/rules/day.ts";
+import { flightPace, flightTicks, flying, skyOf } from "../src/rules/flight.ts";
 import { paceOf } from "../src/rules/move.ts";
 import {
   letterNear,
@@ -75,16 +77,48 @@ describe("the heroes' powers", () => {
     expect(letterNear(ram)).not.toBeNull();
   });
 
-  it("flies the dragon a block and blinks the wizard a few metres, landing only on open street", () => {
+  it("flies the dragon ten seconds a level, low over the streets at first and high over everything later, and blinks the wizard", () => {
     const dragon = use(out(1));
-    expect(dragon.x).toBeLessThan(16_000 - 500);
-    expect(onStreet(dragon.x, dragon.z)).toBe(true);
+    expect(dragon.flyUntil).toBe(dragon.tick + flightTicks);
+    expect(paceOf(dragon)).toBe(flightPace(dragon));
+    // Low, a building is in the way; high, it flies over.
+    expect(skyOf(dragon)(15_000, 17_000)).toBe(false);
+    const high = { done: ["mastered-a", "mastered-b"] };
+    expect(skyOf(high)(15_000, 17_000)).toBe(true);
+    expect(use(out(1, high)).flyUntil).toBe(1_000 + flightTicks * 3);
+    // Aloft, nothing is used and nobody reaches it; its power again brings it down.
+    expect(refusal(dragon, "act", { tick: dragon.tick })).toBe(
+      "land first: use your power again",
+    );
+    const down = use(dragon);
+    expect([down.flyUntil <= down.tick, flying(down)]).toEqual([true, false]);
+    // Out of time over a building, it comes down on the nearest open ground.
+    const over = advance(
+      { ...use(out(1, high)), x: 15_000, z: 17_000 },
+      1_000 + flightTicks * 3,
+    );
+    expect([flying(over), onStreet(over.x, over.z)]).toEqual([false, true]);
+    expect(
+      refusal({ ...out(1), x: 21_100, z: 14_900 }, "power", { tick: 1_000 }),
+    ).toBe("no room to fly in here");
     const wizard = use(out(4));
     expect(16_000 - wizard.x).toBeLessThanOrEqual(500);
     // Facing a wall with nowhere to land.
     expect(
       refusal({ ...out(4), facing: 12, z: 17_100 }, "power", { tick: 1_000 }),
     ).toBe("nowhere open to land that way");
+  });
+
+  it("carries the dragon over the sea and the streets while it flies, and nobody on the ground can catch it", () => {
+    const dragon = { ...use(out(1)), heat: 400 };
+    const stepped = degenRules.step(dragon, {
+      data: { dir: 8, tick: dragon.tick },
+      type: "move",
+    });
+    if (!stepped.ok) throw new Error(stepped.reason);
+    const going = advance(stepped.state, dragon.tick + 60);
+    expect(dragon.x - going.x).toBe(60 * flightPace(dragon));
+    expect(going.cop).toBeNull();
   });
 
   it("gives the dog and the cat frost vision, the cat's longer; digs the miner up DUN now and then; cools the unicorn's heat", () => {

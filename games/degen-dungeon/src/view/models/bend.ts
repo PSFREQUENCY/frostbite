@@ -97,3 +97,17 @@ export function bendPose(bones: Bones, pose: Pose, climbing: boolean): void {
   }
   bend(bones.body, bones.quadruped ? (climbing ? -1.2 : 0) : pose.lean);
 }
+
+// A four-legged model's knees through its own run (its clip swings the legs from the hips and keeps the knees straight): each knee
+// bends as its leg comes forward, the left and right half a stride apart and the front pair a quarter stride after the back.
+export function bendStride(bones: Bones, phase: number): void {
+  if (!bones.quadruped) return;
+  for (const side of [0, 1]) {
+    const back = phase + side * Math.PI;
+    bend(bones.shins[side], 0.25 + 0.75 * Math.max(0, Math.sin(back)));
+    bend(
+      bones.fores[side],
+      0.25 + 0.75 * Math.max(0, Math.sin(back + Math.PI / 2)),
+    );
+  }
+}

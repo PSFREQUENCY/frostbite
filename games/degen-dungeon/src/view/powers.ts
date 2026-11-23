@@ -14,10 +14,12 @@ import { units } from "../rules/move.ts";
 import { letterNear, powerOf, type Power } from "../rules/powers.ts";
 import type { DayState } from "../rules/types.ts";
 import { metres } from "./city.ts";
+import { buildPowerFx } from "./power-fx.ts";
 
 // What a hero's power looks like when it is used (`rules/powers.ts`): a ring of light bursting out on the ground in the power's colour,
-// a cone of frost from the ice giant's mouth, streaks for a charge, a column of light where a flyer or a blinker lands, a puff for a dig;
-// and while the ram senses S, a gold beam from the hero toward S's nearest letter. It reads the day and decides nothing.
+// a cone of frost from the ice giant's mouth, a column of light where a flyer takes off or a blinker lands, or over a dig; and while the
+// ram senses S, a gold beam from the hero toward S's nearest letter. What it keeps doing after that is `power-fx.ts`'s. It reads the day
+// and decides nothing.
 export interface PowerView {
   readonly root: Group;
   show(day: DayState | null): void;
@@ -36,7 +38,7 @@ const colours: Readonly<Record<Power, string>> = {
   vision: "#5beac6",
 };
 // How long a burst lasts, in seconds of the day.
-const burst = 0.8;
+const burst = 1.2;
 
 const glow = (opacity: number): MeshBasicMaterial =>
   new MeshBasicMaterial({
@@ -73,7 +75,8 @@ export function buildPowers(): PowerView {
     beamMaterial,
   );
   beam.name = "power-sense";
-  root.add(ring, cone, pillar, beam);
+  const fx = buildPowerFx();
+  root.add(ring, cone, pillar, beam, fx.root);
   return {
     root,
     show(day) {
@@ -87,6 +90,7 @@ export function buildPowers(): PowerView {
       const [east, south] = units[day.facing] ?? [0, 1_024];
       const heading = Math.atan2(south, east);
       const colour = colours[power];
+      fx.show(day, colour);
       ring.visible = live;
       ring.position.set(x, 0.06, z);
       ring.scale.setScalar(1 + part * (power === "strength" ? 9 : 5));

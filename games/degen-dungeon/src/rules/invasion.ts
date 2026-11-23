@@ -1,5 +1,6 @@
 import { eraOf, invasionEra } from "./calendar.ts";
 import { moonPad, visionTicks } from "./constants.ts";
+import { flying } from "./flight.ts";
 import { priceAt } from "./market.ts";
 import type { DayState, Draft, Point } from "./types.ts";
 
@@ -77,6 +78,7 @@ export function invade(day: Draft): void {
     day.talk !== null ||
     day.ride !== "foot" ||
     day.line !== null ||
+    flying(day) ||
     day.level > 0 ||
     day.dir >= 0 ||
     beamIndexAt(day) < 0

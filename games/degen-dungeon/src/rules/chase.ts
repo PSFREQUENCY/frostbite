@@ -1,3 +1,4 @@
+import { flying } from "./flight.ts";
 import {
   catchRadius,
   copFine,
@@ -42,8 +43,8 @@ function frozen(day: Draft): void {
 
 export function chased(day: Draft): void {
   const stars = starsOf(day.heat);
-  // Down in the hideout, or up on the Green Line, nobody can reach the hero.
-  const hidden = below(day.talk) || day.line !== null;
+  // Down in the hideout, up on the Green Line or flying, nobody can reach the hero.
+  const hidden = below(day.talk) || day.line !== null || flying(day);
   // A chaser the freeze ray caught stands where it froze until it thaws.
   if (hidden || stars < copStars || stars >= tuxStars) day.cop = null;
   else if (!(day.cop !== null && isFrozen(day, "cop"))) {

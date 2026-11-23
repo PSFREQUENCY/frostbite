@@ -17,7 +17,7 @@ import { heightOf, type Actor } from "../actor.ts";
 import type { Seat } from "../body.ts";
 import { jumpLength } from "../hop.ts";
 import { legReach, poseFor, type Way } from "../poses.ts";
-import { bendPose, bendSeat, bonesOf } from "./bend.ts";
+import { bendPose, bendSeat, bendStride, bonesOf } from "./bend.ts";
 import { modelNames, packed, type ModelName } from "./packed.ts";
 import { holo, pulse, spirit, standard } from "./shaders.ts";
 
@@ -126,15 +126,17 @@ export const clipFor = (
   air: number,
   quadruped: boolean,
 ): string =>
-  way === "climb" || way === "hang"
-    ? "Idle"
-    : air >= 0
-      ? "Hop"
-      : way === "crouch" || (way === "crawl" && !quadruped)
-        ? "Duck"
-        : pace > 0
-          ? "Run"
-          : "Idle";
+  way === "fly"
+    ? "Hover"
+    : way === "climb" || way === "hang"
+      ? "Idle"
+      : air >= 0
+        ? "Hop"
+        : way === "crouch" || (way === "crawl" && !quadruped)
+          ? "Duck"
+          : pace > 0
+            ? "Run"
+            : "Idle";
 
 // One copy of a model, stood up to a height in metres and facing along its root's +z, with its clips blended by what it is doing.
 export function rigged(model: Model, height: number): Rigged {
@@ -164,6 +166,7 @@ export function rigged(model: Model, height: number): Rigged {
   // The bones a seat or a pose bends, each with its resting turn, found once; how long the jump's clip is, to fit it to a jump.
   const bones = bonesOf(body);
   const hop = actions.get("Hop")?.getClip().duration ?? jumpLength;
+  const stride = actions.get("Run")?.getClip().duration ?? 0.6;
   const resting = body.position.y;
   const hip = height * 0.48;
   let clock = 0;
@@ -187,6 +190,8 @@ export function rigged(model: Model, height: number): Rigged {
       mixer.update(dt);
       clock += dt;
       body.position.y = resting;
+      if (clip === "Run" && current !== null)
+        bendStride(bones, (current.time / stride) * Math.PI * 2);
       if (seat !== null) {
         const crank = clock * (pace > 0 ? 3 + pace * 0.25 : 0.4);
         if (!bones.quadruped) bendSeat(bones, seat, crank);

@@ -7,6 +7,7 @@ import {
   gaitTenths,
   tankPace,
 } from "./constants.ts";
+import { flightPace, flying, skyOf } from "./flight.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
 import {
@@ -70,30 +71,42 @@ const ridePace: Readonly<Record<Ride, number>> = {
 export const paceOf = (
   state: Pick<
     DayState,
-    "boostUntil" | "done" | "fizz" | "form" | "gait" | "hero" | "ride" | "tick"
+    | "boostUntil"
+    | "done"
+    | "fizz"
+    | "flyUntil"
+    | "form"
+    | "gait"
+    | "hero"
+    | "ride"
+    | "tick"
   >,
 ): number =>
-  state.ride === "foot"
-    ? Math.max(
-        1,
-        Math.floor(
-          ((ridePace.foot + (heroes[state.hero]?.speed ?? 1)) *
-            ((gaitTenths[state.gait] ?? 10) +
-              (state.form >= 0 ? strideTenths : 0) +
-              (state.fizz > 0 ? fizzTenths : 0))) /
-            10,
-        ),
-      ) + (state.tick < state.boostUntil ? boostPace : 0)
-    : ridePace[state.ride] +
-      (state.ride === "car" && state.done.includes("tune") ? 8 : 0) +
-      (motors.some((ride) => ride === state.ride) && state.done.includes("tank")
-        ? tankPace
-        : 0);
+  flying(state)
+    ? flightPace(state)
+    : state.ride === "foot"
+      ? Math.max(
+          1,
+          Math.floor(
+            ((ridePace.foot + (heroes[state.hero]?.speed ?? 1)) *
+              ((gaitTenths[state.gait] ?? 10) +
+                (state.form >= 0 ? strideTenths : 0) +
+                (state.fizz > 0 ? fizzTenths : 0))) /
+              10,
+          ),
+        ) + (state.tick < state.boostUntil ? boostPace : 0)
+      : ridePace[state.ride] +
+        (state.ride === "car" && state.done.includes("tune") ? 8 : 0) +
+        (motors.some((ride) => ride === state.ride) &&
+        state.done.includes("tank")
+          ? tankPace
+          : 0);
 // Where a body may be: the moon's ground once the shuttle sets down, a boat on the water, a helicopter in the sky, wheels on the streets,
 // and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {
   if (onMoon(day.x, day.z)) return onMoon;
   if (underground(day.x, day.z)) return underground;
+  if (flying(day)) return skyOf(day);
   if (onTheRoof(day)) return onRoof;
   if (day.ride === "boat") return onWater;
   if (flies(day.ride)) return inSky;

@@ -204,6 +204,8 @@ export interface DayState {
   readonly powerAt: number;
   readonly boostUntil: number;
   readonly senseUntil: number;
+  // Until when the dragon is in the air (`flight.ts`).
+  readonly flyUntil: number;
   // The hero's own business, the Green Line and the skate park (`business.ts`): the tick the shop's till was last emptied, the train
   // ride under way, and the ticks skated in the park today.
   readonly tillAt: number;

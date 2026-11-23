@@ -10,9 +10,10 @@ import {
 import { addFeatures } from "./features.ts";
 import type { Look } from "./looks.ts";
 import { legReach, poseFor, type Way } from "./poses.ts";
+import { seatAngles, type Seat } from "./seat-pose.ts";
 
-// A body built in code, joint by joint, so every part can move: hips, two legs with knees, a spine and chest, a neck and head, two arms
-// with elbows, and a tail for those who have one. The look (`looks.ts`) sets the size, the colours and what is on the head. Motion comes
+// A body built in code, joint by joint, so every part can move: hips, two legs with knees and ankles (feet that stay level and roll
+// onto their toes), a spine and chest, a neck and head, two arms with elbows and wrists (hands), and a tail for those who have one. The look (`looks.ts`) sets the size, the colours and what is on the head. Motion comes
 // in layers each frame: the pose for what the body is doing (`poses.ts`: standing, walking, running, crouching, crawling, climbing,
 // hanging, a jump's tuck), with the hips set down on whichever leg reaches lowest so the feet or knees stay on the ground; breathing and
 // a slow look round while still, a blink every few seconds, and a nod while talking.
@@ -32,64 +33,12 @@ export interface Body {
   readonly root: Group;
 }
 
-// How a body rides: astride a saddle pedalling (a bike), astride with its feet up on pegs (a motorbike), in a seat with its knees bent
-// (inside a car, minivan, pickup or cab), or standing on a deck with a hand on the bar (a scooter); low on a skateboard, knees bent and
-// arms out for balance; or sitting on a ledge, legs dangling over the edge and hands resting beside the hips (a WAGMI letter's top).
-export type Seat =
-  "board" | "deck" | "ledge" | "pedal" | "saddle" | "seat" | null;
-
-// The joint angles (radians) of a ride's pose: hip, knee and a spread for each leg; shoulder and elbow for the arms; the lean forward.
-// A pedalling body turns its legs round a crank, opposite each other; legs dangling from a ledge swing a little.
-const seated: Readonly<
-  Record<
-    Exclude<Seat, null>,
-    readonly [number, number, number, number, number, number]
-  >
-> = {
-  // elbow, hip, knee, lean, shoulder, spread
-  board: [-0.6, -0.55, 0.95, 0.22, -0.35, 0.2],
-  deck: [-0.45, -0.2, 0.3, 0.12, -0.7, 0.04],
-  ledge: [-0.25, -1.45, 1.35, -0.06, 0.3, 0.1],
-  pedal: [-0.45, -1.0, 1.05, 0.34, -1.0, 0.14],
-  saddle: [-0.45, -1.2, 1.6, 0.34, -1.0, 0.14],
-  seat: [-0.7, -1.45, 1.4, 0.04, -0.75, 0.04],
-};
-export function seatAngles(
-  seat: Exclude<Seat, null>,
-  side: number,
-  crank: number,
-): {
-  readonly elbow: number;
-  readonly hip: number;
-  readonly knee: number;
-  readonly lean: number;
-  readonly shoulder: number;
-  readonly spread: number;
-} {
-  const turn = crank + (side === 0 ? 0 : Math.PI);
-  const [elbow, hip, knee, lean, shoulder, spread] = seated[seat];
-  return {
-    elbow,
-    hip:
-      seat === "deck" && side === 1
-        ? 0.25
-        : seat === "pedal"
-          ? hip + Math.sin(turn) * 0.4
-          : hip,
-    knee:
-      seat === "pedal"
-        ? knee + Math.cos(turn) * 0.45
-        : seat === "ledge"
-          ? knee + Math.sin(turn * 2) * 0.12
-          : knee,
-    lean,
-    shoulder,
-    spread,
-  };
-}
+export { seatAngles, type Seat } from "./seat-pose.ts";
 
 interface Limb {
   readonly lower: Group;
+  // The ankle (a foot pointing ahead) or the wrist (a hand).
+  readonly tip: Group;
   readonly upper: Group;
 }
 
@@ -138,12 +87,23 @@ function limb(
   radius: number,
   length: number,
   colours: readonly [string, string],
+  foot = false,
 ): Limb {
   const upper = joint(parent, at[1], at[0], at[2]);
   bone(upper, radius, length / 2, colours[0]);
   const lower = joint(upper, -length / 2 - radius);
   bone(lower, radius * 0.85, length / 2, colours[1]);
-  return { lower, upper };
+  const tip = joint(lower, -length / 2 - radius * 0.85);
+  const end = new Mesh(
+    foot
+      ? new CapsuleGeometry(radius * 0.8, 0.12, 3, 8).rotateX(Math.PI / 2)
+      : new SphereGeometry(radius * 1.2, 8, 6),
+    paint(foot ? "#2a2f45" : colours[1]),
+  );
+  end.position.set(0, foot ? radius * 0.6 : 0, foot ? 0.06 : 0);
+  end.castShadow = true;
+  tip.add(end);
+  return { lower, tip, upper };
 }
 
 export function buildBody(look: Look): Body {
@@ -155,10 +115,14 @@ export function buildBody(look: Look): Body {
   const hips = joint(frame, leg + 0.1);
   const radius = 0.075 * look.bulk;
   const legs = [-1, 1].map((side) =>
-    limb(hips, [side * 0.12 * look.bulk, 0, 0], radius, leg, [
-      look.legs,
-      look.legs,
-    ]),
+    limb(
+      hips,
+      [side * 0.12 * look.bulk, 0, 0],
+      radius,
+      leg,
+      [look.legs, look.legs],
+      true,
+    ),
   );
   // The leg's measures for setting the hips down: hip to knee, knee to sole, the shin's thickness, and how far a straight leg reaches
   // past the hips' standing height (the sole sits that little into the ground).
@@ -217,12 +181,14 @@ export function buildBody(look: Look): Body {
       one.upper.rotation.x = angles.hip;
       one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.spread;
       one.lower.rotation.x = angles.knee;
+      one.tip.rotation.x = -(angles.hip + angles.knee);
     });
     arms.forEach((one, side) => {
       const angles = seatAngles(seat, side, crank);
       one.upper.rotation.x = angles.shoulder;
       one.upper.rotation.z = (side === 0 ? 1 : -1) * 0.1;
       one.lower.rotation.x = angles.elbow;
+      one.tip.rotation.x = angles.elbow * 0.3;
     });
     const angles = seatAngles(seat, 0, crank);
     hips.position.y = leg + 0.1;
@@ -251,12 +217,16 @@ export function buildBody(look: Look): Body {
         one.upper.rotation.x = angles.hip;
         one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.spread;
         one.lower.rotation.x = angles.knee;
+        // The foot stays near level with the ground, rolling onto its toes as the leg pushes off behind.
+        one.tip.rotation.x =
+          -(angles.hip + angles.knee) * 0.85 + Math.max(0, angles.hip) * 0.4;
       });
       arms.forEach((one, side) => {
         const angles = pose.arms[side] ?? pose.arms[0];
         one.upper.rotation.x = angles.shoulder;
         one.upper.rotation.z = (side === 0 ? -1 : 1) * angles.out;
         one.lower.rotation.x = angles.elbow;
+        one.tip.rotation.x = angles.elbow * 0.3;
       });
       // Standing straight the hips are where they always were; on bent legs they come down to the lowest foot or knee.
       hips.position.y = pose.planted

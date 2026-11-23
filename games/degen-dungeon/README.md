@@ -118,10 +118,12 @@ of one hero. DUN is in-game credit only.
   quests: go live, play a cabinet, three gigs.
 - **Powers (Q, or the Power button):** every hero has their own, which cools for twenty seconds after each use and grows a level
   (to three) for each top skill mastered that day. The ram charges and senses S's nearest letter (a gold beam points the way); the
-  dragon flies a block in one leap; the miner digs anywhere and now and then turns up DUN or a gem; the ice giant breathes frost that
-  freezes whoever is close ahead; the wizard blinks a few metres; the dog sniffs and the cat sees with frost vision (the cat for
-  longer); the bull charges; the bear's strength stops the tux and the beat cop round it; and the unicorn's shimmer cools a star of
-  heat.
+  dragon takes off and flies, ten seconds a level and quicker than running: low over the streets and the sea at level one, high over
+  every rooftop from level two (Pip counts the seconds; the power again lands it, and it comes down on open ground); the miner digs
+  anywhere and now and then turns up DUN or a gem, which spins up out of the hole; the ice giant breathes frost that freezes whoever
+  is close ahead; the wizard blinks a few metres in a puff of sparks; the dog sniffs and the cat sees with frost vision (the cat for
+  longer); the bull charges in streaks of speed; the bear's stamp kicks up dust and stops the tux and the beat cop round it; and the
+  unicorn's shimmer swirls a rainbow and cools a star of heat. Every power glows round its hero while it works.
 - **The crystal caves and the Underground Bazaar:** a crack in the rocks in the island's south-east corner opens into caves that wind
   east and down, eight metres in all, past walls of shining quartz, diamond, amethyst, emerald and rose crystal on a glossy floor, to a
   back door of the Underground Bazaar. Come in that way without having taken the main stairs (on The Shaft's street) today, and heads
@@ -183,9 +185,10 @@ of one hero. DUN is in-game credit only.
   you sketch from the loft (standing), a flat stands empty, or somebody shuts the window on you (a little heat).
 - **Walk the roofs:** from the top storey, climb once more to step onto the roof. Walk the ring of roofs round the block (not out over
   its courtyard); at an edge over a street, Drop or F climbs back down that wall.
-- **Bodies that move:** every hero and every person built in code bends at the hips, knees, spine, shoulders and elbows: they stride and
-  swing their arms, run leaning in with bent elbows, duck on bent knees, crawl on hands and knees, climb, hang and tuck their legs in a
-  jump. Frost Run's models play their own Duck and Hop clips and bend their bones the same way to crawl, climb and hang.
+- **Bodies that move:** every hero and every person built in code bends at the hips, knees, ankles, spine, shoulders, elbows and wrists:
+  they stride and swing their arms, roll onto their toes, run leaning in with bent elbows, duck on bent knees, crawl on hands and knees,
+  climb, hang and tuck their legs in a jump. Frost Run's models play their own Duck and Hop clips and bend their bones the same way to
+  crawl, climb and hang; the ram's knees bend through every stride of its run, and the dragon hovers on beating wings as it flies.
 - **The Time Machine:** reach a worth of 100,000 DUN (or finish Moon Night on SHA Beach) and the Ice Runner lifts off its plinth on a
   column of light. Step up to it and the next day is a trip back to day one, where your newbie self can be met three times; each answer bends the
   timeline for better or worse, and the timeline carries into the next playthrough. Come home to a present you changed (your pocket
