@@ -71,6 +71,20 @@ export const kits: Readonly<Record<Exclude<Ride, "foot">, readonly Part[]>> = {
     ["ball", "#ff3b3b", [0.2, 0.1, 0.08], [-0.62, 0.84, -2.02]],
     ...wheels(0.95, 0.4, 1.3, 0.4, 0.3),
   ],
+  // The Fancy Lot's hover car (`rules/deal.ts`): a long low body under a glass bubble, a dark skirt, four hover pads where wheels would
+  // be, a light bar each end and a spoiler. It floats (`view/rides.ts`), and glows (`view/neon.ts`).
+  hover: [
+    ["pill", "paint", [2.1, 0.66, 4.7], [0, 0.72, 0]],
+    ["ball", "#22314a", [1.25, 0.55, 2.1], [0, 1.08, -0.15]],
+    ["pill", "#11131c", [2.2, 0.16, 4.3], [0, 0.42, 0]],
+    ["ball", "#38e8ff", [0.5, 0.1, 0.5], [0.85, 0.32, 1.5]],
+    ["ball", "#38e8ff", [0.5, 0.1, 0.5], [-0.85, 0.32, 1.5]],
+    ["ball", "#38e8ff", [0.5, 0.1, 0.5], [0.85, 0.32, -1.5]],
+    ["ball", "#38e8ff", [0.5, 0.1, 0.5], [-0.85, 0.32, -1.5]],
+    ["box", "#fff6c8", [1.5, 0.06, 0.06], [0, 0.8, 2.34]],
+    ["box", "#ff3b3b", [1.6, 0.06, 0.06], [0, 0.86, -2.34]],
+    ["box", "paint", [1.9, 0.06, 0.42], [0, 1.18, -2.1]],
+  ],
   heli: [
     ["ball", "#ff5d5d", [1.3, 1.1, 1.8], [0, 1.3, 0]],
     ["box", "#ff5d5d", [0.3, 0.3, 3.4], [0, 1.5, -2.4]],

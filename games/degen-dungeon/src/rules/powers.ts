@@ -7,6 +7,7 @@ import { units } from "./move.ts";
 import { openTo, spots } from "./places.ts";
 import type { DayState, Draft, Point } from "./types.ts";
 import { onStreet } from "./world.ts";
+import { topFloor } from "./haus.ts";
 
 // Every hero's own power (`view/powers.ts`), used with one button and then cooling for twenty seconds, stronger at each level: level one
 // to start, then one more for each top skill mastered today, up to three (`mastery.ts`). The ram charges and senses S's nearest letter
@@ -97,11 +98,16 @@ export function usePower(day: Draft): string | null {
     return null;
   }
   const power = powerOf(day.hero);
-  // The dragon may take off from a roof too.
-  const fromRoof = power === "fly" && onTheRoof(day);
+  // The dragon may take off from a roof too, and from Haus De Savage's rooftop; no other power works up in the tower.
+  const fromRoof =
+    power === "fly" && (onTheRoof(day) || day.floor === topFloor);
   if (
     !fromRoof &&
-    (day.ride !== "foot" || day.level !== 0 || day.line !== null)
+    (day.ride !== "foot" ||
+      day.level !== 0 ||
+      day.line !== null ||
+      day.floor > 0 ||
+      day.elevator !== null)
   )
     return "your power needs your own feet on the ground";
   if (!powerReady(day)) return "your power is still charging";

@@ -1,4 +1,6 @@
+import { storeys } from "./climb.ts";
 import { borrowHeat } from "./constants.ts";
+import { valetBay } from "./deal.ts";
 import { heated, rankOf } from "./heat.ts";
 import { flies, type Draft, type Ride } from "./types.ts";
 import { dockLand, dockWater } from "./world.ts";
@@ -19,6 +21,10 @@ export function board(day: Draft, ride: Ride, rank: number): string | null {
   day.level = 0;
   if (ride === "saucer") day.done = [...new Set([...day.done, "saucer"])];
   if (ride === "boat") Object.assign(day, dockWater);
+  // The hover car glides down off the penthouse pad to the valet's bay; the rooftop's helicopter lifts off high over the islet.
+  if (ride === "hover" && day.floor > 0) Object.assign(day, valetBay);
+  if (ride === "heli" && day.floor > 0) day.level = storeys;
+  day.floor = 0;
   return null;
 }
 
@@ -29,6 +35,7 @@ export function stepOff(day: Draft): null {
     day.ride !== "foot" &&
     day.ride !== "boat" &&
     day.ride !== "board" &&
+    day.ride !== "hover" &&
     !flies(day.ride)
   )
     day.left = [

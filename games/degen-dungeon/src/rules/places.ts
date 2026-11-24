@@ -9,6 +9,7 @@ import { concertSites } from "./concert.ts";
 import { dogOut, foodSites } from "./food.ts";
 import { caveSites } from "./caves.ts";
 import { tillSites } from "./business.ts";
+import { dealSites } from "./deal.ts";
 import { errandOpen, errandSites } from "./errands.ts";
 import { bedOf, landlordSites, streetOf } from "./lofts.ts";
 import { dashSites, sites, storeSites } from "./sites.ts";
@@ -213,6 +214,7 @@ export const spots: readonly Spot[] = [
   ...dashSites,
   ...storeSites,
   ...errandSites,
+  ...dealSites,
   ...landlordSites,
   ...concertSites,
   ...foodSites,
@@ -225,8 +227,23 @@ export const spotNamed = (id: string): Spot | undefined => named.get(id);
 // Whether a place is there for this hero today (a hidden one only while frost vision is on, a Dash one only while a run is on).
 export const openTo = (
   spot: Spot,
-  day: Pick<DayState, "beamups" | "dash" | "day" | "done" | "hero" | "looking">,
+  day: Pick<
+    DayState,
+    | "beamups"
+    | "dash"
+    | "day"
+    | "dhJob"
+    | "done"
+    | "floor"
+    | "hero"
+    | "hover"
+    | "keycard"
+    | "looking"
+    | "tick"
+  >,
 ): boolean =>
+  (spot.floor ?? 0) === day.floor &&
+  (spot.when === undefined || spot.when(day)) &&
   (spot.on === undefined || (spot.on & (1 << day.day)) !== 0) &&
   (spot.only === undefined || spot.only === day.hero) &&
   (spot.hidden !== true || day.looking) &&
@@ -237,10 +254,7 @@ export const openTo = (
 
 // The open place within reach, the nearest if there are several.
 export function nearest(
-  day: Pick<
-    DayState,
-    "beamups" | "dash" | "day" | "done" | "hero" | "looking" | "x" | "z"
-  >,
+  day: Parameters<typeof openTo>[1] & Pick<DayState, "x" | "z">,
 ): Spot | null {
   let best: Spot | null = null;
   let gap = reach + 1;

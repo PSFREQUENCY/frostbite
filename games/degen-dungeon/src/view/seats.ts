@@ -30,6 +30,7 @@ export const seatsOf: Readonly<
   boat: [],
   car: [...pair(0.56, 0.15), ...pair(0.56, -0.8)],
   heli: [],
+  hover: pair(0.6, 0.05),
   saucer: [],
   moto: [sit(0, 1.05, -0.22, "saddle"), sit(0, 1.08, -0.62, "saddle")],
   scooter: [sit(0, 0.33, -0.08, "deck")],

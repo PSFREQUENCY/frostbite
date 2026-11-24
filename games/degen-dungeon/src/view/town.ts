@@ -19,6 +19,7 @@ import { buildClues } from "./clues.ts";
 import { buildDexFloor } from "./dex-floor.ts";
 import { buildForecourts } from "./forecourts.ts";
 import { buildGalleryArt } from "./gallery-art.ts";
+import { buildHaus } from "./haus.ts";
 import { buildInsiders } from "./insiders.ts";
 import { buildKnocks } from "./knocks.ts";
 import { buildMall } from "./mall.ts";
@@ -31,6 +32,7 @@ import { buildShops } from "./shops.ts";
 import { buildStreet } from "./street.ts";
 import { buildThings } from "./things.ts";
 import { buildTraffic } from "./traffic.ts";
+import { buildTvs } from "./tvs.ts";
 import { buildUnderglow } from "./underglow.ts";
 import { buildVenues } from "./venues.ts";
 import { buildWalkers } from "./walkers.ts";
@@ -39,8 +41,8 @@ import { buildWalkers } from "./walkers.ts";
 // forecourts, the parked rides, the people walking and talking, the traffic, the landmarks, the lantern night, the beacon over where to
 // go next, the Green Line's stations, the clues frost vision lights, the people filling the landmarks and the bazaar, the DEX's trading
 // floor, ADOR's two floors of shops, the Pixel Vault's neon art, the light under the rides at the kerbs, the goods a hero can knock off a
-// shelf, and Mount WAGMI with its trail and its sign. It also keeps the time of day, from the day's clock: the sun crosses the sky until
-// dusk, and after `nightTick` it is night.
+// shelf, Mount WAGMI with its trail and its sign, Haus De Savage on its islet, and the TVs looping the moon commercial. It also keeps the
+// time of day, from the day's clock: the sun crosses the sky until dusk, and after `nightTick` it is night.
 export interface Town {
   // The town between days (the opening and the hero ring): daylight, people and traffic, nobody's quest.
   idle(seconds: number): void;
@@ -116,7 +118,11 @@ export function buildTown(): Town {
   const beats = buildBeatScenes();
   const gallery = buildGalleryArt();
   const underglow = buildUnderglow();
+  const tower = buildHaus();
+  const tvs = buildTvs();
   root.add(
+    tower.root,
+    tvs.root,
     gallery.root,
     underglow.root,
     things.root,
@@ -168,6 +174,8 @@ export function buildTown(): Town {
       dexFloor.show(seconds);
       bazaar.show(seconds);
       gallery.show(null, seconds);
+      tower.show(null, seconds);
+      tvs.show(null, seconds);
       knocks.show(null, seconds, 0);
       things.show(null, null, seconds);
       forecourts.show(null, seconds);
@@ -210,6 +218,8 @@ export function buildTown(): Town {
       gallery.root.visible = near(x, z, "gallery");
       if (gallery.root.visible) gallery.show(day, seconds);
       underglow.show(day, x, z, seconds, dark);
+      tower.show(day, seconds);
+      tvs.show(day, seconds);
       bazaar.root.visible = underground(day.x, day.z);
       dexFloor.show(seconds);
       bazaar.show(seconds);

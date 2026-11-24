@@ -10,7 +10,9 @@ import { sighted, watcherAt } from "../rules/mystery.ts";
 import { beatOf } from "../rules/story.ts";
 import { flies, type DayState } from "../rules/types.ts";
 import { nearest, spotNamed } from "../rules/places.ts";
+import { inLift } from "../rules/haus.ts";
 import { machineLines } from "../script/cast.ts";
+import { floorLines, liftLine } from "../script/haus.ts";
 import { questLine } from "./words.ts";
 
 // The words beside the picture: the heat as stars, and the one line under the screen that says what can be done right here.
@@ -40,6 +42,8 @@ export function noteFor(day: DayState): string {
       "On the roof. Walk to an edge over a street, then F climbs down.",
       "On the roof. Walk to an edge over a street, then Drop climbs down.",
     );
+  if (day.elevator !== null) return liftLine(day.elevator.to);
+  if (inLift(day)) return byInput(...floorLines(day.floor, true));
   const here = (what: string): string =>
     byInput(`E: ${what}`, `Tap right: ${what}`);
   if (inReach(day, statue)) {
@@ -64,6 +68,7 @@ export function noteFor(day: DayState): string {
   if (spot?.kind === "statue" && !day.won)
     return `${spot.label}: its mask wakes once the story is won.`;
   if (spot !== null) return here(spot.label);
+  if (day.floor > 0) return byInput(...floorLines(day.floor, false));
   if (zuriNear(day)) return here("Miss Mirinda, with a Degen Dash ticket");
   if (day.thief !== null)
     return byInput(

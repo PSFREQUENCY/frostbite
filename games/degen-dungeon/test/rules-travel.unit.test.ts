@@ -14,6 +14,7 @@ import {
   onWater,
 } from "../src/rules/world.ts";
 import { reach } from "../src/rules/constants.ts";
+import { onFloor } from "../src/rules/haus.ts";
 import { nearest, openTo, spots } from "../src/rules/places.ts";
 import { createBot } from "./support/bot.ts";
 import { refusal, started } from "./support/replay.ts";
@@ -22,11 +23,15 @@ describe("the island", () => {
   it("has sixteen headings of the same length, and every spot on a street with room to stand", () => {
     for (const [x, z] of units)
       expect(Math.abs(Math.hypot(x, z) - 1_024)).toBeLessThan(2);
+    // Up in Haus De Savage a place stands on its own floor; Ms. Opal's yacht (and the boat) float on the sea.
     for (const spot of spots.filter(({ id }) => id !== "ride-boat"))
       expect(
-        onLand(spot.x, spot.z) ||
-          onMoon(spot.x, spot.z) ||
-          underground(spot.x, spot.z),
+        (spot.floor ?? 0) > 0
+          ? onFloor(spot.floor ?? 0, spot.x, spot.z)
+          : onLand(spot.x, spot.z) ||
+              onMoon(spot.x, spot.z) ||
+              underground(spot.x, spot.z) ||
+              (spot.id === "dh-drop-3" && onWater(spot.x, spot.z)),
         spot.id,
       ).toBe(true);
     expect(new Set(spots.map(({ id }) => id)).size).toBe(spots.length);
@@ -34,9 +39,14 @@ describe("the island", () => {
       beamups: 0,
       dash: 0,
       day: 1,
+      dhJob: 0,
       done: [],
+      floor: 0,
       hero: 7,
+      hover: false,
+      keycard: false,
       looking: false,
+      tick: 0,
     };
     expect(nearest({ ...open, x: 18_000, z: 18_000 })).toBeNull();
     expect(nearest({ ...open, x: 17_100, z: 18_050 })?.id).toBe("faucet");
@@ -52,13 +62,19 @@ describe("the island", () => {
     for (const day of [1, 2, 3, 4, 5, 6, 7])
       for (const hero of [0, 7, 9]) {
         // A Degen Dash on, so that Miss Mirinda's desk and the Dash car are open too.
+        // The hover car's deal held, the penthouse owned and one of the Diamond Hands' jobs on (each on some day), after dark.
         const seen = {
           beamups: 13,
           dash: 1,
           day,
+          dhJob: (day % 3) + 1,
           done: [],
+          floor: 0,
           hero,
+          hover: true,
+          keycard: true,
           looking: true,
+          tick: 15_000,
         };
         const open = spots.filter((spot) => openTo(spot, seen));
         // Every pair is checked in plain code and any too close are listed together, which keeps the test quick on a busy machine.

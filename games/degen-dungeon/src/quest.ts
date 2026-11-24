@@ -9,6 +9,7 @@ import { echoAt } from "./rules/machine.ts";
 import { openTo, spotNamed, spots, type Spot } from "./rules/places.ts";
 import { beatOf, questOf, tunnelMouth, type Quest } from "./rules/story.ts";
 import { motors, type DayState, type Point } from "./rules/types.ts";
+import { drops } from "./rules/deal.ts";
 
 // Where the next thing to do is, for the glow on the map and the beacon in the city: home while the balance drains (the terminal is
 // there), the beach once the oldest tunnel is open, the next gate on a Degen Dash (the Dash car before the drive), the newbie on a trip
@@ -108,6 +109,8 @@ export function questAt(day: DayState): Point | null {
     return stage.trial === "car" && !motors.some((ride) => ride === day.ride)
       ? dashCar
       : stage;
+  // A Diamond Hands job taken: where it is handed over.
+  if (day.dhJob > 0) return drops[day.dhJob - 1] ?? home;
   if (day.loop > 0) {
     const echo = echoAt(day);
     return echo !== null && !day.done.includes(echo.id) ? echo : home;

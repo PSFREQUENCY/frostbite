@@ -39,10 +39,13 @@ describe("the Time Machine on the page", () => {
       day: 1,
       dream: 0,
       fate: 0,
+      hover: false,
       idCard: false,
+      keycard: false,
       loft: 0,
       loop: 1,
       owed: false,
+      repo: false,
       won: false,
     });
     // The last day ending on SHA Beach wins the story: the Time Machine opens, the statues' masks wake, and the ring is offered again.
@@ -82,10 +85,13 @@ describe("the Time Machine on the page", () => {
       day: 1,
       dream: 0,
       fate: 3,
+      hover: false,
       idCard: false,
+      keycard: false,
       loft: 0,
       loop: 0,
       owed: false,
+      repo: false,
       won: false,
     });
     expect(
@@ -96,10 +102,13 @@ describe("the Time Machine on the page", () => {
       day: 1,
       dream: 0,
       fate: 0,
+      hover: false,
       idCard: false,
+      keycard: false,
       loft: 0,
       loop: 9,
       owed: false,
+      repo: false,
       won: false,
     });
     expect(restore({ fate: -3, loops: 2, machine: true })).toMatchObject({

@@ -2,12 +2,13 @@ import { BoxGeometry, Group, Mesh, MeshToonMaterial } from "three";
 
 import type { Ride } from "../rules/types.ts";
 import { buildKit, kits } from "./kits.ts";
+import { addNeon, type Neon } from "./neon.ts";
 import { buildSaucer } from "./saucers.ts";
 import { toonSteps } from "./textures.ts";
 
 // The ride under the hero (`kits.ts` builds each): only one shows at a time. A ride taken from the kerb keeps its own colour, a car its
 // broken side window; the driver's door swings open and shut as the hero gets in; the helicopter's rotor turns, and the visitors' saucer
-// spins under the hero's feet.
+// spins under the hero's feet; the Fancy Lot's hover car glows.
 export interface Rides {
   readonly root: Group;
   show(
@@ -30,6 +31,7 @@ const kinds: readonly Exclude<Ride, "foot">[] = [
   "boat",
   "car",
   "heli",
+  "hover",
   "moto",
   "saucer",
   "scooter",
@@ -41,6 +43,7 @@ const standard: Readonly<Record<string, string>> = {
   bike: "#ff5d5d",
   board: "#ff7a1a",
   car: "#e0b341",
+  hover: "#e6e9f2",
   moto: "#11131c",
   scooter: "#5beac6",
   semi: "#2f6fb5",
@@ -73,6 +76,7 @@ export function buildRides(): Rides {
   );
   crack.name = "broken-window";
   let spinner: Group | null = null;
+  let glow: Neon | null = null;
   for (const ride of kinds) {
     const group = buildKit(kits[ride], paint);
     group.name = ride;
@@ -94,6 +98,19 @@ export function buildRides(): Rides {
     if (ride === "car") {
       crack.position.set(0.84, 1.12, -0.2);
       group.add(crack);
+    }
+    // The hover car floats (`lift.ts`) over a pool of its own light, lit along its body.
+    if (ride === "hover") {
+      glow = addNeon(group, {
+        at: [0, 0.8, 0],
+        colour: "#ff3df2",
+        edge: 0.05,
+        edged: (mesh) => mesh.material === paint,
+        halo: 4,
+        pool: [4, 6.4],
+      });
+      const pool = glow.root.getObjectByName("neon-pool");
+      if (pool !== undefined) pool.position.y = -0.4;
     }
     const hinge = doors[ride];
     if (hinge !== undefined) {
@@ -124,6 +141,7 @@ export function buildRides(): Rides {
       crack.visible = broken;
       if (rotor !== null) rotor.rotation.y = seconds * 18;
       if (spinner !== null) spinner.rotation.y = seconds * 2.4;
+      if (ride === "hover") glow?.show(seconds);
     },
   };
 }

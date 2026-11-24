@@ -35,6 +35,7 @@ import { hungryLine } from "../script/food.ts";
 import { starving } from "../rules/food.ts";
 import { stories } from "../script/stories.ts";
 import { skateTicks, tillOf } from "../rules/business.ts";
+import { floorName, jobLine, liftLine, repoLine } from "../script/haus.ts";
 
 // The words the page puts beside the picture: the rank's name, Pip's line for what the day is about, and what a talk says with the answers
 // it offers. None of it changes the rules.
@@ -80,6 +81,10 @@ export function dashLine(day: DayState): string | null {
 // saucers, the open tunnel, a Degen Dash on, a trip back.
 function urgentLine(day: DayState): string | null {
   if (day.line !== null) return lineLine(boroughs[day.line.to] ?? "");
+  if (day.elevator !== null) return liftLine(day.elevator.to);
+  if (day.done.includes("repossessed") && day.tick < 30 * ticksPerSecond)
+    return repoLine;
+  if (day.dhJob > 0) return jobLine(day.dhJob);
   if (flying(day))
     return flyingLine(Math.ceil((day.flyUntil - day.tick) / ticksPerSecond));
   if (day.ride === "board" && !day.done.includes("did-skate"))
@@ -173,7 +178,8 @@ export function talkOf(
         .replace("{hint}", day.done.includes("concert-show") ? danceHint : "")
         .replace("{price}", String(priceAt(day.seed, day.day, day.tick)))
         .replace("{time}", clockText(day.dashTime))
-        .replace("{par}", clockText(dashPar)),
+        .replace("{par}", clockText(dashPar))
+        .replace("{floor}", floorName(day.floor)),
     };
   const spot = spotNamed(id);
   const scam = spot?.kind === "offer" && (spot.crooked ?? day.crooked);

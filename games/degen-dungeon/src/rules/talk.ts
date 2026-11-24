@@ -8,6 +8,7 @@ import { concertDeed, concertNodes } from "./concert.ts";
 import { foodDeed, foodNodes } from "./food.ts";
 import { caveDeed, caveNodes } from "./caves.ts";
 import { businessDeed, businessNodes } from "./business.ts";
+import { dealDeed, dealNodes } from "./deal.ts";
 import { storeDeed, storeNodes } from "./stores.ts";
 import { aboard } from "./invasion.ts";
 import { stake } from "./moonshot.ts";
@@ -120,6 +121,7 @@ export const nodes: Readonly<Record<string, readonly Answer[]>> = {
   ...foodNodes,
   ...caveNodes,
   ...businessNodes,
+  ...dealNodes,
   speech: [{ to: "speech-2" }],
   "speech-2": [{ to: "speech-3" }],
   "speech-3": [{ does: "heard" }],
@@ -224,6 +226,7 @@ function deed(day: Draft, name: string): string | null {
   if (name.startsWith("food-")) return foodDeed(day, name);
   if (name.startsWith("cave-")) return caveDeed(day, name);
   if (name.startsWith("biz-")) return businessDeed(day, name);
+  if (name.startsWith("deal-")) return dealDeed(day, name);
   if (name === "fly" || name === "land" || name === "rock" || name === "colony")
     return lunar(day, name);
   if (name === "peace" || name === "trade" || name === "quietly")

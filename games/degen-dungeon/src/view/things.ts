@@ -10,6 +10,7 @@ import { openTo, spots, type Spot } from "../rules/places.ts";
 import type { DayState, Point } from "../rules/types.ts";
 import { clueShape } from "./clues.ts";
 import { hash } from "./hash.ts";
+import { storeyHeight } from "./haus-floors.ts";
 import { hillAt } from "./hill.ts";
 import { buildKit, kits } from "./kits.ts";
 import { addNeon, type Neon, type NeonLook } from "./neon.ts";
@@ -30,10 +31,23 @@ export interface Things {
 
 // What stands at each ride stand: the ride itself (the saucer and the Dash car are drawn by their own views), each lit its own colour.
 const stands: Readonly<Record<string, keyof typeof kits>> = {
+  "haus-heli": "heli",
+  "haus-pad": "hover",
   "ride-boat": "boat",
   "ride-car": "car",
   "ride-heli": "heli",
+  "ride-hover": "hover",
   "ride-scooter": "scooter",
+};
+// The Fancy Lot's hover car, wherever it waits for the hero (`rules/deal.ts`).
+const hoverLight: NeonLook = {
+  colour: "#ff3df2",
+  edge: 0.05,
+  halo: 6,
+  pool: [4, 6.4],
+  sparkles: 10,
+  ring: 3,
+  at: [0, 0.8, 0],
 };
 const standLight: Readonly<Record<string, NeonLook>> = {
   "ride-boat": { colour: "#38e8ff", halo: 6, pool: [4, 8], at: [0, 1, 0] },
@@ -46,7 +60,10 @@ const standLight: Readonly<Record<string, NeonLook>> = {
     ring: 2.6,
     at: [0, 1, 0],
   },
+  "haus-heli": { colour: "#ffd166", halo: 5, at: [0, 1.4, 0] },
+  "haus-pad": hoverLight,
   "ride-heli": { colour: "#ffd166", halo: 5, pool: [3.4, 5], at: [0, 1.4, 0] },
+  "ride-hover": hoverLight,
   "ride-scooter": {
     colour: "#5beac6",
     edge: 0.04,
@@ -152,12 +169,17 @@ export function buildThings(): Things {
     const { look, neon } = made;
     const kind = stands[spot.id];
     const [x, z] = [spot.x / 100, spot.z / 100];
-    look.position.set(x, hillAt(x, z), z);
+    // On a floor of Haus De Savage, up there; the hover car floats over its pad.
+    const ground =
+      (spot.floor ?? 0) > 0
+        ? (spot.floor ?? 0) * storeyHeight
+        : hillAt(x, z) + (spot.id === "ride-hover" ? 0.2 : 0);
+    look.position.set(x, ground + (kind === "hover" ? 0.4 : 0), z);
     look.rotation.y = hash(spot.x, spot.z, 5) * Math.PI * 2;
     look.name = `thing-${spot.id}`;
     const marker = new Mesh(star, white);
     const over = kind !== undefined ? 3.2 : spot.kind === "tool" ? 2.3 : 1.4;
-    marker.position.set(x, hillAt(x, z) + over, z);
+    marker.position.set(x, ground + over, z);
     root.add(look, marker);
     const floating = look.getObjectByName("floating") ?? null;
     return [{ floating, kind, look, marker, neon, spot }];
@@ -172,9 +194,12 @@ export function buildThings(): Things {
         const far =
           Math.abs(spot.x - state.x) > 12_000 ||
           Math.abs(spot.z - state.z) > 12_000;
+        // Up in Haus De Savage, what stands on a floor is there to see from anywhere.
+        const seen =
+          (spot.floor ?? 0) > 0 ? { ...state, floor: spot.floor ?? 0 } : state;
         look.visible =
           !far &&
-          openTo(spot, state) &&
+          openTo(spot, seen) &&
           (kind === undefined || state.ride !== kind);
         marker.visible = look.visible;
         if (!marker.visible) continue;

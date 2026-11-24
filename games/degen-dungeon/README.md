@@ -174,6 +174,21 @@ of one hero. DUN is in-game credit only.
   underglow, faint by day and bright after dark. The Pixel Vault Gallery is vault-dark inside now, hung with twelve original pixel-art
   pieces in pulsing neon frames, and the piece of the day waits on an easel at the back, lit gold until a print is bought (then a red
   dot, as galleries mark what has sold). The Meme Market's shiny frame glows gold at its auction.
+- **The Fancy Lot's hover car:** from nightfall on the second day the Fancy Lot, a glass showroom on Haus De Savage's plaza, lends its one
+  hover car on the Diamond Hands' word. It floats on its own light, is quicker than any car and crosses the sea. Keep it by running at
+  least one of the Diamond Hands' jobs a day: Rocco, by the seafront restaurant's door, hands out three, one at a time (a guest driven to
+  Haus De Savage's doorman in the hover car, a sealed cold wallet to the vault guard on the Global DEX's steps, and an order run over the
+  sea to Ms. Opal's yacht), 10,000 DUN for all three. A day without one and the lot takes the car back the next morning.
+- **Haus De Savage:** a tree of a tower on its own islet in the sea south of Gig Street, over a bridge under a neon arch. Its trunk is
+  braided from bark ribs with veins of gold light, every floor is a ring of garden with a branch held out to its own tree (the sky
+  garden on 7, the sky spa on 14), and three glass elevators climb its south face: step into the middle one and ride it a floor at a
+  time on R and F (Climb and Drop on a phone), or open its panel for the lobby or the rooftop. The concierge sells the sky penthouse on
+  the twentieth floor (50,000 DUN), with its keycard to the top two floors, a pad for the hover car (the valet's lift raises it) and a
+  bed you wake up in. The rooftop has a pool, the Canopy restaurant and a helicopter that lifts off high over the islet; the dragon can
+  fly off it too. While you are inside, the floors above you are cut away so the camera sees in.
+- **TVs:** a commercial loops on the island's screens, a rocket climbing to the moon and the slogan "Only Masters can make it to the
+  moon": on the wall of your loft, in the penthouse, at every Green Line station, and on a great curved screen over ADOR's doorway with
+  the slogan scrolling on a band beneath it.
 - **Neon meters:** over the picture's top-left corner, every goal at a glance: today's quests as lit units, the side quests, the rent
   against the pocket (red while short, pulsing in the last two minutes), the power charging with its level, how full the hero is, the
   shop's till, the skills mastered as units, and the way to the next rank; and while they last, the flight, the board, a live stream,
@@ -231,7 +246,7 @@ of one hero. DUN is in-game credit only.
 
 Keys: arrows or WASD walk (up is the way the camera looks), Shift held runs, C crouches, Z crawls, Space jumps, E acts and gives the first
 answer, 1 to 5 pick an answer, X walks away, B or I opens the backpack, V is frost vision, G fires the freeze ray, R and F climb a wall
-or a letter or fly a helicopter up and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: press and hold the drawn stick's edge to walk that
+or a letter, ride Haus De Savage's glass elevator a floor at a time or fly a helicopter up and down, Enter starts, P pauses. On a phone or tablet the picture fills the screen: press and hold the drawn stick's edge to walk that
 way (no slide needed), or put a thumb anywhere else on the left half and slide (the ring jumps under it and the way it slides steers,
 sixteen ways); a tap on the right acts, and round buttons under
 the right thumb act, jump, run, duck, crawl, see (frost vision, with its seconds), open the bag, fire the freeze ray while you hold it,
@@ -249,14 +264,17 @@ the status line says so. Headless test browsers are such a case, so the platform
 
 `src/rules/` is a pure, seeded, whole-number state machine (`degenRules`). Settings are `{ day, hero }` (day 1 to 7), with `loop` on a
 trip back, and on a story day `fate` for the timeline it carries, `boon` for last night's lantern wish, `beamups` for the beam-ups of
-earlier days, `idcard` for a Nakasato ID made on an earlier day and, on the last day, `dream` for the dream chosen on Moon Night.
+earlier days, `idcard` for a Nakasato ID made on an earlier day, `loft` and `owed` for the loft and its rent, `hover` for the Fancy
+Lot's hover car kept from yesterday (or `repo` when it was taken back), `keycard` for the sky penthouse and, on the last day, `dream`
+for the dream chosen on Moon Night.
 Inputs are `move`, `gait`, `act`, `pick`, `lift`, `look`, `shoot` and `end`, each with its tick; the day runs itself between them. A jump is only on the screen. The platform
 replays the record to the same end and decides the milestones from it, forty in all: twenty for the story (its quests from the seed
 paper on, as Frost's speech and finishing the Dash have none, then the Degen Dash won and Moon Night's lantern), ten top skills, and
 the top achievements: nine hidden ones (the Butterfly effect and Sub-Zero among them) and the saucer pilot
 (`src/rules/milestones.ts`). The Dash's course and rules are `src/rules/course.ts` and `src/rules/dash.ts`; the stores, the freeze ray
 and Mount WAGMI are `src/rules/stores.ts`, `src/rules/freeze.ts` (with the crowds it catches, `src/rules/crowd.ts`) and
-`src/rules/mountain.ts`. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
+`src/rules/mountain.ts`; Haus De Savage and its elevator are `src/rules/haus.ts`, and the Fancy Lot's deal, the Diamond Hands' jobs and
+the penthouse `src/rules/deal.ts`. `src/replay.ts` publishes the rules; `src/sample-run.ts` is
 a legal day the verifier is shown with. The settings come from the page, so `fate`, `boon`, `beamups` and `dream` are the page's word, as
 before.
 

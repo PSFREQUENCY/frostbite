@@ -315,6 +315,19 @@ clips.ts`; the view keeps its own 30-second clock as the day waits), and The Lon
   (`pixel-art.ts`) into one 64-pixel atlas and merges canvases, frames (vertex colours pulsed per piece), glows and plates into four
   draws; the easel stands at b -7.8 (the plinths moved clear), and its red dot shows `did-print`.
 
+- Haus De Savage and the hover car: `rules/haus.ts` is the islet (`onIslet`, joined into `onStreet`), the lobby (`inLobby`, in
+  `onLand`), the floors (`onFloor`, which `move.ts` uses while `day.floor > 0`) and the glass elevator (`rideLift`, `elevatorTick`,
+  `liftTenths`; the climb keys ride it through `climb.ts`'s `lift` when `inLift`). `rules/deal.ts` has the tower's places (`dealSites`: a
+  spot's `floor` and `when` decide where and when it opens, in `places.ts`'s `openTo`), the talks and deeds (`deal-` in `talk.ts`), the
+  Diamond Hands' jobs (`day.dhJob`), the penthouse (`day.keycard`) and `keepsCar`, which `progress.ts` uses to carry `hover`, or `repo`
+  when the car is taken back. The hover car is a ride of its own (`hover`, pace 40, `hoverable` ground: streets and the sea). Settings
+  `hover`, `repo` and `keycard` are checked in `rules/index.ts`; a penthouse owner wakes at `penthouseBed`. On screen: `view/haus.ts`
+  (trunk, lobby, elevators, the clip plane that cuts the floors above the hero; `stage.ts` turns on local clipping), `haus-floors.ts`
+  (floors, gardens, penthouse, rooftop; `storeyHeight` 4 m), `fancy-lot.ts` (showroom, turntable, valet, arch, yacht), `lift.ts` (floor
+  heights, the ride, the hover car's float), and the stands in `things.ts` (a floor's things are shown from any floor).
+- TVs: `view/tvs.ts` paints `tv-ad.ts`'s commercial onto one canvas eight times a second for every screen (the loft's, the penthouse's,
+  one per Green Line station, ADOR's curved screen) and a second canvas for ADOR's scrolling band; the words are `script/ads.ts`.
+
 ## What is left to polish
 
 1. Art: a Blender pass for Omen, Chip, Mint, Rally, Dip, Slip and Bit to match Frost Run's four; modelled kits for the landmarks (they

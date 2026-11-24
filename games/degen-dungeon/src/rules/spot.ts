@@ -1,5 +1,5 @@
 import type { Errand } from "./errands.ts";
-import type { Point, Ride, Wheels } from "./types.ts";
+import type { DayState, Point, Ride, Wheels } from "./types.ts";
 
 // What a place is. `on` is the days it is open (bit 1 is day one), `hidden` needs frost vision, and `only` is for one hero.
 interface Base extends Point {
@@ -14,6 +14,11 @@ interface Base extends Point {
   readonly dash?: boolean;
   // One of the first morning's errands, there only while it is under way (`errands.ts`).
   readonly errand?: Errand;
+  // On a floor of Haus De Savage (`haus.ts`), reached only there; and only while a test of the day holds (`deal.ts`).
+  readonly floor?: number;
+  readonly when?: (
+    day: Pick<DayState, "day" | "dhJob" | "hover" | "keycard" | "tick">,
+  ) => boolean;
 }
 export type Spot = Base &
   (

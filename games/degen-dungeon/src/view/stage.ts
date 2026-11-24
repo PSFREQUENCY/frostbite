@@ -70,6 +70,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
     return null;
   }
   renderer.toneMapping = ACESFilmicToneMapping;
+  // Haus De Savage cuts away what is above the hero's floor (`haus.ts`).
+  renderer.localClippingEnabled = true;
   renderer.outputColorSpace = SRGBColorSpace;
   const camera = new PerspectiveCamera(50, aspect, 0.3, 1_200);
   let fitted = "";

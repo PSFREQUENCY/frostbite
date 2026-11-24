@@ -7,6 +7,7 @@ import {
 import { eraOf, lastDay, moonNight, stormEra } from "./rules/calendar.ts";
 import { maxLoops } from "./rules/constants.ts";
 import { beamupsToday } from "./rules/invasion.ts";
+import { keepsCar } from "./rules/deal.ts";
 import { scoreOf } from "./rules/heat.ts";
 import { rentDue, topLoft } from "./rules/lofts.ts";
 import { storyTold } from "./rules/story.ts";
@@ -26,6 +27,11 @@ export interface Progress {
   readonly dream: number;
   readonly fate: number;
   readonly hero: number;
+  // The Fancy Lot's hover car held for the next story day, or taken back from it for want of a Diamond Hands job, and the sky penthouse's
+  // keycard (`rules/deal.ts`).
+  readonly hover: boolean;
+  readonly repo: boolean;
+  readonly keycard: boolean;
   // Whether the player has made a Nakasato ID at the kiosk (`stores.ts`), which every story day after carries.
   readonly idCard: boolean;
   // The loft's upgrades bought so far (`rules/lofts.ts`), which every story day after carries.
@@ -50,11 +56,14 @@ export const freshProgress: Progress = {
   dream: 0,
   fate: 0,
   hero: 7,
+  hover: false,
   idCard: false,
+  keycard: false,
   loft: 0,
   loops: 0,
   machine: false,
   owed: false,
+  repo: false,
   seen: false,
   slip: false,
   sound: defaultSound,
@@ -85,11 +94,14 @@ export function restore(saved: unknown): Progress {
     dream: whole(fields.dream, 0, 2, 0),
     fate: whole(fields.fate, -99, 99, 0),
     hero: whole(fields.hero, 0, heroes.length - 1, freshProgress.hero),
+    hover: fields.hover === true,
     idCard: fields.idCard === true,
+    keycard: fields.keycard === true,
     loft: whole(fields.loft, 0, topLoft, 0),
     loops: whole(fields.loops, 0, 99, 0),
     machine: fields.machine === true,
     owed: fields.owed === true,
+    repo: fields.repo === true && fields.hover !== true,
     seen: fields.seen === true,
     slip: fields.slip === true,
     sound: parseSound(fields.sound),
@@ -134,6 +146,10 @@ export function afterDay(
         ? Math.max(-99, Math.min(99, progress.fate + day.fate))
         : progress.fate,
       idCard: progress.idCard || day.idCard,
+      // The hover car stays for a story day that ran a Diamond Hands job (or made the deal); the penthouse, once bought, is kept.
+      hover: !trip && keepsCar(day),
+      repo: !trip && day.hover && !keepsCar(day),
+      keycard: progress.keycard || day.keycard,
       loft: trip ? progress.loft : Math.max(progress.loft, day.loft),
       // Rent left unpaid is owed on the next story day, from the second on; a trip back starts the story again, with nothing owed.
       owed: !trip && next > 1 && rentDue(day),
@@ -161,10 +177,13 @@ export const nextRun = (
   readonly day: number;
   readonly dream: number;
   readonly fate: number;
+  readonly hover: boolean;
   readonly idCard: boolean;
+  readonly keycard: boolean;
   readonly loft: number;
   readonly loop: number;
   readonly owed: boolean;
+  readonly repo: boolean;
   readonly won: boolean;
 } =>
   progress.machine
@@ -174,10 +193,13 @@ export const nextRun = (
         day: 1,
         dream: 0,
         fate: 0,
+        hover: false,
         idCard: false,
+        keycard: false,
         loft: 0,
         loop: Math.min(maxLoops, progress.loops + 1),
         owed: false,
+        repo: false,
         won: progress.won,
       }
     : {
@@ -186,9 +208,12 @@ export const nextRun = (
         day: progress.day,
         dream: progress.day === lastDay ? progress.dream : 0,
         fate: Math.max(-9, Math.min(9, progress.fate)),
+        hover: progress.hover,
         idCard: progress.idCard,
+        keycard: progress.keycard,
         loft: progress.loft,
         loop: 0,
         owed: progress.owed && progress.day > 1,
+        repo: progress.repo && !progress.hover,
         won: progress.won,
       };

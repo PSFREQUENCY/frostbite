@@ -195,6 +195,7 @@ function useSpot(day: Draft, spot: Spot): string | null {
 export function act(day: Draft): string | null {
   if (day.talk !== null) return "answer first";
   if (day.line !== null) return "you are on the train";
+  if (day.elevator !== null) return "the elevator is moving";
   if (flying(day)) return "land first: use your power again";
   if (clinging(day)) return enterWindow(day);
   if (onTheRoof(day)) return "climb down first";

@@ -6,6 +6,7 @@ export type Ride =
   | "car"
   | "foot"
   | "heli"
+  | "hover"
   | "moto"
   | "saucer"
   | "scooter"
@@ -215,6 +216,13 @@ export interface DayState {
   readonly thiefLeg: number;
   readonly frozen: readonly Frost[];
   readonly peakFrozen: number;
+  // Haus De Savage (`haus.ts`, `deal.ts`): the floor the hero is on (0 the ground), the glass elevator ride under way, whether the Fancy
+  // Lot's hover car is the hero's, whether the sky penthouse is (its keycard opens the top floors), and the Diamond Hands job on (0 none).
+  readonly floor: number;
+  readonly elevator: Elevator | null;
+  readonly hover: boolean;
+  readonly keycard: boolean;
+  readonly dhJob: number;
   // A Nakasato ID, carried from day to day once made (`stores.ts`), and a Fuzzy's fizz left (ticks).
   readonly idCard: boolean;
   readonly fizz: number;
@@ -226,6 +234,13 @@ export interface DayState {
 export interface Train {
   readonly at: number;
   readonly from: Point;
+  readonly to: number;
+}
+
+// A ride in Haus De Savage's glass elevator: the tick it set off, and the floors it runs from and to.
+export interface Elevator {
+  readonly at: number;
+  readonly from: number;
   readonly to: number;
 }
 

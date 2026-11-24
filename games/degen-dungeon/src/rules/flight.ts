@@ -1,5 +1,6 @@
 import { underground } from "./caves.ts";
 import { ticksPerSecond } from "./constants.ts";
+import { inLobby } from "./haus.ts";
 import { inRoom } from "./rooms.ts";
 import type { DayState, Draft } from "./types.ts";
 import { inVenue } from "./venues.ts";
@@ -31,13 +32,16 @@ export function takeOff(day: Draft): string | null {
   if (
     inRoom(day.x, day.z) ||
     inVenue(day.x, day.z) ||
+    (day.floor === 0 && inLobby(day.x, day.z)) ||
     underground(day.x, day.z) ||
     onMoon(day.x, day.z)
   )
     return "no room to fly in here";
   day.flyUntil = day.tick + flightTicks * powerLevel(day);
-  day.flyHigh = powerLevel(day) >= 2 || day.level > 0;
+  // Off a roof (or Haus De Savage's rooftop, leaving the tower), it flies high.
+  day.flyHigh = powerLevel(day) >= 2 || day.level > 0 || day.floor > 0;
   day.level = 0;
+  day.floor = 0;
   return null;
 }
 

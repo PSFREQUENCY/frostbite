@@ -6,6 +6,7 @@ import { loftTalks } from "./lofts.ts";
 import { concertTalks } from "./concert.ts";
 import { foodTalks } from "./food.ts";
 import { caveTalks } from "./caves.ts";
+import { hausTalks } from "./haus.ts";
 import { venueTalks } from "./venues.ts";
 
 // What the talks say and the answers they offer, in the order of the rules' `nodes`, and the words for the day's goals. Each line is
@@ -94,6 +95,7 @@ export const talks: Readonly<
   ...concertTalks,
   ...foodTalks,
   ...caveTalks,
+  ...hausTalks,
 };
 
 // What Frost says about S, a different hint each day.

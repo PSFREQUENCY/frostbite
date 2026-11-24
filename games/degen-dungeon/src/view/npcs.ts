@@ -15,6 +15,7 @@ import { buildActor, type Actor } from "./actor.ts";
 import { buildBody } from "./body.ts";
 import type { Subject } from "./camera.ts";
 import { createDashView } from "./dash-view.ts";
+import { storeyHeight } from "./haus-floors.ts";
 import { hillAt } from "./hill.ts";
 import { clerkLooks, placeLooks } from "./looks.ts";
 import { createRayView } from "./ray-view.ts";
@@ -34,6 +35,7 @@ const people = spots.filter(
       spot.kind === "fence" ||
       spot.kind === "gig") &&
     !spot.id.startsWith("till-") &&
+    !spot.id.startsWith("haus-lift-") &&
     spot.id !== "dash" &&
     spot.id !== "dash-desk" &&
     spot.id !== "wallet" &&
@@ -46,6 +48,10 @@ const people = spots.filter(
       "bazaar-stairs",
       "bazaar-up",
       "emitter",
+      "haus-home",
+      "haus-garden",
+      "haus-pool",
+      "dh-drop-3",
     ].includes(spot.id),
 );
 // Over the head of everyone with something to say today, a speech bubble; over whoever the story wants next, a gold "!" instead.
@@ -150,7 +156,14 @@ export function createPeople(
         }
         const actor = someone(spot.id, index);
         actor.root.visible = true;
-        actor.root.position.set(x, hillAt(x, z), z);
+        // Up on a floor of Haus De Savage, they stand on it.
+        actor.root.position.set(
+          x,
+          (spot.floor ?? 0) > 0
+            ? (spot.floor ?? 0) * storeyHeight
+            : hillAt(x, z),
+          z,
+        );
         const bubbles = actor.root.getObjectByName("bubbles");
         const wanted =
           goal !== null && Math.hypot(goal.x - spot.x, goal.z - spot.z) < 60;

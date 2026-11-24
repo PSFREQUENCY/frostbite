@@ -7,6 +7,7 @@ import {
   seatNear,
 } from "./mountain.ts";
 import { onRoof, onStreet, wallBeside } from "./world.ts";
+import { inLift, rideLift } from "./haus.ts";
 
 // Going up and down: a helicopter climbs and drops a level at a time (three at most, and it lands only on the street), and on foot the
 // hero climbs a building's wall from the pavement beside it (`wallBeside`), a storey at a time, up to three, and from the top storey
@@ -67,6 +68,8 @@ export const canClimb = (
     : day.level < storeys || (day.level === storeys && roofStep(day) !== null));
 
 export function lift(day: Draft, by: number): string | null {
+  // In Haus De Savage's glass elevator, up or down a floor.
+  if (inLift(day)) return rideLift(day, day.floor + by);
   if (day.ride === "foot") return climb(day, by);
   if (!flies(day.ride)) return "only a helicopter climbs";
   const level = day.level + by;

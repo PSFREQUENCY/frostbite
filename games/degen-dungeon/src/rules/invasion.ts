@@ -79,6 +79,8 @@ export function invade(day: Draft): void {
     day.ride !== "foot" ||
     day.line !== null ||
     flying(day) ||
+    day.floor > 0 ||
+    day.elevator !== null ||
     day.level > 0 ||
     day.dir >= 0 ||
     beamIndexAt(day) < 0

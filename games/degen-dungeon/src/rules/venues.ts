@@ -167,11 +167,15 @@ export const activities: Readonly<Record<string, Activity>> = {
   dance: doing(20, 30, 4),
   exhibits: doing(5, 10, 8),
   film: doing(15, 40, 0, 0, 40),
+  // Haus De Savage's sky garden, sky spa and rooftop pool (`deal.ts`).
+  garden: doing(0, 20, 3),
   grass: doing(0, 25, 1),
   live: doing(0, 0, 2, 0, 0, 300),
   print: doing(200, 0, 12),
   read: doing(0, 5, 2, 120),
   skate: doing(0, 15, 6),
+  spa: doing(300, 40, 4),
+  swim: doing(0, 30, 5),
   track: doing(50, 0, 15),
   vr: doing(25, 20, 0, 300),
 };

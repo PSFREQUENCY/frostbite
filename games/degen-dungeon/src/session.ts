@@ -59,6 +59,10 @@ export interface RunSessionOptions {
   readonly loft?: number;
   // Yesterday's rent left unpaid (story days from the second on).
   readonly owed?: boolean;
+  // The Fancy Lot's hover car kept from yesterday or taken back, and the sky penthouse's keycard (story days only).
+  readonly hover?: boolean;
+  readonly repo?: boolean;
+  readonly keycard?: boolean;
 }
 
 const finished: Outcome = { ok: false, reason: "the day has ended" };
@@ -85,6 +89,11 @@ export function createRunSession(options: RunSessionOptions): RunSession {
           ...(options.idCard === true ? { idcard: 1 } : {}),
           ...((options.loft ?? 0) > 0 ? { loft: options.loft ?? 0 } : {}),
           ...(options.owed === true ? { owed: 1 } : {}),
+          ...(options.hover === true ? { hover: 1 } : {}),
+          ...(options.repo === true && options.hover !== true
+            ? { repo: 1 }
+            : {}),
+          ...(options.keycard === true ? { keycard: 1 } : {}),
           ...won,
         };
   const init = degenRules.init(options.seed, config);

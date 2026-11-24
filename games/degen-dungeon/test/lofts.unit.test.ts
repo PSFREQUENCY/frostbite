@@ -134,7 +134,7 @@ describe("the lofts", () => {
     expect(degenRules.init(1, { day: 1, hero: 7, loft: 1, loop: 1 })).toEqual({
       ok: false,
       reason:
-        "a trip back starts fresh, with no fate, boon, ID, loft or rent owed",
+        "a trip back starts fresh, with no fate, boon, ID, loft, car, keycard or rent owed",
     });
   });
 });

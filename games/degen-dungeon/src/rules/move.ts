@@ -7,7 +7,9 @@ import {
   gaitTenths,
   tankPace,
 } from "./constants.ts";
+import { hoverStand } from "./deal.ts";
 import { flightPace, flying, skyOf } from "./flight.ts";
+import { onFloor } from "./haus.ts";
 import { heroes } from "./heroes.ts";
 import { strideTenths } from "./statues.ts";
 import {
@@ -20,6 +22,7 @@ import {
 import {
   dockWater,
   helipad,
+  hoverable,
   inSky,
   inTunnel,
   onBeach,
@@ -59,6 +62,7 @@ const ridePace: Readonly<Record<Ride, number>> = {
   car: 32,
   foot: 10,
   heli: 36,
+  hover: 40,
   moto: 30,
   saucer: 54,
   scooter: 22,
@@ -104,11 +108,13 @@ export const paceOf = (
 // Where a body may be: the moon's ground once the shuttle sets down, a boat on the water, a helicopter in the sky, wheels on the streets,
 // and feet on the island and in the shops (and in the oldest tunnel and on SHA Beach once the Genesis Room is open).
 function free(day: Draft): (x: number, z: number) => boolean {
+  if (day.floor > 0) return (x, z) => onFloor(day.floor, x, z);
   if (onMoon(day.x, day.z)) return onMoon;
   if (underground(day.x, day.z)) return underground;
   if (flying(day)) return skyOf(day);
   if (onTheRoof(day)) return onRoof;
   if (day.ride === "boat") return onWater;
+  if (day.ride === "hover") return hoverable;
   if (flies(day.ride)) return inSky;
   if (day.ride !== "foot") return onStreet;
   if (day.gate === 0) return onLand;
@@ -120,7 +126,13 @@ function free(day: Draft): (x: number, z: number) => boolean {
 // toward SHA Beach is back where it set out from.
 export function moved(day: Draft): void {
   const unit = units[day.dir];
-  if (unit === undefined || day.talk !== null || day.line !== null) return;
+  if (
+    unit === undefined ||
+    day.talk !== null ||
+    day.line !== null ||
+    day.elevator !== null
+  )
+    return;
   if (flies(day.ride) ? day.level === 0 : clinging(day)) return;
   const pace = paceOf(day);
   const open = free(day);
@@ -134,7 +146,9 @@ export function moved(day: Draft): void {
       ? helipad
       : day.ride === "saucer"
         ? saucerPad
-        : dockWater;
+        : day.ride === "hover"
+          ? hoverStand
+          : dockWater;
   day.x = back.x;
   day.z = back.z;
   day.level = 0;
