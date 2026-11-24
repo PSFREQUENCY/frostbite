@@ -1,0 +1,259 @@
+import { eras } from "./calendar.ts";
+import { launchpad, moonPad, reach, shuttleBooth } from "./constants.ts";
+import { heroes } from "./heroes.ts";
+import { saucerOpen } from "./invasion.ts";
+import { parkedRides } from "./parked.ts";
+import { statueId, statues } from "./statues.ts";
+import { lofts, rooms } from "./rooms.ts";
+import { concertSites } from "./concert.ts";
+import { dogOut, foodSites } from "./food.ts";
+import { caveSites } from "./caves.ts";
+import { tillSites } from "./business.ts";
+import { errandOpen, errandSites } from "./errands.ts";
+import { bedOf, landlordSites, streetOf } from "./lofts.ts";
+import { dashSites, sites, storeSites } from "./sites.ts";
+import { bit, days, type Spot } from "./spot.ts";
+import type { DayState, Point } from "./types.ts";
+import { nodeOf, venues } from "./venues.ts";
+import { at, loop } from "./world.ts";
+
+export { bit, days, type Spot };
+
+// Every place where something can be done. Each stands on a street or an avenue, so anyone can walk to it, and no two that can be open
+// on the same day are within reach of each other. `on` is the days a place is open (bit 1 is day one), `hidden` needs frost vision, and
+// `only` is for one hero. Adding a place to the game is adding a row here; a new kind of place is a case in `acts.ts`.
+// Each hero's bed, at the back of their loft (`lofts.ts`).
+const homes: Spot[] = heroes.flatMap((hero, id) => {
+  const loft = lofts[id];
+  return loft === undefined
+    ? []
+    : [
+        {
+          ...bedOf(loft),
+          hero: id,
+          id: `home-${String(id)}`,
+          kind: "home" as const,
+          label: `${hero.name}'s place`,
+        },
+      ];
+});
+// Each hero's own word from the first morning, on the street beside their door, seen only by frost vision.
+const heroWords: Spot[] = lofts.map((loft, id) => ({
+  ...streetOf(loft, -900),
+  hidden: true,
+  id: `heroword-${String(id)}`,
+  kind: "heroword",
+  label: "Something scratched in the ice",
+  on: days(1),
+  only: id,
+}));
+const recruits: Spot[] = [
+  ...heroes.flatMap((hero, id) =>
+    hero.hidden
+      ? []
+      : [
+          {
+            ...at(hero.borough, hero.borough === 4 ? -2_000 : -2_500, 0),
+            hero: id,
+            id: `recruit-${String(id)}`,
+            kind: "recruit" as const,
+            label: hero.name,
+          },
+        ],
+  ),
+  {
+    ...at(7, 0, -4_500),
+    hero: bit,
+    id: `recruit-${String(bit)}`,
+    kind: "recruit",
+    label: "Bit",
+    on: eras(4, 5),
+  },
+];
+const stops: Spot[] = loop.map((borough, index) => ({
+  ...at(borough, 0, 2_500),
+  id: `stop-${String(borough)}`,
+  kind: "stop",
+  label: "Green Line Express",
+  next: `stop-${String(loop[(index + 1) % loop.length] ?? 0)}`,
+}));
+
+// S's twenty-one letters, three on each day's avenues.
+const avenue: readonly (readonly [number, number, number])[] = [
+  [3_000, 12_000, 1],
+  [21_000, 24_000, 1],
+  [12_000, 27_000, 1],
+  [9_000, 12_000, 2],
+  [27_000, 24_000, 2],
+  [24_000, 9_000, 2],
+  [12_000, 15_000, 3],
+  [15_000, 12_000, 3],
+  [33_000, 24_000, 3],
+  [24_000, 21_000, 4],
+  [12_000, 3_000, 4],
+  [21_000, 12_000, 4],
+  [3_000, 24_000, 5],
+  [24_000, 27_000, 5],
+  [12_000, 21_000, 5],
+  [33_000, 12_000, 6],
+  [25_600, 12_000, 6],
+  [9_000, 24_000, 6],
+  [24_000, 15_000, 7],
+  [12_000, 33_000, 7],
+  [24_000, 3_000, 7],
+];
+const letters: Spot[] = avenue.map(([x, z, day], index) => ({
+  id: `letter-${String(index + 1)}`,
+  kind: "letter",
+  label: "A letter signed S",
+  on: days(day),
+  x,
+  z,
+}));
+
+// The shops' counters, and the lantern ground in the Old Floe park (open every day, used after dark).
+const counters: Spot[] = rooms
+  .filter(({ kind }) => kind !== "loft" && kind !== "restaurant")
+  .map((room) => ({
+    ...room.counter,
+    id: room.id,
+    kind: "talk",
+    label: room.label,
+    node: `shop-${room.kind}`,
+  }));
+const lanterns: Spot = {
+  id: "lanterns",
+  kind: "talk",
+  label: "The lantern ground",
+  node: "lantern",
+  x: 30_000,
+  z: 6_000,
+};
+// The shuttle booth under Moon Tower, and on the moon the pad home, the colony's airlock and a crater rim to take a rock from.
+const moonward: readonly Spot[] = [
+  {
+    id: "shuttle",
+    kind: "talk",
+    label: "Shuttle to the colony",
+    node: "shuttle",
+    ...shuttleBooth,
+  },
+  {
+    id: "moon-pad",
+    kind: "talk",
+    label: "Shuttle home",
+    node: "moon-pad",
+    ...moonPad,
+  },
+  {
+    id: "colony",
+    kind: "talk",
+    label: "The colony airlock",
+    node: "colony",
+    x: 103_000,
+    z: 4_000,
+  },
+  {
+    id: "crater",
+    kind: "talk",
+    label: "Crater rim",
+    node: "crater",
+    x: 109_500,
+    z: 3_000,
+  },
+];
+// Something to do in every landmark you can walk into, toward the back of its floor; and the moonshot launchpad beside the shuttle booth.
+const outings: readonly Spot[] = venues.map(
+  ({ id, kind, label, middle, out }) => ({
+    id,
+    kind: "talk",
+    label,
+    node: nodeOf[kind],
+    x: middle.x,
+    z: middle.z - out * 600,
+  }),
+);
+const fixed: readonly Spot[] = [
+  ...statues.map(({ label, x, z }, index): Spot => ({
+    id: statueId(index),
+    index,
+    kind: "statue",
+    label,
+    x,
+    z,
+  })),
+  ...homes,
+  ...heroWords,
+  ...recruits,
+  ...stops,
+  ...letters,
+  ...sites,
+  ...counters,
+  lanterns,
+  ...moonward,
+  ...outings,
+  {
+    id: "launchpad",
+    kind: "talk",
+    label: "Moonshot launchpad",
+    node: "launchpad",
+    ...launchpad,
+  },
+];
+export const spots: readonly Spot[] = [
+  ...fixed,
+  ...parkedRides([
+    ...fixed,
+    ...landlordSites,
+    ...concertSites,
+    ...foodSites,
+    ...caveSites,
+    ...tillSites,
+  ]),
+  ...dashSites,
+  ...storeSites,
+  ...errandSites,
+  ...landlordSites,
+  ...concertSites,
+  ...foodSites,
+  ...caveSites,
+  ...tillSites,
+];
+const named = new Map(spots.map((spot) => [spot.id, spot]));
+export const spotNamed = (id: string): Spot | undefined => named.get(id);
+
+// Whether a place is there for this hero today (a hidden one only while frost vision is on, a Dash one only while a run is on).
+export const openTo = (
+  spot: Spot,
+  day: Pick<DayState, "beamups" | "dash" | "day" | "done" | "hero" | "looking">,
+): boolean =>
+  (spot.on === undefined || (spot.on & (1 << day.day)) !== 0) &&
+  (spot.only === undefined || spot.only === day.hero) &&
+  (spot.hidden !== true || day.looking) &&
+  (spot.saucer !== true || saucerOpen(day)) &&
+  (spot.dash !== true || day.dash > 0) &&
+  (spot.errand === undefined || errandOpen(spot.errand, day)) &&
+  (spot.id !== "dog" || dogOut(day));
+
+// The open place within reach, the nearest if there are several.
+export function nearest(
+  day: Pick<
+    DayState,
+    "beamups" | "dash" | "day" | "done" | "hero" | "looking" | "x" | "z"
+  >,
+): Spot | null {
+  let best: Spot | null = null;
+  let gap = reach + 1;
+  for (const spot of spots) {
+    const away = Math.max(Math.abs(spot.x - day.x), Math.abs(spot.z - day.z));
+    if (away < gap && openTo(spot, day)) {
+      best = spot;
+      gap = away;
+    }
+  }
+  return best;
+}
+
+// Whether a place is within reach of where the hero stands.
+export const inReach = (from: Point, place: Point): boolean =>
+  Math.max(Math.abs(from.x - place.x), Math.abs(from.z - place.z)) <= reach;

@@ -1,0 +1,133 @@
+// Everything the rules measure, in whole numbers: a place is in centimetres on the island's floor (x runs east, z runs south), a time is
+// in ticks (the screen runs thirty a second, the rules know only ticks). Nothing here is a float, so every engine plays a day the same way.
+export const gameId = "degen-dungeon";
+export const verifierId = "degen-dungeon";
+export const verifierVersion = 1;
+
+export const ticksPerSecond = 30;
+// One run is one day, at most ten minutes long, which bounds the work of one replay.
+export const maxTicks = 18_000;
+// A day's record holds at most this many inputs, which keeps it well under the platform's 64 KB.
+export const maxInputs = 1_200;
+
+// Nakasato is three boroughs by three, and a borough is 120 metres a side.
+export const block = 12_000;
+export const island = 36_000;
+// Boats and helicopters may go this far past the shore. North of the fog line lies SHA Beach, which nobody reaches: they are turned round.
+export const sea = 5_000;
+export const shore = 200;
+export const fogLine = -3_000;
+// A street runs through the middle of every borough each way. Buildings fill the four corners: from the first to the second number of
+// each pair, measured from the borough's own corner, on both axes.
+export const lots = [
+  [800, 5_000],
+  [7_000, 11_200],
+] as const;
+export const bodyRadius = 40;
+// How near a spot must be (on both axes) to act on it.
+export const reach = 300;
+
+// Heat is the wanted level: a hundred points a star, five stars at most. At three stars a tux comes, and what it touches is frozen.
+export const heatPerStar = 100;
+export const maxHeat = 500;
+export const tuxStars = 3;
+export const tuxGap = 3_000;
+export const catchRadius = 150;
+// Heat falls a point every this many ticks.
+export const heatFadeTicks = 30;
+export const lootHeat = 160;
+export const borrowHeat = 150;
+export const frozenFine = 250;
+export const rebrandCool = 300;
+export const lineCool = 60;
+
+// The Great Airdrop: in the winter (`calendar.ts`) DUN falls for a minute. The ground is cut in patches, and each patch has a new gust every few seconds.
+export const stormStart = 7_200;
+export const stormTicks = 1_800;
+export const patch = 1_000;
+export const gustTicks = 150;
+export const swapMeetBonus = 8;
+
+// Net worth at which each rank begins (Newbie, Shrimp, Crab, Dolphin, Shark, Whale), and what a story day starts with in the pocket.
+export const rankFloors = [0, 1_000, 5_000, 25_000, 100_000, 500_000] as const;
+export const dayPockets = [0, 300, 600, 0, 3_000, 10_000, 10_000] as const;
+// What each story day starts with in the freezer: the climb so far, fixed so that every day replays on its own.
+export const dayFreezers = [0, 0, 400, 4_000, 20_000, 80_000, 80_000] as const;
+export const faucetDun = 100;
+export const gigRep = 10;
+export const lootRep = 20;
+
+// The Time Machine: the rank that wakes the statue, how many trips back a save may count, what a traveller carries, how long the newbie
+// stays at each place, the tip a newbie can be handed, the heat a paradox brings for each step the timeline darkens, and what each step of
+// the timeline is worth when a trip is scored.
+export const statueRank = 4;
+export const maxLoops = 9;
+export const loopPocket = 1_000;
+export const echoTicks = 6_000;
+export const tipDun = 500;
+export const paradoxHeat = 60;
+export const fateDun = 500;
+
+// The rest of the island. Frost vision lasts this long a day (Lumen's lamp twice as long). The seed paper is tested this long after it is
+// written, and a drained pocket loses this much every ten ticks (a permission slip leaks one). Crossing the riot is a star; loot taken in front of a crowd adds witnesses.
+export const visionTicks = 450;
+// Frost vision comes back to at least `visionTicks` every thirty seconds.
+export const visionEvery = 900;
+export const paperTest = 2_400;
+export const drainPace = 4;
+export const riotHeat = 130;
+export const witnessHeat = 80;
+// The beat cop: out at two stars, on a scooter, and a fine instead of a freeze.
+export const copStars = 2;
+export const copGap = 2_500;
+export const copPace = 16;
+export const copFine = 100;
+// The coin: a new candle every ten seconds, and the size of a small buy. MAXX pays a fiftieth every half minute in the mania.
+export const candleTicks = 300;
+export const buyDun = 100;
+export const maxxTicks = 900;
+export const maxxShare = 50;
+// The park takes FOMO down a point every this many ticks of sitting still; the mania puts it up a point every this many.
+export const grassTicks = 10;
+export const fomoTicks = 90;
+// The oldest tunnel and SHA Beach, north of the island under the sea, and how close behind the Vests come.
+export const tunnel = { x0: 23_600, x1: 24_400, z0: -7_100, z1: 0 } as const;
+export const beach = {
+  x0: 16_000,
+  x1: 32_000,
+  z0: -9_600,
+  z1: -7_000,
+} as const;
+export const waterline = -9_200;
+export const vestGap = 1_800;
+export const vestPace = 8;
+
+// Night falls for the last third of the day: the lanterns go up then. A gait changes a walking pace by tenths (walk, run, crouch, crawl),
+// and crouching or crawling hides the hero a little and lets heat fade twice as fast.
+export const nightTick = 12_000;
+export const gaitTenths = [10, 16, 6, 4] as const;
+export const gaitStealth = [0, 0, 2, 4] as const;
+// What a wish answered brings at the start of the next story day: moonlight (frost vision), the crew's luck (rep), safe keys (the
+// freezer), riches (the pocket).
+export const boons = [0, 300, 60, 500, 400] as const;
+// The colony on the moon: a seat on the shuttle from Moon Tower, the moon's walkable ground (centimetres, far east of the island), where
+// the shuttle sets down, and where it lands back home.
+export const moonFare = 500_000;
+export const moon = { x0: 100_000, x1: 112_000, z0: 0, z1: 12_000 } as const;
+export const moonPad = { x: 106_000, z: 9_000 } as const;
+export const shuttleBooth = { x: 20_400, z: 17_300 } as const;
+// The moonshot launchpad under Moon Tower: what a shot can stake, what a hit pays (a hundred times), the odds of a hit (one in thirty),
+// and how often a launch goes up (every thirty seconds); a stake rides on the next launch.
+export const shotStakes = [1_000, 5_000, 10_000] as const;
+export const shotPays = 100;
+export const shotOdds = 30;
+export const shotWindow = 900;
+export const launchpad = { x: 21_700, z: 17_300 } as const;
+// A Fuzzy's fizz (`stores.ts`): how long it lasts and how much longer it makes a stride on foot (tenths); and a full tank's extra pace.
+export const fizzTicks = 900;
+export const fizzTenths = 2;
+export const tankPace = 4;
+// How long a hero's power cools after it is used (`powers.ts`), in ticks.
+export const powerCooldown = 600;
+// How much a charge quickens the pace, cm a tick (`powers.ts`).
+export const boostPace = 12;

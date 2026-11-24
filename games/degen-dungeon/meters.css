@@ -1,0 +1,124 @@
+/* The neon meters over the picture's top-left corner (`src/page/meters.ts`): a name, a glowing bar or a row of lit units, and a number,
+   each in its own colour. A meter that needs seeing to pulses. The backpack's progress uses the same bars and units. */
+.meters {
+  grid-area: 1 / 1;
+  place-self: start start;
+  z-index: 4;
+  display: grid;
+  gap: 0.22rem;
+  inline-size: min(15rem, 46%);
+  margin: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgb(56 232 255 / 0.35);
+  border-radius: 0.6rem;
+  background: rgb(10 6 28 / 0.62);
+  box-shadow: 0 0 0.8rem rgb(56 232 255 / 0.15);
+  font-size: 0.68rem;
+  line-height: 1.1;
+  pointer-events: none;
+}
+.meters[hidden] {
+  display: none;
+}
+.neon {
+  display: grid;
+  grid-template-columns: minmax(0, 5.6rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem;
+  color: #ece8ff;
+}
+.neon-name {
+  overflow: hidden;
+  color: var(--hue);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 0.35rem var(--hue);
+  white-space: nowrap;
+}
+.neon-text {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+.neon-track {
+  position: relative;
+  display: block;
+  block-size: 0.55rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--hue) 55%, transparent);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.07);
+}
+.neon-track i {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--hue) 55%, #ffffff),
+    var(--hue)
+  );
+  box-shadow:
+    0 0 0.35rem var(--hue),
+    0 0 0.8rem var(--hue),
+    inset 0 0 0.15rem rgb(255 255 255 / 0.6);
+  transition: inline-size 0.3s ease-out;
+}
+.neon-units {
+  display: flex;
+  gap: 0.14rem;
+}
+.neon-units i {
+  flex: 1 1 0;
+  max-inline-size: 0.9rem;
+  block-size: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--hue) 55%, transparent);
+  border-radius: 0.15rem;
+  background: rgb(255 255 255 / 0.07);
+}
+.neon-units i.on {
+  background: var(--hue);
+  box-shadow: 0 0 0.45rem var(--hue);
+}
+.neon[data-warn="yes"] {
+  animation: neon-pulse 0.9s ease-in-out infinite alternate;
+}
+@keyframes neon-pulse {
+  to {
+    filter: brightness(1.6);
+  }
+}
+/* In the backpack, a bar under each line that counts. */
+.bag .neon-track,
+.bag .neon-units {
+  --hue: #38e8ff;
+  margin-block: 0.2rem 0.1rem;
+}
+body[data-vista="yes"] .meters {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .neon[data-warn="yes"] {
+    animation: none;
+    outline: 1px solid var(--hue);
+  }
+  .neon-track i {
+    transition: none;
+  }
+}
+/* A phone: the five that matter most, small, under the goal and the note. */
+@media (pointer: coarse) {
+  :root body main .meters {
+    inline-size: min(13rem, 52%);
+    margin: calc(max(0.25rem, env(safe-area-inset-top)) + 11.2rem) 0 0
+      max(0.75rem, env(safe-area-inset-left));
+    font-size: 0.62rem;
+  }
+  .meters .neon:nth-child(n + 6) {
+    display: none;
+  }
+  @media (orientation: landscape) {
+    :root body main .meters {
+      margin-block-start: calc(max(0.25rem, env(safe-area-inset-top)) + 4.6rem);
+    }
+  }
+}

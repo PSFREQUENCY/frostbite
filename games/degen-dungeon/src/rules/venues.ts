@@ -1,0 +1,222 @@
+import { block, bodyRadius, lots, visionTicks } from "./constants.ts";
+import { cooled } from "./heat.ts";
+import type { Box } from "./rooms.ts";
+import type { Draft } from "./types.ts";
+
+// The landmarks you can walk into, each on a lot of its own (corner 1 faces the street to its south, corner 2 the one to its north):
+// a round hall in the middle of the lot behind a doorway from the street, or, for the skate park and the green, the whole lot open to the
+// pavement. Inside are things to do (`activities`), each once a day, paid in DUN where it costs, and each good for something: calm,
+// standing, frost vision, a cooler head, a little income. Every name is an original gag. A draft for the owner.
+export type VenueKind =
+  | "arcade"
+  | "bank"
+  | "cinema"
+  | "club"
+  | "dome"
+  | "gallery"
+  | "library"
+  | "museum"
+  | "park"
+  | "records"
+  | "skate"
+  | "store"
+  | "studio";
+export interface Venue {
+  // The square round the hall's walkable floor (centimetres), or for an open venue the whole lot, and the lot the landmark stands on.
+  readonly hall: Box;
+  readonly lot: Box;
+  readonly open: boolean;
+  // The doorway from the street into the hall; an open venue has none.
+  readonly door: Box | null;
+  readonly id: string;
+  readonly kind: VenueKind;
+  readonly label: string;
+  // The middle of the hall, and which way its doorway faces (1 south, -1 north).
+  readonly middle: { readonly x: number; readonly z: number };
+  readonly out: 1 | -1;
+}
+
+const table: readonly (readonly [number, 1 | 2, VenueKind, string])[] = [
+  [0, 1, "library", "Whitepaper Library"],
+  [1, 1, "studio", "Clipstream Studios"],
+  [1, 2, "cinema", "Starlight Cinema"],
+  [3, 1, "records", "Bassline Records"],
+  [3, 2, "club", "The Mempool"],
+  [4, 1, "store", "ADOR"],
+  [4, 2, "bank", "The Global DEX"],
+  [5, 1, "gallery", "Pixel Vault Gallery"],
+  [5, 2, "skate", "Meme Market Skate Park"],
+  [6, 1, "museum", "Museum of Genesis"],
+  [6, 2, "club", "Club Halving"],
+  [7, 1, "dome", "The Dome VR"],
+  [7, 2, "arcade", "Mega Arcade"],
+  [8, 1, "club", "The Long Game"],
+  [8, 2, "park", "Gig Street Green"],
+];
+// Half the width of the square a hall's doorway reaches into; the hall's floor is round, inside the round wall the city draws (18.5
+// metres), and the plaza round it starts a metre outside the wall's floor edge, so nobody steps through the wall.
+const half = 1_300;
+export const floorRadius = 1_780;
+export const plazaRadius = 1_880;
+
+// A borough's lot by its corner (0 north-west, 1 north-east, 2 south-west, 3 south-east), in centimetres.
+export function lotOf(borough: number, corner: number): Box {
+  const [west, east] = lots[corner % 2] ?? [0, 0];
+  const [north, south] = lots[Math.floor(corner / 2)] ?? [0, 0];
+  const left = block * (borough % 3);
+  const top = block * Math.floor(borough / 3);
+  return { x0: left + west, x1: left + east, z0: top + north, z1: top + south };
+}
+// The Old Floe's lawns: three of its four lots are grass, open to walk, sit and ride on.
+export const lawns: readonly Box[] = [0, 1, 2].map((corner) =>
+  lotOf(2, corner),
+);
+
+export const venues: readonly Venue[] = table.map(
+  ([borough, corner, kind, label]) => {
+    const lot = lotOf(borough, corner);
+    const x = (lot.x0 + lot.x1) / 2;
+    const z = (lot.z0 + lot.z1) / 2;
+    const out = corner === 1 ? 1 : -1;
+    const open = kind === "skate" || kind === "park";
+    const hall = open
+      ? lot
+      : {
+          x0: x - floorRadius,
+          x1: x + floorRadius,
+          z0: z - floorRadius,
+          z1: z + floorRadius,
+        };
+    const edge = out === 1 ? lot.z1 : lot.z0;
+    const door = open
+      ? null
+      : {
+          x0: x - 200,
+          x1: x + 200,
+          z0: out === 1 ? z + half - 50 : edge - 300,
+          z1: out === 1 ? edge + 300 : z - half + 50,
+        };
+    return {
+      door,
+      hall,
+      id: `venue-${String(borough)}-${String(corner)}`,
+      kind,
+      label,
+      lot,
+      middle: { x, z },
+      open,
+      out,
+    };
+  },
+);
+
+const inside = (box: Box, x: number, z: number): boolean =>
+  x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1;
+// How far a point is from a hall's middle, squared (centimetres).
+const away = (venue: Venue, x: number, z: number): number =>
+  (x - venue.middle.x) ** 2 + (z - venue.middle.z) ** 2;
+// Whether a point (centimetres) is on a landmark's floor: inside its round hall, or anywhere on an open lot.
+const onFloor = (venue: Venue, x: number, z: number): boolean =>
+  venue.open ? inside(venue.lot, x, z) : away(venue, x, z) <= floorRadius ** 2;
+// Whether a point is on a landmark's floor or in its doorway.
+export const inVenue = (x: number, z: number): boolean =>
+  venues.some(
+    (venue) =>
+      onFloor(venue, x, z) || (venue.door !== null && inside(venue.door, x, z)),
+  );
+// Out of doors, where wheels go as well as feet: the plaza round a hall (clear of its wall), the open landmarks (the skate park and the
+// green) and the lawns, each right up to the pavement (a lot's edge is kept a body's width clear only where a building stands on it).
+const reaching = (box: Box): Box => ({
+  x0: box.x0 - bodyRadius,
+  x1: box.x1 + bodyRadius,
+  z0: box.z0 - bodyRadius,
+  z1: box.z1 + bodyRadius,
+});
+export const outdoors = (x: number, z: number): boolean =>
+  lawns.some((lawn) => inside(reaching(lawn), x, z)) ||
+  venues.some((venue) =>
+    venue.open
+      ? inside(reaching(venue.lot), x, z)
+      : inside(reaching(venue.lot), x, z) &&
+        away(venue, x, z) >= plazaRadius ** 2,
+  );
+// The landmark whose floor a point is on, if any.
+export const venueAt = (x: number, z: number): Venue | null =>
+  venues.find((venue) => onFloor(venue, x, z)) ?? null;
+
+// What there is to do at each kind of landmark: what it costs, how much FOMO it calms, standing it earns, frost vision it gives back
+// (ticks), heat it cools, and DUN it pays. Each is once a day. The arcade hall uses the arcade's cabinets and the bank its teller.
+export interface Activity {
+  readonly calm: number;
+  readonly cool: number;
+  readonly cost: number;
+  readonly pays: number;
+  readonly rep: number;
+  readonly vision: number;
+}
+const doing = (
+  cost: number,
+  calm: number,
+  rep: number,
+  vision = 0,
+  cool = 0,
+  pays = 0,
+): Activity => ({ calm, cool, cost, pays, rep, vision });
+export const activities: Readonly<Record<string, Activity>> = {
+  browse: doing(0, 10, 2),
+  dance: doing(20, 30, 4),
+  exhibits: doing(5, 10, 8),
+  film: doing(15, 40, 0, 0, 40),
+  grass: doing(0, 25, 1),
+  live: doing(0, 0, 2, 0, 0, 300),
+  print: doing(200, 0, 12),
+  read: doing(0, 5, 2, 120),
+  skate: doing(0, 15, 6),
+  track: doing(50, 0, 15),
+  vr: doing(25, 20, 0, 300),
+};
+// Which activity (or the teller, or the cabinets) each kind of landmark has, by talk node.
+export const nodeOf: Readonly<Record<VenueKind, string>> = {
+  arcade: "shop-arcade",
+  bank: "bank",
+  cinema: "do-film",
+  club: "do-dance",
+  dome: "do-vr",
+  gallery: "do-print",
+  library: "do-read",
+  museum: "do-exhibits",
+  park: "do-grass",
+  records: "do-track",
+  skate: "do-skate",
+  store: "do-browse",
+  studio: "do-live",
+};
+
+// Doing an activity, once a day: it costs what it costs and does what it does (frost vision up to twice a day's worth).
+export function venture(day: Draft, name: string): string | null {
+  const activity = activities[name];
+  if (activity === undefined) return null;
+  const id = `did-${name}`;
+  if (day.done.includes(id)) return "you have done that today";
+  if (day.pocket < activity.cost) return "not enough DUN";
+  day.pocket -= activity.cost;
+  day.fomo = Math.max(0, day.fomo - activity.calm);
+  day.rep += activity.rep;
+  day.vision = Math.min(2 * visionTicks, day.vision + activity.vision);
+  cooled(day, activity.cool);
+  day.pocket += activity.pays;
+  day.made += activity.pays;
+  day.done = [...day.done, id];
+  return null;
+}
+
+// The bank's teller moves a thousand DUN at a time between the pocket and the freezer (not on the morning the freezer looks empty).
+export const bankStep = 1_000;
+export function teller(day: Draft, into: boolean): string | null {
+  if (day.fake) return "the teller cannot find your freezer this morning";
+  if ((into ? day.pocket : day.freezer) < bankStep)
+    return into ? "not enough DUN" : "not enough in the freezer";
+  day.pocket += into ? -bankStep : bankStep;
+  day.freezer += into ? bankStep : -bankStep;
+  return null;
+}

@@ -1,0 +1,262 @@
+/* The opening credits run over the city letterboxed like a clip, but every touch goes through them to the screen beneath. */
+.clip.credits {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* With the 3D picture under it, the game screen is only its map, kept to the top of the picture. */
+#world:not([hidden]) ~ #screen {
+  object-position: 50% 0;
+}
+
+/* The thumb stick, drawn where the screen's stick is (a fifth of the way in, low on the left), only on a touch screen during a day; its
+   knob leans the way the thumb steers. */
+.stick {
+  display: none;
+}
+
+/* A phone or a tablet. The SDK's phone layout puts the picture under the whole frame and keeps only pause and sound; this game's hands
+   come back as a cluster of round buttons under the right thumb, the goal and the talk float over the picture, and the readouts may take
+   two lines. Every button is fixed in place, so nothing a thumb is on moves when a day starts or as it runs. */
+@media (pointer: coarse) {
+  .stage {
+    position: relative;
+  }
+  :root body[data-awake="yes"] main .stick {
+    position: absolute;
+    left: 22%;
+    top: 62%;
+    z-index: 1;
+    display: block;
+    inline-size: 7.5rem;
+    block-size: 7.5rem;
+    border: 0.15rem solid rgb(56 232 255 / 45%);
+    border-radius: 50%;
+    background: rgb(10 8 30 / 22%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .stick span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    inline-size: 3rem;
+    block-size: 3rem;
+    border-radius: 50%;
+    background: rgb(56 232 255 / 55%);
+    transform: translate(
+      calc(-50% + var(--east, 0) * 2.2rem),
+      calc(-50% + var(--south, 0) * 2.2rem)
+    );
+    transition: transform 0.08s ease-out;
+  }
+  #world:not([hidden]) ~ #screen {
+    object-position: 50% 5.25rem;
+  }
+  :root body main .score {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+  :root body main .score span:has(#best) {
+    display: none;
+  }
+  :root:root
+    body
+    main
+    .actions
+    :is(#act, #jump, #run, #duck, #crawl, #look, #pack, #up, #down) {
+    position: fixed;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 3.4rem;
+    min-inline-size: 3.4rem;
+    block-size: 3.4rem;
+    min-block-size: 3.4rem;
+    padding: 0;
+    border: 0.15rem solid #38e8ff;
+    border-radius: 50%;
+    background: rgb(10 8 30 / 62%);
+    color: #e8e2ff;
+    font-size: 0;
+    pointer-events: auto;
+    touch-action: none;
+  }
+  :root:root body main .actions :is(#up, #down):disabled {
+    display: none;
+  }
+  :root:root
+    body
+    main
+    .actions
+    :is(#act, #jump, #run, #duck, #crawl, #look, #pack, #up, #down)::before {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    text-align: center;
+    white-space: pre;
+  }
+  :root:root body main .actions #act {
+    right: max(1rem, calc(env(safe-area-inset-right) + 0.5rem));
+    bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+    inline-size: 4.75rem;
+    block-size: 4.75rem;
+    border-color: #ffd166;
+  }
+  :root:root body main .actions #act::before {
+    content: "ACT";
+    font-size: 0.9rem;
+  }
+  :root:root body main .actions #jump {
+    right: max(6.4rem, calc(env(safe-area-inset-right) + 5.9rem));
+    bottom: max(1.1rem, calc(env(safe-area-inset-bottom) + 0.6rem));
+  }
+  :root:root body main .actions #jump::before {
+    content: "JUMP";
+  }
+  :root:root body main .actions #run {
+    right: max(1.65rem, calc(env(safe-area-inset-right) + 1.15rem));
+    bottom: max(6.6rem, calc(env(safe-area-inset-bottom) + 6.1rem));
+  }
+  :root:root body main .actions #run::before {
+    content: "RUN";
+  }
+  :root:root body main .actions #duck {
+    right: max(5.6rem, calc(env(safe-area-inset-right) + 5.1rem));
+    bottom: max(5.2rem, calc(env(safe-area-inset-bottom) + 4.7rem));
+  }
+  :root:root body main .actions #duck::before {
+    content: "DUCK";
+  }
+  :root:root body main .actions #crawl {
+    right: max(9.6rem, calc(env(safe-area-inset-right) + 9.1rem));
+    bottom: max(3.2rem, calc(env(safe-area-inset-bottom) + 2.7rem));
+  }
+  :root:root body main .actions #crawl::before {
+    content: "CRAWL";
+  }
+  :root:root body main .actions #look {
+    right: max(1.65rem, calc(env(safe-area-inset-right) + 1.15rem));
+    bottom: max(10.6rem, calc(env(safe-area-inset-bottom) + 10.1rem));
+    border-color: #9ad7ff;
+  }
+  :root:root body main .actions #look::before {
+    content: "SEE\A" attr(data-left) "s";
+  }
+  :root:root body main .actions #pack {
+    right: max(5.6rem, calc(env(safe-area-inset-right) + 5.1rem));
+    bottom: max(9.2rem, calc(env(safe-area-inset-bottom) + 8.7rem));
+  }
+  :root:root body main .actions #pack::before {
+    content: "BAG";
+  }
+  :root:root body main .actions #up {
+    right: max(1.65rem, calc(env(safe-area-inset-right) + 1.15rem));
+    bottom: max(14.6rem, calc(env(safe-area-inset-bottom) + 14.1rem));
+  }
+  :root:root body main .actions #up::before {
+    content: "CLIMB";
+  }
+  :root:root body main .actions #down {
+    right: max(5.6rem, calc(env(safe-area-inset-right) + 5.1rem));
+    bottom: max(13.2rem, calc(env(safe-area-inset-bottom) + 12.7rem));
+  }
+  :root:root body main .actions #down::before {
+    content: "DROP";
+  }
+  :root:root body main .actions button:disabled {
+    opacity: 0.45;
+  }
+  /* Until a hero wakes (the title, the cinematic and the ring) only the act button shows, as the way to play, skip and wake; the rest keep
+     their places, unseen, so nothing moves when they appear. The readouts wait for the day too. */
+  :root:root
+    body:not([data-awake="yes"])
+    main
+    .actions
+    :is(#jump, #run, #duck, #crawl, #look, #pack, #up, #down) {
+    visibility: hidden;
+  }
+  :root body:not([data-awake="yes"]) main .bar {
+    visibility: hidden;
+  }
+  /* A clip's words sit above the thumb's buttons, and how to skip it in the black bar on top. */
+  .clip {
+    padding-bottom: 14.5rem;
+  }
+  .clip-skip {
+    top: -2rem;
+    right: auto;
+    bottom: auto;
+    left: 1rem;
+    max-inline-size: 70%;
+  }
+  /* The goal under the readouts, and the note under the goal, both small and clear of every button. */
+  :root body main #goal,
+  :root body main #note {
+    z-index: 2;
+    grid-area: 1 / 1;
+    align-self: start;
+    justify-self: start;
+    box-sizing: border-box;
+    max-inline-size: calc(100% - 8rem);
+    margin: 0 0 0 max(0.75rem, env(safe-area-inset-left));
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.5rem;
+    background: rgb(0 0 0 / 55%);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    text-align: center;
+    pointer-events: none;
+  }
+  :root body main #goal {
+    margin-block-start: calc(max(0.25rem, env(safe-area-inset-top)) + 6.4rem);
+  }
+  :root body main #note {
+    max-block-size: 2.7em;
+    overflow: hidden;
+    margin-block-start: calc(max(0.25rem, env(safe-area-inset-top)) + 8.6rem);
+  }
+  :root body main #goal:empty,
+  :root body main #note:empty {
+    display: none;
+  }
+  /* A talk floats in the middle of the picture with big answers. */
+  :root body main #talk:not([hidden]) {
+    z-index: 5;
+    grid-area: 1 / 1;
+    align-self: center;
+    justify-self: center;
+    box-sizing: border-box;
+    inline-size: min(30rem, calc(100% - 1.5rem));
+    max-block-size: 60%;
+    overflow: auto;
+    padding: 0.75rem;
+    border: 0.15rem solid #38e8ff;
+    border-radius: 0.9rem;
+    background: rgb(12 8 32 / 94%);
+    pointer-events: auto;
+  }
+  :root body main #talk button {
+    min-block-size: 2.75rem;
+  }
+  @media (orientation: landscape) {
+    #world:not([hidden]) ~ #screen {
+      object-position: 50% 3.25rem;
+    }
+    .clip {
+      padding: 0 14rem 1.6rem 1rem;
+    }
+    :root body main #goal {
+      margin-block-start: calc(max(0.25rem, env(safe-area-inset-top)) + 2.4rem);
+    }
+    :root body main #note {
+      align-self: end;
+      justify-self: start;
+      max-inline-size: calc(100% - 16rem);
+      margin-block: 0 max(0.5rem, env(safe-area-inset-bottom));
+      margin-inline-start: max(0.75rem, env(safe-area-inset-left));
+    }
+  }
+}
